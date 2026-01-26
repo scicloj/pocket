@@ -3,5 +3,4 @@
                           :toc-depth 4
                           :theme [:cosmo "notebooks/custom.scss"]
                           :fontsize "0.9em"}}}
- :base-target-path "temp"
- :book {:title "Pocket Documentation"}}
+ :base-target-path ".clay-temp"}
