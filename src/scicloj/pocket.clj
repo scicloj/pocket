@@ -18,26 +18,25 @@
      (require '[scicloj.pocket :as pocket])
      
      ;; Set cache directory (or use POCKET_BASE_CACHE_DIR env var)
-     (binding [pocket/*base-cache-dir* \"/tmp/my-cache\"]
-       
-       ;; Create cached computation (lazy)
-       (def expensive-result
-         (pocket/cached expensive-function arg1 arg2))
-       
-       ;; Force computation (or load from cache)
-       @expensive-result)
+     (alter-var-root #'pocket/*base-cache-dir* (constantly \"/tmp/my-cache\"))
+     
+     ;; Create cached computation (lazy)
+     (def expensive-result
+       (pocket/cached expensive-function arg1 arg2))
+     
+     ;; Force computation (or load from cache)
+     @expensive-result
      
      ;; Or use cached-fn wrapper
      (def cached-expensive (pocket/cached-fn expensive-function))
      @(cached-expensive arg1 arg2)"
   (:require [scicloj.pocket.impl.cache :as impl]))
 
-;; Re-export public API
 (def ^:dynamic *base-cache-dir*
   "Base directory for cache storage.
    Can be set via POCKET_BASE_CACHE_DIR environment variable
-   or dynamically bound."
-  impl/*base-cache-dir*)
+   or altered with alter-var-root."
+  (System/getenv "POCKET_BASE_CACHE_DIR"))
 
 (defprotocol PIdentifiable
   "Protocol for computing cache keys from values.

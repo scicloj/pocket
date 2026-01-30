@@ -4,8 +4,8 @@
   (:import (org.apache.commons.codec.digest DigestUtils)
            (clojure.lang PersistentHashMap IDeref Var)))
 
-(def ^:dynamic *base-cache-dir*
-  (System/getenv "POCKET_BASE_CACHE_DIR"))
+(defn- base-cache-dir []
+  @(requiring-resolve 'scicloj.pocket/*base-cache-dir*))
 
 (defprotocol PIdentifiable
   (->id [this]))
@@ -17,7 +17,7 @@
     (nippy/thaw-from-file (str path "/_.nippy"))
     ;; nil
     (fs/exists? (str path "/nil"))
-    (do 
+    (do
       #_(fs/delete (str path "/nil"))
       nil)))
 
@@ -38,7 +38,7 @@
   (let [h (-> id
               hash-unordered-coll
               str)]
-    (str *base-cache-dir*
+    (str (base-cache-dir)
          "/.cache/"
          (-> h
              sha
@@ -63,7 +63,6 @@
           (write-cached! v path)
           v)))))
 
-
 (extend-protocol PIdentifiable
   Cached
   (->id [v]
@@ -79,7 +78,7 @@
                                                                              [k (->id v)]))
                                                                    (apply array-map))
                               :else (->id a))))))))
-  
+
   clojure.lang.MapEntry
   (->id [v] (pr-str v))
 

@@ -6,7 +6,6 @@
 
 (ns index
   (:require [scicloj.pocket :as pocket]
-            [scicloj.pocket.impl.cache :as impl]
             [babashka.fs :as fs]))
 
 ;; ## Quick Start
@@ -17,7 +16,7 @@
 
 (def cache-dir "/tmp/pocket-demo")
 
-(alter-var-root #'impl/*base-cache-dir* (constantly cache-dir))
+(alter-var-root #'pocket/*base-cache-dir* (constantly cache-dir))
 
 ;; Define an expensive computation that we want to cache:
 
@@ -141,7 +140,7 @@
 ;; Or set it once at the top of your script:
 ;;
 ;; ```clojure
-;; (alter-var-root #'impl/*base-cache-dir* (constantly "/tmp/cache"))
+;; (alter-var-root #'pocket/*base-cache-dir* (constantly "/tmp/cache"))
 ;; ```
 
 ;; ## Key Features
