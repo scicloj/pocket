@@ -74,7 +74,7 @@
      (def result (cached #'expensive-fn arg1 arg2))
      @result  ; computes or loads from cache"
   [func & args]
-  (apply impl/cached func args))
+  (apply impl/cached *base-cache-dir* func args))
 
 (defn cached-fn
   "Wrap a function to automatically cache its results.
@@ -91,7 +91,7 @@
      (def cached-expensive (cached-fn #'expensive-function))
      @(cached-expensive arg1 arg2)"
   [f]
-  (impl/cached-fn f))
+  (impl/cached-fn *base-cache-dir* f))
 
 (defn maybe-deref
   "Deref if x is IDeref, otherwise return x as-is.

@@ -4,9 +4,6 @@
   (:import (org.apache.commons.codec.digest DigestUtils)
            (clojure.lang PersistentHashMap IDeref Var)))
 
-(defn- base-cache-dir []
-  @(requiring-resolve 'scicloj.pocket/*base-cache-dir*))
-
 (defprotocol PIdentifiable
   (->id [this]))
 
@@ -34,11 +31,11 @@
 (defn sha [^String s]
   (DigestUtils/sha1Hex s))
 
-(defn ->path [id typ]
+(defn ->path [base-dir id typ]
   (let [h (-> id
               hash-unordered-coll
               str)]
-    (str (base-cache-dir)
+    (str base-dir
          "/.cache/"
          (-> h
              sha
@@ -51,11 +48,11 @@
              (sha h)
              idstr)))))
 
-(deftype Cached [f args]
+(deftype Cached [base-dir f args]
   IDeref
   (deref [this]
     (let [id (->id this)
-          path (->path id
+          path (->path base-dir id
                        (-> f meta :type))]
       (if (fs/exists? path)
         (read-cached path)
@@ -92,17 +89,17 @@
 
 (defn cached
   "Create a cached computation"
-  [func & args]
-  (->Cached func args))
+  [base-dir func & args]
+  (->Cached base-dir func args))
 
 (defn maybe-deref [x]
   (if (instance? IDeref x)
     @x
     x))
 
-(defn cached-fn [f]
+(defn cached-fn [base-dir f]
   (fn [& args]
-    (apply cached f args)))
+    (apply cached base-dir f args)))
 
 ;; Fix: Add nil handling to PIdentifiable protocol
 (extend-protocol PIdentifiable
