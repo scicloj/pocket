@@ -48,13 +48,13 @@
 (extend-protocol PIdentifiable
   clojure.lang.MapEntry
   (->id [v] (impl/->id v))
-  
+
   clojure.lang.Var
   (->id [this] (impl/->id this))
-  
+
   Object
   (->id [this] (impl/->id this))
-  
+
   nil
   (->id [_] (impl/->id nil)))
 
@@ -75,7 +75,7 @@
      (def result (cached #'expensive-fn arg1 arg2))
      @result  ; computes or loads from cache"
   [func & args]
-  (impl/cached func args))
+  (apply impl/cached func args))
 
 (defn cached-fn
   "Wrap a function to automatically cache its results.
