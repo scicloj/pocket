@@ -1,6 +1,8 @@
 (ns scicloj.pocket.impl.cache
   (:require [babashka.fs :as fs]
-            [taoensso.nippy :as nippy])
+            [taoensso.nippy :as nippy]
+            [clojure.core.cache :as cc]
+            [clojure.core.cache.wrapped :as cw])
   (:import (org.apache.commons.codec.digest DigestUtils)
            (clojure.lang PersistentHashMap IDeref Var)))
 
@@ -31,6 +33,41 @@
 (defn sha [^String s]
   (DigestUtils/sha1Hex s))
 
+(def default-mem-cache-threshold 256)
+
+(defonce mem-cache
+  (cw/lru-cache-factory {} :threshold default-mem-cache-threshold))
+
+(def ^java.util.concurrent.ConcurrentHashMap in-flight
+  (java.util.concurrent.ConcurrentHashMap.))
+
+(defn clear-mem-cache! []
+  (swap! mem-cache empty))
+
+(defn reset-mem-cache!
+  "Reset the in-memory cache with the given options.
+   
+   `:policy` — one of `:lru`, `:fifo`, `:lu`, `:ttl`, `:lirs`, `:soft`, `:basic` (default `:lru`).
+   `:threshold` — max entries for `:lru`, `:fifo`, `:lu` (default 256).
+   `:ttl` — time-to-live in ms for `:ttl` policy (default 30000).
+   `:s-history-limit` / `:q-history-limit` — for `:lirs` policy."
+  [{:keys [policy threshold ttl s-history-limit q-history-limit]
+    :or {policy :lru
+         threshold default-mem-cache-threshold
+         ttl 30000}}]
+  (reset! mem-cache
+          (case policy
+            :basic (cc/basic-cache-factory {})
+            :fifo (cc/fifo-cache-factory {} :threshold threshold)
+            :lru (cc/lru-cache-factory {} :threshold threshold)
+            :lu (cc/lu-cache-factory {} :threshold threshold)
+            :ttl (cc/ttl-cache-factory {} :ttl ttl)
+            :lirs (cc/lirs-cache-factory {} :s-history-limit (or s-history-limit threshold)
+                                         :q-history-limit (or q-history-limit (quot threshold 4)))
+            :soft (cc/soft-cache-factory {})
+            (throw (ex-info (str "Unknown cache policy: " policy)
+                            {:policy policy})))))
+
 (defn ->path [base-dir id typ]
   (let [h (-> id
               hash-unordered-coll
@@ -54,11 +91,23 @@
     (let [id (->id this)
           path (->path base-dir id
                        (-> f meta :type))]
-      (if (fs/exists? path)
-        (read-cached path)
-        (let [v (apply f args)]
-          (write-cached! v path)
-          v)))))
+      (cw/lookup-or-miss
+       mem-cache path
+       (fn [_]
+         (let [d (.computeIfAbsent
+                  in-flight path
+                  (reify java.util.function.Function
+                    (apply [_ _]
+                      (delay
+                        (try
+                          (if (fs/exists? path)
+                            (read-cached path)
+                            (let [v (clojure.core/apply f args)]
+                              (write-cached! v path)
+                              v))
+                          (finally
+                            (.remove in-flight path)))))))]
+           @d))))))
 
 (extend-protocol PIdentifiable
   Cached

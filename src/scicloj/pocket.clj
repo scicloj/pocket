@@ -11,7 +11,7 @@
    - Lazy evaluation (deref to compute)
    - Extensible identity protocol (`PIdentifiable`)
    - Nil value support
-   - Thread-safe reads (writes have check-then-write race condition)"
+   - Thread-safe via in-memory LRU cache (backed by `core.cache`)"
   (:require [scicloj.pocket.impl.cache :as impl]
             [babashka.fs :as fs]))
 
@@ -84,11 +84,24 @@
 
 (defn cleanup!
   "Delete the cache directory at `*base-cache-dir*`, removing all cached values.
+   Also clears the in-memory cache.
    Returns a map with `:dir` and `:existed` indicating what happened."
   []
   (let [dir *base-cache-dir*
         existed? (and dir (fs/exists? dir))]
     (when existed?
       (fs/delete-tree dir))
+    (impl/clear-mem-cache!)
     {:dir dir
      :existed (boolean existed?)}))
+
+(defn set-mem-cache-options!
+  "Configure the in-memory cache. Resets it, discarding any currently cached values.
+   
+   Supported keys:
+   - `:policy` — `:lru` (default), `:fifo`, `:lu`, `:ttl`, `:lirs`, `:soft`, or `:basic`
+   - `:threshold` — max entries for `:lru`, `:fifo`, `:lu` (default 256)
+   - `:ttl` — time-to-live in ms for `:ttl` policy (default 30000)
+   - `:s-history-limit` / `:q-history-limit` — for `:lirs` policy"
+  [opts]
+  (impl/reset-mem-cache! opts))
