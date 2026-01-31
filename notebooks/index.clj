@@ -10,17 +10,13 @@
             [scicloj.kindly.v4.kind :as kind]
             [babashka.fs :as fs]))
 
-;; ## Quick Start
+;; ## Basic Walkthrough
 
-;; Let's demonstrate Pocket's core functionality with a simple example.
-
-;; First, we'll set up a cache directory:
+;; First, we set up a cache directory and define an expensive computation:
 
 (def cache-dir "/tmp/pocket-demo")
 
 (pocket/set-base-cache-dir! cache-dir)
-
-;; Define an expensive computation that we want to cache:
 
 (defn expensive-calculation
   "Simulates an expensive computation"
@@ -29,39 +25,38 @@
   (Thread/sleep 1000)
   (+ x y))
 
-;; ## Basic Caching
-
-;; Create a cached computation. This returns an `IDeref` object - the
-;; computation won't run until we deref it:
+;; `cached` creates a lazy cached computation. It returns a `Cached` object —
+;; the computation won't run until we deref it:
 
 (def cached-result
   (pocket/cached #'expensive-calculation 10 20))
 
-;;; First call (computes and caches):
+cached-result
+
+;;; First deref (computes and caches):
 (time @cached-result)
 
-;;; Second call (from cache, instant!):
+;;; Second deref (loaded from cache, instant):
 (time @cached-result)
 
-;; ## Using cached-fn
-
-;; For convenience, you can wrap a function to automatically cache all calls:
+;; For convenience, `cached-fn` wraps a function so that every call
+;; returns a `Cached` object:
 
 (def cached-expensive
   (pocket/cached-fn #'expensive-calculation))
 
-;; Use it like a normal function, but it returns a cached IDeref:
-
-;;; Using cached-fn:
+;;; First call:
 (time @(cached-expensive 5 15))
 
-;;; Second call with same args (cached):
+;;; Same args — cache hit:
 (time @(cached-expensive 5 15))
 
-;;; Different args (new computation):
+;;; Different args — new computation:
 (time @(cached-expensive 7 8))
 
-;; ## Recursive Caching in Pipelines
+;; ## Guides
+
+;; ### Recursive caching in pipelines
 
 ;; When you pass a `Cached` value as an argument to another cached function,
 ;; Pocket handles this recursively. The cache key for the outer computation
@@ -102,7 +97,7 @@
      deref
      (select-keys [:model :accuracy])))
 
-;; Run the same pipeline again - everything loads from cache:
+;; Run the same pipeline again — everything loads from cache:
 
 ;;; Second pipeline run (all cached):
 (time
@@ -113,15 +108,15 @@
      deref
      (select-keys [:model :accuracy])))
 
-;; Note that each step caches independently. If you change only the last step
+;; Each step caches independently. If you change only the last step
 ;; (e.g., different training params), the upstream steps load from cache while
 ;; only the final step recomputes.
 
-;; ## Nil Handling
+;; ### Nil handling
 
-;; Pocket properly handles nil values. Since the cache uses files on disk,
-;; it needs to distinguish "never computed" from "computed and got nil".
-;; It does this with a special marker file rather than Nippy serialization:
+;; Pocket properly handles `nil` values. Since the cache uses files on disk,
+;; it needs to distinguish "never computed" from "computed and got `nil`".
+;; It does this with a special marker file:
 
 (defn returns-nil [] nil)
 
@@ -130,49 +125,43 @@
 ;;; Cached nil value:
 @nil-result
 
-;;; Loading from cache:
+;;; Loading nil from cache:
 @nil-result
 
-;; ## Important Notes
+;; ### Usage notes
 
-;; ### Use Vars for Functions
-;;
+;; **Use vars for functions.**
 ;; Always use `#'function-name` (var), not `function-name` (function object).
 ;; Vars have stable names that produce consistent cache keys across sessions.
 ;; Function objects have unstable identity and would create a new cache entry
 ;; every time the code is reloaded.
 ;;
 ;; ```clojure
-;; ;; ✅ Good - stable cache key from var name
+;; ;; ✅ Good — stable cache key from var name
 ;; (pocket/cached #'my-function args)
 ;;
-;; ;; ❌ Bad - unstable identity, defeats caching
+;; ;; ❌ Bad — unstable identity, defeats caching
 ;; (pocket/cached my-function args)
 ;; ```
 
-;; ### Cache Invalidation
-;;
+;; **Cache invalidation.**
 ;; Pocket does **not** detect function implementation changes. If you modify
 ;; a function's body, the cache key remains the same (it's based on the
 ;; function name and arguments, not the implementation). You must manually
 ;; delete the cache directory to invalidate stale entries.
 
-;; ## Configuration
-
-;; Set cache directory via environment variable:
+;; **Configuration.**
+;; Set the cache directory via the `POCKET_BASE_CACHE_DIR` environment variable:
 ;;
 ;; ```bash
 ;; export POCKET_BASE_CACHE_DIR=/path/to/cache
-;; clojure -M:dev
 ;; ```
-
-;; Or set it once at the top of your script:
 ;;
-;; ```clojure
-;; (pocket/set-base-cache-dir! "/tmp/cache")
-;; ```
+;; Or programmatically with `set-base-cache-dir!`.
 
 ;; ## API Reference
+
+;; ### Configuration
 
 (kind/doc #'pocket/*base-cache-dir*)
 
@@ -188,6 +177,8 @@ pocket/*base-cache-dir*
 ;; Restore it for the rest of the notebook:
 
 (pocket/set-base-cache-dir! cache-dir)
+
+;; ### Caching
 
 (kind/doc #'pocket/cached)
 
@@ -225,6 +216,8 @@ my-result
 ;; A `Cached` value gets derefed:
 
 (pocket/maybe-deref (pocket/cached #'expensive-calculation 100 200))
+
+;; ### Cache key identity
 
 (kind/doc #'pocket/->id)
 
