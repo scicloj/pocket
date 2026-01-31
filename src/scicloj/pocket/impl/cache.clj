@@ -54,7 +54,8 @@
   [{:keys [policy threshold ttl s-history-limit q-history-limit]
     :or {policy :lru
          threshold default-mem-cache-threshold
-         ttl 30000}}]
+         ttl 30000}
+    :as opts}]
   (reset! mem-cache
           (case policy
             :basic (cc/basic-cache-factory {})
@@ -66,7 +67,10 @@
                                          :q-history-limit (or q-history-limit (quot threshold 4)))
             :soft (cc/soft-cache-factory {})
             (throw (ex-info (str "Unknown cache policy: " policy)
-                            {:policy policy})))))
+                            {:policy policy}))))
+  {:policy policy
+   :threshold threshold
+   :ttl ttl})
 
 (defn ->path [base-dir id typ]
   (let [h (-> id
