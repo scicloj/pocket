@@ -4,8 +4,10 @@
 ;; making it easy to cache expensive function calls to disk and reuse results
 ;; across sessions.
 
+^{:kindly/options {:kinds-that-hide-code #{:kind/doc}}}
 (ns index
   (:require [scicloj.pocket :as pocket]
+            [scicloj.kindly.v4.kind :as kind]
             [babashka.fs :as fs]))
 
 ;; ## Quick Start
@@ -59,9 +61,18 @@
 ;;; Different args (new computation):
 (time @(cached-expensive 7 8))
 
-;; ## Data Science Pipeline Example
+;; ## Recursive Caching in Pipelines
 
-;; Pocket shines in data science workflows where intermediate steps are expensive:
+;; When you pass a `Cached` value as an argument to another cached function,
+;; Pocket handles this recursively. The cache key for the outer computation
+;; is derived from the **identity** of the inner computation (its function
+;; name and arguments), not from its result. This means the entire pipeline's
+;; cache key captures the full computation graph.
+
+;; For this to work, functions in the pipeline should call `maybe-deref`
+;; on arguments that may be `Cached` objects. This way, the function receives
+;; the actual value when executed, while the cache key still reflects the
+;; upstream computation identity.
 
 (defn load-dataset [path]
   (println "Loading dataset from" path "...")
@@ -69,14 +80,18 @@
   {:data [1 2 3 4 5] :source path})
 
 (defn preprocess [data opts]
-  (println "Preprocessing with options:" opts)
-  (Thread/sleep 600)
-  (update data :data #(map (fn [x] (* x (:scale opts))) %)))
+  (let [data (pocket/maybe-deref data)]
+    (println "Preprocessing with options:" opts)
+    (Thread/sleep 600)
+    (update data :data #(map (fn [x] (* x (:scale opts))) %))))
 
 (defn train-model [data params]
-  (println "Training model with params:" params)
-  (Thread/sleep 1000)
-  {:model :trained :accuracy 0.95 :data data})
+  (let [data (pocket/maybe-deref data)]
+    (println "Training model with params:" params)
+    (Thread/sleep 1000)
+    {:model :trained :accuracy 0.95 :data data}))
+
+;; Chain cached computations in a pipeline:
 
 ;;; First pipeline run:
 (time
@@ -87,6 +102,8 @@
      deref
      (select-keys [:model :accuracy])))
 
+;; Run the same pipeline again - everything loads from cache:
+
 ;;; Second pipeline run (all cached):
 (time
  (-> "data/raw.csv"
@@ -96,9 +113,15 @@
      deref
      (select-keys [:model :accuracy])))
 
+;; Note that each step caches independently. If you change only the last step
+;; (e.g., different training params), the upstream steps load from cache while
+;; only the final step recomputes.
+
 ;; ## Nil Handling
 
-;; Pocket properly handles nil values:
+;; Pocket properly handles nil values. Since the cache uses files on disk,
+;; it needs to distinguish "never computed" from "computed and got nil".
+;; It does this with a special marker file rather than Nippy serialization:
 
 (defn returns-nil [] nil)
 
@@ -110,19 +133,29 @@
 ;;; Loading from cache:
 @nil-result
 
-;; ## Cache Inspection
+;; ## Important Notes
 
-;; You can inspect the cache directory to see how Pocket organizes cached values:
+;; ### Use Vars for Functions
 ;;
-;; ### Cache Directory Structure
+;; Always use `#'function-name` (var), not `function-name` (function object).
+;; Vars have stable names that produce consistent cache keys across sessions.
+;; Function objects have unstable identity and would create a new cache entry
+;; every time the code is reloaded.
 ;;
+;; ```clojure
+;; ;; ✅ Good - stable cache key from var name
+;; (pocket/cached #'my-function args)
+;;
+;; ;; ❌ Bad - unstable identity, defeats caching
+;; (pocket/cached my-function args)
 ;; ```
-;; $POCKET_BASE_CACHE_DIR/.cache/
-;;   <sha1-prefix>/
-;;     <function-name-args>/
-;;       _.nippy    # serialized value
-;;       nil        # marker for cached nil
-;; ```
+
+;; ### Cache Invalidation
+;;
+;; Pocket does **not** detect function implementation changes. If you modify
+;; a function's body, the cache key remains the same (it's based on the
+;; function name and arguments, not the implementation). You must manually
+;; delete the cache directory to invalidate stale entries.
 
 ;; ## Configuration
 
@@ -139,28 +172,52 @@
 ;; (pocket/set-base-cache-dir! "/tmp/cache")
 ;; ```
 
-;; ## Key Features
+;; ## API Reference
 
-;; - Content-addressable storage - cache keys from function + arguments
-;; - Automatic serialization via Nippy
-;; - Lazy evaluation with IDeref
-;; - Nil-safe caching
-;; - Extensible via PIdentifiable protocol
-;; - Simple API - just `cached` and `cached-fn`
+(kind/doc #'pocket/*base-cache-dir*)
 
-;; ## Important Notes
+(kind/doc #'pocket/set-base-cache-dir!)
 
-;; ### ⚠️ Use Vars for Functions
-;;
-;; Always use `#'function-name` (var), not `function-name` (function object):
+;; Set to a custom directory:
 ;;
 ;; ```clojure
-;; ;; ✅ Good
-;; (pocket/cached #'my-function args)
-;;
-;; ;; ❌ Bad - unstable cache keys
-;; (pocket/cached my-function args)
+;; (pocket/set-base-cache-dir! "/tmp/my-cache")
 ;; ```
+
+(kind/doc #'pocket/cached)
+
+;; Returns a `Cached` object implementing `IDeref`. The computation runs on
+;; first deref and is loaded from cache on subsequent derefs:
+
+;;; Example:
+@(pocket/cached #'expensive-calculation 1 2)
+
+(kind/doc #'pocket/cached-fn)
+
+;; Returns a wrapped function whose calls return `Cached` objects:
+
+;;; Example:
+(def my-cached-fn (pocket/cached-fn #'expensive-calculation))
+@(my-cached-fn 3 4)
+
+(kind/doc #'pocket/maybe-deref)
+
+;; Useful in pipeline functions that may receive either cached or plain values:
+
+;;; Example:
+(pocket/maybe-deref 42)
+
+(pocket/maybe-deref (pocket/cached #'expensive-calculation 1 2))
+
+(kind/doc #'pocket/->id)
+
+;; The `PIdentifiable` protocol allows customizing how values contribute to
+;; cache keys. Default implementations exist for Var, MapEntry, Object, and nil:
+
+;;; Example:
+(pocket/->id #'expensive-calculation)
+
+(pocket/->id {:a 1})
 
 ;; ## Cleanup
 
