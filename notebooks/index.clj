@@ -18,7 +18,6 @@
 
 (pocket/set-base-cache-dir! cache-dir)
 
-
 ;; Define an expensive computation that we want to cache:
 
 (defn expensive-calculation
@@ -30,20 +29,16 @@
 
 ;; ## Basic Caching
 
-;; Create a cached computation. This returns an `IDeref` object - the 
+;; Create a cached computation. This returns an `IDeref` object - the
 ;; computation won't run until we deref it:
 
 (def cached-result
   (pocket/cached #'expensive-calculation 10 20))
 
-;; Now let's deref it. The first time, it will compute and cache:
-
-(println "First call:")
+;;; First call (computes and caches):
 (time @cached-result)
 
-;; The second deref loads from cache (instant!):
-
-(println "\nSecond call (from cache):")
+;;; Second call (from cache, instant!):
 (time @cached-result)
 
 ;; ## Using cached-fn
@@ -55,13 +50,13 @@
 
 ;; Use it like a normal function, but it returns a cached IDeref:
 
-(println "\nUsing cached-fn:")
+;;; Using cached-fn:
 (time @(cached-expensive 5 15))
 
-(println "\nSecond call with same args (cached):")
+;;; Second call with same args (cached):
 (time @(cached-expensive 5 15))
 
-(println "\nDifferent args (new computation):")
+;;; Different args (new computation):
 (time @(cached-expensive 7 8))
 
 ;; ## Data Science Pipeline Example
@@ -83,9 +78,7 @@
   (Thread/sleep 1000)
   {:model :trained :accuracy 0.95 :data data})
 
-;; Chain cached computations in a pipeline:
-
-(println "\n=== First pipeline run ===")
+;;; First pipeline run:
 (time
  (-> "data/raw.csv"
      ((pocket/cached-fn #'load-dataset))
@@ -94,9 +87,7 @@
      deref
      (select-keys [:model :accuracy])))
 
-;; Run the same pipeline again - everything loads from cache:
-
-(println "\n=== Second pipeline run (all cached) ===")
+;;; Second pipeline run (all cached):
 (time
  (-> "data/raw.csv"
      ((pocket/cached-fn #'load-dataset))
@@ -112,8 +103,12 @@
 (defn returns-nil [] nil)
 
 (def nil-result (pocket/cached #'returns-nil))
-(println "\nCached nil value:" @nil-result)
-(println "Loading from cache:" @nil-result)
+
+;;; Cached nil value:
+@nil-result
+
+;;; Loading from cache:
+@nil-result
 
 ;; ## Cache Inspection
 
@@ -172,4 +167,3 @@
 ;; Clean up the demo cache:
 
 (fs/delete-tree cache-dir)
-(println "\nDemo cache cleaned up!")
