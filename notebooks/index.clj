@@ -1,13 +1,15 @@
 ;; # Pocket - Filesystem-based Caching
 
-;; Pocket provides content-addressable caching with automatic serialization,
+;; Pocket provides [content-addressable](https://en.wikipedia.org/wiki/Content-addressable_storage)
+;; caching with automatic [serialization](https://en.wikipedia.org/wiki/Serialization),
 ;; making it easy to cache expensive function calls to disk and reuse results
 ;; across sessions.
 ;;
 ;; Pocket uses a two-layer caching architecture:
-;; - **Disk** — durable, content-addressable storage using Nippy serialization
-;; - **In-memory** — an LRU cache (backed by [core.cache](https://github.com/clojure/core.cache))
-;;   that avoids repeated disk reads and provides thread-safe coordination
+;; - **Disk** — durable, content-addressable storage using [Nippy](https://github.com/taoensso/nippy) serialization
+;; - **In-memory** — an [LRU](https://en.wikipedia.org/wiki/Cache_replacement_policies#LRU) cache
+;;   (backed by [core.cache](https://github.com/clojure/core.cache))
+;;   that avoids repeated disk reads and provides [thread-safe](https://en.wikipedia.org/wiki/Thread_safety) coordination
 ;;
 ;; When multiple threads deref the same `Cached` value concurrently,
 ;; the computation runs exactly once. Subsequent derefs are served
@@ -33,8 +35,8 @@
   (Thread/sleep 400)
   (+ x y))
 
-;; `cached` creates a lazy cached computation. It returns a `Cached` object —
-;; the computation won't run until we deref it:
+;; `cached` creates a [lazy](https://en.wikipedia.org/wiki/Lazy_evaluation) cached computation.
+;; It returns a `Cached` object — the computation won't run until we deref it:
 
 (def cached-result
   (pocket/cached #'expensive-calculation 10 20))
@@ -70,7 +72,7 @@ cached-result
 ;; Pocket handles this recursively. The cache key for the outer computation
 ;; is derived from the **identity** of the inner computation (its function
 ;; name and arguments), not from its result. This means the entire pipeline's
-;; cache key captures the full computation graph.
+;; cache key captures the full [computation graph](https://en.wikipedia.org/wiki/Dataflow_programming).
 
 ;; For this to work, functions in the pipeline should call `maybe-deref`
 ;; on arguments that may be `Cached` objects. This way, the function receives
@@ -144,24 +146,25 @@ cached-result
 ;;
 ;; 1. **Performance** — repeated derefs of the same computation skip disk I/O entirely
 ;;    (until the entry is evicted from memory).
-;; 2. **Thread safety** — when multiple threads deref the same `Cached` value
-;;    concurrently, the computation runs exactly once. This is coordinated via
-;;    a `ConcurrentHashMap` of delays, so no duplicate work is performed.
+;; 2. **[Thread safety](https://en.wikipedia.org/wiki/Thread_safety)** — when multiple
+;;    threads deref the same `Cached` value concurrently, the computation runs exactly once.
+;;    This is coordinated via a [`ConcurrentHashMap`](https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/ConcurrentHashMap.html)
+;;    of [delays](https://clojure.org/reference/concurrency#delay), so no duplicate work is performed.
 ;;
-;; By default, the in-memory layer uses an **LRU** (Least Recently Used) policy
-;; with a threshold of 256 entries. You can configure the policy and its
-;; parameters with `set-mem-cache-options!`.
+;; By default, the in-memory layer uses an **[LRU](https://en.wikipedia.org/wiki/Cache_replacement_policies#LRU)**
+;; (Least Recently Used) policy with a threshold of 256 entries. You can configure
+;; the policy and its parameters with `set-mem-cache-options!`.
 
 ;; Supported policies and their parameters:
 ;;
 ;; | Policy | Key | Parameters |
 ;; |--------|---------|-----------|
-;; | LRU (Least Recently Used) | `:lru` | `:threshold` (default 256) |
-;; | FIFO (First In First Out) | `:fifo` | `:threshold` (default 256) |
-;; | LU (Least Used) | `:lu` | `:threshold` (default 256) |
-;; | TTL (Time To Live) | `:ttl` | `:ttl` in ms (default 30000) |
-;; | LIRS | `:lirs` | `:s-history-limit`, `:q-history-limit` |
-;; | Soft references | `:soft` | (none — uses JVM garbage collection) |
+;; | [LRU](https://en.wikipedia.org/wiki/Cache_replacement_policies#LRU) (Least Recently Used) | `:lru` | `:threshold` (default 256) |
+;; | [FIFO](https://en.wikipedia.org/wiki/Cache_replacement_policies#FIFO) (First In First Out) | `:fifo` | `:threshold` (default 256) |
+;; | [LFU](https://en.wikipedia.org/wiki/Least_frequently_used) (Least Frequently Used) | `:lu` | `:threshold` (default 256) |
+;; | [TTL](https://en.wikipedia.org/wiki/Time_to_live) (Time To Live) | `:ttl` | `:ttl` in ms (default 30000) |
+;; | [LIRS](https://en.wikipedia.org/wiki/LIRS_caching_algorithm) | `:lirs` | `:s-history-limit`, `:q-history-limit` |
+;; | [Soft references](https://docs.oracle.com/javase/8/docs/api/java/lang/ref/SoftReference.html) | `:soft` | (none — uses JVM garbage collection) |
 ;; | Basic (unbounded) | `:basic` | (none) |
 
 ;; For example, to use a FIFO policy with a smaller threshold:
@@ -178,7 +181,7 @@ cached-result
 
 ;; ### Usage notes
 
-;; **Use vars for functions.**
+;; **Use [vars](https://clojure.org/reference/vars) for functions.**
 ;; Always use `#'function-name` (var), not `function-name` (function object).
 ;; Vars have stable names that produce consistent cache keys across sessions.
 ;; Function objects have unstable identity and would create a new cache entry
@@ -192,7 +195,7 @@ cached-result
 ;; (pocket/cached my-function args)
 ;; ```
 
-;; **Cache invalidation.**
+;; **[Cache invalidation](https://en.wikipedia.org/wiki/Cache_invalidation).**
 ;; Pocket does **not** detect function implementation changes. If you modify
 ;; a function's body, the cache key remains the same (it's based on the
 ;; function name and arguments, not the implementation). You must manually
