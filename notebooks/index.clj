@@ -3,12 +3,20 @@
 ;; Pocket provides content-addressable caching with automatic serialization,
 ;; making it easy to cache expensive function calls to disk and reuse results
 ;; across sessions.
+;;
+;; Pocket uses a two-layer caching architecture:
+;; - **Disk** — durable, content-addressable storage using Nippy serialization
+;; - **In-memory** — an LRU cache (backed by [core.cache](https://github.com/clojure/core.cache))
+;;   that avoids repeated disk reads and provides thread-safe coordination
+;;
+;; When multiple threads deref the same `Cached` value concurrently,
+;; the computation runs exactly once. Subsequent derefs are served
+;; from the in-memory cache, falling back to disk if evicted.
 
 ^{:kindly/options {:kinds-that-hide-code #{:kind/doc}}}
 (ns index
   (:require [scicloj.pocket :as pocket]
-            [scicloj.kindly.v4.kind :as kind]
-            [babashka.fs :as fs]))
+            [scicloj.kindly.v4.kind :as kind]))
 
 ;; ## Basic Walkthrough
 
@@ -22,7 +30,7 @@
   "Simulates an expensive computation"
   [x y]
   (println (str "Computing " x " + " y " (this is expensive!)"))
-  (Thread/sleep 1000)
+  (Thread/sleep 400)
   (+ x y))
 
 ;; `cached` creates a lazy cached computation. It returns a `Cached` object —
@@ -71,19 +79,19 @@ cached-result
 
 (defn load-dataset [path]
   (println "Loading dataset from" path "...")
-  (Thread/sleep 800)
+  (Thread/sleep 300)
   {:data [1 2 3 4 5] :source path})
 
 (defn preprocess [data opts]
   (let [data (pocket/maybe-deref data)]
     (println "Preprocessing with options:" opts)
-    (Thread/sleep 600)
+    (Thread/sleep 300)
     (update data :data #(map (fn [x] (* x (:scale opts))) %))))
 
 (defn train-model [data params]
   (let [data (pocket/maybe-deref data)]
     (println "Training model with params:" params)
-    (Thread/sleep 1000)
+    (Thread/sleep 300)
     {:model :trained :accuracy 0.95 :data data}))
 
 ;; Chain cached computations in a pipeline:
@@ -128,6 +136,46 @@ cached-result
 ;;; Loading nil from cache:
 @nil-result
 
+;; ### In-memory cache and thread safety
+
+;; Pocket maintains an in-memory cache in front of the disk layer,
+;; backed by [core.cache](https://github.com/clojure/core.cache).
+;; This provides two benefits:
+;;
+;; 1. **Performance** — repeated derefs of the same computation skip disk I/O entirely
+;;    (until the entry is evicted from memory).
+;; 2. **Thread safety** — when multiple threads deref the same `Cached` value
+;;    concurrently, the computation runs exactly once. This is coordinated via
+;;    a `ConcurrentHashMap` of delays, so no duplicate work is performed.
+;;
+;; By default, the in-memory layer uses an **LRU** (Least Recently Used) policy
+;; with a threshold of 256 entries. You can configure the policy and its
+;; parameters with `set-mem-cache-options!`.
+
+;; Supported policies and their parameters:
+;;
+;; | Policy | Key | Parameters |
+;; |--------|---------|-----------|
+;; | LRU (Least Recently Used) | `:lru` | `:threshold` (default 256) |
+;; | FIFO (First In First Out) | `:fifo` | `:threshold` (default 256) |
+;; | LU (Least Used) | `:lu` | `:threshold` (default 256) |
+;; | TTL (Time To Live) | `:ttl` | `:ttl` in ms (default 30000) |
+;; | LIRS | `:lirs` | `:s-history-limit`, `:q-history-limit` |
+;; | Soft references | `:soft` | (none — uses JVM garbage collection) |
+;; | Basic (unbounded) | `:basic` | (none) |
+
+;; For example, to use a FIFO policy with a smaller threshold:
+
+(pocket/set-mem-cache-options! {:policy :fifo :threshold 100})
+
+;; Or a TTL policy where entries expire after 60 seconds:
+
+(pocket/set-mem-cache-options! {:policy :ttl :ttl 60000})
+
+;; Reset to the default LRU policy:
+
+(pocket/set-mem-cache-options! {:policy :lru :threshold 256})
+
 ;; ### Usage notes
 
 ;; **Use vars for functions.**
@@ -161,7 +209,7 @@ cached-result
 
 ;; ### Cleanup
 
-;; To delete all cached values, use `cleanup!`:
+;; To delete all cached values (both disk and in-memory), use `cleanup!`:
 
 (pocket/cleanup!)
 
@@ -237,6 +285,16 @@ my-result
 ;; `nil` is handled as well:
 
 (pocket/->id nil)
+
+(kind/doc #'pocket/set-mem-cache-options!)
+
+;; Switch to a FIFO policy with 100 entries:
+
+(pocket/set-mem-cache-options! {:policy :fifo :threshold 100})
+
+;; Reset to default:
+
+(pocket/set-mem-cache-options! {:policy :lru :threshold 256})
 
 (kind/doc #'pocket/cleanup!)
 
