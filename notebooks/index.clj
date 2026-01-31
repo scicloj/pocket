@@ -16,11 +16,12 @@
 
 (def cache-dir "/tmp/pocket-demo")
 
-(alter-var-root #'pocket/*base-cache-dir* (constantly cache-dir))
+(pocket/set-base-cache-dir! cache-dir)
+
 
 ;; Define an expensive computation that we want to cache:
 
-(defn expensive-calculation 
+(defn expensive-calculation
   "Simulates an expensive computation"
   [x y]
   (println (str "Computing " x " + " y " (this is expensive!)"))
@@ -49,7 +50,7 @@
 
 ;; For convenience, you can wrap a function to automatically cache all calls:
 
-(def cached-expensive 
+(def cached-expensive
   (pocket/cached-fn #'expensive-calculation))
 
 ;; Use it like a normal function, but it returns a cached IDeref:
@@ -86,23 +87,23 @@
 
 (println "\n=== First pipeline run ===")
 (time
-  (-> "data/raw.csv"
-      ((pocket/cached-fn #'load-dataset))
-      ((pocket/cached-fn #'preprocess) {:scale 2})
-      ((pocket/cached-fn #'train-model) {:epochs 100})
-      deref
-      (select-keys [:model :accuracy])))
+ (-> "data/raw.csv"
+     ((pocket/cached-fn #'load-dataset))
+     ((pocket/cached-fn #'preprocess) {:scale 2})
+     ((pocket/cached-fn #'train-model) {:epochs 100})
+     deref
+     (select-keys [:model :accuracy])))
 
 ;; Run the same pipeline again - everything loads from cache:
 
 (println "\n=== Second pipeline run (all cached) ===")
 (time
-  (-> "data/raw.csv"
-      ((pocket/cached-fn #'load-dataset))
-      ((pocket/cached-fn #'preprocess) {:scale 2})
-      ((pocket/cached-fn #'train-model) {:epochs 100})
-      deref
-      (select-keys [:model :accuracy])))
+ (-> "data/raw.csv"
+     ((pocket/cached-fn #'load-dataset))
+     ((pocket/cached-fn #'preprocess) {:scale 2})
+     ((pocket/cached-fn #'train-model) {:epochs 100})
+     deref
+     (select-keys [:model :accuracy])))
 
 ;; ## Nil Handling
 
@@ -140,7 +141,7 @@
 ;; Or set it once at the top of your script:
 ;;
 ;; ```clojure
-;; (alter-var-root #'pocket/*base-cache-dir* (constantly "/tmp/cache"))
+;; (pocket/set-base-cache-dir! "/tmp/cache")
 ;; ```
 
 ;; ## Key Features
