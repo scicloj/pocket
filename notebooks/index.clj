@@ -176,48 +176,74 @@
 
 (kind/doc #'pocket/*base-cache-dir*)
 
+;; The current value:
+
+pocket/*base-cache-dir*
+
 (kind/doc #'pocket/set-base-cache-dir!)
 
-;; Set to a custom directory:
-;;
-;; ```clojure
-;; (pocket/set-base-cache-dir! "/tmp/my-cache")
-;; ```
+(pocket/set-base-cache-dir! "/tmp/pocket-demo-2")
+pocket/*base-cache-dir*
+
+;; Restore it for the rest of the notebook:
+
+(pocket/set-base-cache-dir! cache-dir)
 
 (kind/doc #'pocket/cached)
 
-;; Returns a `Cached` object implementing `IDeref`. The computation runs on
-;; first deref and is loaded from cache on subsequent derefs:
+;; `cached` returns a `Cached` object — the computation is not yet executed:
 
-;;; Example:
-@(pocket/cached #'expensive-calculation 1 2)
+(def my-result (pocket/cached #'expensive-calculation 100 200))
+my-result
+
+;; The computation runs when we deref:
+
+@my-result
+
+;; Derefing again loads from cache (no recomputation):
+
+@my-result
 
 (kind/doc #'pocket/cached-fn)
 
-;; Returns a wrapped function whose calls return `Cached` objects:
+;; `cached-fn` wraps a function so that every call returns a `Cached` object:
 
-;;; Example:
 (def my-cached-fn (pocket/cached-fn #'expensive-calculation))
+
+@(my-cached-fn 3 4)
+
+;; Same args hit the cache:
+
 @(my-cached-fn 3 4)
 
 (kind/doc #'pocket/maybe-deref)
 
-;; Useful in pipeline functions that may receive either cached or plain values:
+;; A plain value passes through unchanged:
 
-;;; Example:
 (pocket/maybe-deref 42)
 
-(pocket/maybe-deref (pocket/cached #'expensive-calculation 1 2))
+;; A `Cached` value gets derefed:
+
+(pocket/maybe-deref (pocket/cached #'expensive-calculation 100 200))
 
 (kind/doc #'pocket/->id)
 
-;; The `PIdentifiable` protocol allows customizing how values contribute to
-;; cache keys. Default implementations exist for Var, MapEntry, Object, and nil:
+;; A var's identity is its name:
 
-;;; Example:
 (pocket/->id #'expensive-calculation)
 
-(pocket/->id {:a 1})
+;; A map's identity is itself (with keys sorted for stability):
+
+(pocket/->id {:b 2 :a 1})
+
+;; A `Cached` object's identity captures the full computation —
+;; function name and argument identities — without running it:
+
+(pocket/->id (pocket/cached #'expensive-calculation 100 200))
+
+;; `nil` is handled as well:
+
+(pocket/->id nil)
 
 ;; ## Cleanup
 
