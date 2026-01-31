@@ -1,4 +1,4 @@
-(ns scicloj.pocket.core-test
+(ns scicloj.pocket-test
   (:require [clojure.test :refer [deftest testing is use-fixtures]]
             [scicloj.pocket :as pocket]
             [scicloj.pocket.impl.cache :as impl]
