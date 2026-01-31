@@ -148,7 +148,7 @@ cached-result
 ;; Pocket does **not** detect function implementation changes. If you modify
 ;; a function's body, the cache key remains the same (it's based on the
 ;; function name and arguments, not the implementation). You must manually
-;; delete the cache directory to invalidate stale entries.
+;; delete the cache directory to invalidate stale entries, e.g. with `cleanup!`.
 
 ;; **Configuration.**
 ;; Set the cache directory via the `POCKET_BASE_CACHE_DIR` environment variable:
@@ -159,9 +159,13 @@ cached-result
 ;;
 ;; Or programmatically with `set-base-cache-dir!`.
 
-;; ## API Reference
+;; ### Cleanup
 
-;; ### Configuration
+;; To delete all cached values, use `cleanup!`:
+
+(pocket/cleanup!)
+
+;; ## API Reference
 
 (kind/doc #'pocket/*base-cache-dir*)
 
@@ -177,8 +181,6 @@ pocket/*base-cache-dir*
 ;; Restore it for the rest of the notebook:
 
 (pocket/set-base-cache-dir! cache-dir)
-
-;; ### Caching
 
 (kind/doc #'pocket/cached)
 
@@ -217,8 +219,6 @@ my-result
 
 (pocket/maybe-deref (pocket/cached #'expensive-calculation 100 200))
 
-;; ### Cache key identity
-
 (kind/doc #'pocket/->id)
 
 ;; A var's identity is its name:
@@ -238,8 +238,6 @@ my-result
 
 (pocket/->id nil)
 
-;; ## Cleanup
+(kind/doc #'pocket/cleanup!)
 
-;; Clean up the demo cache:
-
-(fs/delete-tree cache-dir)
+(pocket/cleanup!)
