@@ -35,8 +35,13 @@
 (def ^:dynamic *base-cache-dir*
   "Base directory for cache storage.
    Can be set via POCKET_BASE_CACHE_DIR environment variable
-   or altered with alter-var-root."
+   or set with set-base-cache-dir!."
   (System/getenv "POCKET_BASE_CACHE_DIR"))
+
+(defn set-base-cache-dir!
+  "Set the base cache directory."
+  [dir]
+  (alter-var-root #'*base-cache-dir* (constantly dir)))
 
 (defprotocol PIdentifiable
   "Protocol for computing cache keys from values.
