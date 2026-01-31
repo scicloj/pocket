@@ -12,7 +12,8 @@
    - Extensible identity protocol (`PIdentifiable`)
    - Nil value support
    - Thread-safe reads (writes have check-then-write race condition)"
-  (:require [scicloj.pocket.impl.cache :as impl]))
+  (:require [scicloj.pocket.impl.cache :as impl]
+            [babashka.fs :as fs]))
 
 (def ^:dynamic *base-cache-dir*
   "Base directory for cache storage.
@@ -80,3 +81,14 @@
   "Write value `v` to the given cache `path`."
   [v path]
   (impl/write-cached! v path))
+
+(defn cleanup!
+  "Delete the cache directory at `*base-cache-dir*`, removing all cached values.
+   Returns a map with `:dir` and `:existed` indicating what happened."
+  []
+  (let [dir *base-cache-dir*
+        existed? (and dir (fs/exists? dir))]
+    (when existed?
+      (fs/delete-tree dir))
+    {:dir dir
+     :existed (boolean existed?)}))
