@@ -148,10 +148,10 @@ cached-result
 (def nil-result (pocket/cached #'returns-nil))
 
 ;;; Cached nil value:
-@nil-result
+(deref nil-result)
 
 ;;; Loading nil from cache:
-@nil-result
+(deref nil-result)
 
 ;; ### In-memory cache and thread safety
 
@@ -233,9 +233,9 @@ cached-result
     (:data data)))
 
 ;;; Version 3 of the processing:
-@(pocket/cached #'process-data
-                {:data [1 2 3]}
-                {:scale 2 :version 3})
+(deref (pocket/cached #'process-data
+                      {:data [1 2 3]}
+                      {:scale 2 :version 3}))
 
 ;; When the implementation changes again, simply bump to `:version 4`.
 ;; Previous cached results remain on disk (useful if you need to compare),
@@ -283,11 +283,11 @@ my-result
 
 ;; The computation runs when we deref:
 
-@my-result
+(deref my-result)
 
 ;; Derefing again loads from cache (no recomputation):
 
-@my-result
+(deref my-result)
 
 (kind/doc #'pocket/cached-fn)
 
@@ -295,11 +295,11 @@ my-result
 
 (def my-cached-fn (pocket/cached-fn #'expensive-calculation))
 
-@(my-cached-fn 3 4)
+(deref (my-cached-fn 3 4))
 
 ;; Same args hit the cache:
 
-@(my-cached-fn 3 4)
+(deref (my-cached-fn 3 4))
 
 (kind/doc #'pocket/maybe-deref)
 
