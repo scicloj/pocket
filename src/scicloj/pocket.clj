@@ -95,6 +95,20 @@
     {:dir dir
      :existed (boolean existed?)}))
 
+(defn invalidate!
+  "Invalidate a specific cached computation, removing it from both disk and memory.
+   Takes the same arguments as `cached`: a function var and its arguments.
+   Returns a map with `:path` and `:existed`."
+  [func & args]
+  (impl/invalidate! *base-cache-dir* func args))
+
+(defn invalidate-fn!
+  "Invalidate all cached entries for a given function var, regardless of arguments.
+   Removes matching entries from both disk and memory.
+   Returns a map with `:fn-name`, `:count`, and `:paths`."
+  [func]
+  (impl/invalidate-fn! *base-cache-dir* func))
+
 (defn set-mem-cache-options!
   "Configure the in-memory cache. Resets it, discarding any currently cached values.
    

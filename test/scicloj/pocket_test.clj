@@ -230,3 +230,50 @@
 
   (testing "MapEntry identity"
     (is (string? (pocket/->id (first {:a 1}))))))
+
+(deftest test-invalidate!
+  (testing "Invalidate a specific cached computation"
+    (let [call-count (atom 0)
+          counting-fn (fn [x y]
+                        (swap! call-count inc)
+                        (+ x y))]
+      (with-redefs [expensive-add counting-fn]
+        ;; Cache a value
+        (is (= 30 @(pocket/cached #'expensive-add 10 20)))
+        (is (= 1 @call-count))
+        ;; Invalidate it
+        (let [result (pocket/invalidate! #'expensive-add 10 20)]
+          (is (true? (:existed result))))
+        ;; Next deref should recompute
+        (is (= 30 @(pocket/cached #'expensive-add 10 20)))
+        (is (= 2 @call-count)))))
+
+  (testing "Invalidate non-existent entry"
+    (let [result (pocket/invalidate! #'expensive-add 999 999)]
+      (is (false? (:existed result))))))
+
+(deftest test-invalidate-fn!
+  (testing "Invalidate all entries for a function"
+    (let [call-count (atom 0)
+          counting-fn (fn [x y]
+                        (swap! call-count inc)
+                        (+ x y))]
+      ;; Cache several entries
+      (is (= 3 @(pocket/cached #'expensive-add 1 2)))
+      (is (= 7 @(pocket/cached #'expensive-add 3 4)))
+      (is (= 11 @(pocket/cached #'expensive-add 5 6)))
+      ;; Invalidate all
+      (let [result (pocket/invalidate-fn! #'expensive-add)]
+        (is (= "expensive-add" (:fn-name result)))
+        (is (= 3 (:count result))))
+      ;; All should recompute
+      (with-redefs [expensive-add counting-fn]
+        (is (= 3 @(pocket/cached #'expensive-add 1 2)))
+        (is (= 7 @(pocket/cached #'expensive-add 3 4)))
+        (is (= 2 @call-count)))
+      ;; Clean up for next test
+      (pocket/invalidate-fn! #'expensive-add)))
+
+  (testing "Invalidate-fn with no cached entries"
+    (let [result (pocket/invalidate-fn! #'expensive-add)]
+      (is (= 0 (:count result))))))

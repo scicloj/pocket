@@ -154,6 +154,45 @@
   (fn [& args]
     (apply cached base-dir f args)))
 
+(defn invalidate!
+  "Invalidate a specific cached computation by deleting its disk and memory entries.
+   Returns a map with `:path` and `:existed`."
+  [base-dir func args]
+  (let [c (->Cached base-dir func args)
+        id (->id c)
+        path (->path base-dir id (-> func meta :type))
+        existed? (boolean (fs/exists? path))]
+    (when existed?
+      (fs/delete-tree path))
+    (swap! mem-cache dissoc path)
+    (.remove in-flight path)
+    {:path path :existed existed?}))
+
+(defn invalidate-fn!
+  "Invalidate all cached entries for a given function var.
+   Scans the cache directory for entries whose path contains the function name.
+   Returns a map with `:fn-name`, `:count`, and `:paths`."
+  [base-dir func]
+  (let [fn-name (->id func)
+        prefix (str "(\"" fn-name "\"")
+        cache-dir (str base-dir "/.cache")
+        deleted-paths (atom [])]
+    (when (fs/exists? cache-dir)
+      (doseq [prefix-dir (fs/list-dir cache-dir)
+              :when (fs/directory? prefix-dir)]
+        (doseq [entry-dir (fs/list-dir prefix-dir)
+                :let [entry-name (str (fs/file-name entry-dir))]
+                :when (and (fs/directory? entry-dir)
+                           (.startsWith entry-name prefix))]
+          (let [path (str entry-dir)]
+            (fs/delete-tree entry-dir)
+            (swap! mem-cache dissoc path)
+            (.remove in-flight path)
+            (swap! deleted-paths conj path)))))
+    {:fn-name fn-name
+     :count (count @deleted-paths)
+     :paths @deleted-paths}))
+
 ;; Fix: Add nil handling to PIdentifiable protocol
 (extend-protocol PIdentifiable
   nil
