@@ -104,3 +104,18 @@ my-result
 (kind/doc #'pocket/cleanup!)
 
 (pocket/cleanup!)
+
+;; ## Extending `PIdentifiable`
+;;
+;; You can customize how your types are identified for caching
+;; by extending the `PIdentifiable` protocol:
+;;
+;; ```clojure
+;; (extend-protocol pocket/PIdentifiable
+;;   MyType
+;;   (->id [this]
+;;     {:type ::my-type :id (.getId this)}))
+;; ```
+;;
+;; Default implementations cover `Var` (symbol name), `MapEntry`,
+;; `Object` (identity), and `nil`.

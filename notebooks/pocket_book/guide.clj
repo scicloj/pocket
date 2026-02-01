@@ -128,3 +128,25 @@ cached-result
 ;; ## Cleanup
 
 (pocket/cleanup!)
+
+;; ## Serialization
+;;
+;; Pocket uses [Nippy](https://github.com/taoensso/nippy) for serialization.
+;; Most Clojure data types are supported, but you cannot cache values that
+;; aren't serializable — such as open file handles, network connections,
+;; or stateful Java objects.
+
+;; ## When to use Pocket
+;;
+;; | Feature | Pocket | `clojure.core/memoize` | `core.memoize` |
+;; |---------|--------|------------------------|----------------|
+;; | Persistence | Disk + memory | Memory only | Memory only |
+;; | Cross-session | Yes | No | No |
+;; | Content-addressable | Yes | No | No |
+;; | Lazy evaluation | `IDeref` | Eager | Eager |
+;;
+;; Use Pocket when computations take minutes or hours, results need to
+;; survive JVM restarts, or you're building data science pipelines with
+;; expensive intermediate steps.
+;;
+;; Use `memoize` or `core.memoize` for fast, in-memory, single-session caching.
