@@ -5,6 +5,7 @@
             [clojure.core.cache.wrapped :as cw]
             [clojure.java.io :as io]
             [clojure.edn :as edn]
+            [clojure.string :as str]
             [clojure.tools.logging :as log]
             [scicloj.pocket.protocols :as protocols :refer [PIdentifiable ->id]])
   (:import (org.apache.commons.codec.digest DigestUtils)
@@ -115,7 +116,8 @@
              sha
              (subs 0 2))
          "/"
-         (let [idstr (str id)]
+         (let [idstr (-> (str id)
+                         (str/replace "/" "⁄"))]
            (if (-> idstr
                    count
                    (> 240))
@@ -134,33 +136,30 @@
           fn-name (->id f)
           path (->path base-dir id
                        (-> f meta :type))]
-      (if (cw/has? mem-cache path)
-        (do (log/debug "Cache hit (mem):" fn-name path)
-            (cw/lookup-or-miss mem-cache path (fn [_] nil)))
-        (cw/lookup-or-miss
-         mem-cache path
-         (fn [_]
-           (let [d (.computeIfAbsent
-                    in-flight path
-                    (reify java.util.function.Function
-                      (apply [_ _]
-                        (delay
-                          (try
-                            (if (fs/exists? path)
-                              (do (log/debug "Cache hit (disk):" fn-name path)
-                                  (read-cached path))
-                              (do (log/info "Cache miss, computing:" fn-name)
-                                  (let [resolved-args (mapv maybe-deref args)
-                                        v (clojure.core/apply f resolved-args)
-                                        meta-map {:id (pr-str id)
-                                                  :fn-name (str fn-name)
-                                                  :args-str (pr-str (vec args))
-                                                  :created-at (str (java.time.Instant/now))}]
-                                    (write-cached! v path meta-map)
-                                    v)))
-                            (finally
-                              (.remove in-flight path)))))))]
-             @d)))))))
+      (cw/lookup-or-miss
+       mem-cache path
+       (fn [_]
+         (let [d (.computeIfAbsent
+                  in-flight path
+                  (reify java.util.function.Function
+                    (apply [_ _]
+                      (delay
+                        (try
+                          (if (fs/exists? path)
+                            (do (log/debug "Cache hit (disk):" fn-name path)
+                                (read-cached path))
+                            (do (log/info "Cache miss, computing:" fn-name)
+                                (let [resolved-args (mapv maybe-deref args)
+                                      v (clojure.core/apply f resolved-args)
+                                      meta-map {:id (pr-str id)
+                                                :fn-name (str fn-name)
+                                                :args-str (pr-str (vec args))
+                                                :created-at (str (java.time.Instant/now))}]
+                                  (write-cached! v path meta-map)
+                                  v)))
+                          (finally
+                            (.remove in-flight path)))))))]
+           @d))))))
 
 (extend-protocol PIdentifiable
   Cached
@@ -184,7 +183,7 @@
 
   Var
   (->id [this]
-    (-> this symbol name symbol))
+    (-> this symbol))
 
   Object
   (->id [this]
@@ -223,8 +222,9 @@
    Returns a map with `:fn-name`, `:count`, and `:paths`."
   [base-dir func]
   (let [fn-name (->id func)
-        prefix-space (str "(" fn-name " ")
-        prefix-close (str "(" fn-name ")")
+        fn-name-sanitized (str/replace (str fn-name) "/" "⁄")
+        prefix-space (str "(" fn-name-sanitized " ")
+        prefix-close (str "(" fn-name-sanitized ")")
         cache-dir (str base-dir "/.cache")
         deleted-paths (atom [])]
     (when (fs/exists? cache-dir)

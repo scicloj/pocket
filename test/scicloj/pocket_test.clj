@@ -215,7 +215,7 @@
 
 (deftest test-identity
   (testing "Var identity is its name"
-    (is (= 'expensive-add (pocket/->id #'expensive-add))))
+    (is (= 'scicloj.pocket-test/expensive-add (pocket/->id #'expensive-add))))
 
   (testing "Map identity has sorted keys"
     (is (= (pocket/->id {:b 2 :a 1})
@@ -223,7 +223,7 @@
 
   (testing "Cached identity captures computation graph"
     (let [c (pocket/cached #'expensive-add 1 2)]
-      (is (= '(expensive-add 1 2)
+      (is (= '(scicloj.pocket-test/expensive-add 1 2)
              (pocket/->id c)))))
 
   (testing "Nil identity"
@@ -246,7 +246,7 @@
     (let [uid (->UserId 42)
           c (pocket/cached #'lookup-user uid)]
       ;; Custom ->id is used in the cache key
-      (is (= '(lookup-user "user-42") (pocket/->id c)))
+      (is (= '(scicloj.pocket-test/lookup-user "user-42") (pocket/->id c)))
       ;; Caching works with the custom type
       (is (= {:name "Alice" :id 42} @c))
       ;; Second deref from cache
@@ -290,7 +290,7 @@
       (is (= 11 @(pocket/cached #'expensive-add 5 6)))
       ;; Invalidate all
       (let [result (pocket/invalidate-fn! #'expensive-add)]
-        (is (= "expensive-add" (:fn-name result)))
+        (is (= "scicloj.pocket-test/expensive-add" (:fn-name result)))
         (is (= 3 (:count result))))
       ;; All should recompute
       (with-redefs [expensive-add counting-fn]
@@ -349,7 +349,7 @@
         (is (= 1 (count entries)))
         (let [entry (first entries)]
           (is (string? (:fn-name entry)))
-          (is (= "expensive-add" (:fn-name entry)))
+          (is (= "scicloj.pocket-test/expensive-add" (:fn-name entry)))
           (is (string? (:created-at entry)))
           (is (string? (:id entry)))
           (is (string? (:args-str entry)))))))
@@ -357,9 +357,9 @@
   (testing "Metadata file is written for nil values"
     (let [result (pocket/cached #'returns-nil)]
       (is (nil? @result))
-      (let [entries (pocket/cache-entries "returns-nil")]
+      (let [entries (pocket/cache-entries "scicloj.pocket-test/returns-nil")]
         (is (= 1 (count entries)))
-        (is (= "returns-nil" (:fn-name (first entries))))))))
+        (is (= "scicloj.pocket-test/returns-nil" (:fn-name (first entries))))))))
 
 (deftest test-cache-entries
   (testing "cache-entries returns all entries"
@@ -369,8 +369,8 @@
     (is (= 3 (count (pocket/cache-entries)))))
 
   (testing "cache-entries filters by function name"
-    (is (= 2 (count (pocket/cache-entries "expensive-add"))))
-    (is (= 1 (count (pocket/cache-entries "returns-nil"))))
+    (is (= 2 (count (pocket/cache-entries "scicloj.pocket-test/expensive-add"))))
+    (is (= 1 (count (pocket/cache-entries "scicloj.pocket-test/returns-nil"))))
     (is (= 0 (count (pocket/cache-entries "nonexistent"))))))
 
 (deftest test-cache-stats
@@ -381,5 +381,5 @@
     (let [stats (pocket/cache-stats)]
       (is (= 3 (:total-entries stats)))
       (is (pos? (:total-size-bytes stats)))
-      (is (= {"expensive-add" 2 "returns-nil" 1}
+      (is (= {"scicloj.pocket-test/expensive-add" 2 "scicloj.pocket-test/returns-nil" 1}
              (:entries-per-fn stats))))))
