@@ -115,17 +115,6 @@
   [x]
   (impl/maybe-deref x))
 
-;; Internal functions (exposed for advanced usage)
-(defn read-cached
-  "Read a cached value from the given `path`. Returns `nil` if not found."
-  [path]
-  (impl/read-cached path))
-
-(defn write-cached!
-  "Write value `v` to the given cache `path`."
-  [v path]
-  (impl/write-cached! v path))
-
 (defn cleanup!
   "Delete the cache directory, removing all cached values.
    Also clears the in-memory cache.
@@ -192,4 +181,4 @@
   (let [dir (str (resolve-base-cache-dir) "/.cache")]
     (if (and dir (fs/exists? dir))
       (impl/dir-tree dir)
-      "")))
+      nil)))

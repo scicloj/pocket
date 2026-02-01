@@ -180,7 +180,7 @@
                            id)))))))
 
   clojure.lang.MapEntry
-  (->id [v] (pr-str v))
+  (->id [v] [(->id (key v)) (->id (val v))])
 
   Var
   (->id [this]

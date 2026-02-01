@@ -230,7 +230,7 @@
     (is (nil? (pocket/->id nil))))
 
   (testing "MapEntry identity"
-    (is (string? (pocket/->id (first {:a 1}))))))
+    (is (= [:a 1] (pocket/->id (first {:a 1}))))))
 
 (defrecord UserId [id])
 
