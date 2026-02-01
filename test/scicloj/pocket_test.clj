@@ -215,7 +215,7 @@
 
 (deftest test-identity
   (testing "Var identity is its name"
-    (is (= "expensive-add" (pocket/->id #'expensive-add))))
+    (is (= 'expensive-add (pocket/->id #'expensive-add))))
 
   (testing "Map identity has sorted keys"
     (is (= (pocket/->id {:b 2 :a 1})
@@ -223,7 +223,7 @@
 
   (testing "Cached identity captures computation graph"
     (let [c (pocket/cached #'expensive-add 1 2)]
-      (is (= (list "expensive-add" [1 2])
+      (is (= '(expensive-add 1 2)
              (pocket/->id c)))))
 
   (testing "Nil identity"
