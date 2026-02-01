@@ -40,6 +40,12 @@ pocket/*base-cache-dir*
 
 (pocket/set-base-cache-dir! cache-dir)
 
+(kind/doc #'pocket/config)
+
+;; Inspect the current effective configuration:
+
+(pocket/config)
+
 (kind/doc #'pocket/cached)
 
 ;; `cached` returns a `Cached` object — the computation is not yet executed:

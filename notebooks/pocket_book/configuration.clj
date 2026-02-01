@@ -1,19 +1,56 @@
 ;; # Configuration
 
+^{:kindly/options {:kinds-that-hide-code #{:kind/doc}}}
 (ns pocket-book.configuration
-  (:require [scicloj.pocket :as pocket]))
+  (:require [scicloj.pocket :as pocket]
+            [scicloj.kindly.v4.kind :as kind]))
+
+;; Pocket resolves configuration using a precedence chain
+;; (for both cache directory and in-memory cache options):
+;;
+;; 1. Thread-local `binding`
+;; 2. `set-*!` (imperative root binding change)
+;; 3. Environment variable
+;; 4. `pocket.edn` on classpath
+;; 5. Hardcoded default
+
+;; ## `pocket.edn`
+;;
+;; Place a `pocket.edn` file on your classpath root for declarative,
+;; project-level configuration:
+;;
+;; ```edn
+;; {:base-cache-dir "/tmp/my-project-cache"
+;;  :mem-cache {:policy :lru :threshold 256}}
+;; ```
+;;
+;; This is read once and cached. It provides defaults that can be
+;; overridden by environment variables, `set-*!` calls, or `binding`.
 
 ;; ## Cache directory
 
-;; Set the cache directory via the `POCKET_BASE_CACHE_DIR` environment variable:
+;; The cache directory can be set in several ways.
+
+;; **Environment variable** — `POCKET_BASE_CACHE_DIR`:
 ;;
 ;; ```bash
 ;; export POCKET_BASE_CACHE_DIR=/path/to/cache
 ;; ```
-;;
-;; Or programmatically with `set-base-cache-dir!`:
+
+;; **Programmatically** with `set-base-cache-dir!`:
 
 (pocket/set-base-cache-dir! "/tmp/pocket-demo-config")
+
+;; You can inspect the effective resolved configuration at any time:
+
+(pocket/config)
+
+;; **Thread-local binding** (useful for tests):
+;;
+;; ```clojure
+;; (binding [pocket/*base-cache-dir* "/tmp/test-cache"]
+;;   @(pocket/cached #'my-fn args))
+;; ```
 
 ;; ## In-memory cache and thread safety
 
@@ -29,8 +66,7 @@
 ;;    of [delays](https://clojure.org/reference/concurrency#delay), so no duplicate work is performed.
 ;;
 ;; By default, the in-memory layer uses an **[LRU](https://en.wikipedia.org/wiki/Cache_replacement_policies#LRU)**
-;; (Least Recently Used) policy with a threshold of 256 entries. You can configure
-;; the policy and its parameters with `set-mem-cache-options!`.
+;; (Least Recently Used) policy with a threshold of 256 entries.
 
 ;; ## Cache policies
 
@@ -46,7 +82,7 @@
 ;; | [Soft references](https://docs.oracle.com/javase/8/docs/api/java/lang/ref/SoftReference.html) | `:soft` | (none — uses JVM garbage collection) |
 ;; | Basic (unbounded) | `:basic` | (none) |
 
-;; For example, to use a FIFO policy with a smaller threshold:
+;; Configure via `set-mem-cache-options!`:
 
 (pocket/set-mem-cache-options! {:policy :fifo :threshold 100})
 
@@ -57,6 +93,23 @@
 ;; Reset to the default LRU policy:
 
 (pocket/set-mem-cache-options! {:policy :lru :threshold 256})
+
+;; **Environment variable** — `POCKET_MEM_CACHE` (EDN string):
+;;
+;; ```bash
+;; export POCKET_MEM_CACHE='{:policy :lru :threshold 512}'
+;; ```
+
+;; **Thread-local binding** (useful for tests):
+;;
+;; ```clojure
+;; (binding [pocket/*mem-cache-options* {:policy :fifo :threshold 50}]
+;;   @(pocket/cached #'my-fn args))
+;; ```
+;;
+;; **Caution**: binding `*mem-cache-options*` reconfigures the shared global
+;; mem-cache, which affects all threads. This is useful for test fixtures
+;; but should be avoided in concurrent production use with different policies.
 
 ;; ## Cleanup
 

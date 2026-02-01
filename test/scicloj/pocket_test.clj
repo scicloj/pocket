@@ -278,3 +278,40 @@
   (testing "Invalidate-fn with no cached entries"
     (let [result (pocket/invalidate-fn! #'expensive-add)]
       (is (= 0 (:count result))))))
+
+(deftest test-pocket-edn
+  (testing "pocket.edn is read from classpath"
+    (let [edn-val @impl/pocket-edn]
+      ;; pocket.edn may or may not exist on the test classpath
+      ;; just verify the delay resolves without error
+      (is (or (nil? edn-val) (map? edn-val)))))
+
+  (testing "resolve-mem-cache-options falls back to defaults"
+    (binding [pocket/*mem-cache-options* nil]
+      (is (= :lru (:policy (#'pocket/resolve-mem-cache-options))))))
+
+  (testing "binding overrides resolved mem-cache options"
+    (binding [pocket/*mem-cache-options* {:policy :fifo :threshold 50}]
+      (is (= {:policy :fifo :threshold 50}
+             (#'pocket/resolve-mem-cache-options)))))
+
+  (testing "set-mem-cache-options! alters var root and reconfigures cache"
+    (pocket/set-mem-cache-options! {:policy :fifo :threshold 100})
+    (is (= {:policy :fifo :threshold 100}
+           (select-keys @impl/current-mem-cache-options [:policy :threshold])))
+    ;; Reset
+    (pocket/set-mem-cache-options! {:policy :lru :threshold 256})))
+
+(deftest test-config
+  (testing "config returns resolved effective configuration"
+    (let [cfg (pocket/config)]
+      (is (= test-cache-dir (:base-cache-dir cfg)))
+      (is (map? (:mem-cache cfg)))
+      (is (contains? (:mem-cache cfg) :policy))))
+
+  (testing "config reflects binding overrides"
+    (binding [pocket/*base-cache-dir* "/tmp/config-test"
+              pocket/*mem-cache-options* {:policy :fifo :threshold 10}]
+      (let [cfg (pocket/config)]
+        (is (= "/tmp/config-test" (:base-cache-dir cfg)))
+        (is (= :fifo (-> cfg :mem-cache :policy)))))))

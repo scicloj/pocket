@@ -5,21 +5,57 @@
    using Nippy. Cached values are stored in a filesystem cache directory
    and keyed by the hash of function + arguments.
    
-   Features:
-   - Automatic serialization/deserialization (Nippy)
-   - Content-addressable storage (SHA-1 based paths)
-   - Lazy evaluation (deref to compute)
-   - Extensible identity protocol (`PIdentifiable`)
-   - Nil value support
-   - Thread-safe via in-memory LRU cache (backed by `core.cache`)"
+   Configuration precedence (for both cache dir and mem-cache options):
+   1. Thread-local `binding`
+   2. `set-*!` (imperative root binding change)
+   3. Environment variable (`POCKET_BASE_CACHE_DIR`, `POCKET_MEM_CACHE`)
+   4. `pocket.edn` on classpath
+   5. Hardcoded default"
   (:require [scicloj.pocket.impl.cache :as impl]
-            [babashka.fs :as fs]))
+            [babashka.fs :as fs]
+            [clojure.edn :as edn]))
 
 (def ^:dynamic *base-cache-dir*
   "Base directory for cache storage.
-   Can be set via the `POCKET_BASE_CACHE_DIR` environment variable
-   or programmatically with `set-base-cache-dir!`."
-  (System/getenv "POCKET_BASE_CACHE_DIR"))
+   
+   Resolved with precedence: binding > `set-base-cache-dir!` > 
+   `POCKET_BASE_CACHE_DIR` env var > `pocket.edn` `:base-cache-dir`."
+  nil)
+
+(def ^:dynamic *mem-cache-options*
+  "In-memory cache configuration options.
+   
+   Resolved with precedence: binding > `set-mem-cache-options!` >
+   `POCKET_MEM_CACHE` env var > `pocket.edn` `:mem-cache` >
+   default `{:policy :lru :threshold 256}`.
+   
+   **Caution**: binding this var reconfigures the shared global mem-cache,
+   which affects all threads. Useful for test fixtures but not for
+   concurrent production use with different policies."
+  nil)
+
+(defn- resolve-base-cache-dir
+  "Resolve the base cache directory using the precedence chain."
+  []
+  (or *base-cache-dir*
+      (System/getenv "POCKET_BASE_CACHE_DIR")
+      (:base-cache-dir @impl/pocket-edn)))
+
+(defn- resolve-mem-cache-options
+  "Resolve mem-cache options using the precedence chain."
+  []
+  (or *mem-cache-options*
+      (some-> (System/getenv "POCKET_MEM_CACHE") edn/read-string)
+      (:mem-cache @impl/pocket-edn)
+      impl/default-mem-cache-options))
+
+(defn config
+  "Return the effective resolved configuration as a map.
+   Useful for inspecting which cache directory and mem-cache policy
+   are in effect after applying the precedence chain."
+  []
+  {:base-cache-dir (resolve-base-cache-dir)
+   :mem-cache (resolve-mem-cache-options)})
 
 (defn set-base-cache-dir!
   "Set the base cache directory by altering `*base-cache-dir*`."
@@ -54,7 +90,8 @@
    
    `func` must be a var (e.g., `#'my-fn`) for stable cache keys."
   [func & args]
-  (apply impl/cached *base-cache-dir* func args))
+  (impl/ensure-mem-cache! (resolve-mem-cache-options))
+  (apply impl/cached (resolve-base-cache-dir) func args))
 
 (defn cached-fn
   "Wrap a function to automatically cache its results.
@@ -65,7 +102,8 @@
    Deprecated: use `caching-fn` instead."
   {:deprecated "0.2.0"}
   [f]
-  (impl/caching-fn *base-cache-dir* f))
+  (fn [& args]
+    (apply cached f args)))
 
 (defn caching-fn
   "Wrap a function to automatically cache its results.
@@ -74,7 +112,8 @@
    Deref the result to trigger computation or load from cache.
    `f` must be a var (e.g., `#'my-fn`) for stable cache keys."
   [f]
-  (impl/caching-fn *base-cache-dir* f))
+  (fn [& args]
+    (apply cached f args)))
 
 (defn maybe-deref
   "Deref if `x` implements `IDeref`, otherwise return `x` as-is.
@@ -95,11 +134,11 @@
   (impl/write-cached! v path))
 
 (defn cleanup!
-  "Delete the cache directory at `*base-cache-dir*`, removing all cached values.
+  "Delete the cache directory, removing all cached values.
    Also clears the in-memory cache.
    Returns a map with `:dir` and `:existed` indicating what happened."
   []
-  (let [dir *base-cache-dir*
+  (let [dir (resolve-base-cache-dir)
         existed? (and dir (fs/exists? dir))]
     (when existed?
       (fs/delete-tree dir))
@@ -112,14 +151,14 @@
    Takes the same arguments as `cached`: a function var and its arguments.
    Returns a map with `:path` and `:existed`."
   [func & args]
-  (impl/invalidate! *base-cache-dir* func args))
+  (impl/invalidate! (resolve-base-cache-dir) func args))
 
 (defn invalidate-fn!
   "Invalidate all cached entries for a given function var, regardless of arguments.
    Removes matching entries from both disk and memory.
    Returns a map with `:fn-name`, `:count`, and `:paths`."
   [func]
-  (impl/invalidate-fn! *base-cache-dir* func))
+  (impl/invalidate-fn! (resolve-base-cache-dir) func))
 
 (defn set-mem-cache-options!
   "Configure the in-memory cache. Resets it, discarding any currently cached values.
@@ -130,4 +169,5 @@
    - `:ttl` — time-to-live in ms for `:ttl` policy (default 30000)
    - `:s-history-limit` / `:q-history-limit` — for `:lirs` policy"
   [opts]
+  (alter-var-root #'*mem-cache-options* (constantly opts))
   (impl/reset-mem-cache! opts))

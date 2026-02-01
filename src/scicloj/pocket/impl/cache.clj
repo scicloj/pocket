@@ -2,7 +2,9 @@
   (:require [babashka.fs :as fs]
             [taoensso.nippy :as nippy]
             [clojure.core.cache :as cc]
-            [clojure.core.cache.wrapped :as cw])
+            [clojure.core.cache.wrapped :as cw]
+            [clojure.java.io :as io]
+            [clojure.edn :as edn])
   (:import (org.apache.commons.codec.digest DigestUtils)
            (clojure.lang PersistentHashMap IDeref Var)))
 
@@ -33,6 +35,19 @@
 (defn sha [^String s]
   (DigestUtils/sha1Hex s))
 
+(def pocket-edn
+  "Cached pocket.edn from classpath. Read once on first access."
+  (delay
+    (when-let [r (io/resource "pocket.edn")]
+      (-> r slurp edn/read-string))))
+
+(def default-mem-cache-options
+  {:policy :lru :threshold 256})
+
+(def current-mem-cache-options
+  "Tracks the options the mem-cache was last configured with."
+  (atom default-mem-cache-options))
+
 (def default-mem-cache-threshold 256)
 
 (defonce mem-cache
@@ -56,21 +71,28 @@
          threshold default-mem-cache-threshold
          ttl 30000}
     :as opts}]
-  (reset! mem-cache
-          (case policy
-            :basic (cc/basic-cache-factory {})
-            :fifo (cc/fifo-cache-factory {} :threshold threshold)
-            :lru (cc/lru-cache-factory {} :threshold threshold)
-            :lu (cc/lu-cache-factory {} :threshold threshold)
-            :ttl (cc/ttl-cache-factory {} :ttl ttl)
-            :lirs (cc/lirs-cache-factory {} :s-history-limit (or s-history-limit threshold)
-                                         :q-history-limit (or q-history-limit (quot threshold 4)))
-            :soft (cc/soft-cache-factory {})
-            (throw (ex-info (str "Unknown cache policy: " policy)
-                            {:policy policy}))))
-  {:policy policy
-   :threshold threshold
-   :ttl ttl})
+  (let [effective {:policy policy :threshold threshold :ttl ttl}]
+    (reset! current-mem-cache-options effective)
+    (reset! mem-cache
+            (case policy
+              :basic (cc/basic-cache-factory {})
+              :fifo (cc/fifo-cache-factory {} :threshold threshold)
+              :lru (cc/lru-cache-factory {} :threshold threshold)
+              :lu (cc/lu-cache-factory {} :threshold threshold)
+              :ttl (cc/ttl-cache-factory {} :ttl ttl)
+              :lirs (cc/lirs-cache-factory {} :s-history-limit (or s-history-limit threshold)
+                                           :q-history-limit (or q-history-limit (quot threshold 4)))
+              :soft (cc/soft-cache-factory {})
+              (throw (ex-info (str "Unknown cache policy: " policy)
+                              {:policy policy}))))
+    effective))
+
+(defn ensure-mem-cache!
+  "Reconfigure the mem-cache if `opts` differ from current configuration.
+   If `opts` is nil, does nothing."
+  [opts]
+  (when (and opts (not= opts @current-mem-cache-options))
+    (reset-mem-cache! opts)))
 
 (defn ->path [base-dir id typ]
   (let [h (-> id
