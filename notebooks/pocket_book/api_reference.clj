@@ -18,6 +18,8 @@
 
 (pocket/set-base-cache-dir! cache-dir)
 
+(pocket/cleanup!)
+
 (defn expensive-calculation
   "Simulates an expensive computation"
   [x y]

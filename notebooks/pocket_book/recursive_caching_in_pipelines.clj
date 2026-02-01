@@ -28,6 +28,8 @@
 
 (pocket/set-base-cache-dir! cache-dir)
 
+(pocket/cleanup!)
+
 (defn load-dataset [path]
   (println "Loading dataset from" path "...")
   (Thread/sleep 300)

@@ -15,6 +15,8 @@
 
 (pocket/set-base-cache-dir! cache-dir)
 
+(pocket/cleanup!)
+
 (defn expensive-calculation
   "Simulates an expensive computation"
   [x y]
@@ -143,6 +145,24 @@ cached-result
 ;; When the implementation changes again, simply bump to `:version 4`.
 ;; Previous cached results remain on disk (useful if you need to compare),
 ;; while the new version computes fresh results.
+
+;; ## What's on disk?
+;;
+;; Pocket names cache directories after the actual Clojure call that
+;; produced them — the function name and its arguments — so you can
+;; tell at a glance what each entry represents:
+
+(kind/code (pocket/dir-tree))
+
+;; Each directory also contains a `_.meta.edn` file with metadata
+;; about the cached computation:
+
+(-> (pocket/cache-entries)
+    first
+    :path
+    (str "/_.meta.edn")
+    slurp
+    clojure.edn/read-string)
 
 ;; ## Cleanup
 

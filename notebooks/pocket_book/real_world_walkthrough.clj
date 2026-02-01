@@ -30,33 +30,9 @@
 
 (def cache-dir "/tmp/pocket-walkthrough")
 
-^:kindly/hide-code
-(defn dir-tree
-  "Render a directory as a tree string, like the `tree` command."
-  [dir]
-  (let [root (clojure.java.io/file dir)
-        sb (StringBuilder.)]
-    (.append sb (.getName root))
-    (.append sb "\n")
-    (letfn [(walk [f prefix last?]
-              (.append sb prefix)
-              (.append sb (if last? "└── " "├── "))
-              (.append sb (.getName f))
-              (.append sb "\n")
-              (when (.isDirectory f)
-                (let [children (sort-by #(.getName %) (vec (.listFiles f)))
-                      n (count children)]
-                  (doseq [[i child] (map-indexed vector children)]
-                    (walk child
-                          (str prefix (if last? "    " "│   "))
-                          (= i (dec n)))))))]
-      (let [children (sort-by #(.getName %) (vec (.listFiles root)))
-            n (count children)]
-        (doseq [[i child] (map-indexed vector children)]
-          (walk child "" (= i (dec n))))))
-    (str sb)))
-
 (pocket/set-base-cache-dir! cache-dir)
+
+(pocket/cleanup!)
 
 ;; ## Pipeline functions
 
@@ -212,7 +188,7 @@
 ;; or a `nil` marker, plus a `_.meta.edn` with metadata.
 ;; Here is the actual cache directory tree, generated dynamically:
 
-(kind/code (dir-tree (str cache-dir "/.cache")))
+(kind/code (pocket/dir-tree))
 
 ;; ## Cleanup
 

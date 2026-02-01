@@ -168,17 +168,17 @@
   Cached
   (->id [v]
     (apply list
-     (->id (.f v))
-     (->> v
-          .args
-          (map (fn [a]
-                 (cond (nil? a) nil
-                       (instance? PersistentHashMap a) (->> a
-                                                            (sort-by key)
-                                                            (mapcat (fn [[k v]]
-                                                                      [k (->id v)]))
-                                                            (apply array-map))
-                       :else (->id a)))))))
+           (->id (.f v))
+           (->> v
+                .args
+                (map (fn [a]
+                       (cond (nil? a) nil
+                             (instance? PersistentHashMap a) (->> a
+                                                                  (sort-by key)
+                                                                  (mapcat (fn [[k v]]
+                                                                            [k (->id v)]))
+                                                                  (apply array-map))
+                             :else (->id a)))))))
 
   clojure.lang.MapEntry
   (->id [v] (pr-str v))
@@ -276,6 +276,32 @@
      :entries-per-fn (->> entries
                           (group-by :fn-name)
                           (reduce-kv (fn [m k v] (assoc m k (count v))) {}))}))
+
+(defn dir-tree
+  "Render a directory as a tree string, like the Unix `tree` command.
+   Returns a string showing the hierarchical structure of files and directories."
+  [dir]
+  (let [root (clojure.java.io/file dir)
+        sb (StringBuilder.)]
+    (.append sb (.getName root))
+    (.append sb "\n")
+    (letfn [(walk [f prefix last?]
+              (.append sb prefix)
+              (.append sb (if last? "└── " "├── "))
+              (.append sb (.getName f))
+              (.append sb "\n")
+              (when (.isDirectory f)
+                (let [children (sort-by #(.getName %) (vec (.listFiles f)))
+                      n (count children)]
+                  (doseq [[i child] (map-indexed vector children)]
+                    (walk child
+                          (str prefix (if last? "    " "│   "))
+                          (= i (dec n)))))))]
+      (let [children (sort-by #(.getName %) (vec (.listFiles root)))
+            n (count children)]
+        (doseq [[i child] (map-indexed vector children)]
+          (walk child "" (= i (dec n))))))
+    (str sb)))
 
 ;; Fix: Add nil handling to PIdentifiable protocol
 (extend-protocol PIdentifiable

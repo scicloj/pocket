@@ -47,6 +47,8 @@
 
 (pocket/set-base-cache-dir! "/tmp/pocket-demo-config")
 
+(pocket/cleanup!)
+
 ;; You can inspect the effective resolved configuration at any time:
 
 (pocket/config)

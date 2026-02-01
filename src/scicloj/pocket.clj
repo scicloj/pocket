@@ -193,3 +193,12 @@
    and `:entries-per-fn`."
   []
   (impl/cache-stats (resolve-base-cache-dir)))
+
+(defn dir-tree
+  "Render the cache directory as a tree string, like the Unix `tree` command.
+   Shows the hierarchical structure of cached entries on disk."
+  []
+  (let [dir (str (resolve-base-cache-dir) "/.cache")]
+    (if (and dir (fs/exists? dir))
+      (impl/dir-tree dir)
+      "")))
