@@ -223,7 +223,8 @@
    Returns a map with `:fn-name`, `:count`, and `:paths`."
   [base-dir func]
   (let [fn-name (->id func)
-        prefix (str "(" fn-name)
+        prefix-space (str "(" fn-name " ")
+        prefix-close (str "(" fn-name ")")
         cache-dir (str base-dir "/.cache")
         deleted-paths (atom [])]
     (when (fs/exists? cache-dir)
@@ -232,7 +233,8 @@
         (doseq [entry-dir (fs/list-dir prefix-dir)
                 :let [entry-name (str (fs/file-name entry-dir))]
                 :when (and (fs/directory? entry-dir)
-                           (.startsWith entry-name prefix))]
+                           (or (.startsWith entry-name prefix-space)
+                               (= entry-name prefix-close)))]
           (let [path (str entry-dir)]
             (fs/delete-tree entry-dir)
             (swap! mem-cache dissoc path)
