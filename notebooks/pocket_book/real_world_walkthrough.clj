@@ -184,8 +184,8 @@
 
 ;; ### Directory tree
 ;;
-;; Each entry contains either a `_.nippy` file (serialized value)
-;; or a `nil` marker, plus a `_.meta.edn` with metadata.
+;; Each entry contains either a `value.nippy` file (serialized value)
+;; or a `nil` marker, plus a `meta.edn` with metadata.
 ;; Here is the actual cache directory tree, generated dynamically:
 
 (kind/code (pocket/dir-tree))

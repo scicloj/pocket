@@ -154,13 +154,17 @@ cached-result
 
 (kind/code (pocket/dir-tree))
 
-;; Each directory also contains a `_.meta.edn` file with metadata
+;; Some prefix directories may appear empty — those held entries
+;; that were removed by the `invalidate!` and `invalidate-fn!`
+;; calls above.
+
+;; Each directory also contains a `meta.edn` file with metadata
 ;; about the cached computation:
 
 (-> (pocket/cache-entries)
     first
     :path
-    (str "/_.meta.edn")
+    (str "/meta.edn")
     slurp
     clojure.edn/read-string)
 
