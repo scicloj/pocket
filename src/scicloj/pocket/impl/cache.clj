@@ -155,7 +155,7 @@
                                   (let [resolved-args (mapv maybe-deref args)
                                         v (clojure.core/apply f resolved-args)
                                         meta-map {:id (pr-str id)
-                                                  :fn-name fn-name
+                                                  :fn-name (str fn-name)
                                                   :args-str (pr-str (vec args))
                                                   :created-at (str (java.time.Instant/now))}]
                                     (write-cached! v path meta-map)
@@ -167,25 +167,25 @@
 (extend-protocol PIdentifiable
   Cached
   (->id [v]
-    (list
+    (apply list
      (->id (.f v))
-     (->id (->> v
-                .args
-                (mapv (fn [a]
-                        (cond (nil? a) nil
-                              (instance? PersistentHashMap a) (->> a
-                                                                   (sort-by key)
-                                                                   (mapcat (fn [[k v]]
-                                                                             [k (->id v)]))
-                                                                   (apply array-map))
-                              :else (->id a))))))))
+     (->> v
+          .args
+          (map (fn [a]
+                 (cond (nil? a) nil
+                       (instance? PersistentHashMap a) (->> a
+                                                            (sort-by key)
+                                                            (mapcat (fn [[k v]]
+                                                                      [k (->id v)]))
+                                                            (apply array-map))
+                       :else (->id a)))))))
 
   clojure.lang.MapEntry
   (->id [v] (pr-str v))
 
   Var
   (->id [this]
-    (-> this symbol name))
+    (-> this symbol name symbol))
 
   Object
   (->id [this]
@@ -221,7 +221,7 @@
    Returns a map with `:fn-name`, `:count`, and `:paths`."
   [base-dir func]
   (let [fn-name (->id func)
-        prefix (str "(\"" fn-name "\"")
+        prefix (str "(" fn-name)
         cache-dir (str base-dir "/.cache")
         deleted-paths (atom [])]
     (when (fs/exists? cache-dir)
@@ -236,7 +236,7 @@
             (swap! mem-cache dissoc path)
             (.remove in-flight path)
             (swap! deleted-paths conj path)))))
-    (let [result {:fn-name fn-name
+    (let [result {:fn-name (str fn-name)
                   :count (count @deleted-paths)
                   :paths @deleted-paths}]
       (log/info "Invalidated" (count @deleted-paths) "entries for" fn-name)
