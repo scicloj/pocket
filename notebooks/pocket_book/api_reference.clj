@@ -110,6 +110,29 @@ my-result
 
 (pocket/cleanup!)
 
+(kind/doc #'pocket/invalidate!)
+
+;; Remove a specific cached entry:
+
+(deref (pocket/cached #'expensive-calculation 10 20))
+
+(pocket/invalidate! #'expensive-calculation 10 20)
+
+;; Derefing again will recompute:
+
+(deref (pocket/cached #'expensive-calculation 10 20))
+
+(kind/doc #'pocket/invalidate-fn!)
+
+;; Cache a few entries, then invalidate them all:
+
+(deref (pocket/cached #'expensive-calculation 1 2))
+(deref (pocket/cached #'expensive-calculation 3 4))
+
+(pocket/invalidate-fn! #'expensive-calculation)
+
+(pocket/cleanup!)
+
 ;; ## Extending `PIdentifiable`
 ;;
 ;; You can customize how your types are identified for caching

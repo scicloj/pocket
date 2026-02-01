@@ -1,7 +1,9 @@
 ;; # Getting Started
 
+^{:kindly/options {:kinds-that-hide-code #{:kind/doc}}}
 (ns pocket-book.getting-started
-  (:require [scicloj.pocket :as pocket]))
+  (:require [scicloj.pocket :as pocket]
+            [scicloj.kindly.v4.kind :as kind]))
 
 ;; ## Setup
 
@@ -97,8 +99,26 @@ cached-result
 ;;
 ;; Pocket does **not** detect function implementation changes. If you modify
 ;; a function's body, the cache key remains the same (it's based on the
-;; function name and arguments, not the implementation). You must manually
-;; delete the cache directory to invalidate stale entries, e.g. with `cleanup!`.
+;; function name and arguments, not the implementation).
+;;
+;; You can invalidate cached entries at different levels of granularity:
+;;
+;; - `invalidate!` — remove a specific entry (by var + args)
+;; - `invalidate-fn!` — remove all entries for a given function
+;; - `cleanup!` — remove everything
+
+;; For example, to invalidate a single cached result:
+
+(deref (pocket/cached #'expensive-calculation 10 20))
+
+(pocket/invalidate! #'expensive-calculation 10 20)
+
+;; Or invalidate all cached results for a function:
+
+(deref (pocket/cached #'expensive-calculation 1 2))
+(deref (pocket/cached #'expensive-calculation 3 4))
+
+(pocket/invalidate-fn! #'expensive-calculation)
 
 ;; ### Versioning function inputs
 ;;
