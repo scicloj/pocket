@@ -1,6 +1,9 @@
-{:quarto {:format {:html {:toc true
+{:remote-repo {:git-url "https://github.com/scicloj/pocket"
+               :branch "master"}
+ :quarto {:format {:html {:toc true
                           :toc-expand 2
+                          :number-depth 1
                           :toc-depth 4
-                          :theme [:cosmo "notebooks/custom.scss"]
-                          :fontsize "0.9em"}}}
+                          :theme [:cosmo "notebooks/custom.scss"]}}
+          :fontsize "0.9em"}
  :base-target-path ".clay-temp"}
