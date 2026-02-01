@@ -6,10 +6,14 @@
   (:require [scicloj.pocket :as pocket]
             [scicloj.kindly.v4.kind :as kind]))
 
-(System/setProperty "org.slf4j.simpleLogger.defaultLogLevel" "debug")
-(System/setProperty "org.slf4j.simpleLogger.logFile" "System.out")
 
 ;; ## Setup
+
+;; Configure logging to stdout at debug level, so we can see
+;; Pocket's cache hit/miss/write messages:
+
+(do (System/setProperty "org.slf4j.simpleLogger.defaultLogLevel" "debug")
+    (System/setProperty "org.slf4j.simpleLogger.logFile" "System.out"))
 
 ;; A few preparations for the code examples below:
 
