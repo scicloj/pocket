@@ -15,8 +15,8 @@
 (defn read-cached [path]
   (cond
     ;; nippy
-    (fs/exists? (str path "/_.nippy"))
-    (nippy/thaw-from-file (str path "/_.nippy"))
+    (fs/exists? (str path "/value.nippy"))
+    (nippy/thaw-from-file (str path "/value.nippy"))
     ;; nil
     (fs/exists? (str path "/nil"))
     (do
@@ -24,10 +24,10 @@
       nil)))
 
 (defn write-meta! [meta-map path]
-  (spit (str path "/_.meta.edn") (pr-str meta-map)))
+  (spit (str path "/meta.edn") (pr-str meta-map)))
 
 (defn read-meta [path]
-  (let [meta-path (str path "/_.meta.edn")]
+  (let [meta-path (str path "/meta.edn")]
     (when (fs/exists? meta-path)
       (edn/read-string (slurp meta-path)))))
 
@@ -39,7 +39,7 @@
     (spit (str path "/nil") "")
     ;; else
     :else
-    (nippy/freeze-to-file (str path "/_.nippy") v))
+    (nippy/freeze-to-file (str path "/value.nippy") v))
   (when meta-map
     (write-meta! meta-map path))
   (log/debug "Cache write:" path))
@@ -120,7 +120,7 @@
          (let [idstr (str id)]
            (if (-> idstr
                    count
-                   (> 250))
+                   (> 240))
              (sha h)
              idstr)))))
 
@@ -244,7 +244,7 @@
 
 (defn cache-entries
   "Scan the cache directory and return a sequence of metadata maps.
-   Each map contains `:path` and any metadata from `_.meta.edn`.
+   Each map contains `:path` and any metadata from `meta.edn`.
    Optionally filter by function name."
   ([base-dir]
    (cache-entries base-dir nil))
