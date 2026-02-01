@@ -89,6 +89,11 @@
              (sha h)
              idstr)))))
 
+(defn maybe-deref [x]
+  (if (instance? IDeref x)
+    @x
+    x))
+
 (deftype Cached [base-dir f args]
   IDeref
   (deref [this]
@@ -106,7 +111,8 @@
                         (try
                           (if (fs/exists? path)
                             (read-cached path)
-                            (let [v (clojure.core/apply f args)]
+                            (let [resolved-args (mapv maybe-deref args)
+                                  v (clojure.core/apply f resolved-args)]
                               (write-cached! v path)
                               v))
                           (finally
@@ -145,10 +151,6 @@
   [base-dir func & args]
   (->Cached base-dir func args))
 
-(defn maybe-deref [x]
-  (if (instance? IDeref x)
-    @x
-    x))
 
 (defn cached-fn [base-dir f]
   (fn [& args]

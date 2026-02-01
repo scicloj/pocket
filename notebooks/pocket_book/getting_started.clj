@@ -130,9 +130,8 @@ cached-result
 ;; a new computation with a distinct cache key:
 
 (defn process-data [data opts]
-  (let [data (pocket/maybe-deref data)]
-    ;; v3: switched from mean to median
-    (:data data)))
+  ;; v3: switched from mean to median
+  (:data data))
 
 ;;; Version 3 of the processing:
 (deref (pocket/cached #'process-data

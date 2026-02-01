@@ -9,10 +9,9 @@
 ;; name and arguments), not from its result. This means the entire pipeline's
 ;; cache key captures the full [computation graph](https://en.wikipedia.org/wiki/Dataflow_programming).
 
-;; For this to work, functions in the pipeline should call `maybe-deref`
-;; on arguments that may be `Cached` objects. This way, the function receives
-;; the actual value when executed, while the cache key still reflects the
-;; upstream computation identity.
+;; Pocket automatically derefs any `Cached` arguments before calling the
+;; function, so pipeline functions receive plain values and don't need
+;; any special handling.
 
 ;; ## Setup
 
@@ -26,16 +25,14 @@
   {:data [1 2 3 4 5] :source path})
 
 (defn preprocess [data opts]
-  (let [data (pocket/maybe-deref data)]
-    (println "Preprocessing with options:" opts)
-    (Thread/sleep 300)
-    (update data :data #(map (fn [x] (* x (:scale opts))) %))))
+  (println "Preprocessing with options:" opts)
+  (Thread/sleep 300)
+  (update data :data #(map (fn [x] (* x (:scale opts))) %)))
 
 (defn train-model [data params]
-  (let [data (pocket/maybe-deref data)]
-    (println "Training model with params:" params)
-    (Thread/sleep 300)
-    {:model :trained :accuracy 0.95 :data data}))
+  (println "Training model with params:" params)
+  (Thread/sleep 300)
+  {:model :trained :accuracy 0.95 :data data})
 
 ;; ## Running the pipeline
 
