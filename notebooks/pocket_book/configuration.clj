@@ -9,12 +9,16 @@
 
 ;; Pocket resolves configuration using a precedence chain
 ;; (for both cache directory and in-memory cache options):
-;;
-;; 1. Thread-local `binding`
-;; 2. `set-*!` (imperative root binding change)
-;; 3. Environment variable
-;; 4. `pocket.edn` on classpath
-;; 5. Hardcoded default
+
+^:kindly/hide-code
+(kind/mermaid
+ "flowchart TD
+    B(binding) -->|if nil| S(set-*!)
+    S -->|if nil| E(Environment variable)
+    E -->|if nil| P(pocket.edn)
+    P -->|if nil| D(Hardcoded default)
+    style B fill:#4a9,color:#fff
+    style D fill:#888,color:#fff")
 
 ;; ## `pocket.edn`
 ;;
@@ -58,6 +62,15 @@
 
 ;; Pocket maintains an in-memory cache in front of the disk layer,
 ;; backed by [core.cache](https://github.com/clojure/core.cache).
+^:kindly/hide-code
+(kind/mermaid
+ "flowchart LR
+    D(deref) --> MC{In-memory\ncache?}
+    MC -->|hit| R[Return value]
+    MC -->|miss| DC{Disk\ncache?}
+    DC -->|hit| R
+    DC -->|miss| C[Compute] --> W[Write to disk] --> R")
+
 ;; This provides two benefits:
 ;;
 ;; 1. **Performance** — repeated derefs of the same computation skip disk I/O entirely

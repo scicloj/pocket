@@ -1,7 +1,8 @@
 ;; # Recursive Caching in Pipelines
 
 (ns pocket-book.recursive-caching-in-pipelines
-  (:require [scicloj.pocket :as pocket]))
+  (:require [scicloj.pocket :as pocket]
+            [scicloj.kindly.v4.kind :as kind]))
 
 (System/setProperty "org.slf4j.simpleLogger.defaultLogLevel" "debug")
 
@@ -14,6 +15,12 @@
 ;; Pocket automatically derefs any `Cached` arguments before calling the
 ;; function, so pipeline functions receive plain values and don't need
 ;; any special handling.
+
+^:kindly/hide-code
+(kind/mermaid
+ "flowchart LR
+    LD[load-dataset] --> PP[preprocess]
+    PP --> TM[train-model]")
 
 ;; ## Setup
 
