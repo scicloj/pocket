@@ -176,7 +176,7 @@
         (is (= 1 @call-count))))))
 
 (deftest test-recursive-pipeline
-  (testing "Cached value as arg to another cached fn"
+  (testing "Cached value as arg to another cached fn (auto-deref)"
     (let [step1-count (atom 0)
           step2-count (atom 0)]
       (defn pipeline-step1 [x]
@@ -184,7 +184,8 @@
         (* x 10))
       (defn pipeline-step2 [data]
         (swap! step2-count inc)
-        (+ (pocket/maybe-deref data) 1))
+        ;; No maybe-deref needed — Cached args are auto-derefed
+        (+ data 1))
       ;; Build pipeline
       (let [cached-step1 (pocket/cached #'pipeline-step1 5)
             cached-step2 (pocket/cached #'pipeline-step2 cached-step1)]
