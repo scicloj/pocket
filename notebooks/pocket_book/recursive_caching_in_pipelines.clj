@@ -1,9 +1,7 @@
 ;; # Recursive Caching in Pipelines
 
-^{:kindly/options {:kinds-that-hide-code #{:kind/doc}}}
 (ns pocket-book.recursive-caching-in-pipelines
-  (:require [scicloj.pocket :as pocket]
-            [scicloj.kindly.v4.kind :as kind]))
+  (:require [scicloj.pocket :as pocket]))
 
 ;; When you pass a `Cached` value as an argument to another cached function,
 ;; Pocket handles this recursively. The cache key for the outer computation

@@ -1,9 +1,7 @@
 ;; # Getting Started
 
-^{:kindly/options {:kinds-that-hide-code #{:kind/doc}}}
 (ns pocket-book.getting-started
-  (:require [scicloj.pocket :as pocket]
-            [scicloj.kindly.v4.kind :as kind]))
+  (:require [scicloj.pocket :as pocket]))
 
 ;; ## Setup
 

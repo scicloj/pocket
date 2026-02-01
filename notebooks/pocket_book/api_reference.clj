@@ -1,11 +1,16 @@
 ;; # API Reference
 
-^{:kindly/options {:kinds-that-hide-code #{:kind/doc}}}
+^{:kindly/hide-code true
+  :kindly/options {:kinds-that-hide-code #{:kind/doc}}}
 (ns pocket-book.api-reference
   (:require [scicloj.pocket :as pocket]
             [scicloj.kindly.v4.kind :as kind]))
 
 ;; ## Setup
+
+;; A few preparations for the code examples below:
+
+(require '[scicloj.pocket :as pocket])
 
 (def cache-dir "/tmp/pocket-demo-reference")
 
