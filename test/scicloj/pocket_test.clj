@@ -315,3 +315,46 @@
       (let [cfg (pocket/config)]
         (is (= "/tmp/config-test" (:base-cache-dir cfg)))
         (is (= :fifo (-> cfg :mem-cache :policy)))))))
+
+(deftest test-cache-metadata
+  (testing "Metadata file is written alongside cached value"
+    (let [result (pocket/cached #'expensive-add 10 20)]
+      (is (= 30 @result))
+      (let [entries (pocket/cache-entries)]
+        (is (= 1 (count entries)))
+        (let [entry (first entries)]
+          (is (string? (:fn-name entry)))
+          (is (= "expensive-add" (:fn-name entry)))
+          (is (string? (:created-at entry)))
+          (is (string? (:id entry)))
+          (is (string? (:args-str entry)))))))
+
+  (testing "Metadata file is written for nil values"
+    (let [result (pocket/cached #'returns-nil)]
+      (is (nil? @result))
+      (let [entries (pocket/cache-entries "returns-nil")]
+        (is (= 1 (count entries)))
+        (is (= "returns-nil" (:fn-name (first entries))))))))
+
+(deftest test-cache-entries
+  (testing "cache-entries returns all entries"
+    @(pocket/cached #'expensive-add 1 2)
+    @(pocket/cached #'expensive-add 3 4)
+    @(pocket/cached #'returns-nil)
+    (is (= 3 (count (pocket/cache-entries)))))
+
+  (testing "cache-entries filters by function name"
+    (is (= 2 (count (pocket/cache-entries "expensive-add"))))
+    (is (= 1 (count (pocket/cache-entries "returns-nil"))))
+    (is (= 0 (count (pocket/cache-entries "nonexistent"))))))
+
+(deftest test-cache-stats
+  (testing "cache-stats returns aggregate info"
+    @(pocket/cached #'expensive-add 1 2)
+    @(pocket/cached #'expensive-add 3 4)
+    @(pocket/cached #'returns-nil)
+    (let [stats (pocket/cache-stats)]
+      (is (= 3 (:total-entries stats)))
+      (is (pos? (:total-size-bytes stats)))
+      (is (= {"expensive-add" 2 "returns-nil" 1}
+             (:entries-per-fn stats))))))

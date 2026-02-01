@@ -22,7 +22,15 @@
       #_(fs/delete (str path "/nil"))
       nil)))
 
-(defn write-cached! [v path]
+(defn write-meta! [meta-map path]
+  (spit (str path "/_.meta.edn") (pr-str meta-map)))
+
+(defn read-meta [path]
+  (let [meta-path (str path "/_.meta.edn")]
+    (when (fs/exists? meta-path)
+      (edn/read-string (slurp meta-path)))))
+
+(defn write-cached! [v path meta-map]
   (fs/create-dirs path)
   (cond
     ;; nil
@@ -30,7 +38,9 @@
     (spit (str path "/nil") "")
     ;; else
     :else
-    (nippy/freeze-to-file (str path "/_.nippy") v)))
+    (nippy/freeze-to-file (str path "/_.nippy") v))
+  (when meta-map
+    (write-meta! meta-map path)))
 
 (defn sha [^String s]
   (DigestUtils/sha1Hex s))
@@ -120,6 +130,7 @@
   IDeref
   (deref [this]
     (let [id (->id this)
+          fn-name (->id f)
           path (->path base-dir id
                        (-> f meta :type))]
       (cw/lookup-or-miss
@@ -134,8 +145,12 @@
                           (if (fs/exists? path)
                             (read-cached path)
                             (let [resolved-args (mapv maybe-deref args)
-                                  v (clojure.core/apply f resolved-args)]
-                              (write-cached! v path)
+                                  v (clojure.core/apply f resolved-args)
+                                  meta-map {:id (pr-str id)
+                                            :fn-name fn-name
+                                            :args-str (pr-str (vec args))
+                                            :created-at (str (java.time.Instant/now))}]
+                              (write-cached! v path meta-map)
                               v))
                           (finally
                             (.remove in-flight path)))))))]
@@ -215,6 +230,41 @@
     {:fn-name fn-name
      :count (count @deleted-paths)
      :paths @deleted-paths}))
+
+(defn cache-entries
+  "Scan the cache directory and return a sequence of metadata maps.
+   Each map contains `:path` and any metadata from `_.meta.edn`.
+   Optionally filter by function name."
+  ([base-dir]
+   (cache-entries base-dir nil))
+  ([base-dir fn-name]
+   (let [cache-dir (str base-dir "/.cache")]
+     (when (fs/exists? cache-dir)
+       (for [prefix-dir (fs/list-dir cache-dir)
+             :when (fs/directory? prefix-dir)
+             entry-dir (fs/list-dir prefix-dir)
+             :when (fs/directory? entry-dir)
+             :let [path (str entry-dir)
+                   meta-map (read-meta path)]
+             :when (or (nil? fn-name)
+                       (= fn-name (:fn-name meta-map)))]
+         (merge {:path path} meta-map))))))
+
+(defn cache-stats
+  "Return aggregate statistics about the cache.
+   Returns a map with `:total-entries`, `:total-size-bytes`,
+   and `:entries-per-fn`."
+  [base-dir]
+  (let [entries (or (cache-entries base-dir) [])
+        size-fn (fn [path]
+                  (->> (fs/list-dir path)
+                       (map #(fs/size %))
+                       (reduce + 0)))]
+    {:total-entries (count entries)
+     :total-size-bytes (reduce + 0 (map #(size-fn (:path %)) entries))
+     :entries-per-fn (->> entries
+                          (group-by :fn-name)
+                          (reduce-kv (fn [m k v] (assoc m k (count v))) {}))}))
 
 ;; Fix: Add nil handling to PIdentifiable protocol
 (extend-protocol PIdentifiable

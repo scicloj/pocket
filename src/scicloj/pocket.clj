@@ -171,3 +171,21 @@
   [opts]
   (alter-var-root #'*mem-cache-options* (constantly opts))
   (impl/reset-mem-cache! opts))
+
+(defn cache-entries
+  "Scan the cache directory and return a sequence of metadata maps.
+   Each entry contains `:path`, `:id`, `:fn-name`, `:args-str`, and `:created-at`
+   (when metadata is available — entries cached before metadata support will
+   only have `:path`).
+   Optionally filter by function name."
+  ([]
+   (impl/cache-entries (resolve-base-cache-dir)))
+  ([fn-name]
+   (impl/cache-entries (resolve-base-cache-dir) fn-name)))
+
+(defn cache-stats
+  "Return aggregate statistics about the cache.
+   Returns a map with `:total-entries`, `:total-size-bytes`,
+   and `:entries-per-fn`."
+  []
+  (impl/cache-stats (resolve-base-cache-dir)))

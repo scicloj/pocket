@@ -139,6 +139,25 @@ my-result
 
 (pocket/cleanup!)
 
+(kind/doc #'pocket/cache-entries)
+
+;; List all cached entries:
+
+(deref (pocket/cached #'expensive-calculation 10 20))
+(deref (pocket/cached #'expensive-calculation 3 4))
+
+(pocket/cache-entries)
+
+;; Filter by function name:
+
+(pocket/cache-entries "expensive-calculation")
+
+(kind/doc #'pocket/cache-stats)
+
+(pocket/cache-stats)
+
+(pocket/cleanup!)
+
 ;; ## Extending `PIdentifiable`
 ;;
 ;; You can customize how your types are identified for caching
