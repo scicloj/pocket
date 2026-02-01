@@ -6,6 +6,7 @@
             [babashka.fs :as fs]))
 
 (System/setProperty "org.slf4j.simpleLogger.defaultLogLevel" "debug")
+(System/setProperty "org.slf4j.simpleLogger.logFile" "System.out")
 
 ;; This walkthrough demonstrates a realistic data pipeline with
 ;; multiple stages and branching dependencies. We'll simulate

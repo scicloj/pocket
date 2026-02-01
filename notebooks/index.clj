@@ -6,6 +6,7 @@
             [scicloj.kindly.v4.kind :as kind]))
 
 (System/setProperty "org.slf4j.simpleLogger.defaultLogLevel" "debug")
+(System/setProperty "org.slf4j.simpleLogger.logFile" "System.out")
 
 ^{:kindly/hide-code true
   :kind/md true}

@@ -5,6 +5,7 @@
             [scicloj.kindly.v4.kind :as kind]))
 
 (System/setProperty "org.slf4j.simpleLogger.defaultLogLevel" "debug")
+(System/setProperty "org.slf4j.simpleLogger.logFile" "System.out")
 
 ;; When you pass a `Cached` value as an argument to another cached function,
 ;; Pocket handles this recursively. The cache key for the outer computation
