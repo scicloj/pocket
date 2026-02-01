@@ -232,6 +232,31 @@
   (testing "MapEntry identity"
     (is (string? (pocket/->id (first {:a 1}))))))
 
+(defrecord UserId [id])
+
+(extend-protocol pocket/PIdentifiable
+  UserId
+  (->id [this] (str "user-" (:id this))))
+
+(defn lookup-user [user-id]
+  {:name "Alice" :id (:id user-id)})
+
+(deftest test-custom-protocol-extension
+  (testing "User extension of PIdentifiable affects cache key generation"
+    (let [uid (->UserId 42)
+          c (pocket/cached #'lookup-user uid)]
+      ;; Custom ->id is used in the cache key
+      (is (= '(lookup-user "user-42") (pocket/->id c)))
+      ;; Caching works with the custom type
+      (is (= {:name "Alice" :id 42} @c))
+      ;; Second deref from cache
+      (is (= {:name "Alice" :id 42} @c))))
+
+  (testing "Different UserId values produce different cache keys"
+    (let [c1 (pocket/cached #'lookup-user (->UserId 1))
+          c2 (pocket/cached #'lookup-user (->UserId 2))]
+      (is (not= (pocket/->id c1) (pocket/->id c2))))))
+
 (deftest test-invalidate!
   (testing "Invalidate a specific cached computation"
     (let [call-count (atom 0)

@@ -12,6 +12,7 @@
    4. `pocket.edn` on classpath
    5. Hardcoded default"
   (:require [scicloj.pocket.impl.cache :as impl]
+            [scicloj.pocket.protocols :as protocols]
             [babashka.fs :as fs]
             [clojure.edn :as edn]
             [clojure.tools.logging :as log]))
@@ -63,26 +64,16 @@
   [dir]
   (alter-var-root #'*base-cache-dir* (constantly dir))
   (log/info "Cache dir set to:" dir))
-
-(defprotocol PIdentifiable
-  "Protocol for computing cache keys from values.
+(def PIdentifiable
+  "Protocol for computing cache key identity from values.
    Extend this protocol to customize how your types contribute to cache keys.
    Default implementations are provided for `Var`, `MapEntry`, `Object`, and `nil`."
-  (->id [this] "Return a cache key representation of this value."))
+  protocols/PIdentifiable)
 
-;; Re-export protocol extensions
-(extend-protocol PIdentifiable
-  clojure.lang.MapEntry
-  (->id [v] (impl/->id v))
-
-  clojure.lang.Var
-  (->id [this] (impl/->id this))
-
-  Object
-  (->id [this] (impl/->id this))
-
-  nil
-  (->id [_] (impl/->id nil)))
+(def ->id
+  "Return a cache key representation of a value.
+   Dispatches via the `PIdentifiable` protocol."
+  protocols/->id)
 
 (defn cached
   "Create a cached computation (returns `IDeref`).

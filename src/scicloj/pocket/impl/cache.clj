@@ -5,12 +5,10 @@
             [clojure.core.cache.wrapped :as cw]
             [clojure.java.io :as io]
             [clojure.edn :as edn]
-            [clojure.tools.logging :as log])
+            [clojure.tools.logging :as log]
+            [scicloj.pocket.protocols :as protocols :refer [PIdentifiable ->id]])
   (:import (org.apache.commons.codec.digest DigestUtils)
            (clojure.lang PersistentHashMap IDeref Var)))
-
-(defprotocol PIdentifiable
-  (->id [this]))
 
 (defn read-cached [path]
   (cond
@@ -189,7 +187,10 @@
 
   Object
   (->id [this]
-    this))
+    this)
+
+  nil
+  (->id [_] nil))
 
 (defn cached
   "Create a cached computation"
@@ -303,7 +304,3 @@
           (walk child "" (= i (dec n))))))
     (str sb)))
 
-;; Fix: Add nil handling to PIdentifiable protocol
-(extend-protocol PIdentifiable
-  nil
-  (->id [_] nil))
