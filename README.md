@@ -1,12 +1,12 @@
 # Pocket
 
-Filesystem-based caching for expensive Clojure computations
+Filesystem-based [caching](https://en.wikipedia.org/wiki/Cache_(computing)) for expensive Clojure computations
 
 ## What is this about?
 
-Pocket provides content-addressable caching with automatic serialization, making it easy to cache expensive function calls to disk and reuse results across sessions. It is designed for data science workflows with expensive intermediate steps that need to survive JVM restarts.
+Pocket provides [content-addressable](https://en.wikipedia.org/wiki/Content-addressable_storage) caching with automatic [serialization](https://en.wikipedia.org/wiki/Serialization), making it easy to cache expensive function calls to disk and reuse results across sessions. It is designed for data science workflows with expensive intermediate steps that need to survive JVM restarts.
 
-Pocket uses a two-layer caching architecture — durable disk storage via [Nippy](https://github.com/taoensso/nippy) and an in-memory [LRU](https://en.wikipedia.org/wiki/Cache_replacement_policies#LRU) cache backed by [core.cache](https://github.com/clojure/core.cache) — with thread-safe coordination so concurrent derefs compute only once.
+Pocket uses a two-layer caching architecture — durable disk storage via [Nippy](https://github.com/taoensso/nippy) and an in-memory cache backed by [core.cache](https://github.com/clojure/core.cache) (supporting [LRU](https://en.wikipedia.org/wiki/Cache_replacement_policies#LRU), [FIFO](https://en.wikipedia.org/wiki/Cache_replacement_policies#FIFO), [TTL](https://en.wikipedia.org/wiki/Time_to_live), and other [eviction policies](https://en.wikipedia.org/wiki/Cache_replacement_policies)) — with [thread-safe](https://en.wikipedia.org/wiki/Thread_safety) coordination so concurrent derefs compute only once.
 
 ## General info
 |||
@@ -16,14 +16,6 @@ Pocket uses a two-layer caching architecture — durable disk storage via [Nippy
 |Deps |[![Clojars Project](https://img.shields.io/clojars/v/io.github.scicloj/pocket.svg)](https://clojars.org/io.github.scicloj/pocket)|
 |License |[MIT](https://github.com/scicloj/pocket/blob/master/LICENSE)|
 |Status |🛠alpha🛠|
-
-## Setup
-
-Add to your `deps.edn`:
-
-```clojure
-{:deps {io.github.scicloj/pocket {:git/tag "v0.1.0" :git/sha "..."}}}
-```
 
 ## Quick example
 

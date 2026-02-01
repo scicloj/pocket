@@ -1,7 +1,7 @@
 ;; # Recursive Caching in Pipelines
 
 ^{:kindly/options {:kinds-that-hide-code #{:kind/doc}}}
-(ns pocket-book.pipelines
+(ns pocket-book.recursive-caching-in-pipelines
   (:require [scicloj.pocket :as pocket]
             [scicloj.kindly.v4.kind :as kind]))
 

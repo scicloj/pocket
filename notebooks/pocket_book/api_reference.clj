@@ -1,7 +1,7 @@
 ;; # API Reference
 
 ^{:kindly/options {:kinds-that-hide-code #{:kind/doc}}}
-(ns pocket-book.reference
+(ns pocket-book.api-reference
   (:require [scicloj.pocket :as pocket]
             [scicloj.kindly.v4.kind :as kind]))
 

@@ -1,6 +1,6 @@
 ;; # Preface
 
-^:kindly/hide-code
+^{:clay {:hide-code true}}
 (ns index
   (:require [clojure.string :as str]
             [scicloj.kindly.v4.kind :as kind]))
