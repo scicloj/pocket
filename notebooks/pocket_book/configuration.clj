@@ -5,6 +5,8 @@
   (:require [scicloj.pocket :as pocket]
             [scicloj.kindly.v4.kind :as kind]))
 
+(System/setProperty "org.slf4j.simpleLogger.defaultLogLevel" "debug")
+
 ;; Pocket resolves configuration using a precedence chain
 ;; (for both cache directory and in-memory cache options):
 ;;

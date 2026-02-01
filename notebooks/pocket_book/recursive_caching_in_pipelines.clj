@@ -3,6 +3,8 @@
 (ns pocket-book.recursive-caching-in-pipelines
   (:require [scicloj.pocket :as pocket]))
 
+(System/setProperty "org.slf4j.simpleLogger.defaultLogLevel" "debug")
+
 ;; When you pass a `Cached` value as an argument to another cached function,
 ;; Pocket handles this recursively. The cache key for the outer computation
 ;; is derived from the **identity** of the inner computation (its function

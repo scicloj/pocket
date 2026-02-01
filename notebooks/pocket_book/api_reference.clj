@@ -6,6 +6,8 @@
   (:require [scicloj.pocket :as pocket]
             [scicloj.kindly.v4.kind :as kind]))
 
+(System/setProperty "org.slf4j.simpleLogger.defaultLogLevel" "debug")
+
 ;; ## Setup
 
 ;; A few preparations for the code examples below:

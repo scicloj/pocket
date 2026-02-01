@@ -13,7 +13,8 @@
    5. Hardcoded default"
   (:require [scicloj.pocket.impl.cache :as impl]
             [babashka.fs :as fs]
-            [clojure.edn :as edn]))
+            [clojure.edn :as edn]
+            [clojure.tools.logging :as log]))
 
 (def ^:dynamic *base-cache-dir*
   "Base directory for cache storage.
@@ -60,7 +61,8 @@
 (defn set-base-cache-dir!
   "Set the base cache directory by altering `*base-cache-dir*`."
   [dir]
-  (alter-var-root #'*base-cache-dir* (constantly dir)))
+  (alter-var-root #'*base-cache-dir* (constantly dir))
+  (log/info "Cache dir set to:" dir))
 
 (defprotocol PIdentifiable
   "Protocol for computing cache keys from values.
@@ -143,6 +145,7 @@
     (when existed?
       (fs/delete-tree dir))
     (impl/clear-mem-cache!)
+    (log/info "Cache cleanup:" dir)
     {:dir dir
      :existed (boolean existed?)}))
 
@@ -170,6 +173,7 @@
    - `:s-history-limit` / `:q-history-limit` — for `:lirs` policy"
   [opts]
   (alter-var-root #'*mem-cache-options* (constantly opts))
+  (log/info "Mem-cache options set:" opts)
   (impl/reset-mem-cache! opts))
 
 (defn cache-entries

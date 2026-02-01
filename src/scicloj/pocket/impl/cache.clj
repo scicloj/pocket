@@ -4,7 +4,8 @@
             [clojure.core.cache :as cc]
             [clojure.core.cache.wrapped :as cw]
             [clojure.java.io :as io]
-            [clojure.edn :as edn])
+            [clojure.edn :as edn]
+            [clojure.tools.logging :as log])
   (:import (org.apache.commons.codec.digest DigestUtils)
            (clojure.lang PersistentHashMap IDeref Var)))
 
@@ -40,7 +41,8 @@
     :else
     (nippy/freeze-to-file (str path "/_.nippy") v))
   (when meta-map
-    (write-meta! meta-map path)))
+    (write-meta! meta-map path))
+  (log/debug "Cache write:" path))
 
 (defn sha [^String s]
   (DigestUtils/sha1Hex s))
@@ -95,6 +97,7 @@
               :soft (cc/soft-cache-factory {})
               (throw (ex-info (str "Unknown cache policy: " policy)
                               {:policy policy}))))
+    (log/info "Mem-cache reconfigured:" effective)
     effective))
 
 (defn ensure-mem-cache!
@@ -133,28 +136,33 @@
           fn-name (->id f)
           path (->path base-dir id
                        (-> f meta :type))]
-      (cw/lookup-or-miss
-       mem-cache path
-       (fn [_]
-         (let [d (.computeIfAbsent
-                  in-flight path
-                  (reify java.util.function.Function
-                    (apply [_ _]
-                      (delay
-                        (try
-                          (if (fs/exists? path)
-                            (read-cached path)
-                            (let [resolved-args (mapv maybe-deref args)
-                                  v (clojure.core/apply f resolved-args)
-                                  meta-map {:id (pr-str id)
-                                            :fn-name fn-name
-                                            :args-str (pr-str (vec args))
-                                            :created-at (str (java.time.Instant/now))}]
-                              (write-cached! v path meta-map)
-                              v))
-                          (finally
-                            (.remove in-flight path)))))))]
-           @d))))))
+      (if (cw/has? mem-cache path)
+        (do (log/debug "Cache hit (mem):" fn-name path)
+            (cw/lookup-or-miss mem-cache path (fn [_] nil)))
+        (cw/lookup-or-miss
+         mem-cache path
+         (fn [_]
+           (let [d (.computeIfAbsent
+                    in-flight path
+                    (reify java.util.function.Function
+                      (apply [_ _]
+                        (delay
+                          (try
+                            (if (fs/exists? path)
+                              (do (log/debug "Cache hit (disk):" fn-name path)
+                                  (read-cached path))
+                              (do (log/info "Cache miss, computing:" fn-name)
+                                  (let [resolved-args (mapv maybe-deref args)
+                                        v (clojure.core/apply f resolved-args)
+                                        meta-map {:id (pr-str id)
+                                                  :fn-name fn-name
+                                                  :args-str (pr-str (vec args))
+                                                  :created-at (str (java.time.Instant/now))}]
+                                    (write-cached! v path meta-map)
+                                    v)))
+                            (finally
+                              (.remove in-flight path)))))))]
+             @d)))))))
 
 (extend-protocol PIdentifiable
   Cached
@@ -204,6 +212,7 @@
       (fs/delete-tree path))
     (swap! mem-cache dissoc path)
     (.remove in-flight path)
+    (log/info "Invalidated:" path "existed=" existed?)
     {:path path :existed existed?}))
 
 (defn invalidate-fn!
@@ -227,9 +236,11 @@
             (swap! mem-cache dissoc path)
             (.remove in-flight path)
             (swap! deleted-paths conj path)))))
-    {:fn-name fn-name
-     :count (count @deleted-paths)
-     :paths @deleted-paths}))
+    (let [result {:fn-name fn-name
+                  :count (count @deleted-paths)
+                  :paths @deleted-paths}]
+      (log/info "Invalidated" (count @deleted-paths) "entries for" fn-name)
+      result)))
 
 (defn cache-entries
   "Scan the cache directory and return a sequence of metadata maps.
