@@ -5,8 +5,14 @@
             [scicloj.kindly.v4.kind :as kind]
             [babashka.fs :as fs]))
 
-(System/setProperty "org.slf4j.simpleLogger.defaultLogLevel" "debug")
-(System/setProperty "org.slf4j.simpleLogger.logFile" "System.out")
+
+;; ## Setup
+
+;; Configure logging to stdout at debug level, so we can see
+;; Pocket's cache hit/miss/write messages:
+
+(do (System/setProperty "org.slf4j.simpleLogger.defaultLogLevel" "debug")
+    (System/setProperty "org.slf4j.simpleLogger.logFile" "System.out"))
 
 ;; This walkthrough demonstrates a realistic data pipeline with
 ;; multiple stages and branching dependencies. We'll simulate
