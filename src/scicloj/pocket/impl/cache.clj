@@ -151,8 +151,7 @@
   [base-dir func & args]
   (->Cached base-dir func args))
 
-
-(defn cached-fn [base-dir f]
+(defn caching-fn [base-dir f]
   (fn [& args]
     (apply cached base-dir f args)))
 

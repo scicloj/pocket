@@ -45,13 +45,13 @@ cached-result
 ;;; Second deref (loaded from cache, instant):
 (time @cached-result)
 
-;; ## Wrapping functions with `cached-fn`
+;; ## Wrapping functions with `caching-fn`
 
-;; For convenience, `cached-fn` wraps a function so that every call
+;; For convenience, `caching-fn` wraps a function so that every call
 ;; returns a `Cached` object:
 
 (def cached-expensive
-  (pocket/cached-fn #'expensive-calculation))
+  (pocket/caching-fn #'expensive-calculation))
 
 ;;; First call:
 (time @(cached-expensive 5 15))

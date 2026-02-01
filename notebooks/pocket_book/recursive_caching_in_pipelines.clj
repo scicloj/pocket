@@ -41,9 +41,9 @@
 ;;; First pipeline run:
 (time
  (-> "data/raw.csv"
-     ((pocket/cached-fn #'load-dataset))
-     ((pocket/cached-fn #'preprocess) {:scale 2})
-     ((pocket/cached-fn #'train-model) {:epochs 100})
+     ((pocket/caching-fn #'load-dataset))
+     ((pocket/caching-fn #'preprocess) {:scale 2})
+     ((pocket/caching-fn #'train-model) {:epochs 100})
      deref
      (select-keys [:model :accuracy])))
 
@@ -52,9 +52,9 @@
 ;;; Second pipeline run (all cached):
 (time
  (-> "data/raw.csv"
-     ((pocket/cached-fn #'load-dataset))
-     ((pocket/cached-fn #'preprocess) {:scale 2})
-     ((pocket/cached-fn #'train-model) {:epochs 100})
+     ((pocket/caching-fn #'load-dataset))
+     ((pocket/caching-fn #'preprocess) {:scale 2})
+     ((pocket/caching-fn #'train-model) {:epochs 100})
      deref
      (select-keys [:model :accuracy])))
 

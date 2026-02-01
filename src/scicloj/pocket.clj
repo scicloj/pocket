@@ -60,9 +60,21 @@
   "Wrap a function to automatically cache its results.
    
    Returns a new function that wraps calls in `cached`.
+   `f` must be a var (e.g., `#'my-fn`) for stable cache keys.
+   
+   Deprecated: use `caching-fn` instead."
+  {:deprecated "0.2.0"}
+  [f]
+  (impl/caching-fn *base-cache-dir* f))
+
+(defn caching-fn
+  "Wrap a function to automatically cache its results.
+   
+   Returns a new function where each call returns a `Cached` object (`IDeref`).
+   Deref the result to trigger computation or load from cache.
    `f` must be a var (e.g., `#'my-fn`) for stable cache keys."
   [f]
-  (impl/cached-fn *base-cache-dir* f))
+  (impl/caching-fn *base-cache-dir* f))
 
 (defn maybe-deref
   "Deref if `x` implements `IDeref`, otherwise return `x` as-is.

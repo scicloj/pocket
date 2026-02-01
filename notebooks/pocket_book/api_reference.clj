@@ -55,17 +55,17 @@ my-result
 
 (deref my-result)
 
-(kind/doc #'pocket/cached-fn)
+(kind/doc #'pocket/caching-fn)
 
-;; `cached-fn` wraps a function so that every call returns a `Cached` object:
+;; `caching-fn` wraps a function so that every call returns a `Cached` object:
 
-(def my-cached-fn (pocket/cached-fn #'expensive-calculation))
+(def my-caching-fn (pocket/caching-fn #'expensive-calculation))
 
-(deref (my-cached-fn 3 4))
+(deref (my-caching-fn 3 4))
 
 ;; Same args hit the cache:
 
-(deref (my-cached-fn 3 4))
+(deref (my-caching-fn 3 4))
 
 (kind/doc #'pocket/maybe-deref)
 

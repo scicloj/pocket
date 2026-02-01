@@ -42,11 +42,11 @@
       ;; Should load nil from cache
       (is (nil? @result)))))
 
-(deftest test-cached-fn
-  (testing "cached-fn wrapper"
-    (let [cached-add (pocket/cached-fn #'expensive-add)]
-      (is (= 30 @(cached-add 10 20)))
-      (is (= 50 @(cached-add 20 30))))))
+(deftest test-caching-fn
+  (testing "caching-fn wrapper"
+    (let [caching-add (pocket/caching-fn #'expensive-add)]
+      (is (= 30 @(caching-add 10 20)))
+      (is (= 50 @(caching-add 20 30))))))
 
 (deftest test-maybe-deref
   (testing "maybe-deref handles both IDeref and regular values"
