@@ -22,6 +22,8 @@
 
 ;; ## Basic Walkthrough
 
+;; ### Setup
+
 ;; First, we set up a cache directory and define an expensive computation:
 
 (def cache-dir "/tmp/pocket-demo")
@@ -34,6 +36,17 @@
   (println (str "Computing " x " + " y " (this is expensive!)"))
   (Thread/sleep 400)
   (+ x y))
+
+;; ### Background: deref in Clojure
+;;
+;; In Clojure, [`deref`](https://clojure.org/reference/concurrency#deref)
+;; extracts a value from a reference type. It can be written as `(deref x)`
+;; or with the shorthand reader macro `@x` — both are equivalent.
+;; Pocket's `cached` returns a `Cached` object that implements `IDeref`,
+;; so you use `@` (or `deref`) to trigger the computation and retrieve
+;; the result.
+
+;; ### Creating a cached computation
 
 ;; `cached` creates a [lazy](https://en.wikipedia.org/wiki/Lazy_evaluation) cached computation.
 ;; It returns a `Cached` object — the computation won't run until we deref it:
@@ -48,6 +61,8 @@ cached-result
 
 ;;; Second deref (loaded from cache, instant):
 (time @cached-result)
+
+;; ### Wrapping functions with `cached-fn`
 
 ;; For convenience, `cached-fn` wraps a function so that every call
 ;; returns a `Cached` object:
@@ -181,7 +196,8 @@ cached-result
 
 ;; ### Usage notes
 
-;; **Use [vars](https://clojure.org/reference/vars) for functions.**
+;; #### Use [vars](https://clojure.org/reference/vars) for functions
+;;
 ;; Always use `#'function-name` (var), not `function-name` (function object).
 ;; Vars have stable names that produce consistent cache keys across sessions.
 ;; Function objects have unstable identity and would create a new cache entry
@@ -195,13 +211,38 @@ cached-result
 ;; (pocket/cached my-function args)
 ;; ```
 
-;; **[Cache invalidation](https://en.wikipedia.org/wiki/Cache_invalidation).**
+;; #### [Cache invalidation](https://en.wikipedia.org/wiki/Cache_invalidation)
+;;
 ;; Pocket does **not** detect function implementation changes. If you modify
 ;; a function's body, the cache key remains the same (it's based on the
 ;; function name and arguments, not the implementation). You must manually
 ;; delete the cache directory to invalidate stale entries, e.g. with `cleanup!`.
 
-;; **Configuration.**
+;; #### Versioning function inputs
+;;
+;; Since Pocket derives cache keys from function name and arguments (not the
+;; function body), changing a function's implementation won't automatically
+;; produce a new cache entry. Rather than invalidating the cache, a practical
+;; approach is to add a version key to the function's input map. When you
+;; change the implementation, bump the version — Pocket will treat it as
+;; a new computation with a distinct cache key:
+
+(defn process-data [data opts]
+  (let [data (pocket/maybe-deref data)]
+    ;; v3: switched from mean to median
+    (:data data)))
+
+;;; Version 3 of the processing:
+@(pocket/cached #'process-data
+                {:data [1 2 3]}
+                {:scale 2 :version 3})
+
+;; When the implementation changes again, simply bump to `:version 4`.
+;; Previous cached results remain on disk (useful if you need to compare),
+;; while the new version computes fresh results.
+
+;; #### Configuration
+;;
 ;; Set the cache directory via the `POCKET_BASE_CACHE_DIR` environment variable:
 ;;
 ;; ```bash
