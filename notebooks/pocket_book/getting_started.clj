@@ -164,6 +164,15 @@ cached-result
     slurp
     clojure.edn/read-string)
 
+;; This same information is available through the API, without
+;; reading files directly:
+
+(pocket/cache-entries)
+
+;; And as aggregate statistics:
+
+(pocket/cache-stats)
+
 ;; ## Cleanup
 
 (pocket/cleanup!)
