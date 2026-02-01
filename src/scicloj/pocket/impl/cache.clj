@@ -8,7 +8,7 @@
             [clojure.tools.logging :as log]
             [scicloj.pocket.protocols :as protocols :refer [PIdentifiable ->id]])
   (:import (org.apache.commons.codec.digest DigestUtils)
-           (clojure.lang PersistentHashMap IDeref Var)))
+           (clojure.lang IPersistentMap IDeref Var)))
 
 (defn read-cached [path]
   (cond
@@ -170,13 +170,14 @@
            (->> v
                 .args
                 (map (fn [a]
-                       (cond (nil? a) nil
-                             (instance? PersistentHashMap a) (->> a
-                                                                  (sort-by key)
-                                                                  (mapcat (fn [[k v]]
-                                                                            [k (->id v)]))
-                                                                  (apply array-map))
-                             :else (->id a)))))))
+                       (let [id (->id a)]
+                         (if (instance? IPersistentMap id)
+                           (->> id
+                                (sort-by key)
+                                (mapcat (fn [[k v]]
+                                          [k (->id v)]))
+                                (apply array-map))
+                           id)))))))
 
   clojure.lang.MapEntry
   (->id [v] (pr-str v))
