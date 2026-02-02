@@ -273,15 +273,16 @@
   ([base-dir fn-name]
    (let [cache-dir (str base-dir "/.cache")]
      (when (fs/exists? cache-dir)
-       (for [prefix-dir (fs/list-dir cache-dir)
-             :when (fs/directory? prefix-dir)
-             entry-dir (fs/list-dir prefix-dir)
-             :when (fs/directory? entry-dir)
-             :let [path (str entry-dir)
-                   meta-map (read-meta path)]
-             :when (or (nil? fn-name)
-                       (= fn-name (:fn-name meta-map)))]
-         (merge {:path path} meta-map))))))
+       (into []
+             (for [prefix-dir (fs/list-dir cache-dir)
+                   :when (fs/directory? prefix-dir)
+                   entry-dir (fs/list-dir prefix-dir)
+                   :when (fs/directory? entry-dir)
+                   :let [path (str entry-dir)
+                         meta-map (read-meta path)]
+                   :when (or (nil? fn-name)
+                             (= fn-name (:fn-name meta-map)))]
+               (merge {:path path} meta-map)))))))
 
 (defn cache-stats
   "Return aggregate statistics about the cache.
