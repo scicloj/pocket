@@ -124,6 +124,29 @@
              (sha h)
              idstr)))))
 
+(defn canonical-id
+  "Deep-sort all maps in an id structure for canonical string representation.
+   Walks the structure recursively: sorts map keys, recurses into sequential
+   and map values. Preserves collection types and ordering of non-map sequences."
+  [x]
+  (cond
+    (instance? IPersistentMap x)
+    (->> x
+         (sort-by key)
+         (map (fn [[k v]] [k (canonical-id v)]))
+         (into (array-map)))
+
+    (list? x)
+    (apply list (map canonical-id x))
+
+    (vector? x)
+    (mapv canonical-id x)
+
+    (set? x)
+    x
+
+    :else x))
+
 (defn maybe-deref [x]
   (if (instance? IDeref x)
     @x
@@ -132,7 +155,7 @@
 (deftype Cached [base-dir f args]
   IDeref
   (deref [this]
-    (let [id (->id this)
+    (let [id (canonical-id (->id this))
           fn-name (->id f)
           path (->path base-dir id
                        (-> f meta :type))]
@@ -166,17 +189,7 @@
   (->id [v]
     (apply list
            (->id (.f v))
-           (->> v
-                .args
-                (map (fn [a]
-                       (let [id (->id a)]
-                         (if (instance? IPersistentMap id)
-                           (->> id
-                                (sort-by key)
-                                (mapcat (fn [[k v]]
-                                          [k (->id v)]))
-                                (apply array-map))
-                           id)))))))
+           (map ->id (.args v))))
 
   clojure.lang.MapEntry
   (->id [v] [(->id (key v)) (->id (val v))])
@@ -206,7 +219,7 @@
    Returns a map with `:path` and `:existed`."
   [base-dir func args]
   (let [c (->Cached base-dir func args)
-        id (->id c)
+        id (canonical-id (->id c))
         path (->path base-dir id (-> func meta :type))
         existed? (boolean (fs/exists? path))]
     (when existed?
