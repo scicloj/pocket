@@ -54,6 +54,8 @@
 
 (pocket/config)
 
+(kind/test-last [(fn [cfg] (= "/tmp/pocket-demo-config" (:base-cache-dir cfg)))])
+
 ;; **Thread-local binding** (useful for tests):
 ;;
 ;; ```clojure
@@ -103,6 +105,8 @@
 ;; Configure via `set-mem-cache-options!`:
 
 (pocket/set-mem-cache-options! {:policy :fifo :threshold 100})
+
+(kind/test-last [(fn [result] (= :fifo (:policy result)))])
 
 ;; Or a TTL policy where entries expire after 60 seconds:
 

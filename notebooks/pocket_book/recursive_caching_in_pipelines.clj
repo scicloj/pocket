@@ -64,6 +64,8 @@
      deref
      (select-keys [:model :accuracy])))
 
+(kind/test-last [= {:model :trained, :accuracy 0.95}])
+
 ;; Run the same pipeline again — everything loads from cache:
 
 ;;; Second pipeline run (all cached):
@@ -75,6 +77,7 @@
      deref
      (select-keys [:model :accuracy])))
 
+(kind/test-last [= {:model :trained, :accuracy 0.95}])
 
 ;; No log output above — the result was served entirely from the
 ;; in-memory cache, so no disk I/O or computation occurred.

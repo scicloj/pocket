@@ -1,5 +1,5 @@
 ;; # Real-World Walkthrough: Weather Analysis Pipeline
-
+^{:clay {:quarto {:format {:html {:toc-location :left}}}}}
 (ns pocket-book.real-world-walkthrough
   (:require [pocket-book.logging]
             [scicloj.pocket :as pocket]
@@ -128,6 +128,8 @@
       report (pocket/cached #'summary temps rain)]
   (time (deref report)))
 
+(kind/test-last [(fn [result] (every? result [:city :report :min-temp :max-temp :total-rain :rainy-days]))])
+
 ;; Every function ran. Notice the log messages showing cache misses,
 ;; computations, and writes.
 
@@ -144,6 +146,8 @@
       report (pocket/cached #'summary temps rain)]
   (time (deref report)))
 
+(kind/test-last [(fn [result] (= "London" (:city result)))])
+
 ;; No log output — served entirely from the in-memory cache.
 
 ;; ## Changing a downstream step
@@ -159,6 +163,8 @@
       rain   (pocket/cached #'rainfall-totals clean {:unit :mm})
       report (pocket/cached #'summary temps rain)]
   (time (deref report)))
+
+(kind/test-last [(fn [result] (= "Paris" (:city result)))])
 
 ;; But running it again is instant — Paris is now cached too:
 
@@ -187,6 +193,8 @@
 ;; ### Cache statistics
 
 (pocket/cache-stats)
+
+(kind/test-last [(fn [stats] (= 10 (:total-entries stats)))])
 
 ;; ### Directory tree
 ;;

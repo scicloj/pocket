@@ -29,6 +29,8 @@
 
 (pocket/->id #'clojure.core/map)
 
+(kind/test-last [= 'clojure.core/map])
+
 ;; A map's identity is itself (keys are deep-sorted later for stable cache paths):
 
 (pocket/->id {:b 2 :a 1})
@@ -39,9 +41,13 @@
 
 (pocket/->id (pocket/cached #'add 1 2))
 
+(kind/test-last [(fn [id] (= (rest id) '(1 2)))])
+
 ;; `nil` is handled:
 
 (pocket/->id nil)
+
+(kind/test-last [nil?])
 
 ;; ## Extending for custom types
 ;;
@@ -70,6 +76,8 @@
 
 (pocket/->id (->DatasetRef "census" 3))
 
+(kind/test-last [= 'census-v3])
+
 ;; ## Using custom types in cached computations
 
 (defn analyze-dataset
@@ -94,6 +102,10 @@
 ;; First deref computes:
 
 (deref analysis)
+
+(kind/test-last [(fn [result] (and (= "census" (:source result))
+                                     (= 3 (:version result))
+                                     (= :regression (:method result))))])
 
 ;; Second deref loads from cache:
 

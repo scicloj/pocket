@@ -48,8 +48,12 @@
 
 (type cached-result)
 
+(kind/test-last [= scicloj.pocket.impl.cache.Cached])
+
 ;;; First deref (computes and caches):
 (time @cached-result)
+
+(kind/test-last [= 30])
 
 ;;; Second deref (loaded from cache, instant):
 (time @cached-result)
@@ -83,6 +87,8 @@
 
 ;;; Cached nil value:
 (deref nil-result)
+
+(kind/test-last [nil?])
 
 ;;; Loading nil from cache:
 (deref nil-result)

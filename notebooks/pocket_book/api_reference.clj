@@ -57,13 +57,19 @@ pocket/*base-cache-dir*
 (def my-result (pocket/cached #'expensive-calculation 100 200))
 (type my-result)
 
+(kind/test-last [= scicloj.pocket.impl.cache.Cached])
+
 ;; The computation runs when we deref:
 
 (deref my-result)
 
+(kind/test-last [= 300])
+
 ;; Derefing again loads from cache (no recomputation):
 
 (deref my-result)
+
+(kind/test-last [= 300])
 
 (kind/doc #'pocket/caching-fn)
 
@@ -83,15 +89,21 @@ pocket/*base-cache-dir*
 
 (pocket/maybe-deref 42)
 
+(kind/test-last [= 42])
+
 ;; A `Cached` value gets derefed:
 
 (pocket/maybe-deref (pocket/cached #'expensive-calculation 100 200))
+
+(kind/test-last [= 300])
 
 (kind/doc #'pocket/->id)
 
 ;; A var's identity is its fully-qualified name:
 
 (pocket/->id #'expensive-calculation)
+
+(kind/test-last [(fn [id] (= (name id) "expensive-calculation"))])
 
 ;; A map's identity is itself (maps are deep-sorted later for stable cache paths):
 
@@ -105,6 +117,8 @@ pocket/*base-cache-dir*
 ;; `nil` is handled as well:
 
 (pocket/->id nil)
+
+(kind/test-last [nil?])
 
 (kind/doc #'pocket/set-mem-cache-options!)
 
@@ -151,6 +165,8 @@ pocket/*base-cache-dir*
 (deref (pocket/cached #'expensive-calculation 3 4))
 
 (pocket/cache-entries)
+
+(kind/test-last [(fn [entries] (= 2 (count entries)))])
 
 ;; Filter by function name:
 
