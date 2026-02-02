@@ -214,10 +214,6 @@
                     {:func func})))
   (->Cached base-dir func args))
 
-(defn caching-fn [base-dir f]
-  (fn [& args]
-    (apply cached base-dir f args)))
-
 (defn invalidate!
   "Invalidate a specific cached computation by deleting its disk and memory entries.
    Returns a map with `:path` and `:existed`."
