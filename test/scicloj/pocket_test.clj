@@ -383,3 +383,75 @@
       (is (pos? (:total-size-bytes stats)))
       (is (= {"scicloj.pocket-test/expensive-add" 2 "scicloj.pocket-test/returns-nil" 1}
              (:entries-per-fn stats))))))
+
+(deftest test-var-validation
+  (testing "cached throws when given a bare function instead of a var"
+    (is (thrown-with-msg? clojure.lang.ExceptionInfo
+                          #"requires a var"
+                          @(pocket/cached expensive-add 1 2))))
+
+  (testing "caching-fn throws when given a bare function"
+    (is (thrown-with-msg? clojure.lang.ExceptionInfo
+                          #"requires a var"
+                          @((pocket/caching-fn expensive-add) 1 2)))))
+
+(deftest test-nil-base-dir-validation
+  (testing "deref throws when base-dir is nil"
+    (let [;; Construct Cached directly with nil base-dir to bypass resolve chain
+          cached-val (impl/cached nil #'expensive-add 1 2)]
+      (is (thrown-with-msg? clojure.lang.ExceptionInfo
+                            #"No cache directory configured"
+                            @cached-val)))))
+
+(deftest test-canonical-id
+  (testing "Symbol-led sequential stays as list"
+    (let [c (pocket/cached #'expensive-add 1 2)]
+      (is (list? (pocket/->id c)))))
+
+  (testing "Vector args stay as vector in cache key"
+    (let [c (pocket/cached #'expensive-add [1 2] [3 4])]
+      (let [id (pocket/->id c)]
+        ;; The function call is a list, but the vector args remain vectors
+        (is (list? id))
+        (is (vector? (second id)))
+        (is (vector? (nth id 2))))))
+
+  (testing "List and vector args with same elements produce same cache key"
+    (let [c1 (pocket/cached #'expensive-add [1 2] 3)
+          c2 (pocket/cached #'expensive-add '(1 2) 3)]
+      (is (= (pocket/->id c1) (pocket/->id c2)))))
+
+  (testing "Nested maps are deep-sorted"
+    (let [c1 (pocket/cached #'expensive-add {:b {:d 4 :c 3} :a 1} 0)
+          c2 (pocket/cached #'expensive-add {:a 1 :b {:c 3 :d 4}} 0)]
+      (is (= (pocket/->id c1) (pocket/->id c2))))))
+
+(deftest test-disk-persistence
+  (testing "Value survives mem-cache clear and loads from disk"
+    (let [call-count (atom 0)
+          counting-fn (fn [x y]
+                        (swap! call-count inc)
+                        (+ x y))]
+      (with-redefs [expensive-add counting-fn]
+        ;; Compute and cache
+        (is (= 30 @(pocket/cached #'expensive-add 10 20)))
+        (is (= 1 @call-count))
+        ;; Clear only in-memory cache
+        (impl/clear-mem-cache!)
+        ;; Should load from disk, not recompute
+        (is (= 30 @(pocket/cached #'expensive-add 10 20)))
+        (is (= 1 @call-count))))))
+
+(deftest test-dir-tree
+  (testing "dir-tree returns a string representation"
+    @(pocket/cached #'expensive-add 1 2)
+    (let [tree (pocket/dir-tree)]
+      (is (string? tree))
+      (is (re-find #"\.cache" tree)))))
+
+(deftest test-cache-entries-args-str
+  (testing "cache-entries args-str contains actual argument values"
+    @(pocket/cached #'expensive-add 10 20)
+    (let [entry (first (pocket/cache-entries))]
+      (is (re-find #"10" (:args-str entry)))
+      (is (re-find #"20" (:args-str entry))))))

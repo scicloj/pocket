@@ -13,14 +13,15 @@
 
 (defn read-cached [path]
   (cond
-    ;; nippy
     (fs/exists? (str path "/value.nippy"))
     (nippy/thaw-from-file (str path "/value.nippy"))
-    ;; nil
+
     (fs/exists? (str path "/nil"))
-    (do
-      #_(fs/delete (str path "/nil"))
-      nil)))
+    nil
+
+    :else
+    (throw (ex-info (str "Corrupted cache entry: no value.nippy or nil marker at " path)
+                    {:path path}))))
 
 (defn write-meta! [meta-map path]
   (spit (str path "/meta.edn") (pr-str meta-map)))
@@ -59,12 +60,11 @@
   "Tracks the options the mem-cache was last configured with."
   (atom default-mem-cache-options))
 
-(def default-mem-cache-threshold 256)
-
 (defonce mem-cache
-  (cw/lru-cache-factory {} :threshold default-mem-cache-threshold))
+  (cw/lru-cache-factory {} :threshold (:threshold default-mem-cache-options)))
 
 (def ^java.util.concurrent.ConcurrentHashMap in-flight
+  "Ensures concurrent derefs of the same path compute only once."
   (java.util.concurrent.ConcurrentHashMap.))
 
 (defn clear-mem-cache! []
@@ -79,7 +79,7 @@
    `:s-history-limit` / `:q-history-limit` — for `:lirs` policy."
   [{:keys [policy threshold ttl s-history-limit q-history-limit]
     :or {policy :lru
-         threshold default-mem-cache-threshold
+         threshold (:threshold default-mem-cache-options)
          ttl 30000}
     :as opts}]
   (let [effective {:policy policy :threshold threshold :ttl ttl}]
@@ -110,20 +110,14 @@
   (when-not base-dir
     (throw (ex-info "No cache directory configured. Set it via pocket/set-base-cache-dir!, the POCKET_BASE_CACHE_DIR env var, or pocket.edn."
                     {})))
-  (let [h (-> id
-              hash-unordered-coll
-              str)]
+  (let [h (-> id hash str)]
     (str base-dir
          "/.cache/"
-         (-> h
-             sha
-             (subs 0 2))
+         (-> h sha (subs 0 2))
          "/"
          (let [idstr (-> (str id)
                          (str/replace "/" "⁄"))]
-           (if (-> idstr
-                   count
-                   (> 240))
+           (if (-> idstr count (> 240))
              (sha h)
              idstr)))))
 
@@ -166,6 +160,10 @@
       (cw/lookup-or-miss
        mem-cache path
        (fn [_]
+         ;; Use in-flight to ensure concurrent derefs of the same path
+         ;; compute only once. lookup-or-miss deduplicates per-call via
+         ;; its own delay, but concurrent callers each create separate
+         ;; lookup-or-miss invocations, so we need this extra layer.
          (let [d (.computeIfAbsent
                   in-flight path
                   (reify java.util.function.Function

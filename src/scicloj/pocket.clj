@@ -86,18 +86,6 @@
   (impl/ensure-mem-cache! (resolve-mem-cache-options))
   (apply impl/cached (resolve-base-cache-dir) func args))
 
-(defn cached-fn
-  "Wrap a function to automatically cache its results.
-   
-   Returns a new function that wraps calls in `cached`.
-   `f` must be a var (e.g., `#'my-fn`) for stable cache keys.
-   
-   Deprecated: use `caching-fn` instead."
-  {:deprecated "0.2.0"}
-  [f]
-  (fn [& args]
-    (apply cached f args)))
-
 (defn caching-fn
   "Wrap a function to automatically cache its results.
    
@@ -178,7 +166,7 @@
   "Render the cache directory as a tree string, like the Unix `tree` command.
    Shows the hierarchical structure of cached entries on disk."
   []
-  (let [dir (str (resolve-base-cache-dir) "/.cache")]
-    (if (and dir (fs/exists? dir))
-      (impl/dir-tree dir)
-      nil)))
+  (let [base-dir (resolve-base-cache-dir)
+        dir (when base-dir (str base-dir "/.cache"))]
+    (when (and dir (fs/exists? dir))
+      (impl/dir-tree dir))))
