@@ -23,7 +23,8 @@
 ;; ## Setup for notebooks
 ;;
 ;; The following configures `slf4j-simple` to log at debug level
-;; to stdout, so all cache messages are visible in notebook output:
+;; to stdout, so all cache messages are visible in notebook output
+;; and are marked as `OUT` rather than as `ERR`.
 
 (do (System/setProperty "org.slf4j.simpleLogger.defaultLogLevel" "debug")
     (System/setProperty "org.slf4j.simpleLogger.logFile" "System.out"))
