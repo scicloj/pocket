@@ -5,6 +5,11 @@
             [scicloj.pocket :as pocket]
             [scicloj.kindly.v4.kind :as kind]))
 
+;; [Pocket](https://github.com/scicloj/pocket) is a Clojure library for
+;; filesystem-based caching of expensive computations. It persists results
+;; to disk so they survive JVM restarts, and uses content-addressable
+;; storage so cache keys are derived from what you compute, not where
+;; you store it.
 
 ;; ## Setup
 
@@ -14,6 +19,7 @@
 
 (pocket/set-base-cache-dir! cache-dir)
 
+;; Start fresh so the examples below run from a clean slate:
 (pocket/cleanup!)
 
 (defn expensive-calculation

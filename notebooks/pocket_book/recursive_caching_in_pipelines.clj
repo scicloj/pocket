@@ -5,7 +5,6 @@
             [scicloj.pocket :as pocket]
             [scicloj.kindly.v4.kind :as kind]))
 
-
 ;; ## Setup
 
 ;; When you pass a `Cached` value as an argument to another cached function,
@@ -24,13 +23,11 @@
     LD[load-dataset] --> PP[preprocess]
     PP --> TM[train-model]")
 
-
 (def cache-dir "/tmp/pocket-demo-pipelines")
 
 (pocket/set-base-cache-dir! cache-dir)
 
 (pocket/cleanup!)
-
 
 ;; ## Pipeline functions
 (defn load-dataset [path]
@@ -48,6 +45,12 @@
   (Thread/sleep 300)
   {:model :trained :accuracy 0.95 :data data})
 
+;; Wrap each function with `caching-fn` so every call returns a `Cached` object:
+
+(def load-dataset* (pocket/caching-fn #'load-dataset))
+(def preprocess* (pocket/caching-fn #'preprocess))
+(def train-model* (pocket/caching-fn #'train-model))
+
 ;; ## Running the pipeline
 
 ;; Chain cached computations in a pipeline:
@@ -55,9 +58,9 @@
 ;;; First pipeline run:
 (time
  (-> "data/raw.csv"
-     ((pocket/caching-fn #'load-dataset))
-     ((pocket/caching-fn #'preprocess) {:scale 2})
-     ((pocket/caching-fn #'train-model) {:epochs 100})
+     (load-dataset*)
+     (preprocess* {:scale 2})
+     (train-model* {:epochs 100})
      deref
      (select-keys [:model :accuracy])))
 
@@ -66,9 +69,9 @@
 ;;; Second pipeline run (all cached):
 (time
  (-> "data/raw.csv"
-     ((pocket/caching-fn #'load-dataset))
-     ((pocket/caching-fn #'preprocess) {:scale 2})
-     ((pocket/caching-fn #'train-model) {:epochs 100})
+     (load-dataset*)
+     (preprocess* {:scale 2})
+     (train-model* {:epochs 100})
      deref
      (select-keys [:model :accuracy])))
 
