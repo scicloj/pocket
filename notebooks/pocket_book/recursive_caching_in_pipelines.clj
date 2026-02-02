@@ -75,6 +75,9 @@
      deref
      (select-keys [:model :accuracy])))
 
+
+;; No log output above — the result was served entirely from the
+;; in-memory cache, so no disk I/O or computation occurred.
 ;; Each step caches independently. If you change only the last step
 ;; (e.g., different training params), the upstream steps load from cache while
 ;; only the final step recomputes.

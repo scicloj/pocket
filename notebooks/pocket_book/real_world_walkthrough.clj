@@ -144,6 +144,8 @@
       report (pocket/cached #'summary temps rain)]
   (time (deref report)))
 
+;; No log output — served entirely from the in-memory cache.
+
 ;; ## Changing a downstream step
 
 ;; Now suppose we want a different city. The entire pipeline
@@ -168,6 +170,8 @@
       rain   (pocket/cached #'rainfall-totals clean {:unit :mm})
       report (pocket/cached #'summary temps rain)]
   (time (deref report)))
+
+;; No log output — served entirely from the in-memory cache.
 
 ;; ## Inspecting the cache on disk
 
