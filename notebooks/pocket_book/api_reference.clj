@@ -94,11 +94,11 @@ my-result
 
 (kind/doc #'pocket/->id)
 
-;; A var's identity is its name:
+;; A var's identity is its fully-qualified name:
 
 (pocket/->id #'expensive-calculation)
 
-;; A map's identity is itself (with keys sorted for stability):
+;; A map's identity is itself (maps are deep-sorted later for stable cache paths):
 
 (pocket/->id {:b 2 :a 1})
 
@@ -159,7 +159,7 @@ my-result
 
 ;; Filter by function name:
 
-(pocket/cache-entries "expensive-calculation")
+(pocket/cache-entries "pocket-book.api-reference/expensive-calculation")
 
 (kind/doc #'pocket/cache-stats)
 
