@@ -466,6 +466,14 @@
       (is (string? tree))
       (is (re-find #"\.cache" tree)))))
 
+(deftest test-corrupted-cache-entry
+  (testing "read-cached throws on entry with neither value.nippy nor nil marker"
+    (let [path (str test-cache-dir "/corrupted-entry")]
+      (fs/create-dirs path)
+      (is (thrown-with-msg? clojure.lang.ExceptionInfo
+                            #"Corrupted cache entry"
+                            (impl/read-cached path))))))
+
 (deftest test-cache-entries-args-str
   (testing "cache-entries args-str contains actual argument values"
     @(pocket/cached #'expensive-add 10 20)
