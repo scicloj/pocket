@@ -7,7 +7,7 @@
             [babashka.fs :as fs]))
 
 
-;; ## Setup
+;; ## Overview
 
 ;; This walkthrough demonstrates a realistic data pipeline with
 ;; multiple stages and branching dependencies. We'll simulate
