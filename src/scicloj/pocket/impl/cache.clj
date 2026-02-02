@@ -177,7 +177,7 @@
                                       v (clojure.core/apply f resolved-args)
                                       meta-map {:id (pr-str id)
                                                 :fn-name (str fn-name)
-                                                :args-str (pr-str (vec args))
+                                                :args-str (pr-str (mapv ->id args))
                                                 :created-at (str (java.time.Instant/now))}]
                                   (write-cached! v path meta-map)
                                   v)))
