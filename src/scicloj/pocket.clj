@@ -70,10 +70,11 @@
    Default implementations are provided for `Var`, `MapEntry`, `Object`, and `nil`."
   protocols/PIdentifiable)
 
-(def ->id
+(defn ->id
   "Return a cache key representation of a value.
    Dispatches via the `PIdentifiable` protocol."
-  protocols/->id)
+  [x]
+  (protocols/->id x))
 
 (defn cached
   "Create a cached computation (returns `IDeref`).

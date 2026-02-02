@@ -395,6 +395,19 @@
                           #"requires a var"
                           @((pocket/caching-fn expensive-add) 1 2)))))
 
+(defrecord CustomCacheId [name version])
+
+(deftest test-extend-protocol-via-public-api
+  (testing "extending pocket/PIdentifiable works for pocket/->id"
+    (extend-protocol pocket/PIdentifiable
+      CustomCacheId
+      (->id [this] (symbol (str (:name this) "-v" (:version this)))))
+    (is (= 'census-v3 (pocket/->id (->CustomCacheId "census" 3)))))
+  (testing "extension is visible to internal cache key generation"
+    (let [c (pocket/cached #'expensive-add (->CustomCacheId "census" 3))]
+      (is (= '(scicloj.pocket-test/expensive-add census-v3)
+             (pocket/->id c))))))
+
 (deftest test-nil-base-dir-validation
   (testing "deref throws when base-dir is nil"
     (let [;; Construct Cached directly with nil base-dir to bypass resolve chain
