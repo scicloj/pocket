@@ -82,22 +82,21 @@
          threshold (:threshold default-mem-cache-options)
          ttl 30000}
     :as opts}]
-  (let [effective {:policy policy :threshold threshold :ttl ttl}]
-    (reset! current-mem-cache-options effective)
-    (reset! mem-cache
-            (case policy
-              :basic (cc/basic-cache-factory {})
-              :fifo (cc/fifo-cache-factory {} :threshold threshold)
-              :lru (cc/lru-cache-factory {} :threshold threshold)
-              :lu (cc/lu-cache-factory {} :threshold threshold)
-              :ttl (cc/ttl-cache-factory {} :ttl ttl)
-              :lirs (cc/lirs-cache-factory {} :s-history-limit (or s-history-limit threshold)
-                                           :q-history-limit (or q-history-limit (quot threshold 4)))
-              :soft (cc/soft-cache-factory {})
-              (throw (ex-info (str "Unknown cache policy: " policy)
-                              {:policy policy}))))
-    (log/info "Mem-cache reconfigured:" effective)
-    effective))
+  (reset! current-mem-cache-options opts)
+  (reset! mem-cache
+          (case policy
+            :basic (cc/basic-cache-factory {})
+            :fifo (cc/fifo-cache-factory {} :threshold threshold)
+            :lru (cc/lru-cache-factory {} :threshold threshold)
+            :lu (cc/lu-cache-factory {} :threshold threshold)
+            :ttl (cc/ttl-cache-factory {} :ttl ttl)
+            :lirs (cc/lirs-cache-factory {} :s-history-limit (or s-history-limit threshold)
+                                         :q-history-limit (or q-history-limit (quot threshold 4)))
+            :soft (cc/soft-cache-factory {})
+            (throw (ex-info (str "Unknown cache policy: " policy)
+                            {:policy policy}))))
+  (log/info "Mem-cache reconfigured:" opts)
+  opts)
 
 (defn ensure-mem-cache!
   "Reconfigure the mem-cache if `opts` differ from current configuration.
