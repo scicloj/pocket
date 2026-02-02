@@ -1,17 +1,12 @@
 ;; # Getting Started
 
 (ns pocket-book.getting-started
-  (:require [scicloj.pocket :as pocket]
+  (:require [pocket-book.logging]
+            [scicloj.pocket :as pocket]
             [scicloj.kindly.v4.kind :as kind]))
 
 
 ;; ## Setup
-
-;; Configure logging to stdout at debug level, so we can see
-;; Pocket's cache hit/miss/write messages:
-
-(do (System/setProperty "org.slf4j.simpleLogger.defaultLogLevel" "debug")
-    (System/setProperty "org.slf4j.simpleLogger.logFile" "System.out"))
 
 ;; First, we set up a cache directory and define an expensive computation:
 
@@ -102,6 +97,10 @@ cached-result
 ;; ;; ❌ Bad — unstable identity, defeats caching
 ;; (pocket/cached my-function args)
 ;; ```
+;;
+;; Pocket will throw an error if you pass a bare function instead of a var,
+;; so this mistake is caught immediately rather than producing unreachable
+;; cache entries.
 
 ;; ### [Cache invalidation](https://en.wikipedia.org/wiki/Cache_invalidation)
 ;;

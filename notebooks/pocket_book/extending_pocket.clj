@@ -1,16 +1,11 @@
 ;; # Extending Pocket
 
 (ns pocket-book.extending-pocket
-  (:require [scicloj.pocket :as pocket]
+  (:require [pocket-book.logging]
+            [scicloj.pocket :as pocket]
             [scicloj.kindly.v4.kind :as kind]))
 
 ;; ## Setup
-
-;; Configure logging to stdout at debug level, so we can see
-;; Pocket's cache hit/miss/write messages:
-
-(do (System/setProperty "org.slf4j.simpleLogger.defaultLogLevel" "debug")
-    (System/setProperty "org.slf4j.simpleLogger.logFile" "System.out"))
 
 (def cache-dir "/tmp/pocket-extending")
 
@@ -30,11 +25,11 @@
 ;;
 ;; Pocket provides default implementations for common types:
 
-;; A var's identity is its unqualified name:
+;; A var's identity is its fully-qualified name:
 
 (pocket/->id #'clojure.core/map)
 
-;; A map's identity is itself (keys are sorted for stability):
+;; A map's identity is itself (keys are deep-sorted later for stable cache paths):
 
 (pocket/->id {:b 2 :a 1})
 

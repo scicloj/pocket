@@ -3,17 +3,12 @@
 ^{:kindly/hide-code true
   :kindly/options {:kinds-that-hide-code #{:kind/doc}}}
 (ns pocket-book.api-reference
-  (:require [scicloj.pocket :as pocket]
+  (:require [pocket-book.logging]
+            [scicloj.pocket :as pocket]
             [scicloj.kindly.v4.kind :as kind]))
 
 
 ;; ## Setup
-
-;; Configure logging to stdout at debug level, so we can see
-;; Pocket's cache hit/miss/write messages:
-
-(do (System/setProperty "org.slf4j.simpleLogger.defaultLogLevel" "debug")
-    (System/setProperty "org.slf4j.simpleLogger.logFile" "System.out"))
 
 ;; A few preparations for the code examples below:
 

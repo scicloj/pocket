@@ -1,17 +1,12 @@
 ;; # Recursive Caching in Pipelines
 
 (ns pocket-book.recursive-caching-in-pipelines
-  (:require [scicloj.pocket :as pocket]
+  (:require [pocket-book.logging]
+            [scicloj.pocket :as pocket]
             [scicloj.kindly.v4.kind :as kind]))
 
 
 ;; ## Setup
-
-;; Configure logging to stdout at debug level, so we can see
-;; Pocket's cache hit/miss/write messages:
-
-(do (System/setProperty "org.slf4j.simpleLogger.defaultLogLevel" "debug")
-    (System/setProperty "org.slf4j.simpleLogger.logFile" "System.out"))
 
 ;; When you pass a `Cached` value as an argument to another cached function,
 ;; Pocket handles this recursively. The cache key for the outer computation
@@ -29,7 +24,6 @@
     LD[load-dataset] --> PP[preprocess]
     PP --> TM[train-model]")
 
-;; ## Setup
 
 (def cache-dir "/tmp/pocket-demo-pipelines")
 
@@ -37,6 +31,8 @@
 
 (pocket/cleanup!)
 
+
+;; ## Pipeline functions
 (defn load-dataset [path]
   (println "Loading dataset from" path "...")
   (Thread/sleep 300)
