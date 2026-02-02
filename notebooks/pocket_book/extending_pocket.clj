@@ -133,6 +133,13 @@
 ;;
 ;; - **Prefer symbols or keywords** over complex nested structures.
 ;;   They produce clean, short directory names.
+;;
+;; - **Records and plain maps can collide.** A record like
+;;   `(->DatasetRef "census" 3)` and a plain map
+;;   `{:source "census" :version 3}` produce the same default cache
+;;   key (both are maps with the same keys). If you use records as
+;;   cache arguments, extend `PIdentifiable` to give them a distinct
+;;   identity — as shown above.
 
 ;; ## Cleanup
 
