@@ -106,7 +106,10 @@
   (when (and opts (not= opts @current-mem-cache-options))
     (reset-mem-cache! opts)))
 
-(defn ->path [base-dir id typ]
+(defn ->path [base-dir id]
+  (when-not base-dir
+    (throw (ex-info "No cache directory configured. Set it via pocket/set-base-cache-dir!, the POCKET_BASE_CACHE_DIR env var, or pocket.edn."
+                    {})))
   (let [h (-> id
               hash-unordered-coll
               str)]
@@ -159,8 +162,7 @@
   (deref [this]
     (let [id (canonical-id (->id this))
           fn-name (->id f)
-          path (->path base-dir id
-                       (-> f meta :type))]
+          path (->path base-dir id)]
       (cw/lookup-or-miss
        mem-cache path
        (fn [_]
@@ -210,6 +212,9 @@
 (defn cached
   "Create a cached computation"
   [base-dir func & args]
+  (when-not (var? func)
+    (throw (ex-info (str "pocket/cached requires a var (e.g., #'my-fn), got: " (type func))
+                    {:func func})))
   (->Cached base-dir func args))
 
 (defn caching-fn [base-dir f]
@@ -222,7 +227,7 @@
   [base-dir func args]
   (let [c (->Cached base-dir func args)
         id (canonical-id (->id c))
-        path (->path base-dir id (-> func meta :type))
+        path (->path base-dir id)
         existed? (boolean (fs/exists? path))]
     (when existed?
       (fs/delete-tree path))
