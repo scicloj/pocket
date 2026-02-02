@@ -229,35 +229,26 @@
     (log/info "Invalidated:" path "existed=" existed?)
     {:path path :existed existed?}))
 
+(declare cache-entries)
+
 (defn invalidate-fn!
   "Invalidate all cached entries for a given function var.
-   Scans the cache directory for entries whose path contains the function name.
+   Uses cache-entries (metadata-based) to find matching entries,
+   so this works even for SHA-1 hashed paths.
    Returns a map with `:fn-name`, `:count`, and `:paths`."
   [base-dir func]
-  (let [fn-name (->id func)
-        fn-name-sanitized (str/replace (str fn-name) "/" "⁄")
-        prefix-space (str "(" fn-name-sanitized " ")
-        prefix-close (str "(" fn-name-sanitized ")")
-        cache-dir (str base-dir "/.cache")
-        deleted-paths (atom [])]
-    (when (fs/exists? cache-dir)
-      (doseq [prefix-dir (fs/list-dir cache-dir)
-              :when (fs/directory? prefix-dir)]
-        (doseq [entry-dir (fs/list-dir prefix-dir)
-                :let [entry-name (str (fs/file-name entry-dir))]
-                :when (and (fs/directory? entry-dir)
-                           (or (.startsWith entry-name prefix-space)
-                               (= entry-name prefix-close)))]
-          (let [path (str entry-dir)]
-            (fs/delete-tree entry-dir)
-            (swap! mem-cache dissoc path)
-            (.remove in-flight path)
-            (swap! deleted-paths conj path)))))
-    (let [result {:fn-name (str fn-name)
-                  :count (count @deleted-paths)
-                  :paths @deleted-paths}]
-      (log/info "Invalidated" (count @deleted-paths) "entries for" fn-name)
-      result)))
+  (let [fn-name (str (->id func))
+        entries (cache-entries base-dir fn-name)
+        deleted-paths (mapv (fn [{:keys [path]}]
+                              (fs/delete-tree path)
+                              (swap! mem-cache dissoc path)
+                              (.remove in-flight path)
+                              path)
+                            entries)]
+    (log/info "Invalidated" (count deleted-paths) "entries for" fn-name)
+    {:fn-name fn-name
+     :count (count deleted-paths)
+     :paths deleted-paths}))
 
 (defn cache-entries
   "Scan the cache directory and return a sequence of metadata maps.
