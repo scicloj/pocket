@@ -46,7 +46,7 @@
 (def cached-result
   (pocket/cached #'expensive-calculation 10 20))
 
-cached-result
+(type cached-result)
 
 ;;; First deref (computes and caches):
 (time @cached-result)

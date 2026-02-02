@@ -55,7 +55,7 @@ pocket/*base-cache-dir*
 ;; `cached` returns a `Cached` object — the computation is not yet executed:
 
 (def my-result (pocket/cached #'expensive-calculation 100 200))
-my-result
+(type my-result)
 
 ;; The computation runs when we deref:
 
