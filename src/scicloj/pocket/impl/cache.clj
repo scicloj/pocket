@@ -121,11 +121,10 @@
              idstr)))))
 
 (defn canonical-id
-  "Deep-sort all maps and normalize sequentials in an id structure
-   for canonical string representation. Walks the structure recursively:
-   sorts map keys, recurses into sequential and map values. Sequentials
-   whose first element is a symbol are kept as lists (so cache paths
-   look like function calls); all others are coerced to vectors."
+  "Deep-sort all maps in an id structure for canonical string representation.
+   Walks the structure recursively: sorts map keys, recurses into sequential
+   and map values. Preserves the type of sequentials (lists stay lists,
+   vectors stay vectors)."
   [x]
   (cond
     (instance? IPersistentMap x)
@@ -136,7 +135,7 @@
 
     (sequential? x)
     (let [items (map canonical-id x)]
-      (if (symbol? (first items))
+      (if (list? x)
         (apply list items)
         (vec items)))
 

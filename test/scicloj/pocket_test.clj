@@ -429,10 +429,14 @@
         (is (vector? (second id)))
         (is (vector? (nth id 2))))))
 
-  (testing "List and vector args with same elements produce same cache key"
+  (testing "List and vector args produce different cache paths"
     (let [c1 (pocket/cached #'expensive-add [1 2] 3)
           c2 (pocket/cached #'expensive-add '(1 2) 3)]
-      (is (= (pocket/->id c1) (pocket/->id c2)))))
+      ;; ->id values are Clojure-equal, but canonical-id preserves type,
+      ;; so str representations (and thus cache paths) differ
+      (is (= (pocket/->id c1) (pocket/->id c2)))
+      (is (not= (str (impl/canonical-id (pocket/->id c1)))
+                (str (impl/canonical-id (pocket/->id c2)))))))
 
   (testing "Nested maps are deep-sorted"
     (let [c1 (pocket/cached #'expensive-add {:b {:d 4 :c 3} :a 1} 0)
