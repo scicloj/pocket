@@ -60,10 +60,12 @@
    :mem-cache (resolve-mem-cache-options)})
 
 (defn set-base-cache-dir!
-  "Set the base cache directory by altering `*base-cache-dir*`."
+  "Set the base cache directory by altering `*base-cache-dir*`.
+   Returns the directory path."
   [dir]
   (alter-var-root #'*base-cache-dir* (constantly dir))
-  (log/info "Cache dir set to:" dir))
+  (log/info "Cache dir set to:" dir)
+  dir)
 (def PIdentifiable
   "Protocol for computing cache key identity from values.
    Extend this protocol to customize how your types contribute to cache keys.
@@ -123,6 +125,7 @@
    Takes the same arguments as `cached`: a function var and its arguments.
    Returns a map with `:path` and `:existed`."
   [func & args]
+  (impl/ensure-mem-cache! (resolve-mem-cache-options))
   (impl/invalidate! (resolve-base-cache-dir) func args))
 
 (defn invalidate-fn!
@@ -130,6 +133,7 @@
    Removes matching entries from both disk and memory.
    Returns a map with `:fn-name`, `:count`, and `:paths`."
   [func]
+  (impl/ensure-mem-cache! (resolve-mem-cache-options))
   (impl/invalidate-fn! (resolve-base-cache-dir) func))
 
 (defn set-mem-cache-options!
