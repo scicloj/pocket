@@ -138,10 +138,12 @@
   "Configure the in-memory cache. Resets it, discarding any currently cached values.
    
    Supported keys:
-   - `:policy` — `:lru` (default), `:fifo`, `:lu`, `:ttl`, `:lirs`, `:soft`, or `:basic`
-   - `:threshold` — max entries for `:lru`, `:fifo`, `:lu` (default 256)
-   - `:ttl` — time-to-live in ms for `:ttl` policy (default 30000)
-   - `:s-history-limit` / `:q-history-limit` — for `:lirs` policy"
+   - `:policy` — `:lru`, `:fifo`, `:lu`, `:ttl`, `:lirs`, `:soft`, or `:basic`
+   - `:threshold` — max entries for `:lru`, `:fifo`, `:lu`
+   - `:ttl` — time-to-live in ms for `:ttl` policy
+   - `:s-history-limit` / `:q-history-limit` — for `:lirs` policy
+   
+   Defaults come from `pocket-defaults.edn`."
   [opts]
   (alter-var-root #'*mem-cache-options* (constantly opts))
   (log/info "Mem-cache options set:" opts)

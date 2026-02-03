@@ -75,15 +75,12 @@
     (when-let [r (io/resource "pocket-defaults.edn")]
       (-> r slurp edn/read-string))))
 
-(def default-mem-cache-options
-  {:policy :lru :threshold 256})
-
 (def current-mem-cache-options
   "Tracks the options the mem-cache was last configured with."
-  (atom default-mem-cache-options))
+  (atom (:mem-cache @pocket-defaults-edn)))
 
 (defonce mem-cache
-  (cw/lru-cache-factory {} :threshold (:threshold default-mem-cache-options)))
+  (cw/lru-cache-factory {} :threshold (get-in @pocket-defaults-edn [:mem-cache :threshold])))
 
 (def ^java.util.concurrent.ConcurrentHashMap in-flight
   "Ensures concurrent derefs of the same path compute only once."
@@ -95,13 +92,16 @@
 (defn reset-mem-cache!
   "Reset the in-memory cache with the given options.
    
-   `:policy` — one of `:lru`, `:fifo`, `:lu`, `:ttl`, `:lirs`, `:soft`, `:basic` (default `:lru`).
-   `:threshold` — max entries for `:lru`, `:fifo`, `:lu` (default 256).
-   `:ttl` — time-to-live in ms for `:ttl` policy (default 30000).
-   `:s-history-limit` / `:q-history-limit` — for `:lirs` policy."
+   Supported keys:
+   - `:policy` — `:lru`, `:fifo`, `:lu`, `:ttl`, `:lirs`, `:soft`, or `:basic`
+   - `:threshold` — max entries for `:lru`, `:fifo`, `:lu`
+   - `:ttl` — time-to-live in ms for `:ttl` policy
+   - `:s-history-limit` / `:q-history-limit` — for `:lirs` policy
+   
+   Defaults come from `pocket-defaults.edn`."
   [{:keys [policy threshold ttl s-history-limit q-history-limit]
     :or {policy :lru
-         threshold (:threshold default-mem-cache-options)
+         threshold (get-in @pocket-defaults-edn [:mem-cache :threshold])
          ttl 30000}
     :as opts}]
   (reset! current-mem-cache-options opts)
@@ -115,8 +115,7 @@
             :lirs (cc/lirs-cache-factory {} :s-history-limit (or s-history-limit threshold)
                                          :q-history-limit (or q-history-limit (quot threshold 4)))
             :soft (cc/soft-cache-factory {})
-            (throw (ex-info (str "Unknown cache policy: " policy)
-                            {:policy policy}))))
+            (throw (ex-info (str "Unknown cache policy: " policy) {:policy policy}))))
   (log/info "Mem-cache reconfigured:" opts)
   opts)
 
