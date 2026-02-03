@@ -520,3 +520,30 @@
       (is (= (str (impl/canonical-id (pocket/->id c1)))
              (str (impl/canonical-id (pocket/->id c2))))))))
 
+(deftest test-print-method
+  (testing "Cached print-method shows identity and status without forcing computation"
+    (let [call-count (atom 0)
+          counting-fn (fn [x y]
+                        (swap! call-count inc)
+                        (+ x y))]
+      (with-redefs [expensive-add counting-fn]
+        (let [c (pocket/cached #'expensive-add 100 200)]
+          ;; Before deref: should show :pending and NOT compute
+          (let [s (pr-str c)]
+            (is (re-find #"#<Cached \(scicloj\.pocket-test/expensive-add 100 200\) :pending>" s))
+            (is (= 0 @call-count) "print-method should not force computation"))
+          ;; Deref to compute
+          (is (= 300 @c))
+          (is (= 1 @call-count))
+          ;; After deref: should show :cached
+          (let [s (pr-str c)]
+            (is (re-find #"#<Cached \(scicloj\.pocket-test/expensive-add 100 200\) :cached>" s)))
+          ;; Clear mem-cache but keep disk
+          (impl/clear-mem-cache!)
+          ;; Should show :disk
+          (let [s (pr-str c)]
+            (is (re-find #"#<Cached \(scicloj\.pocket-test/expensive-add 100 200\) :disk>" s)))
+          ;; Deref again - should load from disk, not recompute
+          (is (= 300 @c))
+          (is (= 1 @call-count) "Should load from disk, not recompute"))))))
+

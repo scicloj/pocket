@@ -21,7 +21,7 @@
   "Base directory for cache storage.
    
    Resolved with precedence: binding > `set-base-cache-dir!` > 
-   `POCKET_BASE_CACHE_DIR` env var > `pocket.edn` `:base-cache-dir`."
+   `POCKET_BASE_CACHE_DIR` env var > `pocket.edn` `:base-cache-dir` > `pocket-defaults.edn` (library default: `.cache/pocket`)."
   nil)
 
 (def ^:dynamic *mem-cache-options*
@@ -29,7 +29,7 @@
    
    Resolved with precedence: binding > `set-mem-cache-options!` >
    `POCKET_MEM_CACHE` env var > `pocket.edn` `:mem-cache` >
-   default `{:policy :lru :threshold 256}`.
+   `pocket-defaults.edn` (library defaults).
    
    **Caution**: binding this var reconfigures the shared global mem-cache,
    which affects all threads. Useful for test fixtures but not for
@@ -41,7 +41,8 @@
   []
   (or *base-cache-dir*
       (System/getenv "POCKET_BASE_CACHE_DIR")
-      (:base-cache-dir (impl/pocket-edn))))
+      (:base-cache-dir (impl/pocket-edn))
+      (:base-cache-dir @impl/pocket-defaults-edn)))
 
 (defn- resolve-mem-cache-options
   "Resolve mem-cache options using the precedence chain."
@@ -49,7 +50,7 @@
   (or *mem-cache-options*
       (some-> (System/getenv "POCKET_MEM_CACHE") edn/read-string)
       (:mem-cache (impl/pocket-edn))
-      impl/default-mem-cache-options))
+      (:mem-cache @impl/pocket-defaults-edn)))
 
 (defn config
   "Return the effective resolved configuration as a map.

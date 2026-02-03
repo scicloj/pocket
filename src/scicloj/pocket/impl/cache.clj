@@ -55,7 +55,6 @@
 (defn sha [^String s]
   (DigestUtils/sha1Hex s))
 
-
 (def ^:private pocket-edn-cache
   "TTL cache for pocket.edn (1 second)."
   (atom (cc/ttl-cache-factory {} :ttl 1000)))
@@ -69,6 +68,12 @@
    (fn [_]
      (when-let [r (io/resource "pocket.edn")]
        (-> r slurp edn/read-string)))))
+
+(def pocket-defaults-edn
+  "Library defaults from pocket-defaults.edn. Read once at load time."
+  (delay
+    (when-let [r (io/resource "pocket-defaults.edn")]
+      (-> r slurp edn/read-string))))
 
 (def default-mem-cache-options
   {:policy :lru :threshold 256})
@@ -221,6 +226,17 @@
 
   nil
   (->id [_] nil))
+
+(defmethod print-method Cached [^Cached c ^java.io.Writer w]
+  (let [id (->id c)]
+    (if-let [base-dir (.base-dir c)]
+      (let [path (->path base-dir (canonical-id id))
+            status (cond
+                     (contains? @mem-cache path) :cached
+                     (fs/exists? path) :disk
+                     :else :pending)]
+        (.write w (str "#<Cached " (pr-str id) " " status ">")))
+      (.write w (str "#<Cached " (pr-str id) ">")))))
 
 (defn cached
   "Create a cached computation"
