@@ -35,6 +35,19 @@
 ;; development. It provides defaults that can be
 ;; overridden by environment variables, `set-*!` calls, or `binding`.
 
+;; ## Library defaults
+;;
+;; Pocket ships with `pocket-defaults.edn` containing the library defaults.
+;; These are used when no other configuration is provided:
+
+(-> (clojure.java.io/resource "pocket-defaults.edn")
+    slurp
+    clojure.edn/read-string)
+
+;; You can override any of these via `pocket.edn`, environment variables,
+;; or the `set-*!` functions.
+
+
 ;; ## Cache directory
 
 ;; The cache directory can be set in several ways.
@@ -87,7 +100,7 @@
 ;;    of [delays](https://clojure.org/reference/concurrency#delay), so no duplicate work is performed.
 ;;
 ;; By default, the in-memory layer uses an **[LRU](https://en.wikipedia.org/wiki/Cache_replacement_policies#LRU)**
-;; (Least Recently Used) policy with a threshold of 256 entries.
+;; (Least Recently Used) policy — see defaults above.
 
 ;; ## Cache policies
 
@@ -95,10 +108,10 @@
 ;;
 ;; | Policy | Key | Parameters |
 ;; |--------|---------|-----------|
-;; | [LRU](https://en.wikipedia.org/wiki/Cache_replacement_policies#LRU) (Least Recently Used) | `:lru` | `:threshold` (default 256) |
-;; | [FIFO](https://en.wikipedia.org/wiki/Cache_replacement_policies#FIFO) (First In First Out) | `:fifo` | `:threshold` (default 256) |
-;; | [LFU](https://en.wikipedia.org/wiki/Least_frequently_used) (Least Frequently Used) | `:lu` | `:threshold` (default 256) |
-;; | [TTL](https://en.wikipedia.org/wiki/Time_to_live) (Time To Live) | `:ttl` | `:ttl` in ms (default 30000) |
+;; | [LRU](https://en.wikipedia.org/wiki/Cache_replacement_policies#LRU) (Least Recently Used) | `:lru` | `:threshold` (see defaults above) |
+;; | [FIFO](https://en.wikipedia.org/wiki/Cache_replacement_policies#FIFO) (First In First Out) | `:fifo` | `:threshold` (see defaults above) |
+;; | [LFU](https://en.wikipedia.org/wiki/Least_frequently_used) (Least Frequently Used) | `:lu` | `:threshold` (see defaults above) |
+;; | [TTL](https://en.wikipedia.org/wiki/Time_to_live) (Time To Live) | `:ttl` | `:ttl` in ms (see defaults above) |
 ;; | [LIRS](https://en.wikipedia.org/wiki/LIRS_caching_algorithm) | `:lirs` | `:s-history-limit`, `:q-history-limit` |
 ;; | [Soft references](https://docs.oracle.com/javase/8/docs/api/java/lang/ref/SoftReference.html) | `:soft` | (none — uses JVM garbage collection) |
 ;; | Basic (unbounded) | `:basic` | (none) |

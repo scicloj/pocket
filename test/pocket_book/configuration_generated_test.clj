@@ -13,46 +13,54 @@
   "flowchart TD\n    B(binding) -->|if nil| S(set-*!)\n    S -->|if nil| E(Environment variable)\n    E -->|if nil| P(pocket.edn)\n    P -->|if nil| D(Hardcoded default)\n    style B fill:#4a9,color:#fff\n    style D fill:#888,color:#fff"))
 
 
-(def v5_l50 (pocket/set-base-cache-dir! "/tmp/pocket-demo-config"))
+(def
+ v5_l43
+ (->
+  (clojure.java.io/resource "pocket-defaults.edn")
+  slurp
+  clojure.edn/read-string))
 
 
-(def v6_l52 (pocket/cleanup!))
+(def v7_l63 (pocket/set-base-cache-dir! "/tmp/pocket-demo-config"))
 
 
-(def v8_l56 (pocket/config))
+(def v8_l65 (pocket/cleanup!))
+
+
+(def v10_l69 (pocket/config))
 
 
 (deftest
- t9_l58
+ t11_l71
  (is
   ((fn [cfg] (= "/tmp/pocket-demo-config" (:base-cache-dir cfg)))
-   v8_l56)))
+   v10_l69)))
 
 
 (def
- v11_l71
+ v13_l84
  (kind/mermaid
   "flowchart LR\n    D(deref) --> MC{In-memory\ncache?}\n    MC -->|hit| R[Return value]\n    MC -->|miss| DC{Disk\ncache?}\n    DC -->|hit| R\n    DC -->|miss| C[Compute] --> W[Write to disk] --> R"))
 
 
 (def
- v13_l108
+ v15_l121
  (pocket/set-mem-cache-options! {:policy :fifo, :threshold 100}))
 
 
 (deftest
- t14_l110
- (is ((fn [result] (= :fifo (:policy result))) v13_l108)))
+ t16_l123
+ (is ((fn [result] (= :fifo (:policy result))) v15_l121)))
 
 
 (def
- v16_l114
+ v18_l127
  (pocket/set-mem-cache-options! {:policy :ttl, :ttl 60000}))
 
 
 (def
- v18_l118
+ v20_l131
  (pocket/set-mem-cache-options! {:policy :lru, :threshold 256}))
 
 
-(def v20_l141 (pocket/cleanup!))
+(def v22_l154 (pocket/cleanup!))
