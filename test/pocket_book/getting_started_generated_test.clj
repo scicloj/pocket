@@ -32,7 +32,7 @@
  (def cached-result (pocket/cached #'expensive-calculation 10 20)))
 
 
-(def v10_l49 (println cached-result))
+(def v10_l49 (type cached-result))
 
 
 (deftest t11_l51 (is (= v10_l49 scicloj.pocket.impl.cache.Cached)))
