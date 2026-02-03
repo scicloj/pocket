@@ -1,16 +1,12 @@
 (ns scicloj.pocket
   "Filesystem-based caching for expensive computations.
    
-   Pocket provides content-addressable caching with automatic serialization
-   using Nippy. Cached values are stored in a filesystem cache directory
-   and keyed by the hash of function + arguments.
+   Primary API: `cached`, `caching-fn`, `maybe-deref`.
+   Configuration: `*base-cache-dir*`, `*mem-cache-options*`, `set-base-cache-dir!`, `set-mem-cache-options!`.
+   Invalidation: `invalidate!`, `invalidate-fn!`, `cleanup!`.
+   Introspection: `cache-entries`, `cache-stats`, `dir-tree`.
    
-   Configuration precedence (for both cache dir and mem-cache options):
-   1. Thread-local `binding`
-   2. `set-*!` (imperative root binding change)
-   3. Environment variable (`POCKET_BASE_CACHE_DIR`, `POCKET_MEM_CACHE`)
-   4. `pocket.edn` on classpath
-   5. Hardcoded default"
+   See `*base-cache-dir*` and `*mem-cache-options*` for configuration precedence."
   (:require [scicloj.pocket.impl.cache :as impl]
             [scicloj.pocket.protocols :as protocols]
             [babashka.fs :as fs]
@@ -67,6 +63,7 @@
   (alter-var-root #'*base-cache-dir* (constantly dir))
   (log/info "Cache dir set to:" dir)
   dir)
+
 (def PIdentifiable
   "Protocol for computing cache key identity from values.
    Extend this protocol to customize how your types contribute to cache keys.
