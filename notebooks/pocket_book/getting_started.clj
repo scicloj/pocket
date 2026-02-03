@@ -234,15 +234,53 @@
 
 ;; ## When to use Pocket
 ;;
+;; ### Good use cases
+;;
+;; - **Data science pipelines** with expensive intermediate steps
+;;   (data loading, preprocessing, feature engineering, model training)
+;; - **Reproducible research** where cached intermediate results let you
+;;   iterate on downstream steps without re-running upstream computations
+;; - **Long-running computations** (minutes to hours) that need to survive
+;;   JVM restarts, crashes, or machine reboots
+;; - **Multi-threaded workflows** where multiple threads may request the
+;;   same expensive computation — Pocket ensures it runs only once
+;;
+;; ### When to use something else
+;;
+;; - **Fast computations** (milliseconds) — use `clojure.core/memoize`
+;; - **Memory-only caching** within a single session — use `memoize` or
+;;   [`core.memoize`](https://github.com/clojure/core.memoize)
+;; - **Frequently changing function implementations** — Pocket doesn't
+;;   detect code changes, so you'd need to manually invalidate or use
+;;   the versioning pattern
+;;
+;; ### Comparison to alternatives
+;;
 ;; | Feature | Pocket | `clojure.core/memoize` | `core.memoize` |
 ;; |---------|--------|------------------------|----------------|
 ;; | Persistence | Disk + memory | Memory only | Memory only |
 ;; | Cross-session | Yes | No | No |
 ;; | Content-addressable | Yes | No | No |
 ;; | Lazy evaluation | `IDeref` | Eager | Eager |
+;; | Eviction policies | LRU, FIFO, TTL, etc. | None | LRU, TTL, etc. |
+;; | Thread-safe (single computation) | Yes | No | Yes |
+;; | Pipeline caching | Yes (recursive) | No | No |
 ;;
-;; Use Pocket when computations take minutes or hours, results need to
-;; survive JVM restarts, or you're building data science pipelines with
-;; expensive intermediate steps.
+;; ## Known limitations
 ;;
-;; Use `memoize` or `core.memoize` for fast, in-memory, single-session caching.
+;; - **No automatic cache invalidation** — Pocket doesn't detect when a
+;;   function's implementation changes. Use `invalidate!`, `invalidate-fn!`,
+;;   or the versioning pattern described above.
+;;
+;; - **Requires serializable values** — Nippy handles most Clojure types,
+;;   but you can't cache functions, atoms, channels, file handles, or
+;;   other stateful objects.
+;;
+;; - **Disk cache grows indefinitely** — The in-memory cache supports
+;;   eviction policies (LRU, TTL, etc.), but the disk cache has no
+;;   automatic cleanup. Use `cleanup!` or `invalidate-fn!` periodically
+;;   if disk space is a concern.
+;;
+;; - **No disk cache TTL** — Cached values on disk never expire
+;;   automatically. If you need time-based expiration, you'll need to
+;;   manage it externally or use `cleanup!`.
