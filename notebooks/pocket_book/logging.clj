@@ -27,6 +27,7 @@
 ;; and are marked as `OUT` rather than as `ERR`.
 
 (do (System/setProperty "org.slf4j.simpleLogger.defaultLogLevel" "debug")
+    (System/setProperty "org.slf4j.simpleLogger.showThreadName" "false")
     (System/setProperty "org.slf4j.simpleLogger.logFile" "System.out"))
 
 ;; Other notebooks in this book require this namespace to
