@@ -215,11 +215,11 @@
 ;; But the `meta.edn` file inside still contains the full details,
 ;; so `cache-entries` and `invalidate-fn!` work correctly:
 
-(-> (pocket/cache-entries "pocket-book.getting-started/process-long-text")
+(-> (pocket/cache-entries (str (ns-name *ns*) "/process-long-text"))
     first
     :fn-name)
 
-(kind/test-last [= "pocket-book.getting-started/process-long-text"])
+(kind/test-last [(fn [fn-name] (and fn-name (clojure.string/ends-with? fn-name "/process-long-text")))])
 
 ;; ## Cleanup
 

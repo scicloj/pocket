@@ -54,159 +54,159 @@
 (def v19_l51 (pocket/config))
 
 
-(def v20_l53 (kind/doc #'pocket/cached))
+(def v20_l54 (kind/doc #'pocket/cached))
 
 
 (def
- v22_l57
+ v22_l58
  (def my-result (pocket/cached #'expensive-calculation 100 200)))
 
 
-(def v23_l58 (type my-result))
+(def v23_l59 (type my-result))
 
 
-(deftest t24_l60 (is (= v23_l58 scicloj.pocket.impl.cache.Cached)))
+(deftest t24_l61 (is (= v23_l59 scicloj.pocket.impl.cache.Cached)))
 
 
-(def v26_l64 (deref my-result))
+(def v26_l65 (deref my-result))
 
 
-(deftest t27_l66 (is (= v26_l64 300)))
+(deftest t27_l67 (is (= v26_l65 300)))
 
 
-(def v29_l70 (deref my-result))
+(def v29_l71 (deref my-result))
 
 
-(deftest t30_l72 (is (= v29_l70 300)))
+(deftest t30_l73 (is (= v29_l71 300)))
 
 
-(def v31_l74 (kind/doc #'pocket/caching-fn))
+(def v31_l75 (kind/doc #'pocket/caching-fn))
 
 
 (def
- v33_l78
+ v33_l79
  (def my-caching-fn (pocket/caching-fn #'expensive-calculation)))
 
 
-(def v34_l80 (deref (my-caching-fn 3 4)))
+(def v34_l81 (deref (my-caching-fn 3 4)))
 
 
-(def v36_l84 (deref (my-caching-fn 3 4)))
+(def v36_l85 (deref (my-caching-fn 3 4)))
 
 
-(def v37_l86 (kind/doc #'pocket/maybe-deref))
+(def v37_l87 (kind/doc #'pocket/maybe-deref))
 
 
-(def v39_l90 (pocket/maybe-deref 42))
+(def v39_l91 (pocket/maybe-deref 42))
 
 
-(deftest t40_l92 (is (= v39_l90 42)))
+(deftest t40_l93 (is (= v39_l91 42)))
 
 
 (def
- v42_l96
+ v42_l97
  (pocket/maybe-deref (pocket/cached #'expensive-calculation 100 200)))
 
 
-(deftest t43_l98 (is (= v42_l96 300)))
+(deftest t43_l99 (is (= v42_l97 300)))
 
 
-(def v44_l100 (kind/doc #'pocket/->id))
+(def v44_l101 (kind/doc #'pocket/->id))
 
 
-(def v46_l104 (pocket/->id #'expensive-calculation))
+(def v46_l105 (pocket/->id #'expensive-calculation))
 
 
 (deftest
- t47_l106
- (is ((fn [id] (= (name id) "expensive-calculation")) v46_l104)))
+ t47_l107
+ (is ((fn [id] (= (name id) "expensive-calculation")) v46_l105)))
 
 
-(def v49_l110 (pocket/->id {:b 2, :a 1}))
+(def v49_l111 (pocket/->id {:b 2, :a 1}))
 
 
 (def
- v51_l115
+ v51_l116
  (pocket/->id (pocket/cached #'expensive-calculation 100 200)))
 
 
-(def v53_l119 (pocket/->id nil))
+(def v53_l120 (pocket/->id nil))
 
 
-(deftest t54_l121 (is (nil? v53_l119)))
+(deftest t54_l122 (is (nil? v53_l120)))
 
 
-(def v55_l123 (kind/doc #'pocket/set-mem-cache-options!))
+(def v55_l124 (kind/doc #'pocket/set-mem-cache-options!))
 
 
 (def
- v57_l127
+ v57_l128
  (pocket/set-mem-cache-options! {:policy :fifo, :threshold 100}))
 
 
 (def
- v59_l131
+ v59_l132
  (pocket/set-mem-cache-options! {:policy :lru, :threshold 256}))
 
 
-(def v60_l133 (kind/doc #'pocket/cleanup!))
+(def v60_l134 (kind/doc #'pocket/cleanup!))
 
 
-(def v61_l135 (pocket/cleanup!))
+(def v61_l136 (pocket/cleanup!))
 
 
-(def v62_l137 (kind/doc #'pocket/invalidate!))
+(def v62_l138 (kind/doc #'pocket/invalidate!))
 
 
-(def v64_l141 (deref (pocket/cached #'expensive-calculation 10 20)))
+(def v64_l142 (deref (pocket/cached #'expensive-calculation 10 20)))
 
 
-(def v65_l143 (pocket/invalidate! #'expensive-calculation 10 20))
+(def v65_l144 (pocket/invalidate! #'expensive-calculation 10 20))
 
 
-(def v67_l147 (deref (pocket/cached #'expensive-calculation 10 20)))
+(def v67_l148 (deref (pocket/cached #'expensive-calculation 10 20)))
 
 
-(def v68_l149 (kind/doc #'pocket/invalidate-fn!))
+(def v68_l150 (kind/doc #'pocket/invalidate-fn!))
 
 
-(def v70_l153 (deref (pocket/cached #'expensive-calculation 1 2)))
+(def v70_l154 (deref (pocket/cached #'expensive-calculation 1 2)))
 
 
-(def v71_l154 (deref (pocket/cached #'expensive-calculation 3 4)))
+(def v71_l155 (deref (pocket/cached #'expensive-calculation 3 4)))
 
 
-(def v72_l156 (pocket/invalidate-fn! #'expensive-calculation))
+(def v72_l157 (pocket/invalidate-fn! #'expensive-calculation))
 
 
-(def v73_l158 (pocket/cleanup!))
+(def v73_l159 (pocket/cleanup!))
 
 
-(def v74_l160 (kind/doc #'pocket/cache-entries))
+(def v74_l161 (kind/doc #'pocket/cache-entries))
 
 
-(def v76_l164 (deref (pocket/cached #'expensive-calculation 10 20)))
+(def v76_l165 (deref (pocket/cached #'expensive-calculation 10 20)))
 
 
-(def v77_l165 (deref (pocket/cached #'expensive-calculation 3 4)))
+(def v77_l166 (deref (pocket/cached #'expensive-calculation 3 4)))
 
 
-(def v78_l167 (pocket/cache-entries))
+(def v78_l168 (pocket/cache-entries))
 
 
-(deftest t79_l169 (is ((fn [entries] (= 2 (count entries))) v78_l167)))
+(deftest t79_l170 (is ((fn [entries] (= 2 (count entries))) v78_l168)))
 
 
 (def
- v81_l173
+ v81_l174
  (pocket/cache-entries
   "pocket-book.api-reference/expensive-calculation"))
 
 
-(def v82_l175 (kind/doc #'pocket/cache-stats))
+(def v82_l176 (kind/doc #'pocket/cache-stats))
 
 
-(def v83_l177 (pocket/cache-stats))
+(def v83_l178 (pocket/cache-stats))
 
 
-(def v84_l179 (pocket/cleanup!))
+(def v84_l180 (pocket/cleanup!))

@@ -123,4 +123,47 @@
 (def v51_l193 (pocket/cache-stats))
 
 
-(def v53_l197 (pocket/cleanup!))
+(def
+ v53_l202
+ (defn
+  process-long-text
+  [text]
+  (str "Processed: " (count text) " chars")))
+
+
+(def v54_l205 (def long-text (apply str (repeat 300 "x"))))
+
+
+(def v55_l207 (deref (pocket/cached #'process-long-text long-text)))
+
+
+(deftest
+ t56_l209
+ (is
+  ((fn [result] (clojure.string/starts-with? result "Processed:"))
+   v55_l207)))
+
+
+(def v58_l213 (kind/code (pocket/dir-tree)))
+
+
+(def
+ v60_l218
+ (->
+  (pocket/cache-entries (str (ns-name *ns*) "/process-long-text"))
+  first
+  :fn-name))
+
+
+(deftest
+ t61_l222
+ (is
+  ((fn
+    [fn-name]
+    (and
+     fn-name
+     (clojure.string/ends-with? fn-name "/process-long-text")))
+   v60_l218)))
+
+
+(def v63_l226 (pocket/cleanup!))
