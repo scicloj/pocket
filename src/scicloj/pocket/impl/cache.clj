@@ -29,7 +29,11 @@
 (defn read-meta [path]
   (let [meta-path (str path "/meta.edn")]
     (when (fs/exists? meta-path)
-      (edn/read-string (slurp meta-path)))))
+      (try
+        (edn/read-string (slurp meta-path))
+        (catch Exception e
+          (log/warn "Corrupted meta.edn at" meta-path ":" (.getMessage e))
+          nil)))))
 
 (defn write-cached! [v path meta-map]
   (fs/create-dirs path)
@@ -47,11 +51,11 @@
 (defn sha [^String s]
   (DigestUtils/sha1Hex s))
 
-(def pocket-edn
-  "Cached pocket.edn from classpath. Read once on first access."
-  (delay
-    (when-let [r (io/resource "pocket.edn")]
-      (-> r slurp edn/read-string))))
+(defn pocket-edn
+  "Read pocket.edn from classpath. Called on every access for maximum dynamism."
+  []
+  (when-let [r (io/resource "pocket.edn")]
+    (-> r slurp edn/read-string)))
 
 (def default-mem-cache-options
   {:policy :lru :threshold 256})
@@ -121,10 +125,10 @@
              idstr)))))
 
 (defn canonical-id
-  "Deep-sort all maps in an id structure for canonical string representation.
+  "Deep-sort all maps and sets in an id structure for canonical string representation.
    Walks the structure recursively: sorts map keys, recurses into sequential
    and map values. Preserves the type of sequentials (lists stay lists,
-   vectors stay vectors)."
+   vectors stay vectors). Sets are sorted into vectors for consistent string form."
   [x]
   (cond
     (instance? IPersistentMap x)
@@ -140,7 +144,7 @@
         (vec items)))
 
     (set? x)
-    x
+    (vec (sort (map canonical-id x)))
 
     :else x))
 
@@ -250,14 +254,15 @@
      :paths deleted-paths}))
 
 (defn cache-entries
-  "Scan the cache directory and return a sequence of metadata maps.
+  "Scan the cache directory and return a vector of metadata maps.
    Each map contains `:path` and any metadata from `meta.edn`.
+   Returns an empty vector if the cache directory doesn't exist.
    Optionally filter by function name."
   ([base-dir]
    (cache-entries base-dir nil))
   ([base-dir fn-name]
    (let [cache-dir (str base-dir "/.cache")]
-     (when (fs/exists? cache-dir)
+     (if (fs/exists? cache-dir)
        (into []
              (for [prefix-dir (fs/list-dir cache-dir)
                    :when (fs/directory? prefix-dir)
@@ -267,7 +272,8 @@
                          meta-map (read-meta path)]
                    :when (or (nil? fn-name)
                              (= fn-name (:fn-name meta-map)))]
-               (merge {:path path} meta-map)))))))
+               (merge {:path path} meta-map)))
+       []))))
 
 (defn cache-stats
   "Return aggregate statistics about the cache.

@@ -192,6 +192,35 @@
 
 (pocket/cache-stats)
 
+;; ## Long cache keys
+;;
+;; When a cache key string exceeds 240 characters, Pocket falls back to
+;; using a SHA-1 hash as the directory name. This ensures the filesystem
+;; can handle arbitrarily complex arguments while maintaining correct
+;; caching behavior.
+
+(defn process-long-text [text]
+  (str "Processed: " (count text) " chars"))
+
+(def long-text (apply str (repeat 300 "x")))
+
+(deref (pocket/cached #'process-long-text long-text))
+
+(kind/test-last [(fn [result] (clojure.string/starts-with? result "Processed:"))])
+
+;; The entry is stored with a hash-based directory name:
+
+(kind/code (pocket/dir-tree))
+
+;; But the `meta.edn` file inside still contains the full details,
+;; so `cache-entries` and `invalidate-fn!` work correctly:
+
+(-> (pocket/cache-entries "pocket-book.getting-started/process-long-text")
+    first
+    :fn-name)
+
+(kind/test-last [= "pocket-book.getting-started/process-long-text"])
+
 ;; ## Cleanup
 
 (pocket/cleanup!)

@@ -41,14 +41,14 @@
   []
   (or *base-cache-dir*
       (System/getenv "POCKET_BASE_CACHE_DIR")
-      (:base-cache-dir @impl/pocket-edn)))
+      (:base-cache-dir (impl/pocket-edn))))
 
 (defn- resolve-mem-cache-options
   "Resolve mem-cache options using the precedence chain."
   []
   (or *mem-cache-options*
       (some-> (System/getenv "POCKET_MEM_CACHE") edn/read-string)
-      (:mem-cache @impl/pocket-edn)
+      (:mem-cache (impl/pocket-edn))
       impl/default-mem-cache-options))
 
 (defn config

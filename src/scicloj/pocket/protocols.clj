@@ -6,3 +6,4 @@
 
 (defprotocol PIdentifiable
   (->id [this] "Return a cache key representation of this value."))
+

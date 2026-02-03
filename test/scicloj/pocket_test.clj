@@ -22,6 +22,11 @@
 (defn returns-nil []
   nil)
 
+(defn concat-strings
+  "Helper for testing long cache keys"
+  [s1 s2]
+  (str s1 s2))
+
 (deftest test-basic-caching
   (testing "Basic cached computation"
     (let [result (pocket/cached #'expensive-add 10 20)]
@@ -306,7 +311,7 @@
 
 (deftest test-pocket-edn
   (testing "pocket.edn is read from classpath"
-    (let [edn-val @impl/pocket-edn]
+    (let [edn-val (impl/pocket-edn)]
       ;; pocket.edn may or may not exist on the test classpath
       ;; just verify the delay resolves without error
       (is (or (nil? edn-val) (map? edn-val)))))
@@ -480,3 +485,38 @@
     (let [entry (first (pocket/cache-entries))]
       (is (re-find #"10" (:args-str entry)))
       (is (re-find #"20" (:args-str entry))))))
+
+(deftest test-long-cache-key-sha1-fallback
+  (testing "Cache keys longer than 240 chars use SHA-1 fallback"
+    (let [long-string (apply str (repeat 300 "x"))
+          result @(pocket/cached #'concat-strings long-string "y")]
+      (is (= (str long-string "y") result))
+      ;; Verify the entry exists and can be retrieved
+      (is (= (str long-string "y") @(pocket/cached #'concat-strings long-string "y")))
+      ;; Verify invalidate-fn! works with SHA-1 paths
+      (let [inv-result (pocket/invalidate-fn! #'concat-strings)]
+        (is (= 1 (:count inv-result)))))))
+
+(deftest test-cache-entries-empty-cache
+  (testing "cache-entries returns empty vector when cache doesn't exist"
+    (pocket/cleanup!)
+    (is (= [] (pocket/cache-entries)))
+    (is (vector? (pocket/cache-entries)))))
+
+(deftest test-corrupted-meta-edn
+  (testing "read-meta handles corrupted EDN gracefully"
+    (let [path (str test-cache-dir "/corrupted-meta")]
+      (fs/create-dirs path)
+      ;; Use truly invalid EDN (unbalanced braces)
+      (spit (str path "/meta.edn") "{:a 1 :b")
+      ;; read-meta should return nil, not throw
+      (is (nil? (impl/read-meta path))))))
+
+(deftest test-set-canonical-id
+  (testing "Sets with same elements produce same cache path regardless of order"
+    (let [c1 (pocket/cached #'expensive-add #{:a :b :c} 1)
+          c2 (pocket/cached #'expensive-add #{:c :a :b} 1)]
+      ;; canonical-id should produce same string for both
+      (is (= (str (impl/canonical-id (pocket/->id c1)))
+             (str (impl/canonical-id (pocket/->id c2))))))))
+

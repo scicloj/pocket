@@ -31,7 +31,8 @@
 ;;  :mem-cache {:policy :lru :threshold 256}}
 ;; ```
 ;;
-;; This is read once and cached. It provides defaults that can be
+;; This is read fresh on every access, so changes take effect immediately during REPL
+;; development. It provides defaults that can be
 ;; overridden by environment variables, `set-*!` calls, or `binding`.
 
 ;; ## Cache directory
