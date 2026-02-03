@@ -38,12 +38,16 @@
 (defn write-cached! [v path meta-map]
   (fs/create-dirs path)
   (cond
-    ;; nil
+    ;; nil - use marker file (small, atomic enough via spit)
     (nil? v)
     (spit (str path "/nil") "")
-    ;; else
+    ;; else - write to temp, then atomic rename
     :else
-    (nippy/freeze-to-file (str path "/value.nippy") v))
+    (let [target (str path "/value.nippy")
+          tmp (str target ".tmp")]
+      (nippy/freeze-to-file tmp v)
+      (fs/move tmp target {:replace-existing true})))
+  ;; meta.edn is small, spit is acceptable
   (when meta-map
     (write-meta! meta-map path))
   (log/debug "Cache write:" path))
@@ -51,11 +55,20 @@
 (defn sha [^String s]
   (DigestUtils/sha1Hex s))
 
+
+(def ^:private pocket-edn-cache
+  "TTL cache for pocket.edn (1 second)."
+  (atom (cc/ttl-cache-factory {} :ttl 1000)))
+
 (defn pocket-edn
-  "Read pocket.edn from classpath. Called on every access for maximum dynamism."
+  "Read pocket.edn from classpath. Cached for 1 second to avoid repeated classpath scans."
   []
-  (when-let [r (io/resource "pocket.edn")]
-    (-> r slurp edn/read-string)))
+  (cw/lookup-or-miss
+   pocket-edn-cache
+   :pocket-edn
+   (fn [_]
+     (when-let [r (io/resource "pocket.edn")]
+       (-> r slurp edn/read-string)))))
 
 (def default-mem-cache-options
   {:policy :lru :threshold 256})

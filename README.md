@@ -37,6 +37,6 @@ Pocket uses a two-layer caching architecture — durable disk storage via [Nippy
 
 ## License
 
-Copyright © 2025 Scicloj
+Copyright © 2025-2026 Scicloj
 
 Distributed under the MIT License — see [LICENSE](LICENSE).
