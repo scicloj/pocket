@@ -17,19 +17,21 @@
 
 (defn make-gfm!
   "render all as github flavored markdown"
-  []
+  [& paths]
   (clay/make! {:format [:gfm]
                :base-source-path "notebooks"
-               :source-path (->> "notebooks/chapters.edn"
-                                 slurp
-                                 clojure.edn/read-string
-                                 (map #(format "pocket_book/%s.clj" %))
-                                 (cons "index.clj"))
+               :source-path (or (seq paths)
+                                (->> "notebooks/chapters.edn"
+                                     slurp
+                                     clojure.edn/read-string
+                                     (map #(format "pocket_book/%s.clj" %))
+                                     (cons "index.clj")))
                :base-target-path "gfm"
                :show false}))
 
 (comment
   (make-book!)
-  (make-gfm!))
+  (make-gfm!)
+  (make-gfm! "notebooks/pocket_book/getting_started.clj"))
 
 
