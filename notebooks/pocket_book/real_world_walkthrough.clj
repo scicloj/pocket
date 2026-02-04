@@ -17,6 +17,11 @@
 ;; share the same cleaned data, so Pocket caches it once and
 ;; reuses it.
 ;;
+;; This builds on the concepts from
+;; [Recursive Caching in Pipelines](pocket_book.recursive_caching_in_pipelines.html),
+;; adding branching dependencies where two analyses share a common
+;; upstream computation.
+;;
 ;; The dependency graph looks like this:
 
 ^:kindly/hide-code

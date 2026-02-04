@@ -1,33 +1,41 @@
 ;; # Recursive Caching in Pipelines
 
-(ns pocket-book.recursive-caching-in-pipelines
-  (:require [pocket-book.logging]
-            [scicloj.pocket :as pocket]
-            [scicloj.kindly.v4.kind :as kind]))
-
-;; ## Setup
-
 ;; When you pass a `Cached` value as an argument to another cached function,
 ;; Pocket handles this recursively. The cache key for the outer computation
 ;; is derived from the **identity** of the inner computation (its function
 ;; name and arguments), not from its result. This means the entire pipeline's
 ;; cache key captures the full [computation graph](https://en.wikipedia.org/wiki/Dataflow_programming).
-
+;;
 ;; Pocket automatically derefs any `Cached` arguments before calling the
 ;; function, so pipeline functions receive plain values and don't need
 ;; any special handling.
 
-^:kindly/hide-code
-(kind/mermaid
- "flowchart LR
-    LD[load-dataset] --> PP[preprocess]
-    PP --> TM[train-model]")
+;; ## Setup
+
+(ns pocket-book.recursive-caching-in-pipelines
+  (:require [pocket-book.logging]
+            [scicloj.pocket :as pocket]
+            [scicloj.kindly.v4.kind :as kind]))
 
 (def cache-dir "/tmp/pocket-demo-pipelines")
 
 (pocket/set-base-cache-dir! cache-dir)
 
 (pocket/cleanup!)
+
+;; ## A three-step pipeline
+
+;; We'll build a simple data science pipeline with three stages:
+;; load data, preprocess it, and train a model. Each stage is
+;; wrapped with `caching-fn` so every call returns a `Cached` object.
+;; Passing one `Cached` result into the next stage is what makes
+;; the caching recursive.
+
+^:kindly/hide-code
+(kind/mermaid
+ "flowchart LR
+    LD[load-dataset] --> PP[preprocess]
+    PP --> TM[train-model]")
 
 ;; ## Pipeline functions
 (defn load-dataset [path]
@@ -84,6 +92,9 @@
 ;; Each step caches independently. If you change only the last step
 ;; (e.g., different training params), the upstream steps load from cache while
 ;; only the final step recomputes.
+
+;; For a fuller example with branching dependencies, see the
+;; [Real-World Walkthrough](pocket_book.real_world_walkthrough.html).
 
 ;; ## Cleanup
 

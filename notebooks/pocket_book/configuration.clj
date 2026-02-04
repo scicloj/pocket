@@ -98,6 +98,7 @@
 ;;    threads deref the same `Cached` value concurrently, the computation runs exactly once.
 ;;    This is coordinated via a [`ConcurrentHashMap`](https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/ConcurrentHashMap.html)
 ;;    of [delays](https://clojure.org/reference/concurrency#delay), so no duplicate work is performed.
+;;    See the [Concurrency chapter](pocket_book.concurrency.html) for a detailed explanation.
 ;;
 ;; By default, the in-memory layer uses an **[LRU](https://en.wikipedia.org/wiki/Cache_replacement_policies#LRU)**
 ;; (Least Recently Used) policy — see defaults above.

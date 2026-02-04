@@ -7,23 +7,23 @@
   [clojure.test :refer [deftest is]]))
 
 
+(def v2_l20 (def cache-dir "/tmp/pocket-demo-pipelines"))
+
+
+(def v3_l22 (pocket/set-base-cache-dir! cache-dir))
+
+
+(def v4_l24 (pocket/cleanup!))
+
+
 (def
- v3_l20
+ v6_l34
  (kind/mermaid
   "flowchart LR\n    LD[load-dataset] --> PP[preprocess]\n    PP --> TM[train-model]"))
 
 
-(def v4_l26 (def cache-dir "/tmp/pocket-demo-pipelines"))
-
-
-(def v5_l28 (pocket/set-base-cache-dir! cache-dir))
-
-
-(def v6_l30 (pocket/cleanup!))
-
-
 (def
- v8_l33
+ v8_l41
  (defn
   load-dataset
   [path]
@@ -33,7 +33,7 @@
 
 
 (def
- v9_l38
+ v9_l46
  (defn
   preprocess
   [data opts]
@@ -42,11 +42,11 @@
   (update
    data
    :data
-   (fn* [p1__38141#] (map (fn [x] (* x (:scale opts))) p1__38141#)))))
+   (fn* [p1__38930#] (map (fn [x] (* x (:scale opts))) p1__38930#)))))
 
 
 (def
- v10_l43
+ v10_l51
  (defn
   train-model
   [data params]
@@ -55,17 +55,17 @@
   {:model :trained, :accuracy 0.95, :data data}))
 
 
-(def v12_l50 (def load-dataset* (pocket/caching-fn #'load-dataset)))
+(def v12_l58 (def load-dataset* (pocket/caching-fn #'load-dataset)))
 
 
-(def v13_l51 (def preprocess* (pocket/caching-fn #'preprocess)))
+(def v13_l59 (def preprocess* (pocket/caching-fn #'preprocess)))
 
 
-(def v14_l52 (def train-model* (pocket/caching-fn #'train-model)))
+(def v14_l60 (def train-model* (pocket/caching-fn #'train-model)))
 
 
 (def
- v16_l59
+ v16_l67
  (time
   (->
    "data/raw.csv"
@@ -76,11 +76,11 @@
    (select-keys [:model :accuracy]))))
 
 
-(deftest t17_l67 (is (= v16_l59 {:model :trained, :accuracy 0.95})))
+(deftest t17_l75 (is (= v16_l67 {:model :trained, :accuracy 0.95})))
 
 
 (def
- v19_l72
+ v19_l80
  (time
   (->
    "data/raw.csv"
@@ -91,7 +91,7 @@
    (select-keys [:model :accuracy]))))
 
 
-(deftest t20_l80 (is (= v19_l72 {:model :trained, :accuracy 0.95})))
+(deftest t20_l88 (is (= v19_l80 {:model :trained, :accuracy 0.95})))
 
 
-(def v22_l90 (pocket/cleanup!))
+(def v22_l101 (pocket/cleanup!))

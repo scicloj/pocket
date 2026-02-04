@@ -44,23 +44,23 @@
 
 
 (def
- v15_l121
+ v15_l122
  (pocket/set-mem-cache-options! {:policy :fifo, :threshold 100}))
 
 
 (deftest
- t16_l123
- (is ((fn [result] (= :fifo (:policy result))) v15_l121)))
+ t16_l124
+ (is ((fn [result] (= :fifo (:policy result))) v15_l122)))
 
 
 (def
- v18_l127
+ v18_l128
  (pocket/set-mem-cache-options! {:policy :ttl, :ttl 60000}))
 
 
 (def
- v20_l131
+ v20_l132
  (pocket/set-mem-cache-options! {:policy :lru, :threshold 256}))
 
 
-(def v22_l154 (pocket/cleanup!))
+(def v22_l155 (pocket/cleanup!))
