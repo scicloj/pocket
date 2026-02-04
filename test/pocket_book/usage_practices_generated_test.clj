@@ -24,7 +24,7 @@
 (deftest
  t7_l43
  (is
-  ((fn* [p1__40644#] (re-find #"requires a var" p1__40644#)) v6_l38)))
+  ((fn* [p1__41445#] (re-find #"requires a var" p1__41445#)) v6_l38)))
 
 
 (def v9_l55 (pocket/cleanup!))
@@ -163,54 +163,54 @@
 (def v63_l205 (def pending-value (pocket/cached #'transform 99)))
 
 
-(def v64_l207 (pr-str pending-value))
+(def v65_l208 (pr-str pending-value))
 
 
 (deftest
- t66_l209
- (is ((fn* [p1__40645#] (re-find #":pending" p1__40645#)) v64_l207)))
+ t66_l210
+ (is ((fn* [p1__41446#] (re-find #":pending" p1__41446#)) v65_l208)))
 
 
-(def v67_l211 (deref pending-value))
+(def v67_l212 (deref pending-value))
 
 
-(def v68_l213 (pr-str pending-value))
+(def v69_l215 (pr-str pending-value))
 
 
 (deftest
- t70_l215
- (is ((fn* [p1__40646#] (re-find #":cached" p1__40646#)) v68_l213)))
+ t70_l217
+ (is ((fn* [p1__41447#] (re-find #":cached" p1__41447#)) v69_l215)))
 
 
-(def v72_l235 (pocket/cleanup!))
+(def v72_l237 (pocket/cleanup!))
 
 
 (def
- v73_l237
+ v73_l239
  (defn
   process-long-text
   [text]
   (str "Processed: " (count text) " chars")))
 
 
-(def v74_l240 (def long-text (apply str (repeat 300 "x"))))
+(def v74_l242 (def long-text (apply str (repeat 300 "x"))))
 
 
-(def v75_l242 (deref (pocket/cached #'process-long-text long-text)))
+(def v75_l244 (deref (pocket/cached #'process-long-text long-text)))
 
 
 (deftest
- t76_l244
+ t76_l246
  (is
   ((fn [result] (clojure.string/starts-with? result "Processed:"))
-   v75_l242)))
+   v75_l244)))
 
 
-(def v78_l248 (kind/code (pocket/dir-tree)))
+(def v78_l250 (kind/code (pocket/dir-tree)))
 
 
 (def
- v80_l253
+ v80_l255
  (->
   (pocket/cache-entries (str (ns-name *ns*) "/process-long-text"))
   first
@@ -218,26 +218,26 @@
 
 
 (deftest
- t81_l257
+ t81_l259
  (is
   ((fn
     [fn-name]
     (and
      fn-name
      (clojure.string/ends-with? fn-name "/process-long-text")))
-   v80_l253)))
+   v80_l255)))
 
 
-(def v83_l281 (pocket/cleanup!))
+(def v83_l283 (pocket/cleanup!))
 
 
-(def v84_l283 (defn generate-data [n] (doall (range n))))
+(def v84_l285 (defn generate-data [n] (doall (range n))))
 
 
-(def v86_l286 (deref (pocket/cached #'generate-data 5)))
+(def v85_l289 (deref (pocket/cached #'generate-data 5)))
 
 
-(deftest t87_l288 (is (= v86_l286 [0 1 2 3 4])))
+(deftest t86_l291 (is (= v85_l289 [0 1 2 3 4])))
 
 
-(def v89_l355 (pocket/cleanup!))
+(def v88_l358 (pocket/cleanup!))

@@ -36,7 +36,7 @@
 (defn example-fn [x] (* x x))
 
 (try
-  (pocket/cached example-fn 5) ; bare function
+  (pocket/cached example-fn 5)
   (catch Exception e
     (ex-message e)))
 
@@ -152,7 +152,7 @@
       calls @call-count]
   {:result result :calls calls})
 
-(kind/test-last [= {:result 25 :calls 1}]) ; still 1, no recomputation
+(kind/test-last [= {:result 25 :calls 1}])
 
 ;; ## REPL Development Workflow
 
@@ -204,13 +204,15 @@
 
 (def pending-value (pocket/cached #'transform 99))
 
-(pr-str pending-value) ; shows :pending
+;; Before deref:
+(pr-str pending-value)
 
 (kind/test-last [#(re-find #":pending" %)])
 
 (deref pending-value)
 
-(pr-str pending-value) ; now shows :cached
+;; After deref:
+(pr-str pending-value)
 
 (kind/test-last [#(re-find #":cached" %)])
 
@@ -281,7 +283,8 @@
 (pocket/cleanup!)
 
 (defn generate-data [n]
-  (doall (range n))) ; doall forces evaluation
+  ;; doall forces full evaluation of the lazy sequence
+  (doall (range n)))
 
 (deref (pocket/cached #'generate-data 5))
 
