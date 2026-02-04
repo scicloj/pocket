@@ -47,21 +47,21 @@
 
 
 (def
- v23_l70
+ v23_l71
  (extend-protocol
   pocket/PIdentifiable
   DatasetRef
   (->id [this] (symbol (str (:source this) "-v" (:version this))))))
 
 
-(def v25_l77 (pocket/->id (->DatasetRef "census" 3)))
+(def v25_l78 (pocket/->id (->DatasetRef "census" 3)))
 
 
-(deftest t26_l79 (is (= v25_l77 'census-v3)))
+(deftest t26_l80 (is (= v25_l78 'census-v3)))
 
 
 (def
- v28_l83
+ v28_l84
  (defn
   analyze-dataset
   "Simulate analyzing a dataset."
@@ -80,7 +80,7 @@
 
 
 (def
- v30_l95
+ v30_l96
  (def
   analysis
   (pocket/cached
@@ -89,14 +89,14 @@
    {:method :regression})))
 
 
-(def v31_l100 (pocket/->id analysis))
+(def v31_l101 (pocket/->id analysis))
 
 
-(def v33_l104 (deref analysis))
+(def v33_l105 (deref analysis))
 
 
 (deftest
- t34_l106
+ t34_l107
  (is
   ((fn
     [result]
@@ -104,14 +104,14 @@
      (= "census" (:source result))
      (= 3 (:version result))
      (= :regression (:method result))))
-   v33_l104)))
+   v33_l105)))
 
 
-(def v36_l112 (deref analysis))
+(def v36_l113 (deref analysis))
 
 
 (def
- v38_l116
+ v38_l117
  (deref
   (pocket/cached
    #'analyze-dataset
@@ -119,7 +119,7 @@
    {:method :regression})))
 
 
-(def v40_l124 (kind/code (pocket/dir-tree)))
+(def v40_l125 (kind/code (pocket/dir-tree)))
 
 
-(def v42_l153 (pocket/cleanup!))
+(def v42_l154 (pocket/cleanup!))

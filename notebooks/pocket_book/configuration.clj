@@ -36,8 +36,8 @@
 ;;  :mem-cache {:policy :lru :threshold 256}}
 ;; ```
 ;;
-;; This is read fresh on every access, so changes take effect immediately during REPL
-;; development. It provides defaults that can be
+;; This is re-read frequently (with a short TTL cache), so changes take
+;; effect quickly during REPL development. It provides defaults that can be
 ;; overridden by environment variables, `set-*!` calls, or `binding`.
 
 ;; ## Library defaults

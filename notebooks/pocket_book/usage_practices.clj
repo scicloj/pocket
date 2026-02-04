@@ -269,12 +269,15 @@
 ;; - Records and most deftypes
 ;; - Java Serializable objects
 
+;; ### ⚠️ Requires Care
+;; - Lazy sequences — may serialize only the realized portion;
+;;   force them first with `doall` (see below)
+;;
 ;; ### ❌ Cannot Cache
 ;; - Open file handles, streams
 ;; - Network connections, sockets
 ;; - Functions, closures (use vars instead)
 ;; - Atoms, refs, agents (stateful references)
-;; - Lazy sequences (force them first with `doall`)
 
 ;; ### Lazy Sequence Gotcha
 

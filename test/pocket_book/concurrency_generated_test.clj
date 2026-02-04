@@ -69,7 +69,7 @@
     [{:keys [results computation-count]}]
     (and
      (= 5 (count results))
-     (every? (fn* [p1__42486#] (= 100 p1__42486#)) results)
+     (every? (fn* [p1__43287#] (= 100 p1__43287#)) results)
      (= 1 computation-count)))
    v15_l176)))
 
@@ -231,8 +231,8 @@
    futures
    (mapv
     (fn*
-     [p1__42487#]
-     (future @(pocket/cached #'slow-computation p1__42487#)))
+     [p1__43288#]
+     (future @(pocket/cached #'slow-computation p1__43288#)))
     [40 41 42])
    results
    (mapv deref futures)
@@ -287,7 +287,7 @@
        no-recompute?]}]
     (and
      (= 3 (count results))
-     (every? (fn* [p1__42488#] (= 2500 p1__42488#)) results)
+     (every? (fn* [p1__43289#] (= 2500 p1__43289#)) results)
      (= 1 count-after-compute)
      (= 1 count-after-disk-hits)
      no-recompute?))

@@ -61,10 +61,11 @@
 
 (defrecord DatasetRef [source version])
 
-;; Without extending the protocol, a `DatasetRef` would use its
-;; default `toString` representation as its identity — which works
-;; but isn't very readable in cache directory names.
-;;
+;; Without extending the protocol, a `DatasetRef` would be treated
+;; as a plain map — its identity would be something like
+;; `{:source "census", :version 3}`, which works but isn't very
+;; readable in cache directory names.
+
 ;; Let's give it a concise, meaningful identity:
 
 (extend-protocol pocket/PIdentifiable
