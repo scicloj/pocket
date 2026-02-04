@@ -6,7 +6,12 @@
 ;; # Usage Practices
 
 ;; This chapter covers recommended patterns and practices for
-;; working effectively with Pocket during development.
+;; working effectively with Pocket.
+
+;; ## Setup
+
+(def test-dir "/tmp/pocket-dev-practices")
+(pocket/set-base-cache-dir! test-dir)
 
 ;; ## Function Identity: Always Use Vars
 
@@ -26,9 +31,6 @@
 ;; that survive restarts.
 
 ;; Pocket validates this and throws a clear error if you forget:
-
-(def test-dir "/tmp/pocket-dev-practices")
-(pocket/set-base-cache-dir! test-dir)
 
 (defn example-fn [x] (* x x))
 
@@ -58,13 +60,22 @@
 
 (kind/test-last [= 20])
 
-;; Function implementation changed — invalidate:
+;; Function implementation changed — invalidate a single entry:
 (pocket/invalidate! #'transform 10)
+
+;; Or invalidate all entries for a function:
+
+(deref (pocket/cached #'transform 1))
+(deref (pocket/cached #'transform 2))
+
+(pocket/invalidate-fn! #'transform)
 
 ;; ### Strategy 2: Versioning Pattern
 
 ;; Add a version key to your function's input. Bumping the version
 ;; creates new cache entries while preserving old ones for comparison:
+
+(pocket/cleanup!)
 
 (defn process-data [{:keys [data version]}]
   {:result (reduce + data)
@@ -164,7 +175,25 @@
 (kind/test-last [= 3])
 
 ;; Visualize cache structure:
-(println (pocket/dir-tree))
+(kind/code (pocket/dir-tree))
+
+;; Each directory contains a `meta.edn` file with metadata
+;; about the cached computation:
+
+(-> (pocket/cache-entries)
+    first
+    :path
+    (str "/meta.edn")
+    slurp
+    clojure.edn/read-string)
+
+;; This same information is available through the API:
+
+(pocket/cache-entries)
+
+;; Filter entries by function name:
+
+(pocket/cache-entries (str (ns-name *ns*) "/transform"))
 
 ;; ### Checking Cached Status
 
@@ -195,6 +224,37 @@
 ;; - `Cache hit (disk): ...` — loaded from disk
 ;; - `Cache write: ...` — written to disk
 
+;; ## Long Cache Keys
+
+;; When a cache key string exceeds 240 characters, Pocket falls back to
+;; using a SHA-1 hash as the directory name. This ensures the filesystem
+;; can handle arbitrarily complex arguments while maintaining correct
+;; caching behavior.
+
+(pocket/cleanup!)
+
+(defn process-long-text [text]
+  (str "Processed: " (count text) " chars"))
+
+(def long-text (apply str (repeat 300 "x")))
+
+(deref (pocket/cached #'process-long-text long-text))
+
+(kind/test-last [(fn [result] (clojure.string/starts-with? result "Processed:"))])
+
+;; The entry is stored with a hash-based directory name:
+
+(kind/code (pocket/dir-tree))
+
+;; But `meta.edn` inside still contains the full details,
+;; so `cache-entries` and `invalidate-fn!` work correctly:
+
+(-> (pocket/cache-entries (str (ns-name *ns*) "/process-long-text"))
+    first
+    :fn-name)
+
+(kind/test-last [(fn [fn-name] (and fn-name (clojure.string/ends-with? fn-name "/process-long-text")))])
+
 ;; ## Serialization Constraints
 
 ;; Pocket uses [Nippy](https://github.com/ptaoussanis/nippy) for
@@ -217,6 +277,8 @@
 
 ;; Lazy sequences may cause issues. Force them before caching:
 
+(pocket/cleanup!)
+
 (defn generate-data [n]
   (doall (range n)))  ; doall forces evaluation
 
@@ -224,42 +286,69 @@
 
 (kind/test-last [= [0 1 2 3 4]])
 
-;; ## When to Use Pocket vs Memoize
+;; ## When to Use Pocket
+;;
+;; ### Good use cases
+;;
+;; - **Data science pipelines** with expensive intermediate steps
+;;   (data loading, preprocessing, feature engineering, model training)
+;; - **Reproducible research** where cached intermediate results let you
+;;   iterate on downstream steps without re-running upstream computations
+;; - **Long-running computations** (minutes to hours) that need to survive
+;;   JVM restarts, crashes, or machine reboots
+;; - **Multi-threaded workflows** where multiple threads may request the
+;;   same expensive computation — Pocket ensures it runs only once
+;;
+;; ### When to use something else
+;;
+;; - **Fast computations** (milliseconds) — use `clojure.core/memoize`
+;; - **Memory-only caching** within a single session — use `memoize` or
+;;   [`core.memoize`](https://github.com/clojure/core.memoize)
+;; - **Frequently changing function implementations** — Pocket doesn't
+;;   detect code changes, so you'd need to manually invalidate or use
+;;   the versioning pattern
+;;
+;; ### Comparison to alternatives
+;;
+;; | Feature | Pocket | `clojure.core/memoize` | `core.memoize` |
+;; |---------|--------|------------------------|----------------|
+;; | Persistence | Disk + memory | Memory only | Memory only |
+;; | Cross-session | Yes | No | No |
+;; | Content-addressable | Yes | No | No |
+;; | Lazy evaluation | `IDeref` | Eager | Eager |
+;; | Eviction policies | LRU, FIFO, TTL, etc. | None | LRU, TTL, etc. |
+;; | Thread-safe (single computation) | Yes | No | Yes |
+;; | Pipeline caching | Yes (recursive) | No | No |
 
-;; | Use Case | Solution |
-;; |----------|----------|
-;; | Fast computations (< 100ms) | `clojure.core/memoize` |
-;; | Single-session memory cache | `clojure.core/memoize` or `core.memoize` |
-;; | Expensive computations (seconds+) | **Pocket** |
-;; | Cross-session persistence | **Pocket** |
-;; | Data science pipelines | **Pocket** |
-;; | Concurrent access with single computation | **Pocket** |
-
-;; Rule of thumb: if the computation takes longer than disk I/O,
-;; Pocket is beneficial.
-
-;; ## Project Configuration
-
-;; For team projects, use `pocket.edn` at the classpath root:
-
-;; ```edn
-;; {:base-cache-dir ".cache/my-project"
-;;  :mem-cache {:policy :lru :threshold 256}}
-;; ```
-
-;; This ensures consistent configuration without code changes,
-;; and works correctly in pooled thread environments where
-;; `binding` doesn't propagate.
+;; ## Known Limitations
+;;
+;; - **No automatic cache invalidation** — Pocket doesn't detect when a
+;;   function's implementation changes. Use `invalidate!`, `invalidate-fn!`,
+;;   or the versioning pattern described above.
+;;
+;; - **Requires serializable values** — Nippy handles most Clojure types,
+;;   but you can't cache functions, atoms, channels, file handles, or
+;;   other stateful objects.
+;;
+;; - **Disk cache grows indefinitely** — The in-memory cache supports
+;;   eviction policies (LRU, TTL, etc.), but the disk cache has no
+;;   automatic cleanup. Use `cleanup!` or `invalidate-fn!` periodically
+;;   if disk space is a concern.
+;;
+;; - **No disk cache TTL** — Cached values on disk never expire
+;;   automatically. If you need time-based expiration, you'll need to
+;;   manage it externally or use `cleanup!`.
 
 ;; ## Summary
 
 ;; | Practice | Recommendation |
 ;; |----------|----------------|
 ;; | Function identity | Always use vars (`#'fn-name`) |
-;; | Invalidation | Manual or versioning pattern |
+;; | Invalidation | Manual, versioning, or full cleanup |
 ;; | Testing | Use `binding` + cleanup fixtures |
 ;; | Debugging | Enable logging, use introspection |
+;; | Long cache keys | Auto-handled with SHA-1 fallback |
 ;; | Serialization | Avoid stateful objects, force lazy seqs |
-;; | Configuration | Use `pocket.edn` for projects |
+;; | Configuration | Use `pocket.edn` — see [Configuration](pocket_book.configuration.html) |
 
 (pocket/cleanup!)

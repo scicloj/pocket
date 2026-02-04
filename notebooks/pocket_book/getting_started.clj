@@ -93,194 +93,29 @@
 ;;; Loading nil from cache:
 (deref nil-result)
 
-;; ## Usage notes
-
-;; ### Use [vars](https://clojure.org/reference/vars) for functions
+;; ## Important: use vars for functions
 ;;
-;; Always use `#'function-name` (var), not `function-name` (function object).
-;; Vars have stable names that produce consistent cache keys across sessions.
-;; Function objects have unstable identity and would create a new cache entry
-;; every time the code is reloaded.
+;; Always pass functions as **vars** (`#'fn-name`), not as bare function
+;; objects. Vars have stable names that produce consistent cache keys
+;; across sessions. Pocket throws an error if you forget:
 ;;
 ;; ```clojure
-;; ;; ✅ Good — stable cache key from var name
-;; (pocket/cached #'my-function args)
-;;
-;; ;; ❌ Bad — unstable identity, defeats caching
-;; (pocket/cached my-function args)
+;; ;; ✅ (pocket/cached #'my-function args)
+;; ;; ❌ (pocket/cached my-function args)
 ;; ```
 ;;
-;; Pocket will throw an error if you pass a bare function instead of a var,
-;; so this mistake is caught immediately rather than producing unreachable
-;; cache entries.
+;; See the [Usage Practices](pocket_book.usage_practices.html) chapter
+;; for a detailed explanation and more best practices.
 
-;; ### [Cache invalidation](https://en.wikipedia.org/wiki/Cache_invalidation)
+;; ## Next steps
 ;;
-;; Pocket does **not** detect function implementation changes. If you modify
-;; a function's body, the cache key remains the same (it's based on the
-;; function name and arguments, not the implementation).
-;;
-;; You can invalidate cached entries at different levels of granularity:
-;;
-;; - `invalidate!` — remove a specific entry (by var + args)
-;; - `invalidate-fn!` — remove all entries for a given function
-;; - `cleanup!` — remove everything
-
-;; For example, to invalidate a single cached result:
-
-(deref (pocket/cached #'expensive-calculation 10 20))
-
-(pocket/invalidate! #'expensive-calculation 10 20)
-
-;; Or invalidate all cached results for a function:
-
-(deref (pocket/cached #'expensive-calculation 1 2))
-(deref (pocket/cached #'expensive-calculation 3 4))
-
-(pocket/invalidate-fn! #'expensive-calculation)
-
-;; ### Versioning function inputs
-;;
-;; Since Pocket derives cache keys from function name and arguments (not the
-;; function body), changing a function's implementation won't automatically
-;; produce a new cache entry. Rather than invalidating the cache, a practical
-;; approach is to add a version key to the function's input map. When you
-;; change the implementation, bump the version — Pocket will treat it as
-;; a new computation with a distinct cache key:
-
-(defn process-data [data opts]
-  ;; v3: switched from mean to median
-  (:data data))
-
-;;; Version 3 of the processing:
-(deref (pocket/cached #'process-data
-                      {:data [1 2 3]}
-                      {:scale 2 :version 3}))
-
-;; When the implementation changes again, simply bump to `:version 4`.
-;; Previous cached results remain on disk (useful if you need to compare),
-;; while the new version computes fresh results.
-
-;; ## What's on disk?
-;;
-;; Pocket names cache directories after the actual Clojure call that
-;; produced them — the function name and its arguments — so you can
-;; tell at a glance what each entry represents:
-
-(kind/code (pocket/dir-tree))
-
-;; Some prefix directories may appear empty — those held entries
-;; that were removed by the `invalidate!` and `invalidate-fn!`
-;; calls above.
-
-;; Each directory also contains a `meta.edn` file with metadata
-;; about the cached computation:
-
-(-> (pocket/cache-entries)
-    first
-    :path
-    (str "/meta.edn")
-    slurp
-    clojure.edn/read-string)
-
-;; This same information is available through the API, without
-;; reading files directly:
-
-(pocket/cache-entries)
-
-;; And as aggregate statistics:
-
-(pocket/cache-stats)
-
-;; ## Long cache keys
-;;
-;; When a cache key string exceeds 240 characters, Pocket falls back to
-;; using a SHA-1 hash as the directory name. This ensures the filesystem
-;; can handle arbitrarily complex arguments while maintaining correct
-;; caching behavior.
-
-(defn process-long-text [text]
-  (str "Processed: " (count text) " chars"))
-
-(def long-text (apply str (repeat 300 "x")))
-
-(deref (pocket/cached #'process-long-text long-text))
-
-(kind/test-last [(fn [result] (clojure.string/starts-with? result "Processed:"))])
-
-;; The entry is stored with a hash-based directory name:
-
-(kind/code (pocket/dir-tree))
-
-;; But the `meta.edn` file inside still contains the full details,
-;; so `cache-entries` and `invalidate-fn!` work correctly:
-
-(-> (pocket/cache-entries (str (ns-name *ns*) "/process-long-text"))
-    first
-    :fn-name)
-
-(kind/test-last [(fn [fn-name] (and fn-name (clojure.string/ends-with? fn-name "/process-long-text")))])
+;; - [Configuration](pocket_book.configuration.html) — cache directory,
+;;   in-memory eviction policies, `pocket.edn`
+;; - [Recursive Caching in Pipelines](pocket_book.recursive_caching_in_pipelines.html) —
+;;   chaining cached computations
+;; - [Usage Practices](pocket_book.usage_practices.html) — invalidation
+;;   strategies, testing, serialization, and more
 
 ;; ## Cleanup
 
 (pocket/cleanup!)
-
-;; ## Serialization
-;;
-;; Pocket uses [Nippy](https://github.com/taoensso/nippy) for serialization.
-;; Most Clojure data types are supported, but you cannot cache values that
-;; aren't serializable — such as open file handles, network connections,
-;; or stateful Java objects.
-
-;; ## When to use Pocket
-;;
-;; ### Good use cases
-;;
-;; - **Data science pipelines** with expensive intermediate steps
-;;   (data loading, preprocessing, feature engineering, model training)
-;; - **Reproducible research** where cached intermediate results let you
-;;   iterate on downstream steps without re-running upstream computations
-;; - **Long-running computations** (minutes to hours) that need to survive
-;;   JVM restarts, crashes, or machine reboots
-;; - **Multi-threaded workflows** where multiple threads may request the
-;;   same expensive computation — Pocket ensures it runs only once
-;;
-;; ### When to use something else
-;;
-;; - **Fast computations** (milliseconds) — use `clojure.core/memoize`
-;; - **Memory-only caching** within a single session — use `memoize` or
-;;   [`core.memoize`](https://github.com/clojure/core.memoize)
-;; - **Frequently changing function implementations** — Pocket doesn't
-;;   detect code changes, so you'd need to manually invalidate or use
-;;   the versioning pattern
-;;
-;; ### Comparison to alternatives
-;;
-;; | Feature | Pocket | `clojure.core/memoize` | `core.memoize` |
-;; |---------|--------|------------------------|----------------|
-;; | Persistence | Disk + memory | Memory only | Memory only |
-;; | Cross-session | Yes | No | No |
-;; | Content-addressable | Yes | No | No |
-;; | Lazy evaluation | `IDeref` | Eager | Eager |
-;; | Eviction policies | LRU, FIFO, TTL, etc. | None | LRU, TTL, etc. |
-;; | Thread-safe (single computation) | Yes | No | Yes |
-;; | Pipeline caching | Yes (recursive) | No | No |
-;;
-;; ## Known limitations
-;;
-;; - **No automatic cache invalidation** — Pocket doesn't detect when a
-;;   function's implementation changes. Use `invalidate!`, `invalidate-fn!`,
-;;   or the versioning pattern described above.
-;;
-;; - **Requires serializable values** — Nippy handles most Clojure types,
-;;   but you can't cache functions, atoms, channels, file handles, or
-;;   other stateful objects.
-;;
-;; - **Disk cache grows indefinitely** — The in-memory cache supports
-;;   eviction policies (LRU, TTL, etc.), but the disk cache has no
-;;   automatic cleanup. Use `cleanup!` or `invalidate-fn!` periodically
-;;   if disk space is a concern.
-;;
-;; - **No disk cache TTL** — Cached values on disk never expire
-;;   automatically. If you need time-based expiration, you'll need to
-;;   manage it externally or use `cleanup!`.
