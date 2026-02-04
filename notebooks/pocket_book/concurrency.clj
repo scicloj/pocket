@@ -13,16 +13,15 @@
 ;; ## The Challenge
 
 ;; The naive approach to caching — check if cached, compute if not — has a race condition:
-
-^:kindly/hide-code
-(kind/hiccup
- [:pre
-  "Thread A                    Thread B
-────────                    ────────
-check cache → miss          check cache → miss
-compute value               compute value     ← duplicate!
-store result                store result"])
-
+;;
+;; ```
+;; Thread A                    Thread B
+;; ────────                    ────────
+;; check cache → miss          check cache → miss
+;; compute value               compute value     ← duplicate!
+;; store result                store result
+;; ```
+;;
 ;; Both threads see the cache miss and both compute the value.
 ;; For expensive computations (minutes, hours), this wastes resources.
 
@@ -48,22 +47,22 @@ store result                store result"])
 
 ;; Pocket adds a `ConcurrentHashMap` layer to synchronize in-flight computations:
 
-^:kindly/hide-code
-(kind/code
- "(def ^ConcurrentHashMap in-flight
-  (java.util.concurrent.ConcurrentHashMap.))
-
-;; Inside the miss-fn:
-(let [d (.computeIfAbsent
-          in-flight path
-          (fn [_]
-            (delay
-              (try
-                ;; disk check + computation here
-                (finally
-                  (.remove in-flight path))))))]
-  @d)")
-
+;; ```clojure
+;; (def ^ConcurrentHashMap in-flight
+;;   (java.util.concurrent.ConcurrentHashMap.))
+;;
+;; ;; Inside the miss-fn:
+;; (let [d (.computeIfAbsent
+;;           in-flight path
+;;           (fn [_]
+;;             (delay
+;;               (try
+;;                 ;; disk check + computation here
+;;                 (finally
+;;                   (.remove in-flight path))))))]
+;;   @d)
+;; ```
+;;
 ;; `computeIfAbsent` guarantees that only **one thread** creates the delay
 ;; for a given key. All concurrent threads receive the same delay instance.
 
@@ -88,30 +87,34 @@ store result                store result"])
 ;; ## Architecture Layers
 
 ^:kindly/hide-code
-(kind/hiccup
- [:table {:style "border-collapse: collapse; width: 100%;"}
-  [:thead
-   [:tr
-    [:th {:style "border: 1px solid #ddd; padding: 8px; text-align: left;"} "Layer"]
-    [:th {:style "border: 1px solid #ddd; padding: 8px; text-align: left;"} "Purpose"]
-    [:th {:style "border: 1px solid #ddd; padding: 8px; text-align: left;"} "Guarantee"]]]
-  [:tbody
-   [:tr
-    [:td {:style "border: 1px solid #ddd; padding: 8px;"} "ConcurrentHashMap"]
-    [:td {:style "border: 1px solid #ddd; padding: 8px;"} "Delay creation"]
-    [:td {:style "border: 1px solid #ddd; padding: 8px;"} "One delay per key"]]
-   [:tr
-    [:td {:style "border: 1px solid #ddd; padding: 8px;"} "delay"]
-    [:td {:style "border: 1px solid #ddd; padding: 8px;"} "Computation"]
-    [:td {:style "border: 1px solid #ddd; padding: 8px;"} "One execution per delay"]]
-   [:tr
-    [:td {:style "border: 1px solid #ddd; padding: 8px;"} "core.cache (mem-cache)"]
-    [:td {:style "border: 1px solid #ddd; padding: 8px;"} "In-memory caching"]
-    [:td {:style "border: 1px solid #ddd; padding: 8px;"} "Fast repeated access"]]
-   [:tr
-    [:td {:style "border: 1px solid #ddd; padding: 8px;"} "Disk cache"]
-    [:td {:style "border: 1px solid #ddd; padding: 8px;"} "Persistence"]
-    [:td {:style "border: 1px solid #ddd; padding: 8px;"} "Cross-session caching"]]]])
+(kind/mermaid
+ "flowchart TB
+    subgraph Request
+    D[deref Cached]
+    end
+    subgraph Synchronization
+    CHM[ConcurrentHashMap\\nin-flight]
+    DEL[delay]
+    end
+    subgraph Caching
+    MEM[Memory Cache\\ncore.cache]
+    DISK[Disk Cache\\nNippy files]
+    end
+    D --> CHM
+    CHM -->|one delay per key| DEL
+    DEL -->|on miss| MEM
+    MEM -->|on miss| DISK
+    DISK -->|on miss| COMP[Compute]
+    COMP --> DISK
+    DISK --> MEM
+    MEM --> D")
+
+;; | Layer | Purpose | Guarantee |
+;; |-------|---------|-----------|
+;; | ConcurrentHashMap | Delay creation | One delay per key |
+;; | delay | Computation | One execution per delay |
+;; | core.cache (mem-cache) | In-memory caching | Fast repeated access |
+;; | Disk cache | Persistence | Cross-session caching |
 
 ;; ## Concurrency Scenarios
 
@@ -156,16 +159,15 @@ store result                store result"])
 
 ;; Multiple threads deref the same `Cached` object while the computation
 ;; is still running. All should receive the same result from a single computation.
-
-^:kindly/hide-code
-(kind/hiccup
- [:pre
-  "Timeline (ms):   0         100        300        400
-                  │          │          │          │
-Thread A:        [─── request ───][─── computing ───]──→ result
-Thread B:                   [─── request ───][ wait ]──→ result
-                                              ↑
-                              B waits for A's computation"])
+;;
+;; ```
+;; Timeline (ms):   0         100        300        400
+;;                  │          │          │          │
+;; Thread A:       [─── request ───][─── computing ───]──→ result
+;; Thread B:                  [─── request ───][ wait ]──→ result
+;;                                              ↑
+;;                              B waits for A's computation
+;; ```
 
 (fresh-scenario!)
 
@@ -180,7 +182,8 @@ Thread B:                   [─── request ───][ wait ]──→ resul
 
 (kind/test-last
  [(fn [{:keys [results computation-count]}]
-    (and (every? #(= 100 %) results)
+    (and (= 5 (count results))
+         (every? #(= 100 %) results)
          (= 1 computation-count)))])
 
 ;; ---
@@ -189,36 +192,43 @@ Thread B:                   [─── request ───][ wait ]──→ resul
 
 ;; After the first computation, subsequent requests hit the memory cache
 ;; instantly (no disk I/O, no recomputation).
-
-^:kindly/hide-code
-(kind/hiccup
- [:pre
-  "Timeline:
-  Thread A:  [── computing ──]
-                            ↓
-                       mem-cache populated
-  Thread B:                          [request]──→ instant result
-                                        ↑
-                                  memory cache hit"])
+;;
+;; ```
+;; Timeline:
+;; Thread A:  [── computing ──]
+;;                           ↓
+;;                      mem-cache populated
+;; Thread B:                         [request]──→ instant result
+;;                                       ↑
+;;                                 memory cache hit
+;; ```
 
 (fresh-scenario!)
 
-;; First request computes:
-@(pocket/cached #'slow-computation 20)
+;; First request computes, second is instant (memory hit):
 
-;; Second request should be instant (memory hit):
-(let [start (System/currentTimeMillis)
-      result @(pocket/cached #'slow-computation 20)
-      elapsed (- (System/currentTimeMillis) start)]
-  {:result result
-   :elapsed-ms elapsed
-   :computation-count @computation-count})
+(let [;; First request - computes
+      result-1 @(pocket/cached #'slow-computation 20)
+      count-after-first @computation-count
+      ;; Second request - should hit memory cache
+      start (System/currentTimeMillis)
+      result-2 @(pocket/cached #'slow-computation 20)
+      elapsed (- (System/currentTimeMillis) start)
+      count-after-second @computation-count]
+  {:first-result result-1
+   :second-result result-2
+   :second-elapsed-ms elapsed
+   :computations-after-first count-after-first
+   :computations-after-second count-after-second})
 
 (kind/test-last
- [(fn [{:keys [result elapsed-ms computation-count]}]
-    (and (= 400 result)
-         (< elapsed-ms 50)
-         (= 1 computation-count)))])
+ [(fn [{:keys [first-result second-result second-elapsed-ms
+               computations-after-first computations-after-second]}]
+    (and (= 400 first-result)
+         (= 400 second-result)
+         (< second-elapsed-ms 50)
+         (= 1 computations-after-first)
+         (= 1 computations-after-second)))])
 
 ;; ---
 
@@ -226,38 +236,39 @@ Thread B:                   [─── request ───][ wait ]──→ resul
 
 ;; Fill the memory cache to evict our entry, then verify
 ;; the next request reads from disk (not recomputes).
-
-^:kindly/hide-code
-(kind/hiccup
- [:pre
-  "Timeline:
-  1. Compute value for arg=30          → stored in mem + disk
-  2. Compute 3 more values (31,32,33)  → arg=30 evicted from mem (LRU)
-  3. Request arg=30 again              → disk cache hit (no recompute)"])
+;;
+;; ```
+;; Timeline:
+;; 1. Compute value for arg=30          → stored in mem + disk
+;; 2. Compute 3 more values (31,32,33)  → arg=30 evicted from mem (LRU)
+;; 3. Request arg=30 again              → disk cache hit (no recompute)
+;; ```
 
 (fresh-scenario!)
 
-;; Step 1: Compute initial value
-@(pocket/cached #'slow-computation 30)
+;; Step 1: Compute initial value, then fill cache to cause eviction:
 
-;; Step 2: Fill cache to evict arg=30 from memory
-@(pocket/cached #'slow-computation 31)
-@(pocket/cached #'slow-computation 32)
-@(pocket/cached #'slow-computation 33)
-
-(let [count-before @computation-count]
-  ;; Step 3: Request arg=30 again
-  (let [result @(pocket/cached #'slow-computation 30)
-        count-after @computation-count]
-    {:result result
-     :recomputed? (not= count-before count-after)
-     :total-computations count-after}))
+(let [;; Compute arg=30
+      _ @(pocket/cached #'slow-computation 30)
+      ;; Fill cache to evict arg=30 (threshold=3)
+      _ @(pocket/cached #'slow-computation 31)
+      _ @(pocket/cached #'slow-computation 32)
+      _ @(pocket/cached #'slow-computation 33)
+      count-before-retry @computation-count
+      ;; Request arg=30 again - should hit disk
+      result @(pocket/cached #'slow-computation 30)
+      count-after-retry @computation-count]
+  {:result result
+   :computations-before-retry count-before-retry
+   :computations-after-retry count-after-retry
+   :disk-hit? (= count-before-retry count-after-retry)})
 
 (kind/test-last
- [(fn [{:keys [result recomputed? total-computations]}]
+ [(fn [{:keys [result computations-before-retry computations-after-retry disk-hit?]}]
     (and (= 900 result)
-         (not recomputed?)
-         (= 4 total-computations)))])
+         (= 4 computations-before-retry)
+         (= 4 computations-after-retry)
+         disk-hit?))])
 
 ;; ---
 
@@ -265,14 +276,13 @@ Thread B:                   [─── request ───][ wait ]──→ resul
 
 ;; When a computation fails, the exception is not cached.
 ;; The next caller gets a fresh attempt.
-
-^:kindly/hide-code
-(kind/hiccup
- [:pre
-  "Timeline:
-  1. Thread A requests → computation fails (exception)
-  2. Thread B requests → fresh computation succeeds
-  3. Thread C requests → cache hit (no recompute)"])
+;;
+;; ```
+;; Timeline:
+;; 1. Thread A requests → computation fails (exception)
+;; 2. Thread B requests → fresh computation succeeds
+;; 3. Thread C requests → cache hit (no recompute)
+;; ```
 
 (def failure-count (atom 0))
 
@@ -285,32 +295,38 @@ Thread B:                   [─── request ───][ wait ]──→ resul
     (do (swap! failure-count inc)
         (* x 100))))
 
-(reset! failure-count 0)
-(pocket/cleanup!)
+(do
+  (reset! failure-count 0)
+  (pocket/cleanup!)
+  :ready)
 
-;; First attempt fails:
-(let [attempt-1 (try
+;; First attempt fails, second succeeds, third hits cache:
+
+(let [;; First attempt - fails
+      attempt-1 (try
                   @(pocket/cached #'flaky-computation 5)
-                  (catch Exception e {:error (.getMessage e)}))]
-  attempt-1)
-
-(kind/test-last [(fn [r] (contains? r :error))])
-
-;; Second attempt succeeds (retries, not cached exception):
-@(pocket/cached #'flaky-computation 5)
-
-(kind/test-last [(fn [r] (= 500 r))])
-
-;; Third attempt hits cache:
-(let [count-before @failure-count
-      result @(pocket/cached #'flaky-computation 5)
-      count-after @failure-count]
-  {:result result
-   :attempts-unchanged? (= count-before count-after)})
+                  (catch Exception e {:error (.getMessage e)}))
+      count-after-1 @failure-count
+      ;; Second attempt - succeeds
+      attempt-2 @(pocket/cached #'flaky-computation 5)
+      count-after-2 @failure-count
+      ;; Third attempt - cache hit
+      attempt-3 @(pocket/cached #'flaky-computation 5)
+      count-after-3 @failure-count]
+  {:attempt-1 attempt-1
+   :attempt-2 attempt-2
+   :attempt-3 attempt-3
+   :counts [count-after-1 count-after-2 count-after-3]})
 
 (kind/test-last
- [(fn [{:keys [result attempts-unchanged?]}]
-    (and (= 500 result) attempts-unchanged?))])
+ [(fn [{:keys [attempt-1 attempt-2 attempt-3 counts]}]
+    (and (map? attempt-1)
+         (contains? attempt-1 :error)
+         (= 500 attempt-2)
+         (= 500 attempt-3)
+         (= 1 (first counts))
+         (= 2 (second counts))
+         (= 2 (nth counts 2))))])
 
 ;; ---
 
@@ -318,17 +334,16 @@ Thread B:                   [─── request ───][ wait ]──→ resul
 
 ;; Requests with different arguments run in parallel
 ;; (no unnecessary serialization).
-
-^:kindly/hide-code
-(kind/hiccup
- [:pre
-  "Timeline (ms):   0                   300
-                  │                    │
-Thread A (x=40): [──── computing ────]──→ 1600
-Thread B (x=41): [──── computing ────]──→ 1681
-Thread C (x=42): [──── computing ────]──→ 1764
-                  ↑
-            All start ~simultaneously, run in parallel"])
+;;
+;; ```
+;; Timeline (ms):   0                   300
+;;                  │                    │
+;; Thread A (x=40): [──── computing ────]──→ 1600
+;; Thread B (x=41): [──── computing ────]──→ 1681
+;; Thread C (x=42): [──── computing ────]──→ 1764
+;;                   ↑
+;;             All start ~simultaneously, run in parallel
+;; ```
 
 (fresh-scenario!)
 
@@ -342,8 +357,9 @@ Thread C (x=42): [──── computing ────]──→ 1764
    :parallel? (< elapsed 500)})
 
 (kind/test-last
- [(fn [{:keys [results parallel?]}]
+ [(fn [{:keys [results elapsed-ms parallel?]}]
     (and (= [1600 1681 1764] results)
+         (< elapsed-ms 500)
          parallel?))])
 
 ;; ---
@@ -352,100 +368,102 @@ Thread C (x=42): [──── computing ────]──→ 1764
 
 ;; Clear memory cache while keeping disk cache.
 ;; All requests should read from disk without recomputing.
-
-^:kindly/hide-code
-(kind/hiccup
- [:pre
-  "Setup: value for arg=50 is on disk but NOT in memory
-
-  Threads A, B, C all request x=50
-  → All read from disk (no computation)"])
+;;
+;; ```
+;; Setup: value for arg=50 is on disk but NOT in memory
+;;
+;; Threads A, B, C all request x=50
+;; → All read from disk (no computation)
+;; ```
 
 (fresh-scenario!)
 
-;; Compute and cache arg=50
-@(pocket/cached #'slow-computation 50)
+;; Compute, clear memory, then hit disk:
 
-;; Clear only memory cache (disk remains)
-(scicloj.pocket.impl.cache/clear-mem-cache!)
-
-(let [count-before @computation-count
+(let [;; Compute and cache arg=50
+      _ @(pocket/cached #'slow-computation 50)
+      count-after-compute @computation-count
+      ;; Clear only memory cache (disk remains)
+      _ (scicloj.pocket.impl.cache/clear-mem-cache!)
       ;; Multiple threads hit disk cache
       futures (mapv (fn [_] (future @(pocket/cached #'slow-computation 50)))
                     (range 3))
       results (mapv deref futures)
-      count-after @computation-count]
+      count-after-disk-hits @computation-count]
   {:results results
-   :recomputed? (not= count-before count-after)})
+   :count-after-compute count-after-compute
+   :count-after-disk-hits count-after-disk-hits
+   :no-recompute? (= count-after-compute count-after-disk-hits)})
 
 (kind/test-last
- [(fn [{:keys [results recomputed?]}]
-    (and (every? #(= 2500 %) results)
-         (not recomputed?)))])
+ [(fn [{:keys [results count-after-compute count-after-disk-hits no-recompute?]}]
+    (and (= 3 (count results))
+         (every? #(= 2500 %) results)
+         (= 1 count-after-compute)
+         (= 1 count-after-disk-hits)
+         no-recompute?))])
 
 ;; ---
 
 ;; ### Scenario 7: Full Cache Hierarchy Test
 
 ;; A comprehensive scenario testing all cache layers:
-;; 1. Miss everywhere → compute
-;; 2. Memory hit → instant
-;; 3. Memory evicted, disk hit → read from disk
-;; 4. Disk deleted → recompute
-
-^:kindly/hide-code
-(kind/hiccup
- [:pre
-  "┌─────────────────────────────────────────────────────────────┐
-  │ Step 1: Request x=60         → COMPUTE (miss everywhere)    │
-  │ Step 2: Request x=60 again   → MEMORY HIT (instant)         │
-  │ Step 3: Evict from memory    → (fill cache with other vals) │
-  │ Step 4: Request x=60         → DISK HIT (read from disk)    │
-  │ Step 5: Delete disk cache    → invalidate!                  │
-  │ Step 6: Request x=60         → COMPUTE (miss everywhere)    │
-  └─────────────────────────────────────────────────────────────┘"])
+;;
+;; ```
+;; ┌─────────────────────────────────────────────────────────────┐
+;; │ Step 1: Request x=60         → COMPUTE (miss everywhere)    │
+;; │ Step 2: Request x=60 again   → MEMORY HIT (instant)         │
+;; │ Step 3: Evict from memory    → (fill cache with other vals) │
+;; │ Step 4: Request x=60         → DISK HIT (read from disk)    │
+;; │ Step 5: Delete disk cache    → invalidate!                  │
+;; │ Step 6: Request x=60         → COMPUTE (miss everywhere)    │
+;; └─────────────────────────────────────────────────────────────┘
+;; ```
 
 (fresh-scenario! {:mem-cache-opts {:policy :lru :threshold 2}})
 
-;; Step 1: Initial computation
-@(pocket/cached #'slow-computation 60)
-(def after-step-1 @computation-count)
-
-;; Step 2: Memory hit
-(let [start (System/currentTimeMillis)]
-  @(pocket/cached #'slow-computation 60)
-  {:step-2-fast? (< (- (System/currentTimeMillis) start) 50)
-   :after-step-2 @computation-count})
-
-(kind/test-last
- [(fn [{:keys [step-2-fast? after-step-2]}]
-    (and step-2-fast? (= 1 after-step-2)))])
-
-;; Step 3: Evict from memory
-@(pocket/cached #'slow-computation 61)
-@(pocket/cached #'slow-computation 62)
-
-;; Step 4: Disk hit (memory miss)
-(let [count-before @computation-count]
-  @(pocket/cached #'slow-computation 60)
-  {:step-4-no-recompute? (= count-before @computation-count)})
-
-(kind/test-last
- [(fn [{:keys [step-4-no-recompute?]}] step-4-no-recompute?)])
-
-;; Step 5: Delete disk cache
-(pocket/invalidate! #'slow-computation 60)
-(scicloj.pocket.impl.cache/clear-mem-cache!)
-
-;; Step 6: Recompute (miss everywhere)
-(let [count-before @computation-count]
-  @(pocket/cached #'slow-computation 60)
-  {:step-6-recomputed? (= (inc count-before) @computation-count)
-   :total-computations @computation-count})
+(let [;; Step 1: Initial computation
+      _ @(pocket/cached #'slow-computation 60)
+      count-step-1 @computation-count
+      
+      ;; Step 2: Memory hit (should be instant)
+      start-2 (System/currentTimeMillis)
+      _ @(pocket/cached #'slow-computation 60)
+      elapsed-2 (- (System/currentTimeMillis) start-2)
+      count-step-2 @computation-count
+      
+      ;; Step 3: Evict from memory by filling cache
+      _ @(pocket/cached #'slow-computation 61)
+      _ @(pocket/cached #'slow-computation 62)
+      count-step-3 @computation-count
+      
+      ;; Step 4: Disk hit (memory miss)
+      _ @(pocket/cached #'slow-computation 60)
+      count-step-4 @computation-count
+      
+      ;; Step 5: Delete disk cache
+      _ (pocket/invalidate! #'slow-computation 60)
+      _ (scicloj.pocket.impl.cache/clear-mem-cache!)
+      
+      ;; Step 6: Recompute (miss everywhere)
+      _ @(pocket/cached #'slow-computation 60)
+      count-step-6 @computation-count]
+  {:count-step-1 count-step-1
+   :elapsed-step-2 elapsed-2
+   :count-step-2 count-step-2
+   :count-step-3 count-step-3
+   :count-step-4 count-step-4
+   :count-step-6 count-step-6})
 
 (kind/test-last
- [(fn [{:keys [step-6-recomputed? total-computations]}]
-    (and step-6-recomputed? (= 4 total-computations)))])
+ [(fn [{:keys [count-step-1 elapsed-step-2 count-step-2 
+               count-step-3 count-step-4 count-step-6]}]
+    (and (= 1 count-step-1)            ; step 1: computed once
+         (< elapsed-step-2 50)          ; step 2: instant (memory hit)
+         (= 1 count-step-2)             ; step 2: no recompute
+         (= 3 count-step-3)             ; step 3: computed 61, 62
+         (= 3 count-step-4)             ; step 4: disk hit (no recompute)
+         (= 4 count-step-6)))])         ; step 6: recomputed after invalidation
 
 ;; ---
 
