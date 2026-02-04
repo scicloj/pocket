@@ -22,3 +22,21 @@ code {font-family: 'Fira Code Medium', monospace;}
   max-height:300px;
   overflow-y: auto;
 }
+
+
+
+div.callout div.callout-body-container pre {
+  white-space: pre-wrap !important;
+  word-break: break-all !important;
+}
+.callout {
+  overflow: hidden !important;
+  max-width: 100% !important;
+}
+
+.callout-body-container {
+  overflow: hidden !important;
+  max-width: 100% !important;
+}
+
+

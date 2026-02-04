@@ -78,6 +78,39 @@
           (is (every? #(= 50 %) results))
           (is (= 1 @call-count)))))))
 
+
+(deftest test-concurrent-cached-creation
+  (testing "Concurrent creation of Cached with same args computes once"
+    (let [call-count (atom 0)
+          slow-fn (fn [x]
+                    (swap! call-count inc)
+                    (Thread/sleep 200)
+                    (* x 10))]
+      (with-redefs [expensive-add slow-fn]
+        ;; Each future creates its own Cached instance, but all share the same cache key
+        (let [futures (doall (repeatedly 10 #(future @(pocket/cached #'expensive-add 7))))
+              results (mapv deref futures)]
+          (is (every? #(= 70 %) results))
+          (is (= 1 @call-count) "Should compute only once despite separate Cached instances"))))))
+
+(deftest test-failure-retry
+  (testing "Failed computation is retried on next deref"
+    (let [attempt-count (atom 0)
+          flaky-fn (fn [x]
+                     (if (= 1 (swap! attempt-count inc))
+                       (throw (ex-info "Temporary failure" {}))
+                       (* x 10)))]
+      (with-redefs [expensive-add flaky-fn]
+        ;; First attempt fails
+        (is (thrown? clojure.lang.ExceptionInfo
+                     @(pocket/cached #'expensive-add 3)))
+        ;; Second attempt succeeds (retries, doesn't cache exception)
+        (is (= 30 @(pocket/cached #'expensive-add 3)))
+        ;; Third attempt hits cache
+        (let [count-before @attempt-count
+              result @(pocket/cached #'expensive-add 3)]
+          (is (= 30 result))
+          (is (= count-before @attempt-count) "Should not recompute on cache hit"))))))
 (deftest test-in-memory-cache
   (testing "Second deref comes from memory, not disk"
     (let [result (pocket/cached #'expensive-add 10 20)]
