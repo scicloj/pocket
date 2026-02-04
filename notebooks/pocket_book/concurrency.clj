@@ -93,12 +93,12 @@
     D[deref Cached]
     end
     subgraph Synchronization
-    CHM[ConcurrentHashMap\\nin-flight]
+    CHM[ConcurrentHashMap<br>in-flight]
     DEL[delay]
     end
     subgraph Caching
-    MEM[Memory Cache\\ncore.cache]
-    DISK[Disk Cache\\nNippy files]
+    MEM[Memory Cache<br>core.cache]
+    DISK[Disk Cache<br>Nippy files]
     end
     D --> CHM
     CHM -->|one delay per key| DEL

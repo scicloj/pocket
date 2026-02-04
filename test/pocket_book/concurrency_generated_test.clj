@@ -10,7 +10,7 @@
 (def
  v3_l89
  (kind/mermaid
-  "flowchart TB\n    subgraph Request\n    D[deref Cached]\n    end\n    subgraph Synchronization\n    CHM[ConcurrentHashMap\\nin-flight]\n    DEL[delay]\n    end\n    subgraph Caching\n    MEM[Memory Cache\\ncore.cache]\n    DISK[Disk Cache\\nNippy files]\n    end\n    D --> CHM\n    CHM -->|one delay per key| DEL\n    DEL -->|on miss| MEM\n    MEM -->|on miss| DISK\n    DISK -->|on miss| COMP[Compute]\n    COMP --> DISK\n    DISK --> MEM\n    MEM --> D"))
+  "flowchart TB\n    subgraph Request\n    D[deref Cached]\n    end\n    subgraph Synchronization\n    CHM[ConcurrentHashMap<br>in-flight]\n    DEL[delay]\n    end\n    subgraph Caching\n    MEM[Memory Cache<br>core.cache]\n    DISK[Disk Cache<br>Nippy files]\n    end\n    D --> CHM\n    CHM -->|one delay per key| DEL\n    DEL -->|on miss| MEM\n    MEM -->|on miss| DISK\n    DISK -->|on miss| COMP[Compute]\n    COMP --> DISK\n    DISK --> MEM\n    MEM --> D"))
 
 
 (def v5_l126 (def test-dir "/tmp/pocket-concurrency-test"))
@@ -69,7 +69,7 @@
     [{:keys [results computation-count]}]
     (and
      (= 5 (count results))
-     (every? (fn* [p1__29916#] (= 100 p1__29916#)) results)
+     (every? (fn* [p1__30402#] (= 100 p1__30402#)) results)
      (= 1 computation-count)))
    v15_l176)))
 
@@ -231,8 +231,8 @@
    futures
    (mapv
     (fn*
-     [p1__29917#]
-     (future @(pocket/cached #'slow-computation p1__29917#)))
+     [p1__30403#]
+     (future @(pocket/cached #'slow-computation p1__30403#)))
     [40 41 42])
    results
    (mapv deref futures)
@@ -287,7 +287,7 @@
        no-recompute?]}]
     (and
      (= 3 (count results))
-     (every? (fn* [p1__29918#] (= 2500 p1__29918#)) results)
+     (every? (fn* [p1__30404#] (= 2500 p1__30404#)) results)
      (= 1 count-after-compute)
      (= 1 count-after-disk-hits)
      no-recompute?))
