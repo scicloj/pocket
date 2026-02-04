@@ -384,7 +384,7 @@
       _ @(pocket/cached #'slow-computation 50)
       count-after-compute @computation-count
       ;; Clear only memory cache (disk remains)
-      _ (scicloj.pocket.impl.cache/clear-mem-cache!)
+      _ (pocket/clear-mem-cache!)
       ;; Multiple threads hit disk cache
       futures (mapv (fn [_] (future @(pocket/cached #'slow-computation 50)))
                     (range 3))
@@ -443,7 +443,7 @@
       
       ;; Step 5: Delete disk cache
       _ (pocket/invalidate! #'slow-computation 60)
-      _ (scicloj.pocket.impl.cache/clear-mem-cache!)
+      _ (pocket/clear-mem-cache!)
       
       ;; Step 6: Recompute (miss everywhere)
       _ @(pocket/cached #'slow-computation 60)
@@ -496,3 +496,4 @@
 ;; ## Cleanup
 
 (pocket/cleanup!)
+(pocket/reset-mem-cache-options!)

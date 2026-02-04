@@ -2,8 +2,8 @@
   "Filesystem-based caching for expensive computations.
    
    Primary API: `cached`, `caching-fn`, `maybe-deref`.
-   Configuration: `*base-cache-dir*`, `*mem-cache-options*`, `set-base-cache-dir!`, `set-mem-cache-options!`.
-   Invalidation: `invalidate!`, `invalidate-fn!`, `cleanup!`.
+   Configuration: `*base-cache-dir*`, `*mem-cache-options*`, `set-base-cache-dir!`, `set-mem-cache-options!`, `reset-mem-cache-options!`.
+   Invalidation: `invalidate!`, `invalidate-fn!`, `cleanup!`, `clear-mem-cache!`.
    Introspection: `cache-entries`, `cache-stats`, `dir-tree`.
    
    See `*base-cache-dir*` and `*mem-cache-options*` for configuration precedence."
@@ -118,6 +118,13 @@
     {:dir dir
      :existed (boolean existed?)}))
 
+(defn clear-mem-cache!
+  "Clear all entries from the in-memory cache without deleting the disk cache.
+   The next deref of a cached value will reload from disk if available.
+   Useful for testing scenarios that need to simulate memory eviction."
+  []
+  (impl/clear-mem-cache!))
+
 (defn invalidate!
   "Invalidate a specific cached computation, removing it from both disk and memory.
    Takes the same arguments as `cached`: a function var and its arguments.
@@ -148,6 +155,17 @@
   (alter-var-root #'*mem-cache-options* (constantly opts))
   (log/info "Mem-cache options set:" opts)
   (impl/reset-mem-cache! opts))
+
+(defn reset-mem-cache-options!
+  "Reset the in-memory cache configuration to library defaults.
+   Clears any options set by `set-mem-cache-options!` and reconfigures
+   the mem-cache with the default policy from `pocket-defaults.edn`.
+   Returns the default options."
+  []
+  (let [defaults (:mem-cache @impl/pocket-defaults-edn)]
+    (alter-var-root #'*mem-cache-options* (constantly nil))
+    (log/info "Mem-cache options reset to defaults:" defaults)
+    (impl/reset-mem-cache! defaults)))
 
 (defn cache-entries
   "Scan the cache directory and return a sequence of metadata maps.

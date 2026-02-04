@@ -131,9 +131,23 @@ pocket/*base-cache-dir*
 
 (pocket/set-mem-cache-options! {:policy :lru :threshold 256})
 
+(kind/doc #'pocket/reset-mem-cache-options!)
+
+;; Reset mem-cache configuration to library defaults:
+
+(pocket/reset-mem-cache-options!)
+
 (kind/doc #'pocket/cleanup!)
 
 (pocket/cleanup!)
+
+(kind/doc #'pocket/clear-mem-cache!)
+
+;; Clear in-memory cache without touching disk:
+
+(deref (pocket/cached #'expensive-calculation 10 20))
+
+(pocket/clear-mem-cache!)
 
 (kind/doc #'pocket/invalidate!)
 

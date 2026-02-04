@@ -69,7 +69,7 @@
     [{:keys [results computation-count]}]
     (and
      (= 5 (count results))
-     (every? (fn* [p1__39210#] (= 100 p1__39210#)) results)
+     (every? (fn* [p1__40884#] (= 100 p1__40884#)) results)
      (= 1 computation-count)))
    v15_l176)))
 
@@ -231,8 +231,8 @@
    futures
    (mapv
     (fn*
-     [p1__39211#]
-     (future @(pocket/cached #'slow-computation p1__39211#)))
+     [p1__40885#]
+     (future @(pocket/cached #'slow-computation p1__40885#)))
     [40 41 42])
    results
    (mapv deref futures)
@@ -261,7 +261,7 @@
    count-after-compute
    @computation-count
    _
-   (scicloj.pocket.impl.cache/clear-mem-cache!)
+   (pocket/clear-mem-cache!)
    futures
    (mapv
     (fn [_] (future @(pocket/cached #'slow-computation 50)))
@@ -287,7 +287,7 @@
        no-recompute?]}]
     (and
      (= 3 (count results))
-     (every? (fn* [p1__39212#] (= 2500 p1__39212#)) results)
+     (every? (fn* [p1__40886#] (= 2500 p1__40886#)) results)
      (= 1 count-after-compute)
      (= 1 count-after-disk-hits)
      no-recompute?))
@@ -327,7 +327,7 @@
    _
    (pocket/invalidate! #'slow-computation 60)
    _
-   (scicloj.pocket.impl.cache/clear-mem-cache!)
+   (pocket/clear-mem-cache!)
    _
    @(pocket/cached #'slow-computation 60)
    count-step-6
@@ -362,3 +362,6 @@
 
 
 (def v48_l498 (pocket/cleanup!))
+
+
+(def v49_l499 (pocket/reset-mem-cache-options!))

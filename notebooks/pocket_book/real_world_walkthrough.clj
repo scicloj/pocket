@@ -22,7 +22,8 @@
 ;; adding branching dependencies where two analyses share a common
 ;; upstream computation.
 ;;
-;; The dependency graph looks like this:
+;; The dependency graph: `fetch-readings` → `clean-data` →
+;; both `temperature-trends` and `rainfall-totals` → `summary`.
 
 ^:kindly/hide-code
 (kind/mermaid

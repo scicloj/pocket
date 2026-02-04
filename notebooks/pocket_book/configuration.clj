@@ -5,11 +5,16 @@
             [scicloj.pocket :as pocket]
             [scicloj.kindly.v4.kind :as kind]))
 
-
 ;; ## Setup
-
 ;; Pocket resolves configuration using a precedence chain
-;; (for both cache directory and in-memory cache options):
+;; (for both cache directory and in-memory cache options),
+;; from highest to lowest priority:
+;;
+;; 1. `binding` (thread-local override)
+;; 2. `set-*!` functions (`set-base-cache-dir!`, `set-mem-cache-options!`)
+;; 3. Environment variable (`POCKET_BASE_CACHE_DIR`, `POCKET_MEM_CACHE`)
+;; 4. `pocket.edn` on classpath
+;; 5. Library defaults (`pocket-defaults.edn`)
 
 ^:kindly/hide-code
 (kind/mermaid
