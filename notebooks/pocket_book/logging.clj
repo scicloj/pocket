@@ -22,15 +22,23 @@
 ;;
 ;; ## Setup for notebooks
 ;;
-;; The following configures `slf4j-simple` to log at debug level
-;; to stdout, so all cache messages are visible in notebook output
-;; and are marked as `OUT` rather than as `ERR`.
+;; The following configures `slf4j-simple` for notebook use.
+;; These properties must be set before any logging occurs.
 
-(do (System/setProperty "org.slf4j.simpleLogger.defaultLogLevel" "debug")
-    (System/setProperty "org.slf4j.simpleLogger.showThreadName" "false")
-    (System/setProperty "org.slf4j.simpleLogger.showDateTime" "true")
-    (System/setProperty "org.slf4j.simpleLogger.dateTimeFormat" "HH:mm:ss.SSS")
-    (System/setProperty "org.slf4j.simpleLogger.logFile" "System.out"))
+;; Show debug-level messages (cache hits and writes):
+(System/setProperty "org.slf4j.simpleLogger.defaultLogLevel" "debug")
+
+;; Hide thread names to reduce clutter:
+(System/setProperty "org.slf4j.simpleLogger.showThreadName" "false")
+
+;; Show timestamps for each log message:
+(System/setProperty "org.slf4j.simpleLogger.showDateTime" "true")
+
+;; Use hours:minutes:seconds.milliseconds format:
+(System/setProperty "org.slf4j.simpleLogger.dateTimeFormat" "HH:mm:ss.SSS")
+
+;; Write to stdout so messages appear as `OUT` rather than `ERR`:
+(System/setProperty "org.slf4j.simpleLogger.logFile" "System.out")
 
 ;; Other notebooks in this book require this namespace to
 ;; activate logging. In your own projects, configure your
