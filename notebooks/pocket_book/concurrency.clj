@@ -456,14 +456,14 @@
    :count-step-6 count-step-6})
 
 (kind/test-last
- [(fn [{:keys [count-step-1 elapsed-step-2 count-step-2 
+ [(fn [{:keys [count-step-1 elapsed-step-2 count-step-2
                count-step-3 count-step-4 count-step-6]}]
-    (and (= 1 count-step-1)            ; step 1: computed once
-         (< elapsed-step-2 50)          ; step 2: instant (memory hit)
-         (= 1 count-step-2)             ; step 2: no recompute
-         (= 3 count-step-3)             ; step 3: computed 61, 62
-         (= 3 count-step-4)             ; step 4: disk hit (no recompute)
-         (= 4 count-step-6)))])         ; step 6: recomputed after invalidation
+    (and (= 1 count-step-1)
+         (< elapsed-step-2 50)
+         (= 1 count-step-2)
+         (= 3 count-step-3)
+         (= 3 count-step-4)
+         (= 4 count-step-6)))])
 
 ;; ---
 
