@@ -1,0 +1,4 @@
+;; Default configuration for Pocket
+;; Users can override by creating pocket.edn on their classpath
+{:base-cache-dir ".cache/pocket"
+ :mem-cache {:policy :lru :threshold 256}}
