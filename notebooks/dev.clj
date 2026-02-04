@@ -1,8 +1,9 @@
 (ns dev
   (:require [scicloj.clay.v2.api :as clay]))
 
-(comment
-  ;; render book HTML through Quarto
+(defn make-book!
+  "Render book HTML through Quarto."
+  []
   (clay/make! {:format [:quarto :html]
                :base-source-path "notebooks"
                :source-path (->> "notebooks/chapters.edn"
@@ -12,9 +13,11 @@
                                  (cons "index.clj"))
                :base-target-path "docs"
                :book {:title "Pocket"}
-               :clean-up-target-dir true})
+               :clean-up-target-dir true}))
 
-  ;; render all as github flavored markdown
+(defn make-gfm!
+  "render all as github flavored markdown"
+  []
   (clay/make! {:format [:gfm]
                :base-source-path "notebooks"
                :source-path (->> "notebooks/chapters.edn"
@@ -24,3 +27,9 @@
                                  (cons "index.clj"))
                :base-target-path "gfm"
                :show false}))
+
+(comment
+  (make-book!)
+  (make-gfm!))
+
+
