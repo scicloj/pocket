@@ -274,4 +274,43 @@
 (def v114_l248 (kind/mermaid (pocket/origin-story-mermaid b-c)))
 
 
-(def v115_l250 (pocket/cleanup!))
+(def v115_l250 (kind/doc #'pocket/origin-story-graph))
+
+
+(def v117_l255 (pocket/origin-story-graph b-c))
+
+
+(def v118_l257 (kind/doc #'pocket/compare-experiments))
+
+
+(def v120_l263 (defn run-exp [config] {:rmse (* 0.1 (:lr config))}))
+
+
+(def
+ v121_l266
+ (def exp1 (pocket/cached #'run-exp {:lr 0.01, :epochs 100})))
+
+
+(def
+ v122_l267
+ (def exp2 (pocket/cached #'run-exp {:lr 0.001, :epochs 100})))
+
+
+(def v123_l269 (pocket/compare-experiments [exp1 exp2]))
+
+
+(deftest
+ t124_l271
+ (is
+  ((fn
+    [rows]
+    (and
+     (= 2 (count rows))
+     (every? (fn* [p1__72737#] (contains? p1__72737# :lr)) rows)
+     (not-any?
+      (fn* [p1__72738#] (contains? p1__72738# :epochs))
+      rows)))
+   v123_l269)))
+
+
+(def v126_l281 (pocket/cleanup!))

@@ -68,12 +68,12 @@
   [ds feature-set]
   (let [xv (vec (:x ds))]
     (-> (case feature-set
-          :raw       ds
+          :raw ds
           :quadratic (-> ds
                          (tc/add-column :x2 (mapv #(* % %) xv)))
-          :trig      (-> ds
-                         (tc/add-column :sin-x (mapv #(Math/sin %) xv))
-                         (tc/add-column :cos-x (mapv #(Math/cos %) xv)))
+          :trig (-> ds
+                    (tc/add-column :sin-x (mapv #(Math/sin %) xv))
+                    (tc/add-column :cos-x (mapv #(Math/cos %) xv)))
           :poly+trig (-> ds
                          (tc/add-column :x2 (mapv #(* % %) xv))
                          (tc/add-column :sin-x (mapv #(Math/sin %) xv))
@@ -239,11 +239,11 @@ feature-results
                               #'nonlinear-fn 500 noise-sd 42)
            sp (first (tc/split->seq ds :holdout {:seed 42}))
            cart-train @(pocket/cached #'prepare-features (:train sp) :raw)
-           cart-test  @(pocket/cached #'prepare-features (:test sp) :raw)
-           sgd-train  @(pocket/cached #'prepare-features (:train sp) :poly+trig)
-           sgd-test   @(pocket/cached #'prepare-features (:test sp) :poly+trig)
+           cart-test @(pocket/cached #'prepare-features (:test sp) :raw)
+           sgd-train @(pocket/cached #'prepare-features (:train sp) :poly+trig)
+           sgd-test @(pocket/cached #'prepare-features (:test sp) :poly+trig)
            cart-model @(pocket/cached #'train-model cart-train cart-spec)
-           sgd-model  @(pocket/cached #'train-model sgd-train linear-sgd-spec)]
+           sgd-model @(pocket/cached #'train-model sgd-train linear-sgd-spec)]
        {:noise-sd noise-sd
         :cart-rmse (predict-and-rmse cart-test cart-model)
         :sgd-rmse (predict-and-rmse sgd-test sgd-model)}))))
@@ -252,7 +252,7 @@ noise-results
 
 (kind/test-last
  [(fn [rows]
-    (let [low  (first (filter #(= 0.1 (:noise-sd %)) rows))
+    (let [low (first (filter #(= 0.1 (:noise-sd %)) rows))
           high (first (filter #(= 5.0 (:noise-sd %)) rows))]
       (and (< (:cart-rmse low) (:sgd-rmse low))
            (> (:cart-rmse high) (:sgd-rmse high)))))])
@@ -346,7 +346,7 @@ noise-results
   (let [x-vals (vec (:x train-ds))]
     {:x-mean (/ (reduce + x-vals) (count x-vals))
      :x-std (Math/sqrt (/ (reduce + (map #(* (- % (/ (reduce + x-vals) (count x-vals)))
-                                              (- % (/ (reduce + x-vals) (count x-vals))))
+                                             (- % (/ (reduce + x-vals) (count x-vals))))
                                          x-vals))
                           (count x-vals)))}))
 
@@ -384,17 +384,14 @@ noise-results
 ;; The key insight: `stats-c` is a cached computation derived from
 ;; training data only. Both preprocessing steps depend on it.
 
-(def train-c (pocket/cached #'identity (:train dag-split) :storage :mem))
-(def test-c  (pocket/cached #'identity (:test dag-split) :storage :mem))
-
 (def stats-c
-  (pocket/cached #'compute-stats train-c))
+  (pocket/cached #'compute-stats (:train dag-split)))
 
 (def train-norm-c
-  (pocket/cached #'normalize-with-stats train-c stats-c))
+  (pocket/cached #'normalize-with-stats (:train dag-split) stats-c))
 
 (def test-norm-c
-  (pocket/cached #'normalize-with-stats test-c stats-c))
+  (pocket/cached #'normalize-with-stats (:test dag-split) stats-c))
 
 (def model-c
   (pocket/cached #'train-normalized-model train-norm-c cart-spec))
@@ -404,7 +401,27 @@ noise-results
 
 ;; ### Visualize the DAG
 
-;; The origin-story shows the diamond — `stats-c` feeds both
+;; Pocket provides three functions for DAG introspection, each suited
+;; to different use cases.
+
+;; **`origin-story`** returns a nested tree structure. Each cached node
+;; has `:fn`, `:args`, and `:id`. The `:id` is unique; when the same
+;; `Cached` instance appears multiple times (diamond pattern), subsequent
+;; occurrences become `{:ref <id>}` pointers. This avoids infinite
+;; recursion and makes the diamond explicit:
+
+(pocket/origin-story metrics-c)
+
+;; Notice how `stats-c` appears as a `:ref` in one branch — it's the
+;; same computation feeding both train and test normalization.
+
+;; **`origin-story-graph`** normalizes the tree into a flat
+;; `{:nodes ... :edges ...}` structure suitable for graph algorithms:
+
+(pocket/origin-story-graph metrics-c)
+
+;; **`origin-story-mermaid`** renders the DAG as a Mermaid flowchart.
+;; The diamond dependency is clearly visible — `stats-c` feeds both
 ;; preprocessing steps:
 
 (kind/mermaid (pocket/origin-story-mermaid metrics-c))
@@ -429,14 +446,14 @@ noise-results
   (let [ds (make-regression-data nonlinear-fn 200 noise-sd 42)
         sp (first (tc/split->seq ds :holdout {:seed 42}))
         train-prep (prepare-features (:train sp) feature-set)
-        test-prep  (prepare-features (:test sp) feature-set)
+        test-prep (prepare-features (:test sp) feature-set)
         spec {:model-type :scicloj.ml.tribuo/regression
               :tribuo-components [{:name "cart"
                                    :type "org.tribuo.regression.rtree.CARTRegressionTrainer"
                                    :properties {:maxDepth (str max-depth)}}]
               :tribuo-trainer-name "cart"}
         model (ml/train train-prep spec)
-        pred  (ml/predict test-prep model)]
+        pred (ml/predict test-prep model)]
     {:rmse (loss/rmse (:y test-prep) (:y pred))}))
 
 ;; Run experiments across a grid of hyperparameters:
@@ -458,11 +475,11 @@ noise-results
 (tc/dataset comparison)
 
 (kind/test-last
- [(fn [rows]
-    (and (= 8 (count rows))
-         (every? #(contains? % :noise-sd) rows)
-         (every? #(contains? % :feature-set) rows)
-         (every? #(contains? % :max-depth) rows)))])
+ [(fn [ds]
+    (and (= 8 (tc/row-count ds))
+         (some #{:noise-sd} (tc/column-names ds))
+         (some #{:feature-set} (tc/column-names ds))
+         (some #{:max-depth} (tc/column-names ds))))])
 
 ;; The `:result` column contains the metrics from each experiment.
 ;; Parameters that were the same across all experiments (like seed=42)
