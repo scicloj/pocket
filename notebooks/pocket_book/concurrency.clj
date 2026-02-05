@@ -4,7 +4,8 @@
 (ns pocket-book.concurrency
   (:require [pocket-book.logging]
             [scicloj.pocket :as pocket]
-            [scicloj.kindly.v4.kind :as kind]))
+            [scicloj.kindly.v4.kind :as kind]
+            [clojure.core.cache.wrapped :as cw]))
 
 ;; Pocket guarantees that when multiple threads deref the same `Cached` value
 ;; concurrently, the underlying computation executes **exactly once**.
@@ -53,6 +54,41 @@
 ;; but both computations have already started. The delay prevents
 ;; redundant work across retries of a **single** `swap!` call — it does
 ;; **not** deduplicate across concurrent callers.
+
+;; ## Seeing the Problem
+
+;; We can demonstrate this directly. Here we use `core.cache.wrapped/lookup-or-miss`
+;; with a slow computation and five concurrent threads.
+;; A `CyclicBarrier` synchronizes the threads so they all call
+;; `lookup-or-miss` at the same instant:
+
+(let [call-count (atom 0)
+      cache (cw/lru-cache-factory {} :threshold 32)
+      barrier (java.util.concurrent.CyclicBarrier. 5)
+      slow-fn (fn [_key]
+                (swap! call-count inc)
+                (Thread/sleep 500)
+                42)]
+  (let [futures (doall (for [_ (range 5)]
+                         (future
+                           (.await barrier)
+                           (cw/lookup-or-miss cache :same-key slow-fn))))
+        results (mapv deref futures)]
+    {:results results
+     :computation-count @call-count}))
+
+(kind/test-last
+ [(fn [{:keys [results computation-count]}]
+    (and (every? #(= 42 %) results)
+         (> computation-count 1)))])
+
+;; All five threads computed the value independently — `computation-count`
+;; is greater than 1 (typically 5). The delay inside `lookup-or-miss`
+;; prevented duplicate work on `swap!` retries within each thread, but
+;; concurrent callers each created and forced their own delay.
+;;
+;; Scenario 1 (below) repeats this same pattern using Pocket,
+;; where the `ConcurrentHashMap` layer reduces the count to exactly 1.
 
 ;; ## Pocket's Solution
 
@@ -466,6 +502,196 @@
          (= 3 count-step-3)
          (= 3 count-step-4)
          (= 4 count-step-6)))])
+
+;; ### Scenario 8: Synchronized Start (Barrier)
+
+;; A stricter variant of Scenario 1 that uses a `CyclicBarrier` to
+;; guarantee all threads enter `deref` at the same instant.
+;; This is the direct contrast to the core.cache demonstration above.
+
+(fresh-scenario!)
+
+(let [barrier (java.util.concurrent.CyclicBarrier. 5)
+      futures (doall (for [_ (range 5)]
+                       (future
+                         (.await barrier)
+                         @(pocket/cached #'slow-computation 70))))
+      results (mapv deref futures)]
+  {:results results
+   :computation-count @computation-count})
+
+(kind/test-last
+ [(fn [{:keys [results computation-count]}]
+    (and (every? #(= 4900 %) results)
+         (= 1 computation-count)))])
+
+;; ---
+
+;; ### Scenario 9: Concurrent Pipeline Deref
+
+;; A pipeline where step 2 takes a `Cached` step 1 result as an argument.
+;; Multiple threads deref step 2 concurrently — both steps should
+;; compute exactly once.
+
+(def step-a-count (atom 0))
+(def step-b-count (atom 0))
+
+(defn pipeline-step-a
+  "First pipeline step: slow transform."
+  [x]
+  (swap! step-a-count inc)
+  (Thread/sleep 200)
+  (* x 10))
+
+(defn pipeline-step-b
+  "Second pipeline step: depends on step-a result."
+  [data]
+  (swap! step-b-count inc)
+  (Thread/sleep 200)
+  (+ data 1))
+
+(do
+  (reset! step-a-count 0)
+  (reset! step-b-count 0)
+  (pocket/cleanup!)
+  (pocket/set-mem-cache-options! {:policy :lru :threshold 10})
+  :ready)
+
+;; Build a two-step pipeline, then deref from 5 threads:
+
+(let [cached-a (pocket/cached #'pipeline-step-a 7)
+      cached-b (pocket/cached #'pipeline-step-b cached-a)
+      barrier (java.util.concurrent.CyclicBarrier. 5)
+      futures (doall (for [_ (range 5)]
+                       (future
+                         (.await barrier)
+                         @cached-b)))
+      results (mapv deref futures)]
+  {:results results
+   :step-a-count @step-a-count
+   :step-b-count @step-b-count})
+
+(kind/test-last
+ [(fn [{:keys [results step-a-count step-b-count]}]
+    (and (every? #(= 71 %) results)
+         (= 1 step-a-count)
+         (= 1 step-b-count)))])
+
+;; ---
+
+;; ### Scenario 10: Concurrent Failure
+
+;; Multiple threads hit a computation that throws.
+;; All threads should see the exception.
+;; A subsequent attempt should succeed (fresh delay).
+
+(def concurrent-fail-count (atom 0))
+
+(defn fail-once-computation
+  "Fails when concurrent-fail-count is 0, succeeds after."
+  [x]
+  (let [n (swap! concurrent-fail-count inc)]
+    (when (= 1 n)
+      (Thread/sleep 200)
+      (throw (ex-info "Transient error" {:x x})))
+    (Thread/sleep 100)
+    (* x x)))
+
+(do
+  (reset! concurrent-fail-count 0)
+  (pocket/cleanup!)
+  (pocket/set-mem-cache-options! {:policy :lru :threshold 10})
+  :ready)
+
+;; 5 threads hit the failing computation simultaneously:
+
+(let [barrier (java.util.concurrent.CyclicBarrier. 5)
+      futures (doall (for [_ (range 5)]
+                       (future
+                         (.await barrier)
+                         (try
+                           {:value @(pocket/cached #'fail-once-computation 8)}
+                           (catch Exception e
+                             {:error (.getMessage e)})))))
+      first-results (mapv deref futures)
+      errors (filterv :error first-results)
+      successes (filterv :value first-results)]
+  {:first-round-errors (count errors)
+   :first-round-successes (count successes)
+   :retry @(pocket/cached #'fail-once-computation 8)
+   :total-calls @concurrent-fail-count})
+
+(kind/test-last
+ [(fn [{:keys [first-round-errors first-round-successes retry total-calls]}]
+    (and (>= first-round-errors 1)
+         (= 5 (+ first-round-errors first-round-successes))
+         (= 64 retry)
+         (>= total-calls 2)))])
+
+;; ---
+
+;; ### Scenario 11: Eviction Under Contention
+
+;; With a very small cache (threshold=2) and many concurrent requests,
+;; memory eviction happens frequently. The `in-flight` map still prevents
+;; duplicate computation for the same key.
+
+(fresh-scenario! {:mem-cache-opts {:policy :lru :threshold 2}})
+
+;; Launch 4 threads per key, for 3 different keys.
+;; Each key should compute exactly once despite eviction pressure.
+
+(let [barrier (java.util.concurrent.CyclicBarrier. 12)
+      futures (doall
+               (for [x [80 81 82]
+                     _ (range 4)]
+                 (future
+                   (.await barrier)
+                   @(pocket/cached #'slow-computation x))))
+      results (mapv deref futures)]
+  {:results results
+   :computation-count @computation-count
+   :expected-results (vec (for [x [80 81 82]
+                                _ (range 4)]
+                            (* x x)))})
+
+(kind/test-last
+ [(fn [{:keys [results computation-count expected-results]}]
+    (and (= expected-results results)
+         (= 3 computation-count)))])
+
+;; ---
+
+;; ### Scenario 12: Rapid Deref After Invalidation
+
+;; Invalidate a cached value and immediately re-request from multiple threads.
+;; The re-request should compute exactly once.
+
+(fresh-scenario!)
+
+;; Compute and cache a value:
+
+(let [_ @(pocket/cached #'slow-computation 90)
+      count-after-first @computation-count
+      ;; Invalidate
+      _ (pocket/invalidate! #'slow-computation 90)
+      ;; Immediately re-request from 5 concurrent threads
+      barrier (java.util.concurrent.CyclicBarrier. 5)
+      futures (doall (for [_ (range 5)]
+                       (future
+                         (.await barrier)
+                         @(pocket/cached #'slow-computation 90))))
+      results (mapv deref futures)
+      count-after-retry @computation-count]
+  {:results results
+   :count-after-first count-after-first
+   :count-after-retry count-after-retry})
+
+(kind/test-last
+ [(fn [{:keys [results count-after-first count-after-retry]}]
+    (and (every? #(= 8100 %) results)
+         (= 1 count-after-first)
+         (= 2 count-after-retry)))])
 
 ;; ---
 
