@@ -14,70 +14,70 @@
 
 
 (def
- v5_l48
+ v5_l49
  (->
   (clojure.java.io/resource "pocket-defaults.edn")
   slurp
   clojure.edn/read-string))
 
 
-(def v7_l68 (pocket/set-base-cache-dir! "/tmp/pocket-demo-config"))
+(def v7_l69 (pocket/set-base-cache-dir! "/tmp/pocket-demo-config"))
 
 
-(def v8_l70 (pocket/cleanup!))
+(def v8_l71 (pocket/cleanup!))
 
 
-(def v10_l74 (pocket/config))
+(def v10_l75 (pocket/config))
 
 
 (deftest
- t11_l76
+ t11_l77
  (is
   ((fn [cfg] (= "/tmp/pocket-demo-config" (:base-cache-dir cfg)))
-   v10_l74)))
+   v10_l75)))
 
 
 (def
- v13_l89
+ v13_l90
  (kind/mermaid
   "flowchart LR\n    D(deref) --> MC{In-memory\ncache?}\n    MC -->|hit| R[Return value]\n    MC -->|miss| DC{Disk\ncache?}\n    DC -->|hit| R\n    DC -->|miss| C[Compute] --> W[Write to disk] --> R"))
 
 
 (def
- v15_l127
+ v15_l128
  (pocket/set-mem-cache-options! {:policy :fifo, :threshold 100}))
 
 
 (deftest
- t16_l129
- (is ((fn [result] (= :fifo (:policy result))) v15_l127)))
+ t16_l130
+ (is ((fn [result] (= :fifo (:policy result))) v15_l128)))
 
 
 (def
- v18_l133
+ v18_l134
  (pocket/set-mem-cache-options! {:policy :ttl, :ttl 60000}))
 
 
 (def
- v20_l137
+ v20_l138
  (pocket/set-mem-cache-options! {:policy :lru, :threshold 256}))
 
 
-(def v22_l178 (pocket/set-storage! :mem))
+(def v22_l179 (pocket/set-storage! :mem))
 
 
-(def v23_l180 (pocket/config))
+(def v23_l181 (pocket/config))
 
 
-(deftest t24_l182 (is ((fn [cfg] (= :mem (:storage cfg))) v23_l180)))
+(deftest t24_l183 (is ((fn [cfg] (= :mem (:storage cfg))) v23_l181)))
 
 
-(def v26_l218 (pocket/set-storage! nil))
+(def v26_l219 (pocket/set-storage! nil))
 
 
 (deftest
- t27_l220
- (is ((fn [_] (= :mem+disk (:storage (pocket/config)))) v26_l218)))
+ t27_l221
+ (is ((fn [_] (= :mem+disk (:storage (pocket/config)))) v26_l219)))
 
 
-(def v29_l226 (pocket/cleanup!))
+(def v29_l227 (pocket/cleanup!))

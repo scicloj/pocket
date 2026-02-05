@@ -234,7 +234,8 @@ pocket/*base-cache-dir*
 
 (pocket/origin-story b-c)
 
-@b-c
+;; Deref to trigger computation:
+(deref b-c)
 
 ;; After deref — `:value` keys appear:
 

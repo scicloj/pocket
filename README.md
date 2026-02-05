@@ -10,6 +10,15 @@ Pocket makes it easy to cache expensive function calls to disk and reuse results
 
 Under the hood, Pocket derives cache keys from the function identity and its arguments (so the same computation always maps to the same cache entry), uses [Nippy](https://github.com/taoensso/nippy) for fast serialization, and provides an in-memory layer backed by [core.cache](https://github.com/clojure/core.cache) with configurable [eviction policies](https://en.wikipedia.org/wiki/Cache_replacement_policies). Concurrent uses of the same computation are [thread-safe](https://en.wikipedia.org/wiki/Thread_safety) — the computation runs only once.
 
+## Key features
+
+- **Lazy evaluation** — `cached` returns a deref-able value; computation runs only when needed
+- **Pipeline caching** — chain cached steps into pipelines with automatic provenance tracking
+- **Storage policies** — `:mem+disk` (default), `:mem` (no disk I/O), or `:none` (identity tracking only)
+- **DAG introspection** — `origin-story` reconstructs the full computation graph; `origin-story-mermaid` renders it as a flowchart
+- **Thread-safe** — concurrent derefs of the same computation run it exactly once
+- **Configurable** — cache directory, eviction policy, and storage mode via `pocket.edn`, environment variables, or code
+
 ## General info
 |||
 |-|-|

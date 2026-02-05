@@ -43,7 +43,7 @@
   (update
    data
    :data
-   (fn* [p1__92839#] (map (fn [x] (* x (:scale opts))) p1__92839#)))))
+   (fn* [p1__96557#] (map (fn [x] (* x (:scale opts))) p1__96557#)))))
 
 
 (def
@@ -103,7 +103,7 @@
  (->> (pocket/cache-entries) (mapv :id) (str/join "\n") kind/code))
 
 
-(def v25_l136 (def data-c (load-dataset* "data/raw.csv")))
+(def v25_l136 (def data-c (load-dataset* "data/experiment.csv")))
 
 
 (def v26_l137 (def preprocessed-c (preprocess* data-c {:scale 2})))
@@ -115,10 +115,13 @@
 (def v29_l142 (pocket/origin-story model-c))
 
 
-(def v31_l149 (pocket/origin-story model-c))
+(def v31_l148 (deref model-c))
 
 
-(def v33_l156 (kind/mermaid (pocket/origin-story-mermaid model-c)))
+(def v33_l152 (pocket/origin-story model-c))
 
 
-(def v35_l160 (pocket/cleanup!))
+(def v35_l157 (kind/mermaid (pocket/origin-story-mermaid model-c)))
+
+
+(def v37_l161 (pocket/cleanup!))

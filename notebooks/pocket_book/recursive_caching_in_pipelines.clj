@@ -133,7 +133,7 @@
 
 ;; Build the pipeline keeping the intermediate `Cached` objects:
 
-(def data-c (load-dataset* "data/raw.csv"))
+(def data-c (load-dataset* "data/experiment.csv"))
 (def preprocessed-c (preprocess* data-c {:scale 2}))
 (def model-c (train-model* preprocessed-c {:epochs 100}))
 
@@ -144,11 +144,12 @@
 ;; No `:value` keys — nothing has been computed yet (in this
 ;; pipeline instance). Now deref to trigger computation:
 
-@model-c
+;; Deref the final step — this cascades through the pipeline:
+(deref model-c)
+
+;; After deref, every node includes its `:value`:
 
 (pocket/origin-story model-c)
-
-;; Every node now includes its `:value`.
 
 ;; `origin-story-mermaid` renders the same tree as a
 ;; [Mermaid](https://mermaid.js.org/) flowchart:

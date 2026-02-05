@@ -41,6 +41,27 @@
 ;; Write to stdout so messages appear as `OUT` rather than `ERR`:
 (System/setProperty "org.slf4j.simpleLogger.logFile" "System.out")
 
+;; If `slf4j-simple` was already initialized (e.g., in a long-running REPL),
+;; the properties above won't take effect because `SimpleLogger` reads them
+;; only once at class-load time. The following forces the output to stdout
+;; on the already-initialized configuration singleton:
+
+^:kindly/hide-code
+(try
+  (let [cp-field (.getDeclaredField org.slf4j.simple.SimpleLogger "CONFIG_PARAMS")]
+    (.setAccessible cp-field true)
+    (let [config (.get cp-field nil)
+          oc-field (.getDeclaredField (class config) "outputChoice")]
+      (.setAccessible oc-field true)
+      (let [sys-out (java.lang.Enum/valueOf
+                     org.slf4j.simple.OutputChoice$OutputChoiceType "SYS_OUT")
+            ctor (.getDeclaredConstructor
+                  org.slf4j.simple.OutputChoice
+                  (into-array Class [org.slf4j.simple.OutputChoice$OutputChoiceType]))]
+        (.setAccessible ctor true)
+        (.set oc-field config (.newInstance ctor (object-array [sys-out]))))))
+  (catch Exception _))
+
 ;; Other notebooks in this book require this namespace to
 ;; activate logging. In your own projects, configure your
 ;; preferred SLF4J backend instead.

@@ -262,13 +262,16 @@
 (def v107_l235 (pocket/origin-story b-c))
 
 
-(def v109_l241 (pocket/origin-story b-c))
+(def v109_l238 (deref b-c))
 
 
-(def v110_l243 (kind/doc #'pocket/origin-story-mermaid))
+(def v111_l242 (pocket/origin-story b-c))
 
 
-(def v112_l247 (kind/mermaid (pocket/origin-story-mermaid b-c)))
+(def v112_l244 (kind/doc #'pocket/origin-story-mermaid))
 
 
-(def v113_l249 (pocket/cleanup!))
+(def v114_l248 (kind/mermaid (pocket/origin-story-mermaid b-c)))
+
+
+(def v115_l250 (pocket/cleanup!))

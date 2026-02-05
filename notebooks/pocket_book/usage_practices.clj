@@ -1,8 +1,10 @@
 ;; # Usage Practices
 
-;; This chapter covers practical patterns for day-to-day work with Pocket:
-;; function identity, cache invalidation, testing, REPL introspection,
-;; serialization constraints, and guidance on when Pocket is the right tool.
+;; This chapter expands on the basics from
+;; [Getting Started](pocket_book.getting_started.html) with practical
+;; patterns for day-to-day work: function identity in depth, cache
+;; invalidation strategies, testing, REPL introspection, serialization
+;; constraints, and debugging tips.
 
 ;; ## Setup
 

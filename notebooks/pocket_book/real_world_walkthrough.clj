@@ -6,7 +6,6 @@
             [scicloj.kindly.v4.kind :as kind]
             [babashka.fs :as fs]))
 
-
 ;; ## Overview
 
 ;; This walkthrough demonstrates a realistic data pipeline with
@@ -55,13 +54,23 @@
   (Thread/sleep 300)
   {:city (:city opts)
    :source (:source opts)
-   :readings [{:day 1 :temp-c 18.2 :rain-mm 0.0}
-              {:day 2 :temp-c 21.5 :rain-mm 5.2}
-              {:day 3 :temp-c 19.8 :rain-mm 12.1}
-              {:day 4 :temp-c 22.0 :rain-mm 0.0}
-              {:day 5 :temp-c 16.3 :rain-mm 8.4}
-              {:day 6 :temp-c 20.1 :rain-mm 0.0}
-              {:day 7 :temp-c 23.7 :rain-mm 3.3}]})
+   :readings (case (:city opts)
+               "Paris"
+               [{:day 1 :temp-c 15.0 :rain-mm 2.1}
+                {:day 2 :temp-c 17.3 :rain-mm 0.0}
+                {:day 3 :temp-c 14.6 :rain-mm 7.8}
+                {:day 4 :temp-c 18.1 :rain-mm 0.0}
+                {:day 5 :temp-c 13.9 :rain-mm 4.5}
+                {:day 6 :temp-c 16.7 :rain-mm 0.0}
+                {:day 7 :temp-c 19.2 :rain-mm 1.0}]
+               ;; default (London, etc.)
+               [{:day 1 :temp-c 18.2 :rain-mm 0.0}
+                {:day 2 :temp-c 21.5 :rain-mm 5.2}
+                {:day 3 :temp-c 19.8 :rain-mm 12.1}
+                {:day 4 :temp-c 22.0 :rain-mm 0.0}
+                {:day 5 :temp-c 16.3 :rain-mm 8.4}
+                {:day 6 :temp-c 20.1 :rain-mm 0.0}
+                {:day 7 :temp-c 23.7 :rain-mm 3.3}])})
 
 (defn clean-data
   "Remove readings with missing values and round numbers."
@@ -127,10 +136,10 @@
 
 (println "=== First run ===")
 
-(let [raw    (pocket/cached #'fetch-readings {:city "London" :days 7 :source :api})
-      clean  (pocket/cached #'clean-data raw {:precision 10 :remove-nulls true})
-      temps  (pocket/cached #'temperature-trends clean {:unit :celsius})
-      rain   (pocket/cached #'rainfall-totals clean {:unit :mm})
+(let [raw (pocket/cached #'fetch-readings {:city "London" :days 7 :source :api})
+      clean (pocket/cached #'clean-data raw {:precision 10 :remove-nulls true})
+      temps (pocket/cached #'temperature-trends clean {:unit :celsius})
+      rain (pocket/cached #'rainfall-totals clean {:unit :mm})
       report (pocket/cached #'summary temps rain)]
   (time (deref report)))
 
@@ -145,10 +154,10 @@
 
 (println "\n=== Second run (fully cached) ===")
 
-(let [raw    (pocket/cached #'fetch-readings {:city "London" :days 7 :source :api})
-      clean  (pocket/cached #'clean-data raw {:precision 10 :remove-nulls true})
-      temps  (pocket/cached #'temperature-trends clean {:unit :celsius})
-      rain   (pocket/cached #'rainfall-totals clean {:unit :mm})
+(let [raw (pocket/cached #'fetch-readings {:city "London" :days 7 :source :api})
+      clean (pocket/cached #'clean-data raw {:precision 10 :remove-nulls true})
+      temps (pocket/cached #'temperature-trends clean {:unit :celsius})
+      rain (pocket/cached #'rainfall-totals clean {:unit :mm})
       report (pocket/cached #'summary temps rain)]
   (time (deref report)))
 
@@ -163,10 +172,10 @@
 
 (println "\n=== Different city ===")
 
-(let [raw    (pocket/cached #'fetch-readings {:city "Paris" :days 7 :source :api})
-      clean  (pocket/cached #'clean-data raw {:precision 10 :remove-nulls true})
-      temps  (pocket/cached #'temperature-trends clean {:unit :celsius})
-      rain   (pocket/cached #'rainfall-totals clean {:unit :mm})
+(let [raw (pocket/cached #'fetch-readings {:city "Paris" :days 7 :source :api})
+      clean (pocket/cached #'clean-data raw {:precision 10 :remove-nulls true})
+      temps (pocket/cached #'temperature-trends clean {:unit :celsius})
+      rain (pocket/cached #'rainfall-totals clean {:unit :mm})
       report (pocket/cached #'summary temps rain)]
   (time (deref report)))
 
@@ -176,10 +185,10 @@
 
 (println "\n=== Paris again (cached) ===")
 
-(let [raw    (pocket/cached #'fetch-readings {:city "Paris" :days 7 :source :api})
-      clean  (pocket/cached #'clean-data raw {:precision 10 :remove-nulls true})
-      temps  (pocket/cached #'temperature-trends clean {:unit :celsius})
-      rain   (pocket/cached #'rainfall-totals clean {:unit :mm})
+(let [raw (pocket/cached #'fetch-readings {:city "Paris" :days 7 :source :api})
+      clean (pocket/cached #'clean-data raw {:precision 10 :remove-nulls true})
+      temps (pocket/cached #'temperature-trends clean {:unit :celsius})
+      rain (pocket/cached #'rainfall-totals clean {:unit :mm})
       report (pocket/cached #'summary temps rain)]
   (time (deref report)))
 
