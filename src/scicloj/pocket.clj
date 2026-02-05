@@ -5,7 +5,7 @@
    Configuration: `*base-cache-dir*`, `*mem-cache-options*`, `*storage*`,
      `set-base-cache-dir!`, `set-mem-cache-options!`, `reset-mem-cache-options!`, `set-storage!`.
    Invalidation: `invalidate!`, `invalidate-fn!`, `cleanup!`, `clear-mem-cache!`.
-   Introspection: `cache-entries`, `cache-stats`, `dir-tree`.
+   Introspection: `cache-entries`, `cache-stats`, `dir-tree`, `origin-story`, `origin-story-mermaid`.
    
    See `*base-cache-dir*`, `*mem-cache-options*`, and `*storage*` for configuration precedence."
   (:require [scicloj.pocket.impl.cache :as impl]
@@ -236,3 +236,28 @@
         dir (when base-dir (str base-dir "/.cache"))]
     (when (and dir (fs/exists? dir))
       (impl/dir-tree dir))))
+
+(defn origin-story
+  "Given a value, return its computation DAG as a nested map.
+
+   For a `Cached` value, each node is `{:fn <var> :args [<nodes>]}`,
+   with `:value` included if the computation has been realized.
+   Plain (non-Cached) arguments become `{:value <val>}` leaf nodes.
+
+   Does not trigger computation — only peeks at already-realized values.
+   Works with all storage policies (`:mem+disk`, `:mem`, `:none`)."
+  [x]
+  (impl/origin-story x))
+
+(defn origin-story-mermaid
+  "Given a value, return a Mermaid flowchart string of its computation DAG.
+
+   Accepts a `Cached` value (walks it via `origin-story`) or a tree map
+   previously returned by `origin-story`.
+
+   Returns a plain string. Wrap with `(kind/mermaid ...)` for Kindly rendering."
+  [x]
+  (let [tree (if (and (map? x) (or (:fn x) (contains? x :value)))
+               x
+               (impl/origin-story x))]
+    (impl/origin-story-mermaid tree)))

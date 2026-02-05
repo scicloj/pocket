@@ -695,3 +695,65 @@
         (finally
           (fs/delete-tree alt-dir))))))
 
+(deftest test-origin-story-basic
+  (testing "origin-story returns tree structure for a pipeline"
+    (let [a (pocket/cached #'expensive-add 1 2)
+          b (pocket/cached #'expensive-add a 3)]
+      (let [tree (pocket/origin-story b)]
+        (is (= #'expensive-add (:fn tree)))
+        (is (= 2 (count (:args tree))))
+        ;; First arg is a Cached node
+        (is (= #'expensive-add (:fn (first (:args tree)))))
+        (is (= [{:value 1} {:value 2}] (:args (first (:args tree)))))
+        ;; Second arg is a leaf
+        (is (= {:value 3} (second (:args tree))))))))
+
+(deftest test-origin-story-value-populated
+  (testing "origin-story includes :value when Cached has been derefed"
+    (let [a (pocket/cached #'expensive-add 1 2)
+          b (pocket/cached #'expensive-add a 3)]
+      @b
+      (let [tree (pocket/origin-story b)]
+        (is (= 6 (:value tree)))
+        (is (= 3 (:value (first (:args tree)))))))))
+
+(deftest test-origin-story-unrealized
+  (testing "origin-story omits :value when Cached has not been derefed"
+    (let [a (pocket/cached #'expensive-add 1 2)
+          b (pocket/cached #'expensive-add a 3)]
+      (let [tree (pocket/origin-story b)]
+        (is (not (contains? tree :value)))
+        (is (not (contains? (first (:args tree)) :value)))))))
+
+(deftest test-origin-story-plain-value
+  (testing "origin-story on a non-Cached value returns {:value x}"
+    (is (= {:value 42} (pocket/origin-story 42)))
+    (is (= {:value nil} (pocket/origin-story nil)))
+    (is (= {:value {:a 1}} (pocket/origin-story {:a 1})))))
+
+(deftest test-origin-story-mermaid
+  (testing "origin-story-mermaid returns valid Mermaid flowchart"
+    (let [a (pocket/cached #'expensive-add 1 2)
+          b (pocket/cached #'expensive-add a 3)
+          mermaid (pocket/origin-story-mermaid b)]
+      (is (string? mermaid))
+      (is (.startsWith mermaid "flowchart TD"))
+      (is (.contains mermaid "expensive-add"))
+      ;; Should contain leaf values
+      (is (.contains mermaid "3")))))
+
+(deftest test-origin-story-mixed-storage
+  (testing "origin-story works with mixed storage policies"
+    (let [none-fn (pocket/caching-fn #'expensive-add {:storage :none})
+          a (none-fn 1 2)
+          b (pocket/cached #'expensive-add a 3)]
+      ;; Tree structure is correct regardless of storage
+      (let [tree (pocket/origin-story b)]
+        (is (= #'expensive-add (:fn tree)))
+        (is (= #'expensive-add (:fn (first (:args tree))))))
+      ;; After deref, values appear
+      @b
+      (let [tree (pocket/origin-story b)]
+        (is (= 6 (:value tree)))
+        (is (= 3 (:value (first (:args tree)))))))))
+

@@ -217,6 +217,36 @@ pocket/*base-cache-dir*
 (pocket/cache-stats)
 
 (pocket/cleanup!)
+
+(kind/doc #'pocket/origin-story)
+
+;; `origin-story` returns a nested map describing a computation's DAG.
+;; Each cached step is `{:fn <var> :args [...]}`, with `:value` if realized.
+;; Plain arguments become `{:value ...}` leaves.
+
+(defn step-a [x] (+ x 10))
+(defn step-b [x y] (* x y))
+
+(def a-c (pocket/cached #'step-a 5))
+(def b-c (pocket/cached #'step-b a-c 3))
+
+;; Before deref — no `:value` keys:
+
+(pocket/origin-story b-c)
+
+@b-c
+
+;; After deref — `:value` keys appear:
+
+(pocket/origin-story b-c)
+
+(kind/doc #'pocket/origin-story-mermaid)
+
+;; Returns a Mermaid flowchart string. Wrap with `kind/mermaid` for rendering:
+
+(kind/mermaid (pocket/origin-story-mermaid b-c))
+
+(pocket/cleanup!)
 ;; ## Extending `PIdentifiable`
 ;;
 ;; You can customize how your types contribute to cache keys by

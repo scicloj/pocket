@@ -242,3 +242,33 @@
 
 
 (def v99_l219 (pocket/cleanup!))
+
+
+(def v100_l221 (kind/doc #'pocket/origin-story))
+
+
+(def v102_l227 (defn step-a [x] (+ x 10)))
+
+
+(def v103_l228 (defn step-b [x y] (* x y)))
+
+
+(def v104_l230 (def a-c (pocket/cached #'step-a 5)))
+
+
+(def v105_l231 (def b-c (pocket/cached #'step-b a-c 3)))
+
+
+(def v107_l235 (pocket/origin-story b-c))
+
+
+(def v109_l241 (pocket/origin-story b-c))
+
+
+(def v110_l243 (kind/doc #'pocket/origin-story-mermaid))
+
+
+(def v112_l247 (kind/mermaid (pocket/origin-story-mermaid b-c)))
+
+
+(def v113_l249 (pocket/cleanup!))

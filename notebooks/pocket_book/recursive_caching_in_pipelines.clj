@@ -123,6 +123,38 @@
 ;; For a fuller example with branching dependencies, see the
 ;; [Real-World Walkthrough](pocket_book.real_world_walkthrough.html).
 
+;; ## Inspecting the DAG
+;;
+;; `origin-story` reconstructs the computation graph from a `Cached` value.
+;; It walks the argument tree recursively, returning a nested map where
+;; each cached step is `{:fn <var> :args [...]}` and plain arguments
+;; are `{:value ...}` leaves. If a step has already been computed,
+;; `:value` is included in the node.
+
+;; Build the pipeline keeping the intermediate `Cached` objects:
+
+(def data-c (load-dataset* "data/raw.csv"))
+(def preprocessed-c (preprocess* data-c {:scale 2}))
+(def model-c (train-model* preprocessed-c {:epochs 100}))
+
+;; Inspect the DAG before forcing any computation:
+
+(pocket/origin-story model-c)
+
+;; No `:value` keys — nothing has been computed yet (in this
+;; pipeline instance). Now deref to trigger computation:
+
+@model-c
+
+(pocket/origin-story model-c)
+
+;; Every node now includes its `:value`.
+
+;; `origin-story-mermaid` renders the same tree as a
+;; [Mermaid](https://mermaid.js.org/) flowchart:
+
+(kind/mermaid (pocket/origin-story-mermaid model-c))
+
 ;; ## Cleanup
 
 (pocket/cleanup!)

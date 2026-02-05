@@ -273,6 +273,78 @@
           (.write w (str "#<Cached " (pr-str id) " " status ">")))
         (.write w (str "#<Cached " (pr-str id) ">"))))))
 
+(defn- peek-value
+  "Non-computing peek at a Cached's realized value.
+   Returns the value if already computed, or ::unrealized."
+  [^Cached c]
+  (let [storage (or (.storage c) :mem+disk)]
+    (case storage
+      :none
+      (if (and (.local-delay c) (realized? (.local-delay c)))
+        @(.local-delay c)
+        ::unrealized)
+
+      (:mem :mem+disk)
+      (if-let [base-dir (.base-dir c)]
+        (let [id (canonical-id (->id c))
+              path (->path base-dir id)]
+          (cond
+            (contains? @mem-cache path)
+            (get @mem-cache path)
+
+            (and (= storage :mem+disk) (fs/exists? path))
+            (read-cached path)
+
+            :else
+            ::unrealized))
+        ::unrealized))))
+
+(defn origin-story
+  "Walk a Cached value's argument tree and return a DAG description.
+   Each cached step is {:fn <var> :args [<nodes>]} with optional :value if realized.
+   Plain (non-Cached) arguments become {:value <val>} leaf nodes."
+  [x]
+  (if (instance? Cached x)
+    (let [node {:fn (.f x)
+                :args (mapv origin-story (.args x))}
+          v (peek-value x)]
+      (if (= v ::unrealized)
+        node
+        (assoc node :value v)))
+    {:value x}))
+
+(defn- mermaid-escape
+  "Escape a string for use in a Mermaid node label."
+  [s]
+  (-> s
+      (str/replace "\"" "'")
+      (str/replace "\n" " ")))
+
+(defn origin-story-mermaid
+  "Render an origin-story tree as a Mermaid flowchart string."
+  [tree]
+  (let [counter (atom 0)
+        lines (atom [])
+        gen-id #(let [n @counter] (swap! counter inc) (str "n" n))]
+    (letfn [(walk [node]
+              (let [id (gen-id)]
+                (if (:fn node)
+                  (let [label (-> (:fn node) symbol name)]
+                    (swap! lines conj (str "  " id "[\"" (mermaid-escape label) "\"]"))
+                    (doseq [arg (:args node)]
+                      (let [child-id (walk arg)]
+                        (swap! lines conj (str "  " id " --> " child-id))))
+                    id)
+                  (let [v (:value node)
+                        label (pr-str v)
+                        label (if (> (count label) 40)
+                                (str (subs label 0 37) "...")
+                                label)]
+                    (swap! lines conj (str "  " id "[\"" (mermaid-escape label) "\"]"))
+                    id))))]
+      (walk tree)
+      (str "flowchart TD\n" (str/join "\n" @lines)))))
+
 (defn cached
   "Create a cached computation"
   [base-dir storage func & args]
