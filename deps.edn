@@ -8,8 +8,9 @@
 
  :aliases
  {:dev {:extra-paths ["notebooks" "test"]
-        :extra-deps {org.scicloj/clay {:mvn/version "2.0.8"}
-                 org.slf4j/slf4j-simple {:mvn/version "2.0.16"}}}
+        :extra-deps {org.scicloj/clay {:mvn/version "2.0.9"}
+                 org.scicloj/noj {:mvn/version "2-beta19.1"}
+                 org.slf4j/slf4j-simple {:mvn/version "2.0.16"} }}
   
   :test {:extra-paths ["test"]
          :extra-deps {io.github.cognitect-labs/test-runner
