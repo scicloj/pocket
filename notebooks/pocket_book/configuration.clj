@@ -153,6 +153,72 @@
 ;; mem-cache, which affects all threads. This is useful for test fixtures
 ;; but should be avoided in concurrent production use with different policies.
 
+;; ## Storage policies
+
+;; Pocket supports three storage modes, controlled by `*storage*`:
+;;
+;; | Mode | Behavior |
+;; |------|----------|
+;; | `:mem+disk` | In-memory cache backed by disk persistence (default) |
+;; | `:mem` | In-memory cache only — no disk I/O |
+;; | `:none` | No shared cache — instance-local memoization only |
+;;
+;; `:mem` is useful for cheap computations that are called many times
+;; with the same arguments. It avoids disk serialization overhead while
+;; still deduplicating concurrent access.
+;;
+;; `:none` is useful for trivially cheap functions that you want to
+;; participate in DAG identity tracking (see
+;; [Recursive Caching in Pipelines](pocket_book.recursive_caching_in_pipelines.html))
+;; without any shared caching. Each `Cached` instance memoizes its own
+;; result (like a `delay`), but separate instances recompute.
+
+;; **Programmatically** with `set-storage!`:
+
+(pocket/set-storage! :mem)
+
+(pocket/config)
+
+(kind/test-last [(fn [cfg] (= :mem (:storage cfg)))])
+
+;; **Per-function** via `caching-fn` options:
+;;
+;; ```clojure
+;; (def fast-fn* (pocket/caching-fn #'fast-fn {:storage :mem}))
+;; (def identity-fn* (pocket/caching-fn #'identity-fn {:storage :none}))
+;; ```
+;;
+;; The option map can also override `:cache-dir` and `:mem-cache`:
+;;
+;; ```clojure
+;; (pocket/caching-fn #'f {:storage :mem+disk
+;;                         :cache-dir "/data/project-cache"
+;;                         :mem-cache {:policy :ttl :ttl 60000}})
+;; ```
+
+;; **Thread-local binding**:
+;;
+;; ```clojure
+;; (binding [pocket/*storage* :mem]
+;;   @(pocket/cached #'my-fn args))
+;; ```
+
+;; **Environment variable** — `POCKET_STORAGE`:
+;;
+;; ```bash
+;; export POCKET_STORAGE=mem
+;; ```
+
+;; **Note**: `:mem`-only entries do not appear in `cache-entries` or
+;; `cache-stats`, which scan the disk cache. `:none` entries are not
+;; tracked anywhere — they exist only as in-memory `Cached` objects.
+
+;; Reset to default:
+
+(pocket/set-storage! nil)
+
+(kind/test-last [(fn [_] (= :mem+disk (:storage (pocket/config))))])
+
 ;; ## Cleanup
 
 ;; To delete all cached values (both disk and in-memory), use `cleanup!`:

@@ -78,7 +78,6 @@
           (is (every? #(= 50 %) results))
           (is (= 1 @call-count)))))))
 
-
 (deftest test-concurrent-cached-creation
   (testing "Concurrent creation of Cached with same args computes once"
     (let [call-count (atom 0)
@@ -449,7 +448,7 @@
 (deftest test-nil-base-dir-validation
   (testing "deref throws when base-dir is nil"
     (let [;; Construct Cached directly with nil base-dir to bypass resolve chain
-          cached-val (impl/cached nil #'expensive-add 1 2)]
+          cached-val (impl/cached nil nil #'expensive-add 1 2)]
       (is (thrown-with-msg? clojure.lang.ExceptionInfo
                             #"No cache directory configured"
                             @cached-val)))))
@@ -579,4 +578,120 @@
           ;; Deref again - should load from disk, not recompute
           (is (= 300 @c))
           (is (= 1 @call-count) "Should load from disk, not recompute"))))))
+
+(deftest test-storage-mem
+  (testing ":mem storage creates no disk files"
+    (let [mem-fn (pocket/caching-fn #'expensive-add {:storage :mem})]
+      (is (= 30 @(mem-fn 10 20)))
+      ;; No disk files should exist
+      (is (not (fs/exists? test-cache-dir)))))
+
+  (testing ":mem value served from mem-cache on second deref"
+    (impl/clear-mem-cache!)
+    (let [call-count (atom 0)
+          counting-fn (fn [x y] (swap! call-count inc) (+ x y))]
+      (with-redefs [expensive-add counting-fn]
+        (let [mem-fn (pocket/caching-fn #'expensive-add {:storage :mem})]
+          (is (= 30 @(mem-fn 10 20)))
+          (is (= 1 @call-count))
+          ;; Second call with same args — should hit mem-cache
+          (is (= 30 @(mem-fn 10 20)))
+          (is (= 1 @call-count))))))
+
+  (testing ":mem value lost after clear-mem-cache!"
+    (impl/clear-mem-cache!)
+    (let [call-count (atom 0)
+          counting-fn (fn [x y] (swap! call-count inc) (+ x y))]
+      (with-redefs [expensive-add counting-fn]
+        (let [mem-fn (pocket/caching-fn #'expensive-add {:storage :mem})]
+          (is (= 30 @(mem-fn 10 20)))
+          (is (= 1 @call-count))
+          ;; Clear mem-cache
+          (impl/clear-mem-cache!)
+          ;; Should recompute
+          (is (= 30 @(mem-fn 10 20)))
+          (is (= 2 @call-count)))))))
+
+(deftest test-storage-none
+  (testing ":none instance-local delay — first deref computes, second does not"
+    (let [call-count (atom 0)
+          counting-fn (fn [x y] (swap! call-count inc) (+ x y))]
+      (with-redefs [expensive-add counting-fn]
+        (let [none-fn (pocket/caching-fn #'expensive-add {:storage :none})
+              c (none-fn 10 20)]
+          ;; First deref computes
+          (is (= 30 @c))
+          (is (= 1 @call-count))
+          ;; Second deref of same instance does NOT recompute
+          (is (= 30 @c))
+          (is (= 1 @call-count))))))
+
+  (testing ":none separate instances recompute"
+    (let [call-count (atom 0)
+          counting-fn (fn [x y] (swap! call-count inc) (+ x y))]
+      (with-redefs [expensive-add counting-fn]
+        (let [none-fn (pocket/caching-fn #'expensive-add {:storage :none})]
+          (is (= 30 @(none-fn 10 20)))
+          (is (= 1 @call-count))
+          ;; New instance with same args — recomputes
+          (is (= 30 @(none-fn 10 20)))
+          (is (= 2 @call-count))))))
+
+  (testing ":none creates no disk files"
+    (let [none-fn (pocket/caching-fn #'expensive-add {:storage :none})]
+      (is (= 30 @(none-fn 10 20)))
+      (is (not (fs/exists? test-cache-dir))))))
+
+(deftest test-storage-binding
+  (testing "binding *storage* to :mem skips disk I/O"
+    (binding [pocket/*storage* :mem]
+      (let [call-count (atom 0)
+            counting-fn (fn [x y] (swap! call-count inc) (+ x y))]
+        (with-redefs [expensive-add counting-fn]
+          (is (= 30 @(pocket/cached #'expensive-add 10 20)))
+          (is (= 1 @call-count))
+          (is (not (fs/exists? test-cache-dir))))))))
+
+(deftest test-caching-fn-opts
+  (testing "caching-fn opts don't leak to other calls"
+    (let [mem-fn (pocket/caching-fn #'expensive-add {:storage :mem})
+          disk-fn (pocket/caching-fn #'expensive-add)]
+      ;; mem-fn should not create disk files
+      (is (= 30 @(mem-fn 10 20)))
+      (is (not (fs/exists? test-cache-dir)))
+      ;; disk-fn with different args should create disk files
+      (is (= 70 @(disk-fn 30 40)))
+      (is (fs/exists? test-cache-dir)))))
+
+(deftest test-storage-mem-in-flight
+  (testing "Concurrent :mem derefs compute only once"
+    (let [call-count (atom 0)
+          slow-fn (fn [x y]
+                    (swap! call-count inc)
+                    (Thread/sleep 200)
+                    (+ x y))]
+      (with-redefs [expensive-add slow-fn]
+        (binding [pocket/*storage* :mem]
+          (let [futures (doall (repeatedly 10 #(future @(pocket/cached #'expensive-add 7 8))))
+                results (mapv deref futures)]
+            (is (every? #(= 15 %) results))
+            (is (= 1 @call-count))))))))
+
+(deftest test-storage-in-config
+  (testing "config reflects :storage key"
+    (is (= :mem+disk (:storage (pocket/config))))
+    (binding [pocket/*storage* :mem]
+      (is (= :mem (:storage (pocket/config)))))))
+
+(deftest test-caching-fn-cache-dir-override
+  (testing "caching-fn with :cache-dir writes to alternate directory"
+    (let [alt-dir "/tmp/pocket-test-alt-dir"
+          alt-fn (pocket/caching-fn #'expensive-add {:cache-dir alt-dir})]
+      (try
+        (is (= 30 @(alt-fn 10 20)))
+        ;; Should write to alt-dir, not test-cache-dir
+        (is (fs/exists? alt-dir))
+        (is (not (fs/exists? test-cache-dir)))
+        (finally
+          (fs/delete-tree alt-dir))))))
 

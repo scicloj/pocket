@@ -84,6 +84,17 @@ pocket/*base-cache-dir*
 
 (deref (my-caching-fn 3 4))
 
+;; `caching-fn` accepts an optional map to override per-function configuration:
+;;
+;; ```clojure
+;; (pocket/caching-fn #'f {:storage :mem})     ;; in-memory only
+;; (pocket/caching-fn #'f {:storage :none})    ;; identity tracking only
+;; (pocket/caching-fn #'f {:cache-dir "/tmp/alt"})  ;; alternate cache dir
+;; ```
+;;
+;; See the [Configuration chapter](pocket_book.configuration.html#storage-policies)
+;; for details on storage modes and the full option map.
+
 (kind/doc #'pocket/maybe-deref)
 
 ;; A plain value passes through unchanged:
@@ -136,6 +147,20 @@ pocket/*base-cache-dir*
 ;; Reset mem-cache configuration to library defaults:
 
 (pocket/reset-mem-cache-options!)
+
+(kind/doc #'pocket/*storage*)
+
+(kind/doc #'pocket/set-storage!)
+
+;; Switch to memory-only storage:
+
+(pocket/set-storage! :mem)
+
+;; Reset to default:
+
+(pocket/set-storage! nil)
+
+(kind/test-last [(fn [_] (= :mem+disk (:storage (pocket/config))))])
 
 (kind/doc #'pocket/cleanup!)
 

@@ -63,4 +63,21 @@
  (pocket/set-mem-cache-options! {:policy :lru, :threshold 256}))
 
 
-(def v22_l160 (pocket/cleanup!))
+(def v22_l178 (pocket/set-storage! :mem))
+
+
+(def v23_l180 (pocket/config))
+
+
+(deftest t24_l182 (is ((fn [cfg] (= :mem (:storage cfg))) v23_l180)))
+
+
+(def v26_l218 (pocket/set-storage! nil))
+
+
+(deftest
+ t27_l220
+ (is ((fn [_] (= :mem+disk (:storage (pocket/config)))) v26_l218)))
+
+
+(def v29_l226 (pocket/cleanup!))

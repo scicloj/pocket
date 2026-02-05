@@ -170,40 +170,62 @@
     @x
     x))
 
-(deftype Cached [base-dir f args]
+(deftype Cached [base-dir f args storage local-delay]
   IDeref
   (deref [this]
-    (let [id (canonical-id (->id this))
-          fn-name (->id f)
-          path (->path base-dir id)]
-      (cw/lookup-or-miss
-       mem-cache path
-       (fn [_]
-         ;; Use in-flight to ensure concurrent derefs of the same path
-         ;; compute only once. lookup-or-miss deduplicates per-call via
-         ;; its own delay, but concurrent callers each create separate
-         ;; lookup-or-miss invocations, so we need this extra layer.
-         (let [d (.computeIfAbsent
-                  in-flight path
-                  (reify java.util.function.Function
-                    (apply [_ _]
-                      (delay
-                        (try
-                          (if (fs/exists? path)
-                            (do (log/debug "Cache hit (disk):" fn-name path)
-                                (read-cached path))
-                            (do (log/info "Cache miss, computing:" fn-name)
-                                (let [resolved-args (mapv maybe-deref args)
-                                      v (clojure.core/apply f resolved-args)
-                                      meta-map {:id (pr-str id)
-                                                :fn-name (str fn-name)
-                                                :args-str (pr-str (mapv ->id args))
-                                                :created-at (str (java.time.Instant/now))}]
-                                  (write-cached! v path meta-map)
-                                  v)))
-                          (finally
-                            (.remove in-flight path)))))))]
-           @d))))))
+    (case (or storage :mem+disk)
+      :none
+      @local-delay
+
+      :mem
+      (let [id (canonical-id (->id this))
+            fn-name (->id f)
+            path (->path base-dir id)]
+        (cw/lookup-or-miss
+         mem-cache path
+         (fn [_]
+           (let [d (.computeIfAbsent
+                    in-flight path
+                    (reify java.util.function.Function
+                      (apply [_ _]
+                        (delay
+                          (try
+                            (log/info "Cache miss (mem), computing:" fn-name)
+                            (let [resolved-args (mapv maybe-deref args)
+                                  v (clojure.core/apply f resolved-args)]
+                              v)
+                            (finally
+                              (.remove in-flight path)))))))]
+             @d))))
+
+      :mem+disk
+      (let [id (canonical-id (->id this))
+            fn-name (->id f)
+            path (->path base-dir id)]
+        (cw/lookup-or-miss
+         mem-cache path
+         (fn [_]
+           (let [d (.computeIfAbsent
+                    in-flight path
+                    (reify java.util.function.Function
+                      (apply [_ _]
+                        (delay
+                          (try
+                            (if (fs/exists? path)
+                              (do (log/debug "Cache hit (disk):" fn-name path)
+                                  (read-cached path))
+                              (do (log/info "Cache miss, computing:" fn-name)
+                                  (let [resolved-args (mapv maybe-deref args)
+                                        v (clojure.core/apply f resolved-args)
+                                        meta-map {:id (pr-str id)
+                                                  :fn-name (str fn-name)
+                                                  :args-str (pr-str (mapv ->id args))
+                                                  :created-at (str (java.time.Instant/now))}]
+                                    (write-cached! v path meta-map)
+                                    v)))
+                            (finally
+                              (.remove in-flight path)))))))]
+             @d)))))))
 
 (extend-protocol PIdentifiable
   Cached
@@ -227,29 +249,46 @@
   (->id [_] nil))
 
 (defmethod print-method Cached [^Cached c ^java.io.Writer w]
-  (let [id (->id c)]
-    (if-let [base-dir (.base-dir c)]
-      (let [path (->path base-dir (canonical-id id))
-            status (cond
-                     (contains? @mem-cache path) :cached
-                     (fs/exists? path) :disk
-                     :else :pending)]
-        (.write w (str "#<Cached " (pr-str id) " " status ">")))
-      (.write w (str "#<Cached " (pr-str id) ">")))))
+  (let [id (->id c)
+        storage (or (.storage c) :mem+disk)]
+    (case storage
+      :none
+      (let [realized? (and (.local-delay c) (realized? (.local-delay c)))]
+        (.write w (str "#<Cached " (pr-str id) " " (if realized? :realized :none) ">")))
+
+      :mem
+      (if-let [base-dir (.base-dir c)]
+        (let [path (->path base-dir (canonical-id id))
+              status (if (contains? @mem-cache path) :cached :pending)]
+          (.write w (str "#<Cached " (pr-str id) " " status ">")))
+        (.write w (str "#<Cached " (pr-str id) ">")))
+
+      :mem+disk
+      (if-let [base-dir (.base-dir c)]
+        (let [path (->path base-dir (canonical-id id))
+              status (cond
+                       (contains? @mem-cache path) :cached
+                       (fs/exists? path) :disk
+                       :else :pending)]
+          (.write w (str "#<Cached " (pr-str id) " " status ">")))
+        (.write w (str "#<Cached " (pr-str id) ">"))))))
 
 (defn cached
   "Create a cached computation"
-  [base-dir func & args]
+  [base-dir storage func & args]
   (when-not (var? func)
     (throw (ex-info (str "pocket/cached requires a var (e.g., #'my-fn), got: " (type func))
                     {:func func})))
-  (->Cached base-dir func args))
+  (let [storage (or storage :mem+disk)
+        local-delay (when (= storage :none)
+                      (delay (clojure.core/apply func (mapv maybe-deref args))))]
+    (->Cached base-dir func args storage local-delay)))
 
 (defn invalidate!
   "Invalidate a specific cached computation by deleting its disk and memory entries.
    Returns a map with `:path` and `:existed`."
   [base-dir func args]
-  (let [c (->Cached base-dir func args)
+  (let [c (->Cached base-dir func args nil nil)
         id (canonical-id (->id c))
         path (->path base-dir id)
         existed? (boolean (fs/exists? path))]

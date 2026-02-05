@@ -2,11 +2,12 @@
   "Filesystem-based caching for expensive computations.
    
    Primary API: `cached`, `caching-fn`, `maybe-deref`.
-   Configuration: `*base-cache-dir*`, `*mem-cache-options*`, `set-base-cache-dir!`, `set-mem-cache-options!`, `reset-mem-cache-options!`.
+   Configuration: `*base-cache-dir*`, `*mem-cache-options*`, `*storage*`,
+     `set-base-cache-dir!`, `set-mem-cache-options!`, `reset-mem-cache-options!`, `set-storage!`.
    Invalidation: `invalidate!`, `invalidate-fn!`, `cleanup!`, `clear-mem-cache!`.
    Introspection: `cache-entries`, `cache-stats`, `dir-tree`.
    
-   See `*base-cache-dir*` and `*mem-cache-options*` for configuration precedence."
+   See `*base-cache-dir*`, `*mem-cache-options*`, and `*storage*` for configuration precedence."
   (:require [scicloj.pocket.impl.cache :as impl]
             [scicloj.pocket.protocols :as protocols]
             [babashka.fs :as fs]
@@ -32,6 +33,18 @@
    concurrent production use with different policies."
   nil)
 
+(def ^:dynamic *storage*
+  "Storage policy for cached computations: `:mem+disk`, `:mem`, or `:none`.
+   
+   - `:mem+disk` (default) — in-memory cache backed by disk persistence
+   - `:mem` — in-memory cache only, no disk I/O
+   - `:none` — no shared cache; instance-local memoization only
+   
+   Resolved with precedence: binding > `set-storage!` >
+   `POCKET_STORAGE` env var > `pocket.edn` `:storage` >
+   `pocket-defaults.edn` (library default: `:mem+disk`)."
+  nil)
+
 (defn- resolve-base-cache-dir
   "Resolve the base cache directory using the precedence chain."
   []
@@ -48,13 +61,22 @@
       (:mem-cache (impl/pocket-edn))
       (:mem-cache @impl/pocket-defaults-edn)))
 
+(defn- resolve-storage
+  "Resolve the storage policy using the precedence chain."
+  []
+  (or *storage*
+      (some-> (System/getenv "POCKET_STORAGE") keyword)
+      (:storage (impl/pocket-edn))
+      (:storage @impl/pocket-defaults-edn)))
+
 (defn config
   "Return the effective resolved configuration as a map.
-   Useful for inspecting which cache directory and mem-cache policy
-   are in effect after applying the precedence chain."
+   Useful for inspecting which cache directory, mem-cache policy,
+   and storage policy are in effect after applying the precedence chain."
   []
   {:base-cache-dir (resolve-base-cache-dir)
-   :mem-cache (resolve-mem-cache-options)})
+   :mem-cache (resolve-mem-cache-options)
+   :storage (resolve-storage)})
 
 (defn set-base-cache-dir!
   "Set the base cache directory by altering `*base-cache-dir*`.
@@ -63,6 +85,15 @@
   (alter-var-root #'*base-cache-dir* (constantly dir))
   (log/info "Cache dir set to:" dir)
   dir)
+
+(defn set-storage!
+  "Set the storage policy by altering `*storage*`.
+   Valid values: `:mem+disk`, `:mem`, `:none`.
+   Returns the storage policy."
+  [storage]
+  (alter-var-root #'*storage* (constantly storage))
+  (log/info "Storage policy set to:" storage)
+  storage)
 
 (def PIdentifiable
   "Protocol for computing cache key identity from values.
@@ -82,20 +113,32 @@
    The computation is executed on first `deref` and cached to disk.
    Subsequent derefs load from cache if available.
    
-   `func` must be a var (e.g., `#'my-fn`) for stable cache keys."
+   `func` must be a var (e.g., `#'my-fn`) for stable cache keys.
+   
+   Storage policy is controlled by `*storage*` (see `set-storage!`).
+   Use `caching-fn` with an opts map for per-function overrides."
   [func & args]
   (impl/ensure-mem-cache! (resolve-mem-cache-options))
-  (apply impl/cached (resolve-base-cache-dir) func args))
+  (apply impl/cached (resolve-base-cache-dir) (resolve-storage) func args))
 
 (defn caching-fn
   "Wrap a function to automatically cache its results.
    
    Returns a new function where each call returns a `Cached` object (`IDeref`).
    Deref the result to trigger computation or load from cache.
-   `f` must be a var (e.g., `#'my-fn`) for stable cache keys."
-  [f]
-  (fn [& args]
-    (apply cached f args)))
+   `f` must be a var (e.g., `#'my-fn`) for stable cache keys.
+   
+   Optionally accepts an options map to override configuration per-function:
+   - `:storage`   — `:mem+disk`, `:mem`, or `:none` (overrides `*storage*`)
+   - `:cache-dir` — base cache directory (overrides `*base-cache-dir*`)
+   - `:mem-cache` — in-memory cache options (overrides `*mem-cache-options*`)"
+  ([f] (caching-fn f nil))
+  ([f opts]
+   (fn [& args]
+     (binding [*storage* (or (:storage opts) *storage*)
+               *base-cache-dir* (or (:cache-dir opts) *base-cache-dir*)
+               *mem-cache-options* (or (:mem-cache opts) *mem-cache-options*)]
+       (apply cached f args)))))
 
 (defn maybe-deref
   "Deref if `x` implements `IDeref`, otherwise return `x` as-is.
