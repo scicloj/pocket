@@ -247,6 +247,37 @@ pocket/*base-cache-dir*
 
 (kind/mermaid (pocket/origin-story-mermaid b-c))
 
+(kind/doc #'pocket/origin-story-graph)
+
+;; `origin-story-graph` returns a normalized `{:nodes ... :edges ...}` format,
+;; suitable for graph algorithms:
+
+(pocket/origin-story-graph b-c)
+
+(kind/doc #'pocket/compare-experiments)
+
+;; `compare-experiments` extracts varying parameters from multiple experiments.
+;; This is useful for hyperparameter sweeps where you want to see which
+;; parameters differ across experiments.
+
+(defn run-exp [config]
+  {:rmse (* 0.1 (:lr config))})
+
+(def exp1 (pocket/cached #'run-exp {:lr 0.01 :epochs 100}))
+(def exp2 (pocket/cached #'run-exp {:lr 0.001 :epochs 100}))
+
+(pocket/compare-experiments [exp1 exp2])
+
+(kind/test-last
+ [(fn [rows]
+    (and (= 2 (count rows))
+         (every? #(contains? % :lr) rows)
+         (not-any? #(contains? % :epochs) rows)))])
+
+;; Note: `:epochs` is not shown because it's the same (100) in both experiments.
+;; Only varying parameters appear in the comparison.
+
+
 (pocket/cleanup!)
 ;; ## Extending `PIdentifiable`
 ;;

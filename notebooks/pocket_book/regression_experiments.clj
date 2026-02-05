@@ -302,3 +302,183 @@ noise-results
 ;; ## Cleanup
 
 (pocket/cleanup!)
+
+;; ---
+
+;; ## Part 4 — DAG workflow with shared statistics
+
+;; In real preprocessing pipelines, statistics computed from the
+;; training set (e.g., mean, std, outlier thresholds) must be applied
+;; to both training and test sets. This creates a diamond dependency:
+;;
+;; ```
+;;     train/test split
+;;          │
+;;     ┌────┴────┐
+;;     ▼         ▼
+;;   train     test
+;;     │
+;;     ▼
+;;  compute-stats
+;;     │
+;;     ├─────────────────┐
+;;     ▼                 ▼
+;; preprocess(train)  preprocess(test)
+;;     │                 │
+;;     ▼                 │
+;; train-model          │
+;;     │                 │
+;;     ├─────────────────┘
+;;     ▼
+;;   evaluate
+;; ```
+;;
+;; Pocket's DAG support handles this naturally — the shared `stats`
+;; node appears once in the computation graph and is computed once.
+
+;; ### Pipeline functions
+
+(defn compute-stats
+  "Compute normalization statistics from training data.
+   Returns mean and std for each numeric column."
+  [train-ds]
+  (println "  Computing stats from training data...")
+  (let [x-vals (vec (:x train-ds))]
+    {:x-mean (/ (reduce + x-vals) (count x-vals))
+     :x-std (Math/sqrt (/ (reduce + (map #(* (- % (/ (reduce + x-vals) (count x-vals)))
+                                              (- % (/ (reduce + x-vals) (count x-vals))))
+                                         x-vals))
+                          (count x-vals)))}))
+
+(defn normalize-with-stats
+  "Normalize a dataset using pre-computed statistics."
+  [ds stats]
+  (println "  Normalizing with stats:" stats)
+  (let [{:keys [x-mean x-std]} stats]
+    (tc/add-column ds :x-norm
+                   (mapv #(/ (- % x-mean) x-std) (:x ds)))))
+
+(defn train-normalized-model
+  "Train a model on normalized data."
+  [train-ds model-spec]
+  (println "  Training model on normalized data...")
+  (ml/train train-ds model-spec))
+
+(defn evaluate-model
+  "Evaluate a model on test data."
+  [test-ds model]
+  (println "  Evaluating model...")
+  (let [pred (ml/predict test-ds model)]
+    {:rmse (loss/rmse (:y test-ds) (:y pred))}))
+
+;; ### Build the DAG
+
+;; Generate fresh data for this demo:
+
+(def dag-data
+  @(pocket/cached #'make-regression-data #'nonlinear-fn 200 0.3 99))
+
+(def dag-split
+  (first (tc/split->seq dag-data :holdout {:seed 99})))
+
+;; The key insight: `stats-c` is a cached computation derived from
+;; training data only. Both preprocessing steps depend on it.
+
+(def train-c (pocket/cached #'identity (:train dag-split) :storage :mem))
+(def test-c  (pocket/cached #'identity (:test dag-split) :storage :mem))
+
+(def stats-c
+  (pocket/cached #'compute-stats train-c))
+
+(def train-norm-c
+  (pocket/cached #'normalize-with-stats train-c stats-c))
+
+(def test-norm-c
+  (pocket/cached #'normalize-with-stats test-c stats-c))
+
+(def model-c
+  (pocket/cached #'train-normalized-model train-norm-c cart-spec))
+
+(def metrics-c
+  (pocket/cached #'evaluate-model test-norm-c model-c))
+
+;; ### Visualize the DAG
+
+;; The origin-story shows the diamond — `stats-c` feeds both
+;; preprocessing steps:
+
+(kind/mermaid (pocket/origin-story-mermaid metrics-c))
+
+;; ### Execute the pipeline
+
+(deref metrics-c)
+
+(kind/test-last
+ [(fn [m] (and (map? m) (contains? m :rmse)))])
+
+;; ---
+
+;; ## Part 5 — Hyperparameter sweep with compare-experiments
+
+;; When running multiple experiments with different hyperparameters,
+;; `compare-experiments` extracts the varying parameters automatically.
+
+(defn run-pipeline
+  "Run a complete pipeline with given hyperparameters."
+  [{:keys [noise-sd feature-set max-depth]}]
+  (let [ds (make-regression-data nonlinear-fn 200 noise-sd 42)
+        sp (first (tc/split->seq ds :holdout {:seed 42}))
+        train-prep (prepare-features (:train sp) feature-set)
+        test-prep  (prepare-features (:test sp) feature-set)
+        spec {:model-type :scicloj.ml.tribuo/regression
+              :tribuo-components [{:name "cart"
+                                   :type "org.tribuo.regression.rtree.CARTRegressionTrainer"
+                                   :properties {:maxDepth (str max-depth)}}]
+              :tribuo-trainer-name "cart"}
+        model (ml/train train-prep spec)
+        pred  (ml/predict test-prep model)]
+    {:rmse (loss/rmse (:y test-prep) (:y pred))}))
+
+;; Run experiments across a grid of hyperparameters:
+
+(def experiments
+  (for [noise-sd [0.3 0.5]
+        feature-set [:raw :poly+trig]
+        max-depth [4 8]]
+    (pocket/cached #'run-pipeline
+                   {:noise-sd noise-sd
+                    :feature-set feature-set
+                    :max-depth max-depth})))
+
+;; Compare all experiments — only varying parameters are shown:
+
+(def comparison
+  (pocket/compare-experiments experiments))
+
+(tc/dataset comparison)
+
+(kind/test-last
+ [(fn [rows]
+    (and (= 8 (count rows))
+         (every? #(contains? % :noise-sd) rows)
+         (every? #(contains? % :feature-set) rows)
+         (every? #(contains? % :max-depth) rows)))])
+
+;; The `:result` column contains the metrics from each experiment.
+;; Parameters that were the same across all experiments (like seed=42)
+;; are automatically excluded from the comparison table.
+
+;; ### Results visualization
+
+(let [rows (map (fn [exp]
+                  (merge (select-keys exp [:noise-sd :feature-set :max-depth])
+                         (:result exp)))
+                comparison)]
+  (-> (tc/dataset rows)
+      (plotly/layer-point {:=x :max-depth :=y :rmse
+                           :=color :feature-set
+                           :=size :noise-sd})))
+
+;; ## Cleanup
+
+(pocket/cleanup!)

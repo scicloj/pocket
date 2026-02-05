@@ -757,3 +757,97 @@
         (is (= 6 (:value tree)))
         (is (= 3 (:value (first (:args tree)))))))))
 
+(deftest test-origin-story-dag-diamond
+  (testing "origin-story deduplicates shared Cached instances (diamond pattern)"
+    (let [a (pocket/cached #'expensive-add 1 2)
+          b (pocket/cached #'expensive-add a 10)
+          c (pocket/cached #'expensive-add a 20)
+          d (pocket/cached #'expensive-add b c)
+          tree (pocket/origin-story d)]
+      ;; Root node has :id
+      (is (string? (:id tree)))
+      ;; First arg (b) has :id and full structure
+      (let [b-node (first (:args tree))]
+        (is (= #'expensive-add (:fn b-node)))
+        (is (string? (:id b-node)))
+        ;; b's first arg is 'a' with full structure
+        (let [a-in-b (first (:args b-node))]
+          (is (= #'expensive-add (:fn a-in-b)))
+          (is (string? (:id a-in-b)))))
+      ;; Second arg (c) has :id
+      (let [c-node (second (:args tree))]
+        (is (= #'expensive-add (:fn c-node)))
+        ;; c's first arg is a :ref to 'a', not a full node
+        (let [a-in-c (first (:args c-node))]
+          (is (contains? a-in-c :ref))
+          (is (not (contains? a-in-c :fn)))
+          ;; The ref points to the same id as a-in-b
+          (is (= (:ref a-in-c) (:id (first (:args (first (:args tree))))))))))))
+
+(deftest test-origin-story-graph-diamond
+  (testing "origin-story-graph returns nodes and edges for diamond pattern"
+    (let [a (pocket/cached #'expensive-add 1 2)
+          b (pocket/cached #'expensive-add a 10)
+          c (pocket/cached #'expensive-add a 20)
+          d (pocket/cached #'expensive-add b c)
+          graph (pocket/origin-story-graph d)]
+      ;; Should have :nodes and :edges
+      (is (map? (:nodes graph)))
+      (is (vector? (:edges graph)))
+      ;; 4 cached nodes + 4 value leaves = 8 nodes
+      (is (= 8 (count (:nodes graph))))
+      ;; Both b and c should have edges to a (shared dependency)
+      (let [edges (:edges graph)
+            a-id (some (fn [[id node]]
+                         (when (and (= #'expensive-add (:fn node))
+                                    ;; a is the only node with edges to value nodes 1 and 2
+                                    (some #(and (= id (first %))
+                                                (= {:value 1} (get (:nodes graph) (second %))))
+                                          edges))
+                           id))
+                       (:nodes graph))]
+        ;; Two different nodes should have edges pointing to a
+        (is (= 2 (count (filter #(= a-id (second %)) edges))))))))
+
+(deftest test-origin-story-mermaid-dag
+  (testing "origin-story-mermaid renders shared nodes correctly"
+    (let [a (pocket/cached #'expensive-add 1 2)
+          b (pocket/cached #'expensive-add a 10)
+          c (pocket/cached #'expensive-add a 20)
+          d (pocket/cached #'expensive-add b c)
+          mermaid (pocket/origin-story-mermaid d)]
+      (is (string? mermaid))
+      (is (.startsWith mermaid "flowchart TD"))
+      ;; Should have 4 expensive-add nodes (a, b, c, d)
+      (is (= 4 (count (re-seq #"expensive-add" mermaid))))
+      ;; Should have edges - at least 8 (4 fn nodes + 4 value leaves, with diamond)
+      (is (>= (count (re-seq #"-->" mermaid)) 8)))))
+
+(defn run-experiment
+  "A fake experiment function that takes config and returns metrics."
+  [config]
+  {:rmse (* 0.1 (:lr config))
+   :accuracy (/ 1.0 (:epochs config))})
+
+(deftest test-compare-experiments
+  (testing "compare-experiments extracts varying params and results"
+    (let [;; Simulate experiments with different hyperparameters
+          exp1 (pocket/cached #'run-experiment {:lr 0.01 :epochs 100 :batch-size 32})
+          exp2 (pocket/cached #'run-experiment {:lr 0.001 :epochs 100 :batch-size 32})
+          exp3 (pocket/cached #'run-experiment {:lr 0.01 :epochs 200 :batch-size 32})
+          comparison (pocket/compare-experiments [exp1 exp2 exp3])]
+      ;; Should have 3 results
+      (is (= 3 (count comparison)))
+      ;; Each result should have :result key with the experiment output
+      (is (every? #(contains? % :result) comparison))
+      (is (every? #(map? (:result %)) comparison))
+      ;; :lr varies (0.01, 0.001, 0.01)
+      (is (every? #(contains? % :lr) comparison))
+      ;; :epochs varies (100, 100, 200)
+      (is (every? #(contains? % :epochs) comparison))
+      ;; :batch-size does NOT vary (all 32) so should not be included
+      (is (not-any? #(contains? % :batch-size) comparison))
+      ;; Check the actual varying values
+      (is (= [0.01 0.001 0.01] (mapv :lr comparison)))
+      (is (= [100 100 200] (mapv :epochs comparison))))))
+

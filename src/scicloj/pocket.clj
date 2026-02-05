@@ -240,14 +240,32 @@
 (defn origin-story
   "Given a value, return its computation DAG as a nested map.
 
-   For a `Cached` value, each node is `{:fn <var> :args [<nodes>]}`,
+   For a `Cached` value, each node is `{:fn <var> :args [<nodes>] :id <string>}`,
    with `:value` included if the computation has been realized.
    Plain (non-Cached) arguments become `{:value <val>}` leaf nodes.
+   
+   When the same Cached instance appears multiple times in the tree,
+   subsequent occurrences are represented as `{:ref <id>}` pointing
+   to the first occurrence's `:id`. This enables proper DAG representation
+   for diamond dependencies.
 
    Does not trigger computation — only peeks at already-realized values.
    Works with all storage policies (`:mem+disk`, `:mem`, `:none`)."
   [x]
   (impl/origin-story x))
+
+(defn origin-story-graph
+  "Given a value, return its computation DAG as a normalized graph.
+   
+   Returns `{:nodes {<id> <node-map>} :edges [[<from> <to>] ...]}`.
+   
+   Node maps contain `:fn` (for cached steps) or `:value` (for leaves),
+   plus `:value` if the cached computation has been realized.
+   
+   This is the fully normalized (Format B) representation of the DAG.
+   Use `origin-story` for the tree-with-refs representation (Format A)."
+  [x]
+  (impl/origin-story-graph x))
 
 (defn origin-story-mermaid
   "Given a value, return a Mermaid flowchart string of its computation DAG.
@@ -261,3 +279,29 @@
                x
                (impl/origin-story x))]
     (impl/origin-story-mermaid tree)))
+
+(defn compare-experiments
+  "Compare multiple cached experiment results.
+   
+   Takes a seq of `Cached` values (typically final metrics from different
+   hyperparameter configurations). Walks each experiment's `origin-story`
+   to extract parameter maps, identifies which parameters vary across
+   experiments, and returns a seq of maps containing the varying params
+   plus the experiment result.
+   
+   Example:
+   ```clojure
+   (def exp1 (cached #'run-experiment {:lr 0.01 :epochs 100}))
+   (def exp2 (cached #'run-experiment {:lr 0.001 :epochs 100}))
+   (def exp3 (cached #'run-experiment {:lr 0.01 :epochs 200}))
+   
+   (compare-experiments [exp1 exp2 exp3])
+   ;; => [{:lr 0.01  :epochs 100 :result @exp1}
+   ;;     {:lr 0.001 :epochs 100 :result @exp2}
+   ;;     {:lr 0.01  :epochs 200 :result @exp3}]
+   ```
+   
+   Only parameters that differ across experiments are included.
+   The `:result` key contains the derefed value of each Cached."
+  [cached-values]
+  (impl/compare-experiments cached-values))

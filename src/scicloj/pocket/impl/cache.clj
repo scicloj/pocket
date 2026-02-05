@@ -299,19 +299,83 @@
             ::unrealized))
         ::unrealized))))
 
+(defn- origin-story*
+  "Internal recursive walk with seen tracking."
+  [x seen counter]
+  (if (instance? Cached x)
+    (let [cached-id (System/identityHashCode x)]
+      (if-let [existing-id (get @seen cached-id)]
+        ;; Already seen this exact Cached instance — emit reference
+        {:ref existing-id}
+        ;; First encounter — assign ID and recurse
+        (let [node-id (str "c" (swap! counter inc))
+              _ (swap! seen assoc cached-id node-id)
+              node {:fn (.f x)
+                    :args (mapv #(origin-story* % seen counter) (.args x))
+                    :id node-id}
+              v (peek-value x)]
+          (if (= v ::unrealized)
+            node
+            (assoc node :value v)))))
+    {:value x}))
+
 (defn origin-story
   "Walk a Cached value's argument tree and return a DAG description.
-   Each cached step is {:fn <var> :args [<nodes>]} with optional :value if realized.
-   Plain (non-Cached) arguments become {:value <val>} leaf nodes."
+   
+   Each cached step is `{:fn <var> :args [<nodes>] :id <string>}`,
+   with `:value` included if the computation has been realized.
+   Plain (non-Cached) arguments become `{:value <val>}` leaf nodes.
+   
+   When the same Cached instance appears multiple times in the tree,
+   subsequent occurrences are represented as `{:ref <id>}` pointing
+   to the first occurrence's `:id`. This enables proper DAG representation
+   for diamond dependencies.
+   
+   Does not trigger computation — only peeks at already-realized values.
+   Works with all storage policies (`:mem+disk`, `:mem`, `:none`)."
   [x]
-  (if (instance? Cached x)
-    (let [node {:fn (.f x)
-                :args (mapv origin-story (.args x))}
-          v (peek-value x)]
-      (if (= v ::unrealized)
-        node
-        (assoc node :value v)))
-    {:value x}))
+  (origin-story* x (atom {}) (atom 0)))
+
+(defn origin-story-graph
+  "Walk a Cached value's argument tree and return a normalized graph.
+   
+   Returns `{:nodes {<id> <node-map>} :edges [[<from> <to>] ...]}`.
+   
+   Node maps contain `:fn` (for cached steps) or `:value` (for leaves),
+   plus `:value` if the cached computation has been realized.
+   
+   This is the fully normalized (Format B) representation of the DAG.
+   Use `origin-story` for the tree-with-refs representation (Format A)."
+  [x]
+  (let [nodes (atom {})
+        edges (atom [])
+        counter (atom 0)
+        seen (atom {})]
+    (letfn [(walk [node parent-id]
+              (if (instance? Cached node)
+                (let [cached-id (System/identityHashCode node)]
+                  (if-let [existing-id (get @seen cached-id)]
+                    ;; Already seen — just add edge
+                    (when parent-id
+                      (swap! edges conj [parent-id existing-id]))
+                    ;; First encounter
+                    (let [node-id (str "c" (swap! counter inc))
+                          _ (swap! seen assoc cached-id node-id)
+                          v (peek-value node)
+                          node-map (cond-> {:fn (.f node)}
+                                     (not= v ::unrealized) (assoc :value v))]
+                      (swap! nodes assoc node-id node-map)
+                      (when parent-id
+                        (swap! edges conj [parent-id node-id]))
+                      (doseq [arg (.args node)]
+                        (walk arg node-id)))))
+                ;; Plain value leaf
+                (let [leaf-id (str "v" (swap! counter inc))]
+                  (swap! nodes assoc leaf-id {:value node})
+                  (when parent-id
+                    (swap! edges conj [parent-id leaf-id])))))]
+      (walk x nil)
+      {:nodes @nodes :edges @edges})))
 
 (defn- mermaid-escape
   "Escape a string for use in a Mermaid node label."
@@ -321,27 +385,44 @@
       (str/replace "\n" " ")))
 
 (defn origin-story-mermaid
-  "Render an origin-story tree as a Mermaid flowchart string."
+  "Render an origin-story DAG as a Mermaid flowchart string.
+   
+   Handles both tree format and DAG format (with :id/:ref nodes).
+   Shared nodes (via :ref) are rendered as edges to existing nodes."
   [tree]
-  (let [counter (atom 0)
+  (let [node-ids (atom {}) ;; maps origin-story :id to mermaid node id
+        counter (atom 0)
         lines (atom [])
         gen-id #(let [n @counter] (swap! counter inc) (str "n" n))]
     (letfn [(walk [node]
-              (let [id (gen-id)]
-                (if (:fn node)
-                  (let [label (-> (:fn node) symbol name)]
-                    (swap! lines conj (str "  " id "[\"" (mermaid-escape label) "\"]"))
-                    (doseq [arg (:args node)]
-                      (let [child-id (walk arg)]
-                        (swap! lines conj (str "  " id " --> " child-id))))
-                    id)
-                  (let [v (:value node)
-                        label (pr-str v)
-                        label (if (> (count label) 40)
-                                (str (subs label 0 37) "...")
-                                label)]
-                    (swap! lines conj (str "  " id "[\"" (mermaid-escape label) "\"]"))
-                    id))))]
+              (cond
+                ;; Reference to existing node
+                (:ref node)
+                (get @node-ids (:ref node))
+
+                ;; Cached node (has :fn)
+                (:fn node)
+                (let [mermaid-id (gen-id)
+                      label (-> (:fn node) symbol name)]
+                  ;; Register this node's origin-story :id if present
+                  (when-let [os-id (:id node)]
+                    (swap! node-ids assoc os-id mermaid-id))
+                  (swap! lines conj (str "  " mermaid-id "[\"" (mermaid-escape label) "\"]"))
+                  (doseq [arg (:args node)]
+                    (let [child-id (walk arg)]
+                      (swap! lines conj (str "  " mermaid-id " --> " child-id))))
+                  mermaid-id)
+
+                ;; Value leaf node
+                :else
+                (let [mermaid-id (gen-id)
+                      v (:value node)
+                      label (pr-str v)
+                      label (if (> (count label) 40)
+                              (str (subs label 0 37) "...")
+                              label)]
+                  (swap! lines conj (str "  " mermaid-id "[\"" (mermaid-escape label) "\"]"))
+                  mermaid-id)))]
       (walk tree)
       (str "flowchart TD\n" (str/join "\n" @lines)))))
 
@@ -455,4 +536,49 @@
         (doseq [[i child] (map-indexed vector children)]
           (walk child "" (= i (dec n))))))
     (str sb)))
+
+(defn- collect-params
+  "Walk an origin-story tree and collect all {:value ...} leaves that are maps.
+   Returns a flat seq of maps."
+  [tree]
+  (cond
+    ;; Reference - skip (we'll find the original)
+    (:ref tree) []
+    ;; Cached node - recurse into args
+    (:fn tree) (mapcat collect-params (:args tree))
+    ;; Value leaf
+    :else (let [v (:value tree)]
+            (if (map? v) [v] []))))
+
+(defn- find-varying-keys
+  "Given a seq of param maps, find keys whose values differ across maps."
+  [param-maps]
+  (let [all-keys (set (mapcat keys param-maps))]
+    (set (filter (fn [k]
+                   (let [vals (distinct (map #(get % k ::missing) param-maps))]
+                     (> (count vals) 1)))
+                 all-keys))))
+
+(defn compare-experiments
+  "Compare multiple cached experiment results.
+   
+   Takes a seq of `Cached` values (typically final metrics from different
+   hyperparameter configurations). Walks each experiment's origin-story
+   to extract parameter maps, identifies which parameters vary across
+   experiments, and returns a seq of maps containing the varying params
+   plus the experiment result.
+   
+   Only parameters that differ across experiments are included.
+   The `:result` key contains the derefed value of each Cached."
+  [cached-values]
+  (let [stories (mapv origin-story cached-values)
+        all-params (mapv collect-params stories)
+        ;; Merge all params for each experiment
+        merged-params (mapv (fn [params] (apply merge params)) all-params)
+        ;; Find which keys vary
+        varying-keys (find-varying-keys merged-params)]
+    (mapv (fn [cached merged]
+            (-> (select-keys merged varying-keys)
+                (assoc :result @cached)))
+          cached-values merged-params)))
 
