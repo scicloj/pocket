@@ -8,22 +8,22 @@
 
 
 (def
- v3_l89
+ v3_l91
  (kind/mermaid
   "flowchart TB\n    subgraph Request\n    D[deref Cached]\n    end\n    subgraph Synchronization\n    CHM[ConcurrentHashMap<br>in-flight]\n    DEL[delay]\n    end\n    subgraph Caching\n    MEM[Memory Cache<br>core.cache]\n    DISK[Disk Cache<br>Nippy files]\n    end\n    D --> CHM\n    CHM -->|one delay per key| DEL\n    DEL -->|on miss| MEM\n    MEM -->|on miss| DISK\n    DISK -->|on miss| COMP[Compute]\n    COMP --> DISK\n    DISK --> MEM\n    MEM --> D"))
 
 
-(def v5_l126 (def test-dir "/tmp/pocket-concurrency-test"))
+(def v5_l128 (def test-dir "/tmp/pocket-concurrency-test"))
 
 
-(def v6_l128 (pocket/set-base-cache-dir! test-dir))
+(def v6_l130 (pocket/set-base-cache-dir! test-dir))
 
 
-(def v8_l132 (def computation-count (atom 0)))
+(def v8_l134 (def computation-count (atom 0)))
 
 
 (def
- v9_l134
+ v9_l136
  (defn
   slow-computation
   "A computation that takes 300ms and increments a counter."
@@ -34,7 +34,7 @@
 
 
 (def
- v11_l143
+ v11_l145
  (defn
   fresh-scenario!
   "Reset counters and caches for a fresh scenario.\n   Returns the start time for timing measurements."
@@ -47,11 +47,11 @@
    {:started-at (java.time.LocalTime/now), :mem-cache mem-cache-opts})))
 
 
-(def v13_l172 (fresh-scenario!))
+(def v13_l174 (fresh-scenario!))
 
 
 (def
- v15_l176
+ v15_l178
  (let
   [cached-val
    (pocket/cached #'slow-computation 10)
@@ -63,22 +63,22 @@
 
 
 (deftest
- t16_l183
+ t16_l185
  (is
   ((fn
     [{:keys [results computation-count]}]
     (and
      (= 5 (count results))
-     (every? (fn* [p1__44870#] (= 100 p1__44870#)) results)
+     (every? (fn* [p1__45886#] (= 100 p1__45886#)) results)
      (= 1 computation-count)))
-   v15_l176)))
+   v15_l178)))
 
 
-(def v18_l206 (fresh-scenario!))
+(def v18_l208 (fresh-scenario!))
 
 
 (def
- v20_l210
+ v20_l212
  (let
   [result-1
    @(pocket/cached #'slow-computation 20)
@@ -100,7 +100,7 @@
 
 
 (deftest
- t21_l224
+ t21_l226
  (is
   ((fn
     [{:keys
@@ -115,14 +115,14 @@
      (< second-elapsed-ms 50)
      (= 1 computations-after-first)
      (= 1 computations-after-second)))
-   v20_l210)))
+   v20_l212)))
 
 
-(def v23_l247 (fresh-scenario!))
+(def v23_l249 (fresh-scenario!))
 
 
 (def
- v25_l251
+ v25_l253
  (let
   [_
    @(pocket/cached #'slow-computation 30)
@@ -145,7 +145,7 @@
 
 
 (deftest
- t26_l266
+ t26_l268
  (is
   ((fn
     [{:keys
@@ -158,14 +158,14 @@
      (= 4 computations-before-retry)
      (= 4 computations-after-retry)
      disk-hit?))
-   v25_l251)))
+   v25_l253)))
 
 
-(def v28_l287 (def failure-count (atom 0)))
+(def v28_l289 (def failure-count (atom 0)))
 
 
 (def
- v29_l289
+ v29_l291
  (defn
   flaky-computation
   "Fails on first call, succeeds thereafter."
@@ -178,11 +178,11 @@
    (do (swap! failure-count inc) (* x 100)))))
 
 
-(def v30_l298 (do (reset! failure-count 0) (pocket/cleanup!) :ready))
+(def v30_l300 (do (reset! failure-count 0) (pocket/cleanup!) :ready))
 
 
 (def
- v32_l305
+ v32_l307
  (let
   [attempt-1
    (try
@@ -205,7 +205,7 @@
 
 
 (deftest
- t33_l321
+ t33_l323
  (is
   ((fn
     [{:keys [attempt-1 attempt-2 attempt-3 counts]}]
@@ -217,22 +217,22 @@
      (= 1 (first counts))
      (= 2 (second counts))
      (= 2 (nth counts 2))))
-   v32_l305)))
+   v32_l307)))
 
 
-(def v35_l348 (fresh-scenario!))
+(def v35_l350 (fresh-scenario!))
 
 
 (def
- v36_l350
+ v36_l352
  (let
   [start
    (System/currentTimeMillis)
    futures
    (mapv
     (fn*
-     [p1__44871#]
-     (future @(pocket/cached #'slow-computation p1__44871#)))
+     [p1__45887#]
+     (future @(pocket/cached #'slow-computation p1__45887#)))
     [40 41 42])
    results
    (mapv deref futures)
@@ -242,19 +242,19 @@
 
 
 (deftest
- t37_l359
+ t37_l361
  (is
   ((fn
     [{:keys [results elapsed-ms parallel?]}]
     (and (= [1600 1681 1764] results) (< elapsed-ms 500) parallel?))
-   v36_l350)))
+   v36_l352)))
 
 
-(def v39_l379 (fresh-scenario!))
+(def v39_l381 (fresh-scenario!))
 
 
 (def
- v41_l383
+ v41_l385
  (let
   [_
    @(pocket/cached #'slow-computation 50)
@@ -277,7 +277,7 @@
 
 
 (deftest
- t42_l398
+ t42_l400
  (is
   ((fn
     [{:keys
@@ -287,20 +287,20 @@
        no-recompute?]}]
     (and
      (= 3 (count results))
-     (every? (fn* [p1__44872#] (= 2500 p1__44872#)) results)
+     (every? (fn* [p1__45888#] (= 2500 p1__45888#)) results)
      (= 1 count-after-compute)
      (= 1 count-after-disk-hits)
      no-recompute?))
-   v41_l383)))
+   v41_l385)))
 
 
 (def
- v44_l423
+ v44_l425
  (fresh-scenario! {:mem-cache-opts {:policy :lru, :threshold 2}}))
 
 
 (def
- v45_l425
+ v45_l427
  (let
   [_
    @(pocket/cached #'slow-computation 60)
@@ -341,7 +341,7 @@
 
 
 (deftest
- t46_l458
+ t46_l460
  (is
   ((fn
     [{:keys
@@ -358,10 +358,10 @@
      (= 3 count-step-3)
      (= 3 count-step-4)
      (= 4 count-step-6)))
-   v45_l425)))
+   v45_l427)))
 
 
-(def v48_l498 (pocket/cleanup!))
+(def v48_l500 (pocket/cleanup!))
 
 
-(def v49_l499 (pocket/reset-mem-cache-options!))
+(def v49_l501 (pocket/reset-mem-cache-options!))

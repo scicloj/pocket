@@ -1,5 +1,6 @@
 ;; # Concurrency
 
+
 (ns pocket-book.concurrency
   (:require [pocket-book.logging]
             [scicloj.pocket :as pocket]
@@ -25,64 +26,65 @@
 ;; Both threads see the cache miss and both compute the value.
 ;; For expensive computations (minutes, hours), this wastes resources.
 
-;; ## Why `core.cache` Alone Is Insufficient
+;; ## Why `core.cache` Alone Is Not Enough
 
 ;; Clojure's [core.cache](https://github.com/clojure/core.cache) provides
-;; `lookup-or-miss` which uses a delay-in-atom pattern:
-
-;; ```clojure
-;; (let [d (delay (miss-fn key))]    ; delay created BEFORE swap!
-;;   (swap! cache-atom ...)
-;;   @(lookup ...))
+;; `lookup-or-miss` which wraps the value function in a delay to prevent
+;; duplicate work across `swap!` retries within a single call.
+;; However, each call to `lookup-or-miss` creates its **own** delay,
+;; and the value function is evaluated **inside** the `swap!` body
+;; (via `through-cache`). This means concurrent callers racing into
+;; `swap!` can each see a miss and each start computing before any
+;; compare-and-swap succeeds:
+;;
 ;; ```
-
-;; The problem: **the delay is created per call, not per key**.
-;; Each thread creates its own delay instance before racing into `swap!`.
-
-;; This is a [known issue](https://clojure.atlassian.net/browse/CMEMOIZE-15)
-;; (CMEMOIZE-15) — if cache eviction occurs between `swap!` completing and
-;; `lookup` returning, threads can end up dereferencing different delays.
+;; Thread A                          Thread B
+;; ────────                          ────────
+;; lookup-or-miss
+;;   create delay-A
+;;   swap!                           lookup-or-miss
+;;     through-cache → miss            create delay-B
+;;     @delay-A → computing...         swap!
+;;                                       through-cache → miss
+;;                                       @delay-B → computing... ← duplicate!
+;; ```
+;;
+;; The `swap!` compare-and-swap ensures only one result enters the cache,
+;; but both computations have already started. The delay prevents
+;; redundant work across retries of a **single** `swap!` call — it does
+;; **not** deduplicate across concurrent callers.
 
 ;; ## Pocket's Solution
 
-;; Pocket adds a `ConcurrentHashMap` layer to synchronize in-flight computations:
-
+;; Pocket adds a `ConcurrentHashMap` layer that ensures only **one delay**
+;; exists per cache key, regardless of how many threads request it:
+;;
 ;; ```clojure
 ;; (def ^ConcurrentHashMap in-flight
 ;;   (java.util.concurrent.ConcurrentHashMap.))
 ;;
-;; ;; Inside the miss-fn:
+;; ;; Inside the lookup-or-miss miss-fn:
 ;; (let [d (.computeIfAbsent
 ;;           in-flight path
 ;;           (fn [_]
 ;;             (delay
 ;;               (try
-;;                 ;; disk check + computation here
+;;                 ;; disk check + computation
 ;;                 (finally
 ;;                   (.remove in-flight path))))))]
 ;;   @d)
 ;; ```
 ;;
-;; `computeIfAbsent` guarantees that only **one thread** creates the delay
-;; for a given key. All concurrent threads receive the same delay instance.
-
-;; ### The Key Principle
-
-;; > **The delay is cheap; the computation is not.**
-
-;; Creating a `delay` object is nearly instantaneous. The expensive work
-;; happens when the delay is dereferenced. By ensuring all threads share
-;; the same delay, we guarantee the computation runs exactly once.
+;; `computeIfAbsent` is atomic: the first thread creates and inserts the
+;; delay; all subsequent threads for the same key receive the **same**
+;; delay instance. Since a Clojure `delay` executes its body exactly once,
+;; the computation runs once and all threads share the result.
 
 ;; ### Failure Handling
 
 ;; The `finally` block removes the entry from `in-flight` after computation
-;; (success or failure). This provides **retry-on-failure** semantics:
-;; if a computation throws, the next caller will get a fresh attempt
-;; rather than a cached exception.
-;;
-;; This matches the behavior of
-;; [core.memoize's RetryingDelay](https://github.com/clojure/core.memoize).
+;; (success or failure). If a computation throws, the next caller gets a
+;; fresh delay and a fresh attempt — exceptions are never cached.
 
 ;; ## Architecture Layers
 
@@ -425,26 +427,26 @@
 (let [;; Step 1: Initial computation
       _ @(pocket/cached #'slow-computation 60)
       count-step-1 @computation-count
-      
+
       ;; Step 2: Memory hit (should be instant)
       start-2 (System/currentTimeMillis)
       _ @(pocket/cached #'slow-computation 60)
       elapsed-2 (- (System/currentTimeMillis) start-2)
       count-step-2 @computation-count
-      
+
       ;; Step 3: Evict from memory by filling cache
       _ @(pocket/cached #'slow-computation 61)
       _ @(pocket/cached #'slow-computation 62)
       count-step-3 @computation-count
-      
+
       ;; Step 4: Disk hit (memory miss)
       _ @(pocket/cached #'slow-computation 60)
       count-step-4 @computation-count
-      
+
       ;; Step 5: Delete disk cache
       _ (pocket/invalidate! #'slow-computation 60)
       _ (pocket/clear-mem-cache!)
-      
+
       ;; Step 6: Recompute (miss everywhere)
       _ @(pocket/cached #'slow-computation 60)
       count-step-6 @computation-count]
