@@ -15,7 +15,8 @@
 (ns pocket-book.recursive-caching-in-pipelines
   (:require [pocket-book.logging]
             [scicloj.pocket :as pocket]
-            [scicloj.kindly.v4.kind :as kind]))
+            [scicloj.kindly.v4.kind :as kind]
+            [clojure.string :as str]))
 
 (def cache-dir "/tmp/pocket-demo-pipelines")
 
@@ -92,6 +93,32 @@
 ;; Each step caches independently. If you change only the last step
 ;; (e.g., different training params), the upstream steps load from cache while
 ;; only the final step recomputes.
+
+;; ## Provenance in cache entries
+
+;; The cache entries reveal the pipeline structure. Each entry's
+;; identity encodes its full computation history — not just the
+;; function name, but the nested identities of all its cached inputs.
+
+(->> (pocket/cache-entries)
+     (mapv :id))
+
+(->> (pocket/cache-entries)
+     (mapv :id)
+     (str/join "\n")
+     kind/code)
+
+;; The inner step appears as a literal sub-expression in the outer
+;; step's identity. This is how Pocket tracks provenance: the cache
+;; key for `train-model` records that its input came from
+;; `preprocess`, which in turn came from `load-dataset`.
+;;
+;; This happens automatically when you pass `Cached` objects (without
+;; derefing) from one cached step to the next. If you deref early
+;; with `@`, the downstream step sees a plain value and the
+;; provenance link is lost — the cache key is based on the value's
+;; hash instead. Both patterns work; the choice is whether you need
+;; traceability.
 
 ;; For a fuller example with branching dependencies, see the
 ;; [Real-World Walkthrough](pocket_book.real_world_walkthrough.html).
