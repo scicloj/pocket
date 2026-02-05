@@ -24,7 +24,7 @@
 (deftest
  t7_l43
  (is
-  ((fn* [p1__43047#] (re-find #"requires a var" p1__43047#)) v6_l38)))
+  ((fn* [p1__44630#] (re-find #"requires a var" p1__44630#)) v6_l38)))
 
 
 (def v9_l55 (pocket/cleanup!))
@@ -168,7 +168,7 @@
 
 (deftest
  t66_l210
- (is ((fn* [p1__43048#] (re-find #":pending" p1__43048#)) v65_l208)))
+ (is ((fn* [p1__44631#] (re-find #":pending" p1__44631#)) v65_l208)))
 
 
 (def v67_l212 (deref pending-value))
@@ -179,7 +179,7 @@
 
 (deftest
  t70_l217
- (is ((fn* [p1__43049#] (re-find #":cached" p1__43049#)) v69_l215)))
+ (is ((fn* [p1__44632#] (re-find #":cached" p1__44632#)) v69_l215)))
 
 
 (def v72_l237 (pocket/cleanup!))
@@ -228,16 +228,16 @@
    v80_l255)))
 
 
-(def v83_l286 (pocket/cleanup!))
+(def v83_l289 (pocket/cleanup!))
 
 
-(def v84_l288 (defn generate-data [n] (doall (range n))))
+(def v84_l291 (defn generate-data [n] (doall (range n))))
 
 
-(def v85_l292 (deref (pocket/cached #'generate-data 5)))
+(def v85_l295 (deref (pocket/cached #'generate-data 5)))
 
 
-(deftest t86_l294 (is (= v85_l292 [0 1 2 3 4])))
+(deftest t86_l297 (is (= v85_l295 [0 1 2 3 4])))
 
 
-(def v88_l361 (pocket/cleanup!))
+(def v88_l330 (pocket/cleanup!))

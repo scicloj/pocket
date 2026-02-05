@@ -62,13 +62,13 @@
       rs
       (filter
        (fn*
-        [p1__43181#]
-        (and (:temp-c p1__43181#) (:rain-mm p1__43181#))))
+        [p1__44764#]
+        (and (:temp-c p1__44764#) (:rain-mm p1__44764#))))
       (mapv
        (fn*
-        [p1__43182#]
+        [p1__44765#]
         (->
-         p1__43182#
+         p1__44765#
          (update
           :temp-c
           (fn [t] (Math/round (* t (double precision)))))
@@ -245,18 +245,18 @@
   (time (deref report))))
 
 
-(def v30_l197 (pocket/cache-entries))
+(def v30_l196 (pocket/cache-entries))
 
 
-(def v32_l201 (pocket/cache-stats))
+(def v32_l200 (pocket/cache-stats))
 
 
 (deftest
- t33_l203
- (is ((fn [stats] (= 10 (:total-entries stats))) v32_l201)))
+ t33_l202
+ (is ((fn [stats] (= 10 (:total-entries stats))) v32_l200)))
 
 
-(def v35_l211 (kind/code (pocket/dir-tree)))
+(def v35_l210 (kind/code (pocket/dir-tree)))
 
 
-(def v37_l217 (pocket/cleanup!))
+(def v37_l216 (pocket/cleanup!))

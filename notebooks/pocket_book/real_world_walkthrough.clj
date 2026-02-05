@@ -187,10 +187,9 @@
 
 ;; ## Inspecting the cache on disk
 
-;; Let's look at what Pocket stored. The cache uses
-;; [content-addressable storage](https://en.wikipedia.org/wiki/Content-addressable_storage):
-;; a SHA-1 prefix directory, then a human-readable directory
-;; named after the function and arguments.
+;; Let's look at what Pocket stored. The cache directory
+;; is organized by a SHA-1 prefix, then a human-readable
+;; directory named after the function and arguments.
 
 ;; ### Cache entries
 

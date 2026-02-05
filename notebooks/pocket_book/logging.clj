@@ -5,14 +5,15 @@
 
 ;; Pocket uses [`clojure.tools.logging`](https://github.com/clojure/tools.logging)
 ;; for cache lifecycle messages. It does **not** bundle a logging backend —
-;; you provide your own [SLF4J](https://www.slf4j.org/) implementation
-;; (e.g., `slf4j-simple`, [Logback](https://logback.qos.ch/),
-;; [Log4j2](https://logging.apache.org/log4j/2.x/)).
-;; Without a backend, logging is silently disabled.
+;; you provide your own (e.g., [SLF4J](https://www.slf4j.org/) with
+;; `slf4j-simple` or [Logback](https://logback.qos.ch/), or
+;; [Log4j2](https://logging.apache.org/log4j/2.x/) directly).
+;; `tools.logging` auto-discovers a backend from the classpath;
+;; without one, logging is silently disabled.
 ;;
 ;; The `:dev` alias in this project includes `slf4j-simple` for
 ;; notebook and REPL use.
-;;
+
 ;; ## Log levels
 ;;
 ;; | Level | Messages |

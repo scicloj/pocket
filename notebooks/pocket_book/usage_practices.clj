@@ -270,8 +270,11 @@
 ;; - Java Serializable objects
 
 ;; ### ⚠️ Requires Care
-;; - Lazy sequences — may serialize only the realized portion;
-;;   force them first with `doall` (see below)
+;; - Lazy sequences — Nippy fully realizes them during serialization,
+;;   which means infinite lazy seqs will hang or OOM. Force lazy seqs
+;;   with `doall` inside your function (see below) to keep realization
+;;   explicit and catch errors early. The round-trip type may also change
+;;   (a `LazySeq` comes back as a regular seq).
 ;;
 ;; ### ❌ Cannot Cache
 ;; - Open file handles, streams
@@ -279,9 +282,9 @@
 ;; - Functions, closures (use vars instead)
 ;; - Atoms, refs, agents (stateful references)
 
-;; ### Lazy Sequence Gotcha
+;; ### Lazy Sequences
 
-;; Lazy sequences may cause issues. Force them before caching:
+;; Use `doall` or `vec` to force evaluation inside your function:
 
 (pocket/cleanup!)
 
@@ -292,40 +295,6 @@
 (deref (pocket/cached #'generate-data 5))
 
 (kind/test-last [= [0 1 2 3 4]])
-
-;; ## When to Use Pocket
-;;
-;; ### Good use cases
-;;
-;; - **Data science pipelines** with expensive intermediate steps
-;;   (data loading, preprocessing, feature engineering, model training)
-;; - **Reproducible research** where cached intermediate results let you
-;;   iterate on downstream steps without re-running upstream computations
-;; - **Long-running computations** (minutes to hours) that need to survive
-;;   JVM restarts, crashes, or machine reboots
-;; - **Multi-threaded workflows** where multiple threads may request the
-;;   same expensive computation — Pocket ensures it runs only once
-;;
-;; ### When to use something else
-;;
-;; - **Fast computations** (milliseconds) — use `clojure.core/memoize`
-;; - **Memory-only caching** within a single session — use `memoize` or
-;;   [`core.memoize`](https://github.com/clojure/core.memoize)
-;; - **Frequently changing function implementations** — Pocket doesn't
-;;   detect code changes, so you'd need to manually invalidate or use
-;;   the versioning pattern
-;;
-;; ### Comparison to alternatives
-;;
-;; | Feature | Pocket | `clojure.core/memoize` | `core.memoize` |
-;; |---------|--------|------------------------|----------------|
-;; | Persistence | Disk + memory | Memory only | Memory only |
-;; | Cross-session | Yes | No | No |
-;; | Content-addressable | Yes | No | No |
-;; | Lazy evaluation | `IDeref` | Eager | Eager |
-;; | Eviction policies | LRU, FIFO, TTL, etc. | None | LRU, TTL, etc. |
-;; | Thread-safe (single computation) | Yes | No | Yes |
-;; | Pipeline caching | Yes (recursive) | No | No |
 
 ;; ## Known Limitations
 ;;
@@ -355,7 +324,7 @@
 ;; | Testing | Use `binding` + cleanup fixtures |
 ;; | Debugging | Enable logging, use introspection |
 ;; | Long cache keys | Auto-handled with SHA-1 fallback |
-;; | Serialization | Avoid stateful objects, force lazy seqs |
+;; | Serialization | Avoid stateful objects; force lazy seqs with `doall` |
 ;; | Configuration | Use `pocket.edn` — see [Configuration](pocket_book.configuration.html) |
 
 (pocket/cleanup!)

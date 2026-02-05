@@ -7,9 +7,9 @@
 
 ;; [Pocket](https://github.com/scicloj/pocket) is a Clojure library for
 ;; filesystem-based caching of expensive computations. It persists results
-;; to disk so they survive JVM restarts, and uses content-addressable
-;; storage so cache keys are derived from what you compute, not where
-;; you store it.
+;; to disk so they survive JVM restarts. Cache keys are derived from the
+;; function identity and its arguments, so the same computation always
+;; maps to the same cache entry.
 
 ;; ## Setup
 
