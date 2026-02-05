@@ -1,12 +1,14 @@
 # Pocket
 
+(🧪 experimental)
+
 Filesystem-based [caching](https://en.wikipedia.org/wiki/Cache_(computing)) for expensive Clojure computations
 
 ## What is this about?
 
 Pocket makes it easy to cache expensive function calls to disk and reuse results across sessions. If a computation takes longer than disk I/O, Pocket can help — wrap it once, and the result is saved for next time. This is especially useful for data science workflows with expensive intermediate steps that need to survive JVM restarts.
 
-Under the hood, Pocket derives cache keys from the function identity and its arguments (so the same computation always maps to the same cache entry), uses [Nippy](https://github.com/taoensso/nippy) for fast serialization, and provides an in-memory layer backed by [core.cache](https://github.com/clojure/core.cache) with configurable [eviction policies](https://en.wikipedia.org/wiki/Cache_replacement_policies). Concurrent derefs of the same computation are [thread-safe](https://en.wikipedia.org/wiki/Thread_safety) — the computation runs only once.
+Under the hood, Pocket derives cache keys from the function identity and its arguments (so the same computation always maps to the same cache entry), uses [Nippy](https://github.com/taoensso/nippy) for fast serialization, and provides an in-memory layer backed by [core.cache](https://github.com/clojure/core.cache) with configurable [eviction policies](https://en.wikipedia.org/wiki/Cache_replacement_policies). Concurrent uses of the same computation are [thread-safe](https://en.wikipedia.org/wiki/Thread_safety) — the computation runs only once.
 
 ## General info
 |||
