@@ -32,6 +32,7 @@
    [scicloj.kindly.v4.kind :as kind]
    ;; Data processing:
    [tablecloth.api :as tc]
+   [tablecloth.column.api :as tcc]
    [tech.v3.dataset :as ds]
    [tech.v3.dataset.modelling :as ds-mod]
    ;; Machine learning:
@@ -71,18 +72,18 @@
   - `:trig`      — add sin(x) and cos(x)
   - `:poly+trig` — add x², sin(x), and cos(x)"
   [ds feature-set]
-  (let [xv (vec (:x ds))]
+  (let [x (:x ds)]
     (-> (case feature-set
           :raw ds
           :quadratic (-> ds
-                         (tc/add-column :x2 (mapv #(* % %) xv)))
+                         (tc/add-column :x2 (tcc/sq x)))
           :trig (-> ds
-                    (tc/add-column :sin-x (mapv #(Math/sin %) xv))
-                    (tc/add-column :cos-x (mapv #(Math/cos %) xv)))
+                    (tc/add-column :sin-x (tcc/sin x))
+                    (tc/add-column :cos-x (tcc/cos x)))
           :poly+trig (-> ds
-                         (tc/add-column :x2 (mapv #(* % %) xv))
-                         (tc/add-column :sin-x (mapv #(Math/sin %) xv))
-                         (tc/add-column :cos-x (mapv #(Math/cos %) xv))))
+                         (tc/add-column :x2 (tcc/sq x))
+                         (tc/add-column :sin-x (tcc/sin x))
+                         (tc/add-column :cos-x (tcc/cos x))))
         (ds-mod/set-inference-target :y))))
 
 (defn train-model
@@ -363,7 +364,7 @@ noise-results
   (println "  Normalizing with stats:" stats)
   (let [{:keys [x-mean x-std]} stats]
     (tc/add-column ds :x-norm
-                   (mapv #(/ (- % x-mean) x-std) (:x ds)))))
+                   (tcc// (tcc/- (:x ds) x-mean) x-std))))
 
 (defn train-normalized-model
   "Train a model on normalized data."
@@ -503,9 +504,11 @@ noise-results
       grouped (group-by (juxt :feature-set :noise-sd) rows)
       feature-colors {:raw "steelblue" :poly "tomato" :poly+trig "green"}]
   (kind/plotly
-   {:data (for [[[feature-set noise-sd] pts] (sort-by first grouped)]
-            {:x (mapv :max-depth pts)
-             :y (mapv :rmse pts)
+   {:data (for [[[feature-set noise-sd] pts] (sort-by first grouped)
+                :let [max-depths (mapv :max-depth pts)
+                      rmses (mapv :rmse pts)]]
+            {:x max-depths
+             :y rmses
              :mode "markers"
              :name (str (name feature-set) " (noise=" noise-sd ")")
              :legendgroup (name feature-set)
