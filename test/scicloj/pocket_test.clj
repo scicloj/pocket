@@ -424,13 +424,31 @@
 (deftest test-var-validation
   (testing "cached throws when given a bare function instead of a var"
     (is (thrown-with-msg? clojure.lang.ExceptionInfo
-                          #"requires a var"
+                          #"requires a var or keyword"
                           @(pocket/cached expensive-add 1 2))))
 
   (testing "caching-fn throws when given a bare function"
     (is (thrown-with-msg? clojure.lang.ExceptionInfo
-                          #"requires a var"
+                          #"requires a var or keyword"
                           @((pocket/caching-fn expensive-add) 1 2)))))
+
+(deftest test-keyword-as-function
+  (testing "keywords work as cached functions"
+    (let [m {:a 1 :b 2}
+          result @(pocket/cached :a m)]
+      (is (= 1 result))))
+
+  (testing "keyword cached values participate in DAG"
+    (let [data-c (pocket/cached #'expensive-add 1 2)
+          extracted-c (pocket/cached :not-a-real-key data-c)]
+      (is (instance? scicloj.pocket.impl.cache.Cached extracted-c))
+      (is (= '(:not-a-real-key (scicloj.pocket-test/expensive-add 1 2))
+             (pocket/->id extracted-c)))))
+
+  (testing "caching-fn works with keywords"
+    (let [extract-a (pocket/caching-fn :a)
+          result @(extract-a {:a 42 :b 99})]
+      (is (= 42 result)))))
 
 (defrecord CustomCacheId [name version])
 

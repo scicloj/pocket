@@ -154,7 +154,9 @@
    The computation is executed on first `deref` and cached to disk.
    Subsequent derefs load from cache if available.
    
-   `func` must be a var (e.g., `#'my-fn`) for stable cache keys.
+   `func` must be a var (e.g., `#'my-fn`) or keyword (e.g., `:train`)
+   for stable cache keys. Keywords are useful for extracting from
+   cached maps: `(cached :train split-c)`.
    
    Storage policy is controlled by `*storage*` (see `set-storage!`).
    Use `caching-fn` with an opts map for per-function overrides."
@@ -167,7 +169,7 @@
    
    Returns a new function where each call returns a `Cached` object (`IDeref`).
    Deref the result to trigger computation or load from cache.
-   `f` must be a var (e.g., `#'my-fn`) for stable cache keys.
+   `f` must be a var (e.g., `#'my-fn`) or keyword for stable cache keys.
    
    Optionally accepts an options map to override configuration per-function:
    - `:storage`   — `:mem+disk`, `:mem`, or `:none` (overrides `*storage*`)
@@ -213,14 +215,14 @@
 
 (defn invalidate!
   "Invalidate a specific cached computation, removing it from both disk and memory.
-   Takes the same arguments as `cached`: a function var and its arguments.
+   Takes the same arguments as `cached`: a function var (or keyword) and its arguments.
    Returns a map with `:path` and `:existed`."
   [func & args]
   (impl/ensure-mem-cache! (resolve-mem-cache-options))
   (impl/invalidate! (resolve-base-cache-dir) (resolve-filename-length-limit) func args))
 
 (defn invalidate-fn!
-  "Invalidate all cached entries for a given function var, regardless of arguments.
+  "Invalidate all cached entries for a given function var (or keyword), regardless of arguments.
    Removes matching entries from both disk and memory.
    Returns a map with `:fn-name`, `:count`, and `:paths`."
   [func]

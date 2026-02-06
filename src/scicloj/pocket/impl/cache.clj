@@ -447,8 +447,8 @@
 (defn cached
   "Create a cached computation"
   [base-dir storage filename-length-limit func & args]
-  (when-not (var? func)
-    (throw (ex-info (str "pocket/cached requires a var (e.g., #'my-fn), got: " (type func))
+  (when-not (or (var? func) (keyword? func))
+    (throw (ex-info (str "pocket/cached requires a var or keyword (e.g., #'my-fn or :my-key), got: " (type func))
                     {:func func})))
   (let [storage (or storage :mem+disk)
         limit (or filename-length-limit 240)
