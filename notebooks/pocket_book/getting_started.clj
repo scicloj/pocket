@@ -1,9 +1,13 @@
 ;; # Getting Started
 
 (ns pocket-book.getting-started
-  (:require [pocket-book.logging]
-            [scicloj.pocket :as pocket]
-            [scicloj.kindly.v4.kind :as kind]))
+  (:require
+   ;; Pocket API
+   [scicloj.pocket :as pocket]
+   ;; Annotating kinds of visualizations
+   [scicloj.kindly.v4.kind :as kind]
+   ;; Logging setup for this chapter (see Logging chapter)
+   [pocket-book.logging]))
 
 ;; [Pocket](https://github.com/scicloj/pocket) is a Clojure library for
 ;; filesystem-based caching of expensive computations. It persists results
