@@ -393,36 +393,6 @@ noise-results
 ;; | Change the noise level        | That data + its features + its models |
 ;; | Re-run the whole notebook     | Nothing — all cached     |
 
-;; ## What we learned
-;;
-;; This experiment revealed a clear story about the interplay between
-;; models, features, and noise:
-;;
-;; - **Feature engineering is decisive for linear models.** With raw
-;;   features, the linear model couldn't capture the nonlinear target
-;;   at all. Adding trigonometric features (sin, cos) — which match
-;;   the structure of the true function — dramatically improved it.
-;;   The model didn't get smarter; we gave it the right vocabulary.
-;;
-;; - **Decision trees are self-sufficient but fragile.** The CART model
-;;   achieved low error regardless of feature set, because it can
-;;   learn nonlinear splits on its own. But as noise increased, it
-;;   began fitting the noise rather than the signal — a classic
-;;   overfitting pattern.
-;;
-;; - **The crossover point matters.** At low noise, the tree wins. At
-;;   high noise, the well-featured linear model degrades more
-;;   gracefully. Knowing where this crossover happens is exactly the
-;;   kind of insight you get from systematic experimentation.
-;;
-;; - **Caching structures the workflow.** In this small example, each
-;;   step runs in milliseconds — caching isn't needed for speed. But
-;;   the pattern scales: with real datasets and expensive training,
-;;   the same pipeline structure ensures that only changed steps
-;;   recompute. Meanwhile, `compare-experiments` extracted the varying
-;;   parameters automatically, turning cached results into a
-;;   comparison table — useful at any scale.
-
 ;; ## Cleanup
 
 (pocket/cleanup!)
