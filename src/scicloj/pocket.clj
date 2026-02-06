@@ -325,18 +325,7 @@
    to extract parameter maps, identifies which parameters vary across
    experiments, and returns a seq of maps containing the varying params
    plus the experiment result.
-   
-   Example:
-   ```clojure
-   (def exp1 (cached #'run-experiment {:lr 0.01 :epochs 100}))
-   (def exp2 (cached #'run-experiment {:lr 0.001 :epochs 100}))
-   (def exp3 (cached #'run-experiment {:lr 0.01 :epochs 200}))
-   
-   (compare-experiments [exp1 exp2 exp3])
-   ;; => [{:lr 0.01  :epochs 100 :result @exp1}
-   ;;     {:lr 0.001 :epochs 100 :result @exp2}
-   ;;     {:lr 0.01  :epochs 200 :result @exp3}]
-   ```
+  ```
    
    Only parameters that differ across experiments are included.
    The `:result` key contains the derefed value of each Cached."
