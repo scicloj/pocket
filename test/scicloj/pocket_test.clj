@@ -501,7 +501,7 @@
     @(pocket/cached #'expensive-add 1 2)
     (let [tree (pocket/dir-tree)]
       (is (= :kind/code (:kindly/kind (meta tree))))
-      (is (re-find #"\.cache" (first tree))))))
+      (is (re-find #"pocket-test-cache" (first tree))))))
 
 (deftest test-corrupted-cache-entry
   (testing "read-cached throws on entry with neither value.nippy nor nil marker"

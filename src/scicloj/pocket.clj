@@ -272,14 +272,13 @@
   (impl/cache-stats (resolve-base-cache-dir)))
 
 (defn dir-tree
-  "Render the cache directory as a tree string, like the Unix `tree` command.
+  "Display the cache directory structure as a tree.
    Shows the hierarchical structure of cached entries on disk.
    Returns a kindly-wrapped value (`kind/code`) for notebook rendering."
   []
-  (let [base-dir (resolve-base-cache-dir)
-        dir (when base-dir (str base-dir "/.cache"))]
-    (when (and dir (fs/exists? dir))
-      (kind/code (impl/dir-tree dir)))))
+  (let [base-dir (resolve-base-cache-dir)]
+    (when (and base-dir (fs/exists? base-dir))
+      (kind/code (impl/dir-tree base-dir)))))
 
 (defn origin-story
   "Given a value, return its computation DAG as a nested map.

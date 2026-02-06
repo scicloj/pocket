@@ -141,7 +141,7 @@
    (let [idstr (-> (str id)
                    (str/replace "/" "_"))]
      (str base-dir
-          "/.cache/"
+          "/"
           (subs (sha idstr) 0 2)
           "/"
           (if (> (count idstr) filename-length-limit)
@@ -494,26 +494,25 @@
      :paths deleted-paths}))
 
 (defn cache-entries
-  "Scan the cache directory and return a vector of metadata maps.
+  "Scan the cache directory and return a vector of maps describing each entry.
    Each map contains `:path` and any metadata from `meta.edn`.
    Returns an empty vector if the cache directory doesn't exist.
    Optionally filter by function name."
   ([base-dir]
    (cache-entries base-dir nil))
   ([base-dir fn-name]
-   (let [cache-dir (str base-dir "/.cache")]
-     (if (fs/exists? cache-dir)
-       (into []
-             (for [prefix-dir (fs/list-dir cache-dir)
-                   :when (fs/directory? prefix-dir)
-                   entry-dir (fs/list-dir prefix-dir)
-                   :when (fs/directory? entry-dir)
-                   :let [path (str entry-dir)
-                         meta-map (read-meta path)]
-                   :when (or (nil? fn-name)
-                             (= fn-name (:fn-name meta-map)))]
-               (merge {:path path} meta-map)))
-       []))))
+   (if (fs/exists? base-dir)
+     (into []
+           (for [prefix-dir (fs/list-dir base-dir)
+                 :when (fs/directory? prefix-dir)
+                 entry-dir (fs/list-dir prefix-dir)
+                 :when (fs/directory? entry-dir)
+                 :let [path (str entry-dir)
+                       meta-map (read-meta path)]
+                 :when (or (nil? fn-name)
+                           (= fn-name (:fn-name meta-map)))]
+             (merge {:path path} meta-map)))
+     [])))
 
 (defn cache-stats
   "Return aggregate statistics about the cache.
