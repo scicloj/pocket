@@ -1,0 +1,1344 @@
+---
+format:
+  html:
+    toc: true
+    toc-depth: 4
+    theme: [cosmo, notebooks/custom.scss]
+    toc-expand: 2
+    number-depth: 1
+
+---
+<style></style><style>.printedClojure .sourceCode {
+  background-color: transparent;
+  border-style: none;
+}
+</style><style>.clay-limit-image-width .clay-image {max-width: 100%}
+.clay-side-by-side .sourceCode {margin: 0}
+.clay-side-by-side {margin: 1em 0}
+</style>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js" type="text/javascript"></script><script src="https://code.jquery.com/ui/1.13.1/jquery-ui.min.js" type="text/javascript"></script>
+
+# Usage Practices
+
+This chapter expands on the basics from
+[Getting Started](pocket_book.getting_started.html) with practical
+patterns for day-to-day work: function identity in depth, cache
+invalidation strategies, testing, REPL introspection, serialization
+constraints, and debugging tips.
+
+
+## Setup
+
+
+::: {.sourceClojure}
+```clojure
+(ns pocket-book.usage-practices
+  (:require
+   ;; Logging setup for this chapter (see Logging chapter):
+   [pocket-book.logging]
+   ;; Pocket API:
+   [scicloj.pocket :as pocket]
+   ;; Annotating kinds of visualizations:
+   [scicloj.kindly.v4.kind :as kind]))
+```
+:::
+
+
+
+::: {.sourceClojure}
+```clojure
+(def test-dir "/tmp/pocket-dev-practices")
+```
+:::
+
+
+
+::: {.sourceClojure}
+```clojure
+(pocket/set-base-cache-dir! test-dir)
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+14:17:06.662 INFO scicloj.pocket - Cache dir set to: /tmp/pocket-dev-practices
+
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+"/tmp/pocket-dev-practices"
+
+```
+:::
+
+
+
+## When to Use Pocket
+
+
+### Good use cases
+
+
+- **Data science pipelines** with expensive intermediate steps
+  (data loading, preprocessing, feature engineering, model training)
+
+- **Reproducible research** where cached intermediate results let you
+  iterate on downstream steps without re-running upstream computations
+
+- **Long-running computations** (minutes to hours) that need to survive
+  JVM restarts, crashes, or machine reboots
+
+- **Multi-threaded workflows** where multiple threads may request the
+  same expensive computation — Pocket ensures it runs only once
+
+
+### Comparison to alternatives
+
+| Feature | Pocket | `clojure.core/memoize` | `core.memoize` |
+|---------|--------|------------------------|----------------|
+| Persistence | Disk + memory | Memory only | Memory only |
+| Cross-session | Yes | No | No |
+| Lazy evaluation | `IDeref` | Eager | Eager |
+| Eviction policies | LRU, FIFO, TTL, etc. | None | LRU, TTL, etc. |
+| Thread-safe (single computation) | Yes | No | Yes |
+| Pipeline caching | Yes (recursive) | No | No |
+
+
+
+## Function Identity: Always Use Vars
+
+Pocket requires functions to be passed as **vars** (`#'fn-name`),
+not as bare function objects. This is the most common mistake:
+
+```clojure
+;; ❌ WRONG - bare function, unstable identity
+(pocket/cached my-expensive-fn arg1 arg2)
+
+;; ✅ CORRECT - var, stable identity
+(pocket/cached #'my-expensive-fn arg1 arg2)
+```
+
+**Why?** Function objects have different identity across JVM sessions,
+making cache keys unpredictable. Vars provide stable symbol names
+that survive restarts.
+
+Pocket validates this and throws a clear error if you forget:
+
+
+::: {.sourceClojure}
+```clojure
+(defn example-fn [x] (* x x))
+```
+:::
+
+
+
+::: {.sourceClojure}
+```clojure
+(try
+  (pocket/cached example-fn 5)
+  (catch Exception e
+    (ex-message e)))
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+"pocket/cached requires a var (e.g., #'my-fn), got: class pocket_book.usage_practices$example_fn"
+
+```
+:::
+
+
+
+## Cache Invalidation Strategies
+
+Pocket does **not** automatically detect when a function's implementation
+changes. You must invalidate manually. Here are the strategies:
+
+
+### Strategy 1: Manual Invalidation
+
+Use `invalidate!` for specific entries or `invalidate-fn!` for all
+entries of a function:
+
+
+::: {.sourceClojure}
+```clojure
+(pocket/cleanup!)
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+14:17:06.666 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-dev-practices
+
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+{:dir "/tmp/pocket-dev-practices", :existed false}
+
+```
+:::
+
+
+
+::: {.sourceClojure}
+```clojure
+(defn transform [x] (* x 2))
+```
+:::
+
+
+Cache a computation:
+
+
+::: {.sourceClojure}
+```clojure
+(deref (pocket/cached #'transform 10))
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+14:17:06.667 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.usage-practices/transform
+14:17:06.668 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-dev-practices/.cache/89/(pocket-book.usage-practices⁄transform 10)
+
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+20
+
+```
+:::
+
+
+Function implementation changed — invalidate a single entry:
+
+
+::: {.sourceClojure}
+```clojure
+(pocket/invalidate! #'transform 10)
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+14:17:06.670 INFO scicloj.pocket.impl.cache - Invalidated: /tmp/pocket-dev-practices/.cache/89/(pocket-book.usage-practices⁄transform 10) existed= true
+
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+{:path
+ "/tmp/pocket-dev-practices/.cache/89/(pocket-book.usage-practices⁄transform 10)",
+ :existed true}
+
+```
+:::
+
+
+Or invalidate all entries for a function:
+
+
+::: {.sourceClojure}
+```clojure
+(deref (pocket/cached #'transform 1))
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+14:17:06.671 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.usage-practices/transform
+14:17:06.672 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-dev-practices/.cache/b7/(pocket-book.usage-practices⁄transform 1)
+
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+2
+
+```
+:::
+
+
+
+::: {.sourceClojure}
+```clojure
+(deref (pocket/cached #'transform 2))
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+14:17:06.672 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.usage-practices/transform
+14:17:06.673 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-dev-practices/.cache/8a/(pocket-book.usage-practices⁄transform 2)
+
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+4
+
+```
+:::
+
+
+
+::: {.sourceClojure}
+```clojure
+(pocket/invalidate-fn! #'transform)
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+14:17:06.674 INFO scicloj.pocket.impl.cache - Invalidated 2 entries for pocket-book.usage-practices/transform
+
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+{:fn-name "pocket-book.usage-practices/transform",
+ :count 2,
+ :paths
+ ["/tmp/pocket-dev-practices/.cache/b7/(pocket-book.usage-practices⁄transform 1)"
+  "/tmp/pocket-dev-practices/.cache/8a/(pocket-book.usage-practices⁄transform 2)"]}
+
+```
+:::
+
+
+
+### Strategy 2: Versioning Pattern
+
+Add a version key to your function's input. Bumping the version
+creates new cache entries while preserving old ones for comparison:
+
+
+::: {.sourceClojure}
+```clojure
+(pocket/cleanup!)
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+14:17:06.675 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-dev-practices
+
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+{:dir "/tmp/pocket-dev-practices", :existed true}
+
+```
+:::
+
+
+
+::: {.sourceClojure}
+```clojure
+(defn process-data [{:keys [data version]}]
+  {:result (reduce + data)
+   :version version})
+```
+:::
+
+
+Version 1:
+
+
+::: {.sourceClojure}
+```clojure
+(deref (pocket/cached #'process-data {:data [1 2 3] :version 1}))
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+14:17:06.677 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.usage-practices/process-data
+14:17:06.677 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-dev-practices/.cache/ff/(pocket-book.usage-practices⁄process-data {:data [1 2 3], :version 1})
+
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+{:result 6, :version 1}
+
+```
+:::
+
+
+After changing the function, bump version:
+
+
+::: {.sourceClojure}
+```clojure
+(deref (pocket/cached #'process-data {:data [1 2 3] :version 2}))
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+14:17:06.679 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.usage-practices/process-data
+14:17:06.679 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-dev-practices/.cache/6a/(pocket-book.usage-practices⁄process-data {:data [1 2 3], :version 2})
+
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+{:result 6, :version 2}
+
+```
+:::
+
+
+Both versions coexist in cache — useful for A/B comparison.
+
+
+### Strategy 3: Full Cleanup
+
+For a fresh start, use `cleanup!` to delete the entire cache:
+
+
+::: {.sourceClojure}
+```clojure
+(pocket/cleanup!)
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+14:17:06.681 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-dev-practices
+
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+{:dir "/tmp/pocket-dev-practices", :existed true}
+
+```
+:::
+
+
+
+## Testing with Pocket
+
+Tests should be isolated from production caches and from each other.
+Use `binding` and cleanup fixtures:
+
+
+### Test Fixture Pattern
+
+```clojure
+(def test-cache-dir "/tmp/my-project-test-cache")
+
+(defn cleanup-fixture [f]
+  (binding [pocket/*base-cache-dir* test-cache-dir]
+    (pocket/cleanup!)
+    (try
+      (f)
+      (finally
+        (pocket/cleanup!)))))
+
+(use-fixtures :each cleanup-fixture)
+```
+
+This ensures:
+1. Tests use a separate cache directory
+2. Cache is cleared before and after each test
+3. Tests don't affect each other
+
+
+### Verifying Cache Behavior
+
+Use an atom to track computation calls:
+
+
+::: {.sourceClojure}
+```clojure
+(pocket/cleanup!)
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+14:17:06.681 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-dev-practices
+
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+{:dir "/tmp/pocket-dev-practices", :existed false}
+
+```
+:::
+
+
+
+::: {.sourceClojure}
+```clojure
+(def call-count (atom 0))
+```
+:::
+
+
+
+::: {.sourceClojure}
+```clojure
+(defn tracked-fn [x]
+  (swap! call-count inc)
+  (* x x))
+```
+:::
+
+
+First call computes:
+
+
+::: {.sourceClojure}
+```clojure
+(reset! call-count 0)
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+0
+
+```
+:::
+
+
+
+::: {.sourceClojure}
+```clojure
+(let [result (deref (pocket/cached #'tracked-fn 5))
+      calls @call-count]
+  {:result result :calls calls})
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+14:17:06.684 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.usage-practices/tracked-fn
+14:17:06.684 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-dev-practices/.cache/a5/(pocket-book.usage-practices⁄tracked-fn 5)
+
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+{:result 25, :calls 1}
+
+```
+:::
+
+
+Second call uses cache (no additional computation):
+
+
+::: {.sourceClojure}
+```clojure
+(let [result (deref (pocket/cached #'tracked-fn 5))
+      calls @call-count]
+  {:result result :calls calls})
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+{:result 25, :calls 1}
+
+```
+:::
+
+
+
+## REPL Development Workflow
+
+
+### Inspecting the Cache
+
+Use introspection functions to understand cache state:
+
+
+::: {.sourceClojure}
+```clojure
+(pocket/cleanup!)
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+14:17:06.687 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-dev-practices
+
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+{:dir "/tmp/pocket-dev-practices", :existed true}
+
+```
+:::
+
+
+
+::: {.sourceClojure}
+```clojure
+(deref (pocket/cached #'transform 1))
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+14:17:06.688 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.usage-practices/transform
+14:17:06.688 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-dev-practices/.cache/b7/(pocket-book.usage-practices⁄transform 1)
+
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+2
+
+```
+:::
+
+
+
+::: {.sourceClojure}
+```clojure
+(deref (pocket/cached #'transform 2))
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+14:17:06.689 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.usage-practices/transform
+14:17:06.689 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-dev-practices/.cache/8a/(pocket-book.usage-practices⁄transform 2)
+
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+4
+
+```
+:::
+
+
+
+::: {.sourceClojure}
+```clojure
+(deref (pocket/cached #'tracked-fn 3))
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+14:17:06.690 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.usage-practices/tracked-fn
+14:17:06.691 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-dev-practices/.cache/64/(pocket-book.usage-practices⁄tracked-fn 3)
+
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+9
+
+```
+:::
+
+
+See all cached entries:
+
+
+::: {.sourceClojure}
+```clojure
+(count (pocket/cache-entries))
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+3
+
+```
+:::
+
+
+Get aggregate statistics:
+
+
+::: {.sourceClojure}
+```clojure
+(:total-entries (pocket/cache-stats))
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+3
+
+```
+:::
+
+
+Visualize cache structure:
+
+
+::: {.sourceClojure}
+```clojure
+(kind/code (pocket/dir-tree))
+```
+:::
+
+
+
+::: {.sourceClojure}
+```clojure
+.cache
+├── 64
+│   └── (pocket-book.usage-practices⁄tracked-fn 3)
+│       ├── meta.edn
+│       └── value.nippy
+├── 8a
+│   └── (pocket-book.usage-practices⁄transform 2)
+│       ├── meta.edn
+│       └── value.nippy
+└── b7
+    └── (pocket-book.usage-practices⁄transform 1)
+        ├── meta.edn
+        └── value.nippy
+
+```
+:::
+
+
+Each directory contains a `meta.edn` file with metadata
+about the cached computation:
+
+
+::: {.sourceClojure}
+```clojure
+(-> (pocket/cache-entries)
+    first
+    :path
+    (str "/meta.edn")
+    slurp
+    clojure.edn/read-string)
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+{:id "(pocket-book.usage-practices/transform 1)",
+ :fn-name "pocket-book.usage-practices/transform",
+ :args-str "[1]",
+ :created-at "2026-02-06T12:17:06.688394999Z"}
+
+```
+:::
+
+
+This same information is available through the API:
+
+
+::: {.sourceClojure}
+```clojure
+(pocket/cache-entries)
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+[{:path
+  "/tmp/pocket-dev-practices/.cache/b7/(pocket-book.usage-practices⁄transform 1)",
+  :id "(pocket-book.usage-practices/transform 1)",
+  :fn-name "pocket-book.usage-practices/transform",
+  :args-str "[1]",
+  :created-at "2026-02-06T12:17:06.688394999Z"}
+ {:path
+  "/tmp/pocket-dev-practices/.cache/64/(pocket-book.usage-practices⁄tracked-fn 3)",
+  :id "(pocket-book.usage-practices/tracked-fn 3)",
+  :fn-name "pocket-book.usage-practices/tracked-fn",
+  :args-str "[3]",
+  :created-at "2026-02-06T12:17:06.690673042Z"}
+ {:path
+  "/tmp/pocket-dev-practices/.cache/8a/(pocket-book.usage-practices⁄transform 2)",
+  :id "(pocket-book.usage-practices/transform 2)",
+  :fn-name "pocket-book.usage-practices/transform",
+  :args-str "[2]",
+  :created-at "2026-02-06T12:17:06.689597909Z"}]
+
+```
+:::
+
+
+Filter entries by function name:
+
+
+::: {.sourceClojure}
+```clojure
+(pocket/cache-entries (str (ns-name *ns*) "/transform"))
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+[{:path
+  "/tmp/pocket-dev-practices/.cache/b7/(pocket-book.usage-practices⁄transform 1)",
+  :id "(pocket-book.usage-practices/transform 1)",
+  :fn-name "pocket-book.usage-practices/transform",
+  :args-str "[1]",
+  :created-at "2026-02-06T12:17:06.688394999Z"}
+ {:path
+  "/tmp/pocket-dev-practices/.cache/8a/(pocket-book.usage-practices⁄transform 2)",
+  :id "(pocket-book.usage-practices/transform 2)",
+  :fn-name "pocket-book.usage-practices/transform",
+  :args-str "[2]",
+  :created-at "2026-02-06T12:17:06.689597909Z"}]
+
+```
+:::
+
+
+
+### Checking Cached Status
+
+`Cached` values print their status without forcing computation:
+
+
+::: {.sourceClojure}
+```clojure
+(pocket/cleanup!)
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+14:17:06.698 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-dev-practices
+
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+{:dir "/tmp/pocket-dev-practices", :existed true}
+
+```
+:::
+
+
+
+::: {.sourceClojure}
+```clojure
+(def pending-value (pocket/cached #'transform 99))
+```
+:::
+
+
+Before deref:
+
+
+::: {.sourceClojure}
+```clojure
+(pr-str pending-value)
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+"#<Cached (pocket-book.usage-practices/transform 99) :pending>"
+
+```
+:::
+
+
+
+::: {.sourceClojure}
+```clojure
+(deref pending-value)
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+14:17:06.700 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.usage-practices/transform
+14:17:06.701 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-dev-practices/.cache/6d/(pocket-book.usage-practices⁄transform 99)
+
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+198
+
+```
+:::
+
+
+After deref:
+
+
+::: {.sourceClojure}
+```clojure
+(pr-str pending-value)
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+"#<Cached (pocket-book.usage-practices/transform 99) :cached>"
+
+```
+:::
+
+
+
+## Debugging with Logging
+
+Enable debug logging to see cache hits, misses, and writes.
+See the [Logging chapter](pocket_book.logging.html) for setup.
+
+With debug logging enabled, you'll see:
+
+- `Cache miss, computing: ...` — computation triggered
+- `Cache hit (memory): ...` — served from in-memory cache
+- `Cache hit (disk): ...` — loaded from disk
+- `Cache write: ...` — written to disk
+
+
+## Long Cache Keys
+
+When a cache key string exceeds 240 characters, Pocket falls back to
+using a SHA-1 hash as the directory name. This ensures the filesystem
+can handle arbitrarily complex arguments while maintaining correct
+caching behavior.
+
+
+::: {.sourceClojure}
+```clojure
+(pocket/cleanup!)
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+14:17:06.703 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-dev-practices
+
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+{:dir "/tmp/pocket-dev-practices", :existed true}
+
+```
+:::
+
+
+
+::: {.sourceClojure}
+```clojure
+(defn process-long-text [text]
+  (str "Processed: " (count text) " chars"))
+```
+:::
+
+
+
+::: {.sourceClojure}
+```clojure
+(def long-text (apply str (repeat 300 "x")))
+```
+:::
+
+
+
+::: {.sourceClojure}
+```clojure
+(deref (pocket/cached #'process-long-text long-text))
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+14:17:06.704 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.usage-practices/process-long-text
+14:17:06.705 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-dev-practices/.cache/66/66ca82f71c1e7e5a1fcebd04da5cff4cf0e04366
+
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+"Processed: 300 chars"
+
+```
+:::
+
+
+The entry is stored with a hash-based directory name:
+
+
+::: {.sourceClojure}
+```clojure
+(kind/code (pocket/dir-tree))
+```
+:::
+
+
+
+::: {.sourceClojure}
+```clojure
+.cache
+└── 66
+    └── 66ca82f71c1e7e5a1fcebd04da5cff4cf0e04366
+        ├── meta.edn
+        └── value.nippy
+
+```
+:::
+
+
+But `meta.edn` inside still contains the full details,
+so `cache-entries` and `invalidate-fn!` work correctly:
+
+
+::: {.sourceClojure}
+```clojure
+(-> (pocket/cache-entries (str (ns-name *ns*) "/process-long-text"))
+    first
+    :fn-name)
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+"pocket-book.usage-practices/process-long-text"
+
+```
+:::
+
+
+
+## Serialization Constraints
+
+Pocket uses [Nippy](https://github.com/ptaoussanis/nippy) for
+serialization. Most Clojure data structures work, but some don't:
+
+
+### ✅ Safe to Cache
+
+- Primitive types (numbers, strings, keywords, symbols)
+- Collections (vectors, maps, sets, lists)
+- Records and most deftypes
+- Java Serializable objects
+
+
+### ⚠️ Requires Care
+
+- Lazy sequences — Nippy fully realizes them during serialization,
+  which means infinite lazy seqs will hang or OOM. Force lazy seqs
+  with `doall` inside your function (see below) to keep realization
+  explicit and catch errors early. The round-trip type may also change
+  (a `LazySeq` comes back as a regular seq).
+
+
+### ❌ Cannot Cache
+
+- Open file handles, streams
+- Network connections, sockets
+- Functions, closures (use vars instead)
+- Atoms, refs, agents (stateful references)
+
+
+### Lazy Sequences
+
+Use `doall` or `vec` to force evaluation inside your function:
+
+
+::: {.sourceClojure}
+```clojure
+(pocket/cleanup!)
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+14:17:06.709 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-dev-practices
+
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+{:dir "/tmp/pocket-dev-practices", :existed true}
+
+```
+:::
+
+
+
+::: {.sourceClojure}
+```clojure
+(defn generate-data [n]
+  ;; doall forces full evaluation of the lazy sequence
+  (doall (range n)))
+```
+:::
+
+
+
+::: {.sourceClojure}
+```clojure
+(deref (pocket/cached #'generate-data 5))
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+14:17:06.710 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.usage-practices/generate-data
+14:17:06.711 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-dev-practices/.cache/70/(pocket-book.usage-practices⁄generate-data 5)
+
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+(0 1 2 3 4)
+
+```
+:::
+
+
+
+## Known Limitations
+
+
+- **No automatic cache invalidation** — Pocket doesn't detect when a
+  function's implementation changes. Use `invalidate!`, `invalidate-fn!`,
+  or the versioning pattern described above.
+
+
+- **Requires serializable values** — Nippy handles most Clojure types,
+  but you can't cache functions, atoms, channels, file handles, or
+  other stateful objects.
+
+
+- **Disk cache grows indefinitely** — The in-memory cache supports
+  eviction policies (LRU, TTL, etc.), but the disk cache has no
+  automatic cleanup. Use `cleanup!` or `invalidate-fn!` periodically
+  if disk space is a concern.
+
+
+- **No disk cache TTL** — Cached values on disk never expire
+  automatically. If you need time-based expiration, you'll need to
+  manage it externally or use `cleanup!`.
+
+
+## Summary
+
+| Practice | Recommendation |
+|----------|----------------|
+| Function identity | Always use vars (`#'fn-name`) |
+| Invalidation | Manual, versioning, or full cleanup |
+| Testing | Use `binding` + cleanup fixtures |
+| Debugging | Enable logging, use introspection |
+| Long cache keys | Auto-handled with SHA-1 fallback |
+| Serialization | Avoid stateful objects; force lazy seqs with `doall` |
+| Configuration | Use `pocket.edn` — see [Configuration](pocket_book.configuration.html) |
+
+
+::: {.sourceClojure}
+```clojure
+(pocket/cleanup!)
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+14:17:06.712 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-dev-practices
+
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+{:dir "/tmp/pocket-dev-practices", :existed true}
+
+```
+:::
+
+
+
+```{=html}
+<div style="background-color:grey;height:2px;width:100%;"></div>
+```
+
+
+
+```{=html}
+<div><pre><small><small>source: <a href="https://github.com/scicloj/pocket/blob/master/notebooks/pocket_book/usage_practices.clj">notebooks/pocket_book/usage_practices.clj</a></small></small></pre></div>
+```

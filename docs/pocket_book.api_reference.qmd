@@ -1,0 +1,1574 @@
+---
+format:
+  html:
+    toc: true
+    toc-depth: 4
+    theme: [cosmo, notebooks/custom.scss]
+    toc-expand: 2
+    number-depth: 1
+
+---
+<style></style><style>.printedClojure .sourceCode {
+  background-color: transparent;
+  border-style: none;
+}
+</style><style>.clay-limit-image-width .clay-image {max-width: 100%}
+.clay-side-by-side .sourceCode {margin: 0}
+.clay-side-by-side {margin: 1em 0}
+</style>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js" type="text/javascript"></script><script src="https://code.jquery.com/ui/1.13.1/jquery-ui.min.js" type="text/javascript"></script><script src="https://cdn.jsdelivr.net/npm/mermaid@11.10.1/dist/mermaid.min.js" type="text/javascript"></script>
+
+# API Reference
+
+
+## Setup
+
+A few preparations for the code examples below:
+
+
+::: {.sourceClojure}
+```clojure
+(require '[scicloj.pocket :as pocket])
+```
+:::
+
+
+
+::: {.sourceClojure}
+```clojure
+(def cache-dir "/tmp/pocket-demo-reference")
+```
+:::
+
+
+
+::: {.sourceClojure}
+```clojure
+(pocket/set-base-cache-dir! cache-dir)
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+14:17:25.706 INFO scicloj.pocket - Cache dir set to: /tmp/pocket-demo-reference
+
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+"/tmp/pocket-demo-reference"
+
+```
+:::
+
+
+
+::: {.sourceClojure}
+```clojure
+(pocket/cleanup!)
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+14:17:25.706 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo-reference
+
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+{:dir "/tmp/pocket-demo-reference", :existed false}
+
+```
+:::
+
+
+
+::: {.sourceClojure}
+```clojure
+(defn expensive-calculation
+  "Simulates an expensive computation"
+  [x y]
+  (println (str "Computing " x " + " y " (this is expensive!)"))
+  (Thread/sleep 400)
+  (+ x y))
+```
+:::
+
+
+
+## Reference
+
+### `*base-cache-dir*`
+Base directory for cache storage.
+   
+   Resolved with precedence: binding > `set-base-cache-dir!` > 
+   `POCKET_BASE_CACHE_DIR` env var > `pocket.edn` `:base-cache-dir` > `pocket-defaults.edn` (library default: `.cache/pocket`).
+
+The current value:
+
+
+::: {.sourceClojure}
+```clojure
+pocket/*base-cache-dir*
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+"/tmp/pocket-demo-reference"
+
+```
+:::
+
+
+### `set-base-cache-dir!`
+`[dir]`
+
+Set the base cache directory by altering `*base-cache-dir*`.
+   Returns the directory path.
+
+
+::: {.sourceClojure}
+```clojure
+(pocket/set-base-cache-dir! "/tmp/pocket-demo-2")
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+14:17:25.708 INFO scicloj.pocket - Cache dir set to: /tmp/pocket-demo-2
+
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+"/tmp/pocket-demo-2"
+
+```
+:::
+
+
+
+::: {.sourceClojure}
+```clojure
+pocket/*base-cache-dir*
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+"/tmp/pocket-demo-2"
+
+```
+:::
+
+
+Restore it for the rest of the notebook:
+
+
+::: {.sourceClojure}
+```clojure
+(pocket/set-base-cache-dir! cache-dir)
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+14:17:25.708 INFO scicloj.pocket - Cache dir set to: /tmp/pocket-demo-reference
+
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+"/tmp/pocket-demo-reference"
+
+```
+:::
+
+
+### `config`
+`[]`
+
+Return the effective resolved configuration as a map.
+   Useful for inspecting which cache directory, mem-cache policy,
+   storage policy, and filename length limit are in effect after applying the precedence chain.
+
+Inspect the current effective configuration:
+
+
+::: {.sourceClojure}
+```clojure
+(pocket/config)
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+{:base-cache-dir "/tmp/pocket-demo-reference",
+ :mem-cache {:policy :lru, :threshold 256},
+ :storage :mem+disk,
+ :filename-length-limit 240}
+
+```
+:::
+
+
+### `cached`
+`[func & args]`
+
+Create a cached computation (returns `IDeref`).
+   
+   The computation is executed on first `deref` and cached to disk.
+   Subsequent derefs load from cache if available.
+   
+   `func` must be a var (e.g., `#'my-fn`) for stable cache keys.
+   
+   Storage policy is controlled by `*storage*` (see `set-storage!`).
+   Use `caching-fn` with an opts map for per-function overrides.
+
+`cached` returns a `Cached` object — the computation is not yet executed:
+
+
+::: {.sourceClojure}
+```clojure
+(def my-result (pocket/cached #'expensive-calculation 100 200))
+```
+:::
+
+
+
+::: {.sourceClojure}
+```clojure
+(type my-result)
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+scicloj.pocket.impl.cache.Cached
+
+```
+:::
+
+
+The computation runs when we deref:
+
+
+::: {.sourceClojure}
+```clojure
+(deref my-result)
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+14:17:25.710 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.api-reference/expensive-calculation
+Computing 100 + 200 (this is expensive!)
+14:17:26.112 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo-reference/.cache/27/(pocket-book.api-reference⁄expensive-calculation 100 200)
+
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+300
+
+```
+:::
+
+
+Derefing again loads from cache (no recomputation):
+
+
+::: {.sourceClojure}
+```clojure
+(deref my-result)
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+300
+
+```
+:::
+
+
+### `caching-fn`
+`[f]`
+
+`[f opts]`
+
+Wrap a function to automatically cache its results.
+   
+   Returns a new function where each call returns a `Cached` object (`IDeref`).
+   Deref the result to trigger computation or load from cache.
+   `f` must be a var (e.g., `#'my-fn`) for stable cache keys.
+   
+   Optionally accepts an options map to override configuration per-function:
+
+   - `:storage`   — `:mem+disk`, `:mem`, or `:none` (overrides `*storage*`)
+   - `:cache-dir` — base cache directory (overrides `*base-cache-dir*`)
+   - `:mem-cache` — in-memory cache options (overrides `*mem-cache-options*`)
+   - `:filename-length-limit` — max filename length before SHA-1 fallback (overrides `*filename-length-limit*`)
+
+`caching-fn` wraps a function so that every call returns a `Cached` object:
+
+
+::: {.sourceClojure}
+```clojure
+(def my-caching-fn (pocket/caching-fn #'expensive-calculation))
+```
+:::
+
+
+
+::: {.sourceClojure}
+```clojure
+(deref (my-caching-fn 3 4))
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+14:17:26.117 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.api-reference/expensive-calculation
+Computing 3 + 4 (this is expensive!)
+14:17:26.518 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo-reference/.cache/53/(pocket-book.api-reference⁄expensive-calculation 3 4)
+
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+7
+
+```
+:::
+
+
+Same args hit the cache:
+
+
+::: {.sourceClojure}
+```clojure
+(deref (my-caching-fn 3 4))
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+7
+
+```
+:::
+
+
+`caching-fn` accepts an optional map to override per-function configuration:
+
+```clojure
+(pocket/caching-fn #'f {:storage :mem})     ;; in-memory only
+(pocket/caching-fn #'f {:storage :none})    ;; identity tracking only
+(pocket/caching-fn #'f {:cache-dir "/tmp/alt"})  ;; alternate cache dir
+```
+
+See the [Configuration chapter](pocket_book.configuration.html#storage-policies)
+for details on storage modes and the full option map.
+
+### `maybe-deref`
+`[x]`
+
+Deref if `x` implements `IDeref`, otherwise return `x` as-is.
+   
+   Useful in pipeline functions that may receive either `Cached` or plain values.
+
+A plain value passes through unchanged:
+
+
+::: {.sourceClojure}
+```clojure
+(pocket/maybe-deref 42)
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+42
+
+```
+:::
+
+
+A `Cached` value gets derefed:
+
+
+::: {.sourceClojure}
+```clojure
+(pocket/maybe-deref (pocket/cached #'expensive-calculation 100 200))
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+300
+
+```
+:::
+
+
+### `->id`
+`[x]`
+
+Return a cache key representation of a value.
+   Dispatches via the `PIdentifiable` protocol.
+
+A var's identity is its fully-qualified name:
+
+
+::: {.sourceClojure}
+```clojure
+(pocket/->id #'expensive-calculation)
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+pocket-book.api-reference/expensive-calculation
+
+```
+:::
+
+
+A map's identity is itself (maps are deep-sorted later for stable cache paths):
+
+
+::: {.sourceClojure}
+```clojure
+(pocket/->id {:b 2 :a 1})
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+{:b 2, :a 1}
+
+```
+:::
+
+
+A `Cached` object's identity captures the full computation —
+function name and argument identities — without running it:
+
+
+::: {.sourceClojure}
+```clojure
+(pocket/->id (pocket/cached #'expensive-calculation 100 200))
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+(pocket-book.api-reference/expensive-calculation 100 200)
+
+```
+:::
+
+
+`nil` is handled as well:
+
+
+::: {.sourceClojure}
+```clojure
+(pocket/->id nil)
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+nil
+
+```
+:::
+
+
+### `set-mem-cache-options!`
+`[opts]`
+
+Configure the in-memory cache. Resets it, discarding any currently cached values.
+   
+   Supported keys:
+
+   - `:policy` — `:lru`, `:fifo`, `:lu`, `:ttl`, `:lirs`, `:soft`, or `:basic`
+   - `:threshold` — max entries for `:lru`, `:fifo`, `:lu`
+   - `:ttl` — time-to-live in ms for `:ttl` policy
+   - `:s-history-limit` / `:q-history-limit` — for `:lirs` policy
+   
+   Defaults come from `pocket-defaults.edn`.
+
+Switch to a FIFO policy with 100 entries:
+
+
+::: {.sourceClojure}
+```clojure
+(pocket/set-mem-cache-options! {:policy :fifo :threshold 100})
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+14:17:26.532 INFO scicloj.pocket - Mem-cache options set: {:policy :fifo, :threshold 100}
+14:17:26.532 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :fifo, :threshold 100}
+
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+{:policy :fifo, :threshold 100}
+
+```
+:::
+
+
+Reset to default:
+
+
+::: {.sourceClojure}
+```clojure
+(pocket/set-mem-cache-options! {:policy :lru :threshold 256})
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+14:17:26.533 INFO scicloj.pocket - Mem-cache options set: {:policy :lru, :threshold 256}
+14:17:26.533 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :lru, :threshold 256}
+
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+{:policy :lru, :threshold 256}
+
+```
+:::
+
+
+### `reset-mem-cache-options!`
+`[]`
+
+Reset the in-memory cache configuration to library defaults.
+   Clears any options set by `set-mem-cache-options!` and reconfigures
+   the mem-cache with the default policy from `pocket-defaults.edn`.
+   Returns the default options.
+
+Reset mem-cache configuration to library defaults:
+
+
+::: {.sourceClojure}
+```clojure
+(pocket/reset-mem-cache-options!)
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+14:17:26.534 INFO scicloj.pocket - Mem-cache options reset to defaults: {:policy :lru, :threshold 256}
+14:17:26.535 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :lru, :threshold 256}
+
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+{:policy :lru, :threshold 256}
+
+```
+:::
+
+
+### `*storage*`
+Storage policy for cached computations: `:mem+disk`, `:mem`, or `:none`.
+   
+
+   - `:mem+disk` (default) — in-memory cache backed by disk persistence
+   - `:mem` — in-memory cache only, no disk I/O
+   - `:none` — no shared cache; instance-local memoization only
+   
+   Resolved with precedence: binding > `set-storage!` >
+   `POCKET_STORAGE` env var > `pocket.edn` `:storage` >
+   `pocket-defaults.edn` (library default: `:mem+disk`).
+
+### `set-storage!`
+`[storage]`
+
+Set the storage policy by altering `*storage*`.
+   Valid values: `:mem+disk`, `:mem`, `:none`.
+   Returns the storage policy.
+
+Switch to memory-only storage:
+
+
+::: {.sourceClojure}
+```clojure
+(pocket/set-storage! :mem)
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+14:17:26.536 INFO scicloj.pocket - Storage policy set to: :mem
+
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+:mem
+
+```
+:::
+
+
+Reset to default:
+
+
+::: {.sourceClojure}
+```clojure
+(pocket/set-storage! nil)
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+14:17:26.537 INFO scicloj.pocket - Storage policy set to: nil
+
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+nil
+
+```
+:::
+
+
+### `cleanup!`
+`[]`
+
+Delete the cache directory, removing all cached values.
+   Also clears the in-memory cache.
+   Returns a map with `:dir` and `:existed` indicating what happened.
+
+
+::: {.sourceClojure}
+```clojure
+(pocket/cleanup!)
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+14:17:26.540 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo-reference
+
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+{:dir "/tmp/pocket-demo-reference", :existed true}
+
+```
+:::
+
+
+### `clear-mem-cache!`
+`[]`
+
+Clear all entries from the in-memory cache without deleting the disk cache.
+   The next deref of a cached value will reload from disk if available.
+   Useful for testing scenarios that need to simulate memory eviction.
+
+Clear in-memory cache without touching disk:
+
+
+::: {.sourceClojure}
+```clojure
+(deref (pocket/cached #'expensive-calculation 10 20))
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+14:17:26.541 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.api-reference/expensive-calculation
+Computing 10 + 20 (this is expensive!)
+14:17:26.943 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo-reference/.cache/45/(pocket-book.api-reference⁄expensive-calculation 10 20)
+
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+30
+
+```
+:::
+
+
+
+::: {.sourceClojure}
+```clojure
+(pocket/clear-mem-cache!)
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+{}
+
+```
+:::
+
+
+### `invalidate!`
+`[func & args]`
+
+Invalidate a specific cached computation, removing it from both disk and memory.
+   Takes the same arguments as `cached`: a function var and its arguments.
+   Returns a map with `:path` and `:existed`.
+
+Remove a specific cached entry:
+
+
+::: {.sourceClojure}
+```clojure
+(deref (pocket/cached #'expensive-calculation 10 20))
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+14:17:26.946 DEBUG scicloj.pocket.impl.cache - Cache hit (disk): pocket-book.api-reference/expensive-calculation /tmp/pocket-demo-reference/.cache/45/(pocket-book.api-reference⁄expensive-calculation 10 20)
+
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+30
+
+```
+:::
+
+
+
+::: {.sourceClojure}
+```clojure
+(pocket/invalidate! #'expensive-calculation 10 20)
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+14:17:26.947 INFO scicloj.pocket.impl.cache - Invalidated: /tmp/pocket-demo-reference/.cache/45/(pocket-book.api-reference⁄expensive-calculation 10 20) existed= true
+
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+{:path
+ "/tmp/pocket-demo-reference/.cache/45/(pocket-book.api-reference⁄expensive-calculation 10 20)",
+ :existed true}
+
+```
+:::
+
+
+Derefing again will recompute:
+
+
+::: {.sourceClojure}
+```clojure
+(deref (pocket/cached #'expensive-calculation 10 20))
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+14:17:26.948 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.api-reference/expensive-calculation
+Computing 10 + 20 (this is expensive!)
+14:17:27.350 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo-reference/.cache/45/(pocket-book.api-reference⁄expensive-calculation 10 20)
+
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+30
+
+```
+:::
+
+
+### `invalidate-fn!`
+`[func]`
+
+Invalidate all cached entries for a given function var, regardless of arguments.
+   Removes matching entries from both disk and memory.
+   Returns a map with `:fn-name`, `:count`, and `:paths`.
+
+Cache a few entries, then invalidate them all:
+
+
+::: {.sourceClojure}
+```clojure
+(deref (pocket/cached #'expensive-calculation 1 2))
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+14:17:27.353 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.api-reference/expensive-calculation
+Computing 1 + 2 (this is expensive!)
+14:17:27.755 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo-reference/.cache/fc/(pocket-book.api-reference⁄expensive-calculation 1 2)
+
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+3
+
+```
+:::
+
+
+
+::: {.sourceClojure}
+```clojure
+(deref (pocket/cached #'expensive-calculation 3 4))
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+14:17:27.756 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.api-reference/expensive-calculation
+Computing 3 + 4 (this is expensive!)
+14:17:28.158 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo-reference/.cache/53/(pocket-book.api-reference⁄expensive-calculation 3 4)
+
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+7
+
+```
+:::
+
+
+
+::: {.sourceClojure}
+```clojure
+(pocket/invalidate-fn! #'expensive-calculation)
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+14:17:28.161 INFO scicloj.pocket.impl.cache - Invalidated 3 entries for pocket-book.api-reference/expensive-calculation
+
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+{:fn-name "pocket-book.api-reference/expensive-calculation",
+ :count 3,
+ :paths
+ ["/tmp/pocket-demo-reference/.cache/45/(pocket-book.api-reference⁄expensive-calculation 10 20)"
+  "/tmp/pocket-demo-reference/.cache/fc/(pocket-book.api-reference⁄expensive-calculation 1 2)"
+  "/tmp/pocket-demo-reference/.cache/53/(pocket-book.api-reference⁄expensive-calculation 3 4)"]}
+
+```
+:::
+
+
+
+::: {.sourceClojure}
+```clojure
+(pocket/cleanup!)
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+14:17:28.162 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo-reference
+
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+{:dir "/tmp/pocket-demo-reference", :existed true}
+
+```
+:::
+
+
+### `cache-entries`
+`[]`
+
+`[fn-name]`
+
+Scan the cache directory and return a sequence of metadata maps.
+   Each entry contains `:path`, `:id`, `:fn-name`, `:args-str`, and `:created-at`
+   (when metadata is available — entries cached before metadata support will
+   only have `:path`).
+   Optionally filter by function name.
+
+List all cached entries:
+
+
+::: {.sourceClojure}
+```clojure
+(deref (pocket/cached #'expensive-calculation 10 20))
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+14:17:28.166 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.api-reference/expensive-calculation
+Computing 10 + 20 (this is expensive!)
+14:17:28.567 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo-reference/.cache/45/(pocket-book.api-reference⁄expensive-calculation 10 20)
+
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+30
+
+```
+:::
+
+
+
+::: {.sourceClojure}
+```clojure
+(deref (pocket/cached #'expensive-calculation 3 4))
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+14:17:28.569 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.api-reference/expensive-calculation
+Computing 3 + 4 (this is expensive!)
+14:17:28.971 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo-reference/.cache/53/(pocket-book.api-reference⁄expensive-calculation 3 4)
+
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+7
+
+```
+:::
+
+
+
+::: {.sourceClojure}
+```clojure
+(pocket/cache-entries)
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+[{:path
+  "/tmp/pocket-demo-reference/.cache/45/(pocket-book.api-reference⁄expensive-calculation 10 20)",
+  :id "(pocket-book.api-reference/expensive-calculation 10 20)",
+  :fn-name "pocket-book.api-reference/expensive-calculation",
+  :args-str "[10 20]",
+  :created-at "2026-02-06T12:17:28.566468365Z"}
+ {:path
+  "/tmp/pocket-demo-reference/.cache/53/(pocket-book.api-reference⁄expensive-calculation 3 4)",
+  :id "(pocket-book.api-reference/expensive-calculation 3 4)",
+  :fn-name "pocket-book.api-reference/expensive-calculation",
+  :args-str "[3 4]",
+  :created-at "2026-02-06T12:17:28.969956887Z"}]
+
+```
+:::
+
+
+Filter by function name:
+
+
+::: {.sourceClojure}
+```clojure
+(pocket/cache-entries "pocket-book.api-reference/expensive-calculation")
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+[{:path
+  "/tmp/pocket-demo-reference/.cache/45/(pocket-book.api-reference⁄expensive-calculation 10 20)",
+  :id "(pocket-book.api-reference/expensive-calculation 10 20)",
+  :fn-name "pocket-book.api-reference/expensive-calculation",
+  :args-str "[10 20]",
+  :created-at "2026-02-06T12:17:28.566468365Z"}
+ {:path
+  "/tmp/pocket-demo-reference/.cache/53/(pocket-book.api-reference⁄expensive-calculation 3 4)",
+  :id "(pocket-book.api-reference/expensive-calculation 3 4)",
+  :fn-name "pocket-book.api-reference/expensive-calculation",
+  :args-str "[3 4]",
+  :created-at "2026-02-06T12:17:28.969956887Z"}]
+
+```
+:::
+
+
+### `cache-stats`
+`[]`
+
+Return aggregate statistics about the cache.
+   Returns a map with `:total-entries`, `:total-size-bytes`,
+   and `:entries-per-fn`.
+
+
+::: {.sourceClojure}
+```clojure
+(pocket/cache-stats)
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+{:total-entries 2,
+ :total-size-bytes 388,
+ :entries-per-fn {"pocket-book.api-reference/expensive-calculation" 2}}
+
+```
+:::
+
+
+
+::: {.sourceClojure}
+```clojure
+(pocket/cleanup!)
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+14:17:28.980 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo-reference
+
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+{:dir "/tmp/pocket-demo-reference", :existed true}
+
+```
+:::
+
+
+### `origin-story`
+`[x]`
+
+Given a value, return its computation DAG as a nested map.
+
+   For a `Cached` value, each node is `{:fn <var> :args [<nodes>] :id <string>}`,
+   with `:value` included if the computation has been realized.
+   Plain (non-Cached) arguments become `{:value <val>}` leaf nodes.
+   
+   When the same Cached instance appears multiple times in the tree,
+   subsequent occurrences are represented as `{:ref <id>}` pointing
+   to the first occurrence's `:id`. This enables proper DAG representation
+   for diamond dependencies.
+
+   Does not trigger computation — only peeks at already-realized values.
+   Works with all storage policies (`:mem+disk`, `:mem`, `:none`).
+
+`origin-story` returns a nested map describing a computation's DAG.
+Each cached step is `{:fn <var> :args [...]}`, with `:value` if realized.
+Plain arguments become `{:value ...}` leaves.
+
+
+::: {.sourceClojure}
+```clojure
+(defn step-a [x] (+ x 10))
+```
+:::
+
+
+
+::: {.sourceClojure}
+```clojure
+(defn step-b [x y] (* x y))
+```
+:::
+
+
+
+::: {.sourceClojure}
+```clojure
+(def a-c (pocket/cached #'step-a 5))
+```
+:::
+
+
+
+::: {.sourceClojure}
+```clojure
+(def b-c (pocket/cached #'step-b a-c 3))
+```
+:::
+
+
+Before deref — no `:value` keys:
+
+
+::: {.sourceClojure}
+```clojure
+(pocket/origin-story b-c)
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+{:fn #'pocket-book.api-reference/step-b,
+ :args
+ [{:fn #'pocket-book.api-reference/step-a,
+   :args [{:value 5}],
+   :id "c2"}
+  {:value 3}],
+ :id "c1"}
+
+```
+:::
+
+
+Deref to trigger computation:
+
+
+::: {.sourceClojure}
+```clojure
+(deref b-c)
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+14:17:28.984 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.api-reference/step-b
+14:17:28.984 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.api-reference/step-a
+14:17:28.984 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo-reference/.cache/85/(pocket-book.api-reference⁄step-a 5)
+14:17:28.985 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo-reference/.cache/e0/(pocket-book.api-reference⁄step-b (pocket-book.api-reference⁄step-a 5) 3)
+
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+45
+
+```
+:::
+
+
+After deref — `:value` keys appear:
+
+
+::: {.sourceClojure}
+```clojure
+(pocket/origin-story b-c)
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+{:fn #'pocket-book.api-reference/step-b,
+ :args
+ [{:fn #'pocket-book.api-reference/step-a,
+   :args [{:value 5}],
+   :id "c2",
+   :value 15}
+  {:value 3}],
+ :id "c1",
+ :value 45}
+
+```
+:::
+
+
+### `origin-story-mermaid`
+`[x]`
+
+Given a value, return a Mermaid flowchart string of its computation DAG.
+
+   Accepts a `Cached` value (walks it via `origin-story`) or a tree map
+   previously returned by `origin-story`.
+
+   Returns a plain string. Wrap with `(kind/mermaid ...)` for Kindly rendering.
+
+Returns a Mermaid flowchart with kindly metadata for notebook rendering:
+
+
+::: {.sourceClojure}
+```clojure
+(pocket/origin-story-mermaid b-c)
+```
+:::
+
+
+
+```{=html}
+<div class="mermaid">flowchart TD
+  n0["step-b"]
+  n1["step-a"]
+  n2[/"5"/]
+  n2 --> n1
+  n1 --> n0
+  n3[/"3"/]
+  n3 --> n0</div>
+```
+
+
+### `origin-story-graph`
+`[x]`
+
+Given a value, return its computation DAG as a normalized graph.
+   
+   Returns `{:nodes {<id> <node-map>} :edges [[<from> <to>] ...]}`.
+   
+   Node maps contain `:fn` (for cached steps) or `:value` (for leaves),
+   plus `:value` if the cached computation has been realized.
+   
+   This is the fully normalized (Format B) representation of the DAG.
+   Use `origin-story` for the tree-with-refs representation (Format A).
+
+`origin-story-graph` returns a normalized `{:nodes ... :edges ...}` format,
+suitable for graph algorithms:
+
+
+::: {.sourceClojure}
+```clojure
+(pocket/origin-story-graph b-c)
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+{:nodes
+ {"c1" {:fn #'pocket-book.api-reference/step-b, :value 45},
+  "c2" {:fn #'pocket-book.api-reference/step-a, :value 15},
+  "v3" {:value 5},
+  "v4" {:value 3}},
+ :edges [["c1" "c2"] ["c2" "v3"] ["c1" "v4"]]}
+
+```
+:::
+
+
+### `compare-experiments`
+`[cached-values]`
+
+Compare multiple cached experiment results.
+   
+   Takes a seq of `Cached` values (typically final metrics from different
+   hyperparameter configurations). Walks each experiment's `origin-story`
+   to extract parameter maps, identifies which parameters vary across
+   experiments, and returns a seq of maps containing the varying params
+   plus the experiment result.
+   
+   Example:
+   ```clojure
+   (def exp1 (cached #'run-experiment {:lr 0.01 :epochs 100}))
+   (def exp2 (cached #'run-experiment {:lr 0.001 :epochs 100}))
+   (def exp3 (cached #'run-experiment {:lr 0.01 :epochs 200}))
+   
+   (compare-experiments [exp1 exp2 exp3])
+   ;; => [{:lr 0.01  :epochs 100 :result @exp1}
+   ;;     {:lr 0.001 :epochs 100 :result @exp2}
+   ;;     {:lr 0.01  :epochs 200 :result @exp3}]
+   ```
+   
+   Only parameters that differ across experiments are included.
+   The `:result` key contains the derefed value of each Cached.
+
+`compare-experiments` extracts varying parameters from multiple experiments.
+This is useful for hyperparameter sweeps where you want to see which
+parameters differ across experiments.
+
+
+::: {.sourceClojure}
+```clojure
+(defn run-exp [config]
+  {:rmse (* 0.1 (:lr config))})
+```
+:::
+
+
+
+::: {.sourceClojure}
+```clojure
+(def exp1 (pocket/cached #'run-exp {:lr 0.01 :epochs 100}))
+```
+:::
+
+
+
+::: {.sourceClojure}
+```clojure
+(def exp2 (pocket/cached #'run-exp {:lr 0.001 :epochs 100}))
+```
+:::
+
+
+
+::: {.sourceClojure}
+```clojure
+(pocket/compare-experiments [exp1 exp2])
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+14:17:28.992 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.api-reference/run-exp
+14:17:28.992 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo-reference/.cache/aa/(pocket-book.api-reference⁄run-exp {:epochs 100, :lr 0.01})
+14:17:28.993 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.api-reference/run-exp
+14:17:28.993 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo-reference/.cache/6e/(pocket-book.api-reference⁄run-exp {:epochs 100, :lr 0.001})
+
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+[{:lr 0.01, :result {:rmse 0.001}} {:lr 0.001, :result {:rmse 1.0E-4}}]
+
+```
+:::
+
+
+Note: `:epochs` is not shown because it's the same (100) in both experiments.
+Only varying parameters appear in the comparison.
+
+
+::: {.sourceClojure}
+```clojure
+(pocket/cleanup!)
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+14:17:28.996 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo-reference
+
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+{:dir "/tmp/pocket-demo-reference", :existed true}
+
+```
+:::
+
+
+
+## Extending `PIdentifiable`
+
+You can customize how your types contribute to cache keys by
+extending the `PIdentifiable` protocol. See the
+[Extending Pocket](pocket_book.extending_pocket.html) chapter
+for a full walkthrough with examples.
+
+
+```{=html}
+<div style="background-color:grey;height:2px;width:100%;"></div>
+```
+
+
+
+```{=html}
+<div><pre><small><small>source: <a href="https://github.com/scicloj/pocket/blob/master/notebooks/pocket_book/api_reference.clj">notebooks/pocket_book/api_reference.clj</a></small></small></pre></div>
+```

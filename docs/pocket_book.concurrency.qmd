@@ -1,0 +1,1580 @@
+---
+format:
+  html:
+    toc: true
+    toc-depth: 4
+    theme: [cosmo, notebooks/custom.scss]
+    toc-expand: 2
+    number-depth: 1
+
+---
+<style></style><style>.printedClojure .sourceCode {
+  background-color: transparent;
+  border-style: none;
+}
+</style><style>.clay-limit-image-width .clay-image {max-width: 100%}
+.clay-side-by-side .sourceCode {margin: 0}
+.clay-side-by-side {margin: 1em 0}
+</style>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js" type="text/javascript"></script><script src="https://code.jquery.com/ui/1.13.1/jquery-ui.min.js" type="text/javascript"></script><script src="https://cdn.jsdelivr.net/npm/mermaid@11.10.1/dist/mermaid.min.js" type="text/javascript"></script>
+
+# Concurrency
+
+
+::: {.sourceClojure}
+```clojure
+(ns pocket-book.concurrency
+  (:require
+   ;; Logging setup for this chapter (see Logging chapter):
+   [pocket-book.logging]
+   ;; Pocket API:
+   [scicloj.pocket :as pocket]
+   ;; Annotating kinds of visualizations:
+   [scicloj.kindly.v4.kind :as kind]
+   ;; Cache implementation for comparisons:
+   [clojure.core.cache.wrapped :as cw]))
+```
+:::
+
+
+Pocket guarantees that when multiple threads deref the same `Cached` value
+concurrently, the underlying computation executes **exactly once**.
+This chapter explains how that guarantee is achieved and demonstrates
+the concurrency scenarios it handles.
+
+
+## The Challenge
+
+The naive approach to caching — check if cached, compute if not — has a race condition:
+
+```
+Thread A                    Thread B
+────────                    ────────
+check cache → miss          check cache → miss
+compute value               compute value     ← duplicate!
+store result                store result
+```
+
+Both threads see the cache miss and both compute the value.
+For expensive computations (minutes, hours), this wastes resources.
+
+
+## Why `core.cache` Alone Is Not Enough
+
+Clojure's [core.cache](https://github.com/clojure/core.cache) provides
+`lookup-or-miss` which wraps the value function in a delay to prevent
+duplicate work across `swap!` retries within a single call.
+However, each call to `lookup-or-miss` creates its **own** delay,
+and the value function is evaluated **inside** the `swap!` body
+(via `through-cache`). This means concurrent callers racing into
+`swap!` can each see a miss and each start computing before any
+compare-and-swap succeeds:
+
+```
+Thread A                          Thread B
+────────                          ────────
+lookup-or-miss
+  create delay-A
+  swap!                           lookup-or-miss
+    through-cache → miss            create delay-B
+    @delay-A → computing...         swap!
+                                      through-cache → miss
+                                      @delay-B → computing... ← duplicate!
+```
+
+The `swap!` compare-and-swap ensures only one result enters the cache,
+but both computations have already started. The delay prevents
+redundant work across retries of a **single** `swap!` call — it does
+**not** deduplicate across concurrent callers.
+
+
+## Seeing the Problem
+
+We can demonstrate this directly. Here we use `core.cache.wrapped/lookup-or-miss`
+with a slow computation and five concurrent threads.
+A `CyclicBarrier` synchronizes the threads so they all call
+`lookup-or-miss` at the same instant:
+
+
+::: {.sourceClojure}
+```clojure
+(let [call-count (atom 0)
+      cache (cw/lru-cache-factory {} :threshold 32)
+      barrier (java.util.concurrent.CyclicBarrier. 5)
+      slow-fn (fn [_key]
+                (swap! call-count inc)
+                (Thread/sleep 500)
+                42)]
+  (let [futures (doall (for [_ (range 5)]
+                         (future
+                           (.await barrier)
+                           (cw/lookup-or-miss cache :same-key slow-fn))))
+        results (mapv deref futures)]
+    {:results results
+     :computation-count @call-count}))
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+{:results [42 42 42 42 42], :computation-count 5}
+
+```
+:::
+
+
+All five threads computed the value independently — `computation-count`
+is greater than 1 (typically 5). The delay inside `lookup-or-miss`
+prevented duplicate work on `swap!` retries within each thread, but
+concurrent callers each created and forced their own delay.
+
+Scenario 1 (below) repeats this same pattern using Pocket,
+where the `ConcurrentHashMap` layer reduces the count to exactly 1.
+
+
+## Pocket's Solution
+
+Pocket adds a `ConcurrentHashMap` layer that ensures only **one delay**
+exists per cache key, regardless of how many threads request it:
+
+```clojure
+(def ^ConcurrentHashMap in-flight
+  (java.util.concurrent.ConcurrentHashMap.))
+
+;; Inside the lookup-or-miss miss-fn:
+(let [d (.computeIfAbsent
+          in-flight path
+          (fn [_]
+            (delay
+              (try
+                ;; disk check + computation
+                (finally
+                  (.remove in-flight path))))))]
+  @d)
+```
+
+`computeIfAbsent` is atomic: the first thread creates and inserts the
+delay; all subsequent threads for the same key receive the **same**
+delay instance. Since a Clojure `delay` executes its body exactly once,
+the computation runs once and all threads share the result.
+
+
+### Failure Handling
+
+The `finally` block removes the entry from `in-flight` after computation
+(success or failure). If a computation throws, the next caller gets a
+fresh delay and a fresh attempt — exceptions are never cached.
+
+
+## Architecture Layers
+
+
+```{=html}
+<div class="mermaid">flowchart TB
+    subgraph Request
+    D[deref Cached]
+    end
+    subgraph Synchronization
+    CHM[ConcurrentHashMap<br>in-flight]
+    DEL[delay]
+    end
+    subgraph Caching
+    MEM[Memory Cache<br>core.cache]
+    DISK[Disk Cache<br>Nippy files]
+    end
+    D --> CHM
+    CHM -->|one delay per key| DEL
+    DEL -->|on miss| MEM
+    MEM -->|on miss| DISK
+    DISK -->|on miss| COMP[Compute]
+    COMP --> DISK
+    DISK --> MEM
+    MEM --> D</div>
+```
+
+
+| Layer | Purpose | Guarantee |
+|-------|---------|-----------|
+| ConcurrentHashMap | Delay creation | One delay per key |
+| delay | Computation | One execution per delay |
+| core.cache (mem-cache) | In-memory caching | Fast repeated access |
+| Disk cache | Persistence | Cross-session caching |
+
+
+## Concurrency Scenarios
+
+The following scenarios demonstrate Pocket's thread-safety guarantees
+with various timing patterns.
+
+
+### Setup
+
+
+::: {.sourceClojure}
+```clojure
+(def test-dir "/tmp/pocket-concurrency-test")
+```
+:::
+
+
+
+::: {.sourceClojure}
+```clojure
+(pocket/set-base-cache-dir! test-dir)
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+14:17:10.247 INFO scicloj.pocket - Cache dir set to: /tmp/pocket-concurrency-test
+
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+"/tmp/pocket-concurrency-test"
+
+```
+:::
+
+
+A counter to track how many times computation actually runs:
+
+
+::: {.sourceClojure}
+```clojure
+(def computation-count (atom 0))
+```
+:::
+
+
+
+::: {.sourceClojure}
+```clojure
+(defn slow-computation
+  "A computation that takes 300ms and increments a counter."
+  [x]
+  (swap! computation-count inc)
+  (Thread/sleep 300)
+  (* x x))
+```
+:::
+
+
+Convenience function to reset state before each scenario:
+
+
+::: {.sourceClojure}
+```clojure
+(defn fresh-scenario!
+  "Reset counters and caches for a fresh scenario.
+   Returns the start time for timing measurements."
+  ([]
+   (fresh-scenario! {}))
+  ([{:keys [mem-cache-opts]
+     :or {mem-cache-opts {:policy :lru :threshold 3}}}]
+   (reset! computation-count 0)
+   (pocket/cleanup!)
+   (pocket/set-mem-cache-options! mem-cache-opts)
+   {:started-at (java.time.LocalTime/now)
+    :mem-cache mem-cache-opts}))
+```
+:::
+
+
+---
+
+
+### Scenario 1: Concurrent Deref of Same Value
+
+Multiple threads deref the same `Cached` object while the computation
+is still running. All should receive the same result from a single computation.
+
+```
+Timeline (ms):   0         100        300        400
+                 │          │          │          │
+Thread A:       [─── request ───][─── computing ───]──→ result
+Thread B:                  [─── request ───][ wait ]──→ result
+                                             ↑
+                             B waits for A's computation
+```
+
+
+::: {.sourceClojure}
+```clojure
+(fresh-scenario!)
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+14:17:10.251 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-concurrency-test
+14:17:10.251 INFO scicloj.pocket - Mem-cache options set: {:policy :lru, :threshold 3}
+14:17:10.251 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :lru, :threshold 3}
+
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+{:started-at
+ #object[java.time.LocalTime 0x3603755a "14:17:10.251672210"],
+ :mem-cache {:policy :lru, :threshold 3}}
+
+```
+:::
+
+
+Launch 5 threads that all deref the same cached value:
+
+
+::: {.sourceClojure}
+```clojure
+(let [cached-val (pocket/cached #'slow-computation 10)
+      futures (doall (for [_ (range 5)]
+                       (future @cached-val)))
+      results (mapv deref futures)]
+  {:results results
+   :computation-count @computation-count})
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+14:17:10.255 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
+14:17:10.557 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-concurrency-test/.cache/a8/(pocket-book.concurrency⁄slow-computation 10)
+
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+{:results [100 100 100 100 100], :computation-count 1}
+
+```
+:::
+
+
+---
+
+
+### Scenario 2: Memory Cache Hit
+
+After the first computation, subsequent requests hit the memory cache
+instantly (no disk I/O, no recomputation).
+
+```
+Timeline:
+Thread A:  [── computing ──]
+                          ↓
+                     mem-cache populated
+Thread B:                         [request]──→ instant result
+                                      ↑
+                                memory cache hit
+```
+
+
+::: {.sourceClojure}
+```clojure
+(fresh-scenario!)
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+14:17:10.563 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-concurrency-test
+14:17:10.563 INFO scicloj.pocket - Mem-cache options set: {:policy :lru, :threshold 3}
+14:17:10.564 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :lru, :threshold 3}
+
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+{:started-at
+ #object[java.time.LocalTime 0x543080da "14:17:10.564069744"],
+ :mem-cache {:policy :lru, :threshold 3}}
+
+```
+:::
+
+
+First request computes, second is instant (memory hit):
+
+
+::: {.sourceClojure}
+```clojure
+(let [;; First request - computes
+      result-1 @(pocket/cached #'slow-computation 20)
+      count-after-first @computation-count
+      ;; Second request - should hit memory cache
+      start (System/currentTimeMillis)
+      result-2 @(pocket/cached #'slow-computation 20)
+      elapsed (- (System/currentTimeMillis) start)
+      count-after-second @computation-count]
+  {:first-result result-1
+   :second-result result-2
+   :second-elapsed-ms elapsed
+   :computations-after-first count-after-first
+   :computations-after-second count-after-second})
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+14:17:10.566 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
+14:17:10.867 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-concurrency-test/.cache/94/(pocket-book.concurrency⁄slow-computation 20)
+
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+{:first-result 400,
+ :second-result 400,
+ :second-elapsed-ms 1,
+ :computations-after-first 1,
+ :computations-after-second 1}
+
+```
+:::
+
+
+---
+
+
+### Scenario 3: Disk Cache Hit After Memory Eviction
+
+Fill the memory cache to evict our entry, then verify
+the next request reads from disk (not recomputes).
+
+```
+Timeline:
+1. Compute value for arg=30          → stored in mem + disk
+2. Compute 3 more values (31,32,33)  → arg=30 evicted from mem (LRU)
+3. Request arg=30 again              → disk cache hit (no recompute)
+```
+
+
+::: {.sourceClojure}
+```clojure
+(fresh-scenario!)
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+14:17:10.874 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-concurrency-test
+14:17:10.874 INFO scicloj.pocket - Mem-cache options set: {:policy :lru, :threshold 3}
+14:17:10.874 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :lru, :threshold 3}
+
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+{:started-at
+ #object[java.time.LocalTime 0x755b0b03 "14:17:10.874231112"],
+ :mem-cache {:policy :lru, :threshold 3}}
+
+```
+:::
+
+
+Step 1: Compute initial value, then fill cache to cause eviction:
+
+
+::: {.sourceClojure}
+```clojure
+(let [;; Compute arg=30
+      _ @(pocket/cached #'slow-computation 30)
+      ;; Fill cache to evict arg=30 (threshold=3)
+      _ @(pocket/cached #'slow-computation 31)
+      _ @(pocket/cached #'slow-computation 32)
+      _ @(pocket/cached #'slow-computation 33)
+      count-before-retry @computation-count
+      ;; Request arg=30 again - should hit disk
+      result @(pocket/cached #'slow-computation 30)
+      count-after-retry @computation-count]
+  {:result result
+   :computations-before-retry count-before-retry
+   :computations-after-retry count-after-retry
+   :disk-hit? (= count-before-retry count-after-retry)})
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+14:17:10.876 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
+14:17:11.177 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-concurrency-test/.cache/1b/(pocket-book.concurrency⁄slow-computation 30)
+14:17:11.178 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
+14:17:11.479 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-concurrency-test/.cache/5b/(pocket-book.concurrency⁄slow-computation 31)
+14:17:11.480 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
+14:17:11.782 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-concurrency-test/.cache/98/(pocket-book.concurrency⁄slow-computation 32)
+14:17:11.783 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
+14:17:12.085 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-concurrency-test/.cache/62/(pocket-book.concurrency⁄slow-computation 33)
+14:17:12.086 DEBUG scicloj.pocket.impl.cache - Cache hit (disk): pocket-book.concurrency/slow-computation /tmp/pocket-concurrency-test/.cache/1b/(pocket-book.concurrency⁄slow-computation 30)
+
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+{:result 900,
+ :computations-before-retry 4,
+ :computations-after-retry 4,
+ :disk-hit? true}
+
+```
+:::
+
+
+---
+
+
+### Scenario 4: Failure and Retry
+
+When a computation fails, the exception is not cached.
+The next caller gets a fresh attempt.
+
+```
+Timeline:
+1. Thread A requests → computation fails (exception)
+2. Thread B requests → fresh computation succeeds
+3. Thread C requests → cache hit (no recompute)
+```
+
+
+::: {.sourceClojure}
+```clojure
+(def failure-count (atom 0))
+```
+:::
+
+
+
+::: {.sourceClojure}
+```clojure
+(defn flaky-computation
+  "Fails on first call, succeeds thereafter."
+  [x]
+  (if (zero? @failure-count)
+    (do (swap! failure-count inc)
+        (throw (ex-info "Temporary failure" {:x x})))
+    (do (swap! failure-count inc)
+        (* x 100))))
+```
+:::
+
+
+
+::: {.sourceClojure}
+```clojure
+(do
+  (reset! failure-count 0)
+  (pocket/cleanup!)
+  :ready)
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+14:17:12.106 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-concurrency-test
+
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+:ready
+
+```
+:::
+
+
+First attempt fails, second succeeds, third hits cache:
+
+
+::: {.sourceClojure}
+```clojure
+(let [;; First attempt - fails
+      attempt-1 (try
+                  @(pocket/cached #'flaky-computation 5)
+                  (catch Exception e {:error (.getMessage e)}))
+      count-after-1 @failure-count
+      ;; Second attempt - succeeds
+      attempt-2 @(pocket/cached #'flaky-computation 5)
+      count-after-2 @failure-count
+      ;; Third attempt - cache hit
+      attempt-3 @(pocket/cached #'flaky-computation 5)
+      count-after-3 @failure-count]
+  {:attempt-1 attempt-1
+   :attempt-2 attempt-2
+   :attempt-3 attempt-3
+   :counts [count-after-1 count-after-2 count-after-3]})
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+14:17:12.112 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/flaky-computation
+14:17:12.113 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/flaky-computation
+14:17:12.114 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-concurrency-test/.cache/27/(pocket-book.concurrency⁄flaky-computation 5)
+
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+{:attempt-1 {:error "Temporary failure"},
+ :attempt-2 500,
+ :attempt-3 500,
+ :counts [1 2 2]}
+
+```
+:::
+
+
+---
+
+
+### Scenario 5: Different Arguments Compute in Parallel
+
+Requests with different arguments run in parallel
+(no unnecessary serialization).
+
+```
+Timeline (ms):   0                   300
+                 │                    │
+Thread A (x=40): [──── computing ────]──→ 1600
+Thread B (x=41): [──── computing ────]──→ 1681
+Thread C (x=42): [──── computing ────]──→ 1764
+                  ↑
+            All start ~simultaneously, run in parallel
+```
+
+
+::: {.sourceClojure}
+```clojure
+(fresh-scenario!)
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+14:17:12.121 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-concurrency-test
+14:17:12.121 INFO scicloj.pocket - Mem-cache options set: {:policy :lru, :threshold 3}
+14:17:12.121 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :lru, :threshold 3}
+
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+{:started-at
+ #object[java.time.LocalTime 0x790925ea "14:17:12.121983950"],
+ :mem-cache {:policy :lru, :threshold 3}}
+
+```
+:::
+
+
+
+::: {.sourceClojure}
+```clojure
+(let [start (System/currentTimeMillis)
+      futures (mapv #(future @(pocket/cached #'slow-computation %))
+                    [40 41 42])
+      results (mapv deref futures)
+      elapsed (- (System/currentTimeMillis) start)]
+  {:results results
+   :elapsed-ms elapsed
+   :parallel? (< elapsed 500)})
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+14:17:12.124 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
+14:17:12.124 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
+14:17:12.124 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
+14:17:12.425 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-concurrency-test/.cache/84/(pocket-book.concurrency⁄slow-computation 41)
+14:17:12.425 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-concurrency-test/.cache/9e/(pocket-book.concurrency⁄slow-computation 42)
+14:17:12.425 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-concurrency-test/.cache/51/(pocket-book.concurrency⁄slow-computation 40)
+
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+{:results [1600 1681 1764], :elapsed-ms 302, :parallel? true}
+
+```
+:::
+
+
+---
+
+
+### Scenario 6: Disk Hit with Empty Memory Cache
+
+Clear memory cache while keeping disk cache.
+All requests should read from disk without recomputing.
+
+```
+Setup: value for arg=50 is on disk but NOT in memory
+
+Threads A, B, C all request x=50
+→ All read from disk (no computation)
+```
+
+
+::: {.sourceClojure}
+```clojure
+(fresh-scenario!)
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+14:17:12.430 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-concurrency-test
+14:17:12.430 INFO scicloj.pocket - Mem-cache options set: {:policy :lru, :threshold 3}
+14:17:12.430 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :lru, :threshold 3}
+
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+{:started-at
+ #object[java.time.LocalTime 0x230a6454 "14:17:12.430453717"],
+ :mem-cache {:policy :lru, :threshold 3}}
+
+```
+:::
+
+
+Compute, clear memory, then hit disk:
+
+
+::: {.sourceClojure}
+```clojure
+(let [;; Compute and cache arg=50
+      _ @(pocket/cached #'slow-computation 50)
+      count-after-compute @computation-count
+      ;; Clear only memory cache (disk remains)
+      _ (pocket/clear-mem-cache!)
+      ;; Multiple threads hit disk cache
+      futures (mapv (fn [_] (future @(pocket/cached #'slow-computation 50)))
+                    (range 3))
+      results (mapv deref futures)
+      count-after-disk-hits @computation-count]
+  {:results results
+   :count-after-compute count-after-compute
+   :count-after-disk-hits count-after-disk-hits
+   :no-recompute? (= count-after-compute count-after-disk-hits)})
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+14:17:12.437 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
+14:17:12.738 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-concurrency-test/.cache/bf/(pocket-book.concurrency⁄slow-computation 50)
+14:17:12.740 DEBUG scicloj.pocket.impl.cache - Cache hit (disk): pocket-book.concurrency/slow-computation /tmp/pocket-concurrency-test/.cache/bf/(pocket-book.concurrency⁄slow-computation 50)
+
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+{:results [2500 2500 2500],
+ :count-after-compute 1,
+ :count-after-disk-hits 1,
+ :no-recompute? true}
+
+```
+:::
+
+
+---
+
+
+### Scenario 7: Full Cache Hierarchy Test
+
+A comprehensive scenario testing all cache layers:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ Step 1: Request x=60         → COMPUTE (miss everywhere)    │
+│ Step 2: Request x=60 again   → MEMORY HIT (instant)         │
+│ Step 3: Evict from memory    → (fill cache with other vals) │
+│ Step 4: Request x=60         → DISK HIT (read from disk)    │
+│ Step 5: Delete disk cache    → invalidate!                  │
+│ Step 6: Request x=60         → COMPUTE (miss everywhere)    │
+└─────────────────────────────────────────────────────────────┘
+```
+
+
+::: {.sourceClojure}
+```clojure
+(fresh-scenario! {:mem-cache-opts {:policy :lru :threshold 2}})
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+14:17:12.755 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-concurrency-test
+14:17:12.755 INFO scicloj.pocket - Mem-cache options set: {:policy :lru, :threshold 2}
+14:17:12.756 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :lru, :threshold 2}
+
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+{:started-at
+ #object[java.time.LocalTime 0x64629f79 "14:17:12.756116237"],
+ :mem-cache {:policy :lru, :threshold 2}}
+
+```
+:::
+
+
+
+::: {.sourceClojure}
+```clojure
+(let [;; Step 1: Initial computation
+      _ @(pocket/cached #'slow-computation 60)
+      count-step-1 @computation-count
+
+      ;; Step 2: Memory hit (should be instant)
+      start-2 (System/currentTimeMillis)
+      _ @(pocket/cached #'slow-computation 60)
+      elapsed-2 (- (System/currentTimeMillis) start-2)
+      count-step-2 @computation-count
+
+      ;; Step 3: Evict from memory by filling cache
+      _ @(pocket/cached #'slow-computation 61)
+      _ @(pocket/cached #'slow-computation 62)
+      count-step-3 @computation-count
+
+      ;; Step 4: Disk hit (memory miss)
+      _ @(pocket/cached #'slow-computation 60)
+      count-step-4 @computation-count
+
+      ;; Step 5: Delete disk cache
+      _ (pocket/invalidate! #'slow-computation 60)
+      _ (pocket/clear-mem-cache!)
+
+      ;; Step 6: Recompute (miss everywhere)
+      _ @(pocket/cached #'slow-computation 60)
+      count-step-6 @computation-count]
+  {:count-step-1 count-step-1
+   :elapsed-step-2 elapsed-2
+   :count-step-2 count-step-2
+   :count-step-3 count-step-3
+   :count-step-4 count-step-4
+   :count-step-6 count-step-6})
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+14:17:12.762 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
+14:17:13.064 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-concurrency-test/.cache/ae/(pocket-book.concurrency⁄slow-computation 60)
+14:17:13.065 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
+14:17:13.367 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-concurrency-test/.cache/6c/(pocket-book.concurrency⁄slow-computation 61)
+14:17:13.367 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
+14:17:13.669 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-concurrency-test/.cache/62/(pocket-book.concurrency⁄slow-computation 62)
+14:17:13.670 DEBUG scicloj.pocket.impl.cache - Cache hit (disk): pocket-book.concurrency/slow-computation /tmp/pocket-concurrency-test/.cache/ae/(pocket-book.concurrency⁄slow-computation 60)
+14:17:13.670 INFO scicloj.pocket.impl.cache - Invalidated: /tmp/pocket-concurrency-test/.cache/ae/(pocket-book.concurrency⁄slow-computation 60) existed= true
+14:17:13.671 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
+14:17:13.972 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-concurrency-test/.cache/ae/(pocket-book.concurrency⁄slow-computation 60)
+
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+{:count-step-1 1,
+ :elapsed-step-2 1,
+ :count-step-2 1,
+ :count-step-3 3,
+ :count-step-4 3,
+ :count-step-6 4}
+
+```
+:::
+
+
+
+### Scenario 8: Synchronized Start (Barrier)
+
+A stricter variant of Scenario 1 that uses a `CyclicBarrier` to
+guarantee all threads enter `deref` at the same instant.
+This is the direct contrast to the core.cache demonstration above.
+
+
+::: {.sourceClojure}
+```clojure
+(fresh-scenario!)
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+14:17:13.977 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-concurrency-test
+14:17:13.977 INFO scicloj.pocket - Mem-cache options set: {:policy :lru, :threshold 3}
+14:17:13.977 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :lru, :threshold 3}
+
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+{:started-at
+ #object[java.time.LocalTime 0x2557eb78 "14:17:13.977877039"],
+ :mem-cache {:policy :lru, :threshold 3}}
+
+```
+:::
+
+
+
+::: {.sourceClojure}
+```clojure
+(let [barrier (java.util.concurrent.CyclicBarrier. 5)
+      futures (doall (for [_ (range 5)]
+                       (future
+                         (.await barrier)
+                         @(pocket/cached #'slow-computation 70))))
+      results (mapv deref futures)]
+  {:results results
+   :computation-count @computation-count})
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+14:17:13.982 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
+14:17:14.284 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-concurrency-test/.cache/9b/(pocket-book.concurrency⁄slow-computation 70)
+
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+{:results [4900 4900 4900 4900 4900], :computation-count 1}
+
+```
+:::
+
+
+---
+
+
+### Scenario 9: Concurrent Pipeline Deref
+
+A pipeline where step 2 takes a `Cached` step 1 result as an argument.
+Multiple threads deref step 2 concurrently — both steps should
+compute exactly once.
+
+
+::: {.sourceClojure}
+```clojure
+(def step-a-count (atom 0))
+```
+:::
+
+
+
+::: {.sourceClojure}
+```clojure
+(def step-b-count (atom 0))
+```
+:::
+
+
+
+::: {.sourceClojure}
+```clojure
+(defn pipeline-step-a
+  "First pipeline step: slow transform."
+  [x]
+  (swap! step-a-count inc)
+  (Thread/sleep 200)
+  (* x 10))
+```
+:::
+
+
+
+::: {.sourceClojure}
+```clojure
+(defn pipeline-step-b
+  "Second pipeline step: depends on step-a result."
+  [data]
+  (swap! step-b-count inc)
+  (Thread/sleep 200)
+  (+ data 1))
+```
+:::
+
+
+
+::: {.sourceClojure}
+```clojure
+(do
+  (reset! step-a-count 0)
+  (reset! step-b-count 0)
+  (pocket/cleanup!)
+  (pocket/set-mem-cache-options! {:policy :lru :threshold 10})
+  :ready)
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+14:17:14.292 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-concurrency-test
+14:17:14.293 INFO scicloj.pocket - Mem-cache options set: {:policy :lru, :threshold 10}
+14:17:14.293 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :lru, :threshold 10}
+
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+:ready
+
+```
+:::
+
+
+Build a two-step pipeline, then deref from 5 threads:
+
+
+::: {.sourceClojure}
+```clojure
+(let [cached-a (pocket/cached #'pipeline-step-a 7)
+      cached-b (pocket/cached #'pipeline-step-b cached-a)
+      barrier (java.util.concurrent.CyclicBarrier. 5)
+      futures (doall (for [_ (range 5)]
+                       (future
+                         (.await barrier)
+                         @cached-b)))
+      results (mapv deref futures)]
+  {:results results
+   :step-a-count @step-a-count
+   :step-b-count @step-b-count})
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+14:17:14.298 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/pipeline-step-b
+14:17:14.298 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/pipeline-step-a
+14:17:14.500 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-concurrency-test/.cache/72/(pocket-book.concurrency⁄pipeline-step-a 7)
+14:17:14.702 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-concurrency-test/.cache/4a/(pocket-book.concurrency⁄pipeline-step-b (pocket-book.concurrency⁄pipeline-step-a 7))
+
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+{:results [71 71 71 71 71], :step-a-count 1, :step-b-count 1}
+
+```
+:::
+
+
+---
+
+
+### Scenario 10: Concurrent Failure
+
+Multiple threads hit a computation that throws.
+All threads should see the exception.
+A subsequent attempt should succeed (fresh delay).
+
+
+::: {.sourceClojure}
+```clojure
+(def concurrent-fail-count (atom 0))
+```
+:::
+
+
+
+::: {.sourceClojure}
+```clojure
+(defn fail-once-computation
+  "Fails when concurrent-fail-count is 0, succeeds after."
+  [x]
+  (let [n (swap! concurrent-fail-count inc)]
+    (when (= 1 n)
+      (Thread/sleep 200)
+      (throw (ex-info "Transient error" {:x x})))
+    (Thread/sleep 100)
+    (* x x)))
+```
+:::
+
+
+
+::: {.sourceClojure}
+```clojure
+(do
+  (reset! concurrent-fail-count 0)
+  (pocket/cleanup!)
+  (pocket/set-mem-cache-options! {:policy :lru :threshold 10})
+  :ready)
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+14:17:14.711 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-concurrency-test
+14:17:14.712 INFO scicloj.pocket - Mem-cache options set: {:policy :lru, :threshold 10}
+14:17:14.712 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :lru, :threshold 10}
+
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+:ready
+
+```
+:::
+
+
+5 threads hit the failing computation simultaneously:
+
+
+::: {.sourceClojure}
+```clojure
+(let [barrier (java.util.concurrent.CyclicBarrier. 5)
+      futures (doall (for [_ (range 5)]
+                       (future
+                         (.await barrier)
+                         (try
+                           {:value @(pocket/cached #'fail-once-computation 8)}
+                           (catch Exception e
+                             {:error (.getMessage e)})))))
+      first-results (mapv deref futures)
+      errors (filterv :error first-results)
+      successes (filterv :value first-results)]
+  {:first-round-errors (count errors)
+   :first-round-successes (count successes)
+   :retry @(pocket/cached #'fail-once-computation 8)
+   :total-calls @concurrent-fail-count})
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+14:17:14.716 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/fail-once-computation
+14:17:14.918 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/fail-once-computation
+14:17:15.020 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-concurrency-test/.cache/94/(pocket-book.concurrency⁄fail-once-computation 8)
+
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+{:first-round-errors 5,
+ :first-round-successes 0,
+ :retry 64,
+ :total-calls 2}
+
+```
+:::
+
+
+---
+
+
+### Scenario 11: Eviction Under Contention
+
+With a very small cache (threshold=2) and many concurrent requests,
+memory eviction happens frequently. The `in-flight` map still prevents
+duplicate computation for the same key.
+
+
+::: {.sourceClojure}
+```clojure
+(fresh-scenario! {:mem-cache-opts {:policy :lru :threshold 2}})
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+14:17:15.025 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-concurrency-test
+14:17:15.026 INFO scicloj.pocket - Mem-cache options set: {:policy :lru, :threshold 2}
+14:17:15.026 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :lru, :threshold 2}
+
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+{:started-at
+ #object[java.time.LocalTime 0xfeb9cb9 "14:17:15.026173382"],
+ :mem-cache {:policy :lru, :threshold 2}}
+
+```
+:::
+
+
+Launch 4 threads per key, for 3 different keys.
+Each key should compute exactly once despite eviction pressure.
+
+
+::: {.sourceClojure}
+```clojure
+(let [barrier (java.util.concurrent.CyclicBarrier. 12)
+      futures (doall
+               (for [x [80 81 82]
+                     _ (range 4)]
+                 (future
+                   (.await barrier)
+                   @(pocket/cached #'slow-computation x))))
+      results (mapv deref futures)]
+  {:results results
+   :computation-count @computation-count
+   :expected-results (vec (for [x [80 81 82]
+                                _ (range 4)]
+                            (* x x)))})
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+14:17:15.034 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
+14:17:15.034 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
+14:17:15.034 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
+14:17:15.335 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-concurrency-test/.cache/77/(pocket-book.concurrency⁄slow-computation 80)
+14:17:15.335 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-concurrency-test/.cache/f0/(pocket-book.concurrency⁄slow-computation 81)
+14:17:15.335 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-concurrency-test/.cache/73/(pocket-book.concurrency⁄slow-computation 82)
+
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+{:results
+ [6400 6400 6400 6400 6561 6561 6561 6561 6724 6724 6724 6724],
+ :computation-count 3,
+ :expected-results
+ [6400 6400 6400 6400 6561 6561 6561 6561 6724 6724 6724 6724]}
+
+```
+:::
+
+
+---
+
+
+### Scenario 12: Rapid Deref After Invalidation
+
+Invalidate a cached value and immediately re-request from multiple threads.
+The re-request should compute exactly once.
+
+
+::: {.sourceClojure}
+```clojure
+(fresh-scenario!)
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+14:17:15.342 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-concurrency-test
+14:17:15.342 INFO scicloj.pocket - Mem-cache options set: {:policy :lru, :threshold 3}
+14:17:15.342 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :lru, :threshold 3}
+
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+{:started-at
+ #object[java.time.LocalTime 0xeaf8f35 "14:17:15.342402254"],
+ :mem-cache {:policy :lru, :threshold 3}}
+
+```
+:::
+
+
+Compute and cache a value:
+
+
+::: {.sourceClojure}
+```clojure
+(let [_ @(pocket/cached #'slow-computation 90)
+      count-after-first @computation-count
+      ;; Invalidate
+      _ (pocket/invalidate! #'slow-computation 90)
+      ;; Immediately re-request from 5 concurrent threads
+      barrier (java.util.concurrent.CyclicBarrier. 5)
+      futures (doall (for [_ (range 5)]
+                       (future
+                         (.await barrier)
+                         @(pocket/cached #'slow-computation 90))))
+      results (mapv deref futures)
+      count-after-retry @computation-count]
+  {:results results
+   :count-after-first count-after-first
+   :count-after-retry count-after-retry})
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+14:17:15.347 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
+14:17:15.648 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-concurrency-test/.cache/44/(pocket-book.concurrency⁄slow-computation 90)
+14:17:15.649 INFO scicloj.pocket.impl.cache - Invalidated: /tmp/pocket-concurrency-test/.cache/44/(pocket-book.concurrency⁄slow-computation 90) existed= true
+14:17:15.651 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
+14:17:15.953 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-concurrency-test/.cache/44/(pocket-book.concurrency⁄slow-computation 90)
+
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+{:results [8100 8100 8100 8100 8100],
+ :count-after-first 1,
+ :count-after-retry 2}
+
+```
+:::
+
+
+---
+
+
+## Design Notes
+
+
+### Why Not Use Caffeine?
+
+[Caffeine](https://github.com/ben-manes/caffeine) (via
+[Cloffeine](https://github.com/AppsFlyer/cloffeine)) provides
+`LoadingCache` with built-in `computeIfAbsent` synchronization.
+This would eliminate the need for our explicit `in-flight` map.
+
+We chose `core.cache` because:
+
+- Lighter dependency (pure Clojure data structures)
+- Pluggable, immutable cache implementations
+- Familiar to the Clojure ecosystem
+
+Trade-off: We need the explicit `ConcurrentHashMap` synchronization layer.
+
+
+### The `computeIfAbsent` Contract
+
+From the [Java documentation](https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/ConcurrentHashMap.html#computeIfAbsent-K-java.util.function.Function-):
+
+> The mapping function should not modify this map during computation.
+
+Our implementation is safe: the mapping function only creates a `delay`
+(cheap, instantaneous). The actual computation happens when the delay
+is dereferenced, **outside** of `computeIfAbsent`.
+
+
+## Cleanup
+
+
+::: {.sourceClojure}
+```clojure
+(pocket/cleanup!)
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+14:17:15.958 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-concurrency-test
+
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+{:dir "/tmp/pocket-concurrency-test", :existed true}
+
+```
+:::
+
+
+
+::: {.sourceClojure}
+```clojure
+(pocket/reset-mem-cache-options!)
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+14:17:15.959 INFO scicloj.pocket - Mem-cache options reset to defaults: {:policy :lru, :threshold 256}
+14:17:15.959 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :lru, :threshold 256}
+
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+{:policy :lru, :threshold 256}
+
+```
+:::
+
+
+
+```{=html}
+<div style="background-color:grey;height:2px;width:100%;"></div>
+```
+
+
+
+```{=html}
+<div><pre><small><small>source: <a href="https://github.com/scicloj/pocket/blob/master/notebooks/pocket_book/concurrency.clj">notebooks/pocket_book/concurrency.clj</a></small></small></pre></div>
+```

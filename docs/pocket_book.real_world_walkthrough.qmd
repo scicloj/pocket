@@ -1,0 +1,821 @@
+---
+format:
+  html:
+    toc: true
+    toc-depth: 4
+    theme: [cosmo, notebooks/custom.scss]
+    toc-expand: 2
+    number-depth: 1
+
+---
+<style></style><style>.printedClojure .sourceCode {
+  background-color: transparent;
+  border-style: none;
+}
+</style><style>.clay-limit-image-width .clay-image {max-width: 100%}
+.clay-side-by-side .sourceCode {margin: 0}
+.clay-side-by-side {margin: 1em 0}
+</style>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js" type="text/javascript"></script><script src="https://code.jquery.com/ui/1.13.1/jquery-ui.min.js" type="text/javascript"></script><script src="https://cdn.jsdelivr.net/npm/mermaid@11.10.1/dist/mermaid.min.js" type="text/javascript"></script>
+
+# Real-World Walkthrough: Weather Analysis Pipeline
+
+
+## Overview
+
+This walkthrough demonstrates a realistic data pipeline with
+multiple stages and branching dependencies. We'll simulate
+a weather analysis workflow where raw sensor readings are
+cleaned, then fed into two independent analyses — one for
+temperature trends and one for rainfall totals. Both analyses
+share the same cleaned data, so Pocket caches it once and
+reuses it.
+
+This builds on the concepts from
+[Recursive Caching in Pipelines](pocket_book.recursive_caching_in_pipelines.html),
+adding branching dependencies where two analyses share a common
+upstream computation.
+
+The dependency graph: `fetch-readings` → `clean-data` →
+both `temperature-trends` and `rainfall-totals` → `summary`.
+
+
+```{=html}
+<div class="mermaid">flowchart TD
+    FR[fetch-readings] --> CD[clean-data]
+    CD --> TT[temperature-trends]
+    CD --> RT[rainfall-totals]
+    TT --> S[summary]
+    RT --> S</div>
+```
+
+
+
+## Setup
+
+
+::: {.sourceClojure}
+```clojure
+(ns pocket-book.real-world-walkthrough
+  (:require
+   ;; Logging setup for this chapter (see Logging chapter):
+   [pocket-book.logging]
+   ;; Pocket API:
+   [scicloj.pocket :as pocket]
+   ;; Annotating kinds of visualizations:
+   [scicloj.kindly.v4.kind :as kind]
+   ;; Filesystem utilities:
+   [babashka.fs :as fs]))
+```
+:::
+
+
+
+::: {.sourceClojure}
+```clojure
+(def cache-dir "/tmp/pocket-walkthrough")
+```
+:::
+
+
+
+::: {.sourceClojure}
+```clojure
+(pocket/set-base-cache-dir! cache-dir)
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+14:17:06.797 INFO scicloj.pocket - Cache dir set to: /tmp/pocket-walkthrough
+
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+"/tmp/pocket-walkthrough"
+
+```
+:::
+
+
+
+::: {.sourceClojure}
+```clojure
+(pocket/cleanup!)
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+14:17:06.798 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-walkthrough
+
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+{:dir "/tmp/pocket-walkthrough", :existed false}
+
+```
+:::
+
+
+
+## Pipeline functions
+
+Each function simulates real work with a short delay.
+Note that these are plain Clojure functions — they know
+nothing about caching.
+
+
+::: {.sourceClojure}
+```clojure
+(defn fetch-readings
+  "Simulate fetching raw sensor data for a city."
+  [opts]
+  (println "  Fetching readings for" (:city opts) "...")
+  (Thread/sleep 300)
+  {:city (:city opts)
+   :source (:source opts)
+   :readings (case (:city opts)
+               "Paris"
+               [{:day 1 :temp-c 15.0 :rain-mm 2.1}
+                {:day 2 :temp-c 17.3 :rain-mm 0.0}
+                {:day 3 :temp-c 14.6 :rain-mm 7.8}
+                {:day 4 :temp-c 18.1 :rain-mm 0.0}
+                {:day 5 :temp-c 13.9 :rain-mm 4.5}
+                {:day 6 :temp-c 16.7 :rain-mm 0.0}
+                {:day 7 :temp-c 19.2 :rain-mm 1.0}]
+               ;; default (London, etc.)
+               [{:day 1 :temp-c 18.2 :rain-mm 0.0}
+                {:day 2 :temp-c 21.5 :rain-mm 5.2}
+                {:day 3 :temp-c 19.8 :rain-mm 12.1}
+                {:day 4 :temp-c 22.0 :rain-mm 0.0}
+                {:day 5 :temp-c 16.3 :rain-mm 8.4}
+                {:day 6 :temp-c 20.1 :rain-mm 0.0}
+                {:day 7 :temp-c 23.7 :rain-mm 3.3}])})
+```
+:::
+
+
+
+::: {.sourceClojure}
+```clojure
+(defn clean-data
+  "Remove readings with missing values and round numbers."
+  [raw-data opts]
+  (println "  Cleaning data for" (:city raw-data) "with" opts "...")
+  (Thread/sleep 200)
+  (let [precision (:precision opts 10)]
+    (update raw-data :readings
+            (fn [rs]
+              (->> rs
+                   (filter #(and (:temp-c %) (:rain-mm %)))
+                   (mapv #(-> %
+                              (update :temp-c (fn [t] (Math/round (* t (double precision)))))
+                              (update :rain-mm (fn [r] (Math/round (* r (double precision))))))))))))
+```
+:::
+
+
+
+::: {.sourceClojure}
+```clojure
+(defn temperature-trends
+  "Compute temperature statistics from cleaned data."
+  [clean-data opts]
+  (println "  Analyzing temperature for" (:city clean-data) "...")
+  (Thread/sleep 300)
+  (let [temps (map :temp-c (:readings clean-data))
+        n (count temps)]
+    {:city (:city clean-data)
+     :unit (:unit opts)
+     :min-temp (apply min temps)
+     :max-temp (apply max temps)
+     :mean-temp (quot (reduce + temps) n)
+     :days n}))
+```
+:::
+
+
+
+::: {.sourceClojure}
+```clojure
+(defn rainfall-totals
+  "Compute rainfall statistics from cleaned data."
+  [clean-data opts]
+  (println "  Analyzing rainfall for" (:city clean-data) "...")
+  (Thread/sleep 300)
+  (let [rains (map :rain-mm (:readings clean-data))
+        rainy-days (count (filter pos? rains))]
+    {:city (:city clean-data)
+     :unit (:unit opts)
+     :total-rain (reduce + rains)
+     :rainy-days rainy-days
+     :dry-days (- (count rains) rainy-days)}))
+```
+:::
+
+
+
+::: {.sourceClojure}
+```clojure
+(defn summary
+  "Combine temperature and rainfall analyses into a report."
+  [temp-analysis rain-analysis]
+  (println "  Generating summary for" (:city temp-analysis) "...")
+  (Thread/sleep 200)
+  (merge temp-analysis rain-analysis
+         {:report (str (:city temp-analysis)
+                       ": temp range "
+                       (:min-temp temp-analysis) "–"
+                       (:max-temp temp-analysis)
+                       ", total rain "
+                       (:total-rain rain-analysis)
+                       " over " (:rainy-days rain-analysis) " days")}))
+```
+:::
+
+
+
+## First run: everything computes
+
+We build the pipeline using `cached`. Each call returns
+a `Cached` object that we pass directly to the next stage.
+Pocket derives cache keys from the computation graph, not
+from intermediate values.
+
+
+::: {.sourceClojure}
+```clojure
+(println "=== First run ===")
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+=== First run ===
+
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+nil
+
+```
+:::
+
+
+
+::: {.sourceClojure}
+```clojure
+(let [raw (pocket/cached #'fetch-readings {:city "London" :days 7 :source :api})
+      clean (pocket/cached #'clean-data raw {:precision 10 :remove-nulls true})
+      temps (pocket/cached #'temperature-trends clean {:unit :celsius})
+      rain (pocket/cached #'rainfall-totals clean {:unit :mm})
+      report (pocket/cached #'summary temps rain)]
+  (time (deref report)))
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+14:17:06.809 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.real-world-walkthrough/summary
+14:17:06.809 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.real-world-walkthrough/temperature-trends
+14:17:06.809 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.real-world-walkthrough/clean-data
+14:17:06.809 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.real-world-walkthrough/fetch-readings
+  Fetching readings for London ...
+14:17:07.111 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-walkthrough/.cache/1f/(pocket-book.real-world-walkthrough⁄fetch-readings {:city "London", :days 7, :source :api})
+  Cleaning data for London with {:precision 10, :remove-nulls true} ...
+14:17:07.314 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-walkthrough/.cache/97/(pocket-book.real-world-walkthrough⁄clean-data (pocket-book.real-world-walkthrough⁄fetch-readings {:city "London", :days 7, :source :api}) {:precision 10, :remove-nulls true})
+  Analyzing temperature for London ...
+14:17:07.616 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-walkthrough/.cache/ba/ba537d067887188386995083bdbfd1dcc84fdadb
+14:17:07.617 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.real-world-walkthrough/rainfall-totals
+  Analyzing rainfall for London ...
+14:17:07.919 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-walkthrough/.cache/24/(pocket-book.real-world-walkthrough⁄rainfall-totals (pocket-book.real-world-walkthrough⁄clean-data (pocket-book.real-world-walkthrough⁄fetch-readings {:city "London", :days 7, :source :api}) {:precision 10, :remove-nulls true}) {:unit :mm})
+  Generating summary for London ...
+14:17:08.121 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-walkthrough/.cache/6a/6a762a4c89e59ac4326e5ef8bff321cc817f397e
+"Elapsed time: 1312.376364 msecs"
+
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+{:report "London: temp range 163–237, total rain 290 over 4 days",
+ :max-temp 237,
+ :dry-days 3,
+ :unit :mm,
+ :city "London",
+ :days 7,
+ :total-rain 290,
+ :rainy-days 4,
+ :mean-temp 202,
+ :min-temp 163}
+
+```
+:::
+
+
+Every function ran. Notice the log messages showing cache misses,
+computations, and writes.
+
+
+## Second run: everything from cache
+
+Running the exact same pipeline again — nothing recomputes:
+
+
+::: {.sourceClojure}
+```clojure
+(println "\n=== Second run (fully cached) ===")
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+
+=== Second run (fully cached) ===
+
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+nil
+
+```
+:::
+
+
+
+::: {.sourceClojure}
+```clojure
+(let [raw (pocket/cached #'fetch-readings {:city "London" :days 7 :source :api})
+      clean (pocket/cached #'clean-data raw {:precision 10 :remove-nulls true})
+      temps (pocket/cached #'temperature-trends clean {:unit :celsius})
+      rain (pocket/cached #'rainfall-totals clean {:unit :mm})
+      report (pocket/cached #'summary temps rain)]
+  (time (deref report)))
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+"Elapsed time: 0.211046 msecs"
+
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+{:report "London: temp range 163–237, total rain 290 over 4 days",
+ :max-temp 237,
+ :dry-days 3,
+ :unit :mm,
+ :city "London",
+ :days 7,
+ :total-rain 290,
+ :rainy-days 4,
+ :mean-temp 202,
+ :min-temp 163}
+
+```
+:::
+
+
+No log output — served entirely from the in-memory cache.
+
+
+## Changing a downstream step
+
+Now suppose we want a different city. The entire pipeline
+recomputes because the root input changed:
+
+
+::: {.sourceClojure}
+```clojure
+(println "\n=== Different city ===")
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+
+=== Different city ===
+
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+nil
+
+```
+:::
+
+
+
+::: {.sourceClojure}
+```clojure
+(let [raw (pocket/cached #'fetch-readings {:city "Paris" :days 7 :source :api})
+      clean (pocket/cached #'clean-data raw {:precision 10 :remove-nulls true})
+      temps (pocket/cached #'temperature-trends clean {:unit :celsius})
+      rain (pocket/cached #'rainfall-totals clean {:unit :mm})
+      report (pocket/cached #'summary temps rain)]
+  (time (deref report)))
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+14:17:08.130 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.real-world-walkthrough/summary
+14:17:08.130 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.real-world-walkthrough/temperature-trends
+14:17:08.130 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.real-world-walkthrough/clean-data
+14:17:08.130 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.real-world-walkthrough/fetch-readings
+  Fetching readings for Paris ...
+14:17:08.432 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-walkthrough/.cache/43/(pocket-book.real-world-walkthrough⁄fetch-readings {:city "Paris", :days 7, :source :api})
+  Cleaning data for Paris with {:precision 10, :remove-nulls true} ...
+14:17:08.633 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-walkthrough/.cache/cc/(pocket-book.real-world-walkthrough⁄clean-data (pocket-book.real-world-walkthrough⁄fetch-readings {:city "Paris", :days 7, :source :api}) {:precision 10, :remove-nulls true})
+  Analyzing temperature for Paris ...
+14:17:08.934 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-walkthrough/.cache/2a/2a820dbc32606f9a2a1ffa074c3acf5784b48894
+14:17:08.935 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.real-world-walkthrough/rainfall-totals
+  Analyzing rainfall for Paris ...
+14:17:09.237 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-walkthrough/.cache/d7/(pocket-book.real-world-walkthrough⁄rainfall-totals (pocket-book.real-world-walkthrough⁄clean-data (pocket-book.real-world-walkthrough⁄fetch-readings {:city "Paris", :days 7, :source :api}) {:precision 10, :remove-nulls true}) {:unit :mm})
+  Generating summary for Paris ...
+14:17:09.440 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-walkthrough/.cache/93/9309825516de10ffc3376546f08c45afffa90056
+"Elapsed time: 1310.244807 msecs"
+
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+{:report "Paris: temp range 139–192, total rain 154 over 4 days",
+ :max-temp 192,
+ :dry-days 3,
+ :unit :mm,
+ :city "Paris",
+ :days 7,
+ :total-rain 154,
+ :rainy-days 4,
+ :mean-temp 164,
+ :min-temp 139}
+
+```
+:::
+
+
+But running it again is instant — Paris is now cached too:
+
+
+::: {.sourceClojure}
+```clojure
+(println "\n=== Paris again (cached) ===")
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+
+=== Paris again (cached) ===
+
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+nil
+
+```
+:::
+
+
+
+::: {.sourceClojure}
+```clojure
+(let [raw (pocket/cached #'fetch-readings {:city "Paris" :days 7 :source :api})
+      clean (pocket/cached #'clean-data raw {:precision 10 :remove-nulls true})
+      temps (pocket/cached #'temperature-trends clean {:unit :celsius})
+      rain (pocket/cached #'rainfall-totals clean {:unit :mm})
+      report (pocket/cached #'summary temps rain)]
+  (time (deref report)))
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+"Elapsed time: 0.224584 msecs"
+
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+{:report "Paris: temp range 139–192, total rain 154 over 4 days",
+ :max-temp 192,
+ :dry-days 3,
+ :unit :mm,
+ :city "Paris",
+ :days 7,
+ :total-rain 154,
+ :rainy-days 4,
+ :mean-temp 164,
+ :min-temp 139}
+
+```
+:::
+
+
+No log output — served entirely from the in-memory cache.
+
+
+## Inspecting the cache on disk
+
+Let's look at what Pocket stored. The cache directory
+is organized by a SHA-1 prefix, then a human-readable
+directory named after the function and arguments.
+
+
+### Cache entries
+
+
+::: {.sourceClojure}
+```clojure
+(pocket/cache-entries)
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+[{:path
+  "/tmp/pocket-walkthrough/.cache/1f/(pocket-book.real-world-walkthrough⁄fetch-readings {:city \"London\", :days 7, :source :api})",
+  :id
+  "(pocket-book.real-world-walkthrough/fetch-readings {:city \"London\", :days 7, :source :api})",
+  :fn-name "pocket-book.real-world-walkthrough/fetch-readings",
+  :args-str "[{:city \"London\", :days 7, :source :api}]",
+  :created-at "2026-02-06T12:17:07.110419353Z"}
+ {:path
+  "/tmp/pocket-walkthrough/.cache/d7/(pocket-book.real-world-walkthrough⁄rainfall-totals (pocket-book.real-world-walkthrough⁄clean-data (pocket-book.real-world-walkthrough⁄fetch-readings {:city \"Paris\", :days 7, :source :api}) {:precision 10, :remove-nulls true}) {:unit :mm})",
+  :id
+  "(pocket-book.real-world-walkthrough/rainfall-totals (pocket-book.real-world-walkthrough/clean-data (pocket-book.real-world-walkthrough/fetch-readings {:city \"Paris\", :days 7, :source :api}) {:precision 10, :remove-nulls true}) {:unit :mm})",
+  :fn-name "pocket-book.real-world-walkthrough/rainfall-totals",
+  :args-str
+  "[(pocket-book.real-world-walkthrough/clean-data (pocket-book.real-world-walkthrough/fetch-readings {:city \"Paris\", :days 7, :source :api}) {:precision 10, :remove-nulls true}) {:unit :mm}]",
+  :created-at "2026-02-06T12:17:09.236287208Z"}
+ {:path
+  "/tmp/pocket-walkthrough/.cache/24/(pocket-book.real-world-walkthrough⁄rainfall-totals (pocket-book.real-world-walkthrough⁄clean-data (pocket-book.real-world-walkthrough⁄fetch-readings {:city \"London\", :days 7, :source :api}) {:precision 10, :remove-nulls true}) {:unit :mm})",
+  :id
+  "(pocket-book.real-world-walkthrough/rainfall-totals (pocket-book.real-world-walkthrough/clean-data (pocket-book.real-world-walkthrough/fetch-readings {:city \"London\", :days 7, :source :api}) {:precision 10, :remove-nulls true}) {:unit :mm})",
+  :fn-name "pocket-book.real-world-walkthrough/rainfall-totals",
+  :args-str
+  "[(pocket-book.real-world-walkthrough/clean-data (pocket-book.real-world-walkthrough/fetch-readings {:city \"London\", :days 7, :source :api}) {:precision 10, :remove-nulls true}) {:unit :mm}]",
+  :created-at "2026-02-06T12:17:07.918131113Z"}
+ {:path
+  "/tmp/pocket-walkthrough/.cache/ba/ba537d067887188386995083bdbfd1dcc84fdadb",
+  :id
+  "(pocket-book.real-world-walkthrough/temperature-trends (pocket-book.real-world-walkthrough/clean-data (pocket-book.real-world-walkthrough/fetch-readings {:city \"London\", :days 7, :source :api}) {:precision 10, :remove-nulls true}) {:unit :celsius})",
+  :fn-name "pocket-book.real-world-walkthrough/temperature-trends",
+  :args-str
+  "[(pocket-book.real-world-walkthrough/clean-data (pocket-book.real-world-walkthrough/fetch-readings {:city \"London\", :days 7, :source :api}) {:precision 10, :remove-nulls true}) {:unit :celsius}]",
+  :created-at "2026-02-06T12:17:07.615471617Z"}
+ {:path
+  "/tmp/pocket-walkthrough/.cache/2a/2a820dbc32606f9a2a1ffa074c3acf5784b48894",
+  :id
+  "(pocket-book.real-world-walkthrough/temperature-trends (pocket-book.real-world-walkthrough/clean-data (pocket-book.real-world-walkthrough/fetch-readings {:city \"Paris\", :days 7, :source :api}) {:precision 10, :remove-nulls true}) {:unit :celsius})",
+  :fn-name "pocket-book.real-world-walkthrough/temperature-trends",
+  :args-str
+  "[(pocket-book.real-world-walkthrough/clean-data (pocket-book.real-world-walkthrough/fetch-readings {:city \"Paris\", :days 7, :source :api}) {:precision 10, :remove-nulls true}) {:unit :celsius}]",
+  :created-at "2026-02-06T12:17:08.933819074Z"}
+ {:path
+  "/tmp/pocket-walkthrough/.cache/6a/6a762a4c89e59ac4326e5ef8bff321cc817f397e",
+  :id
+  "(pocket-book.real-world-walkthrough/summary (pocket-book.real-world-walkthrough/temperature-trends (pocket-book.real-world-walkthrough/clean-data (pocket-book.real-world-walkthrough/fetch-readings {:city \"London\", :days 7, :source :api}) {:precision 10, :remove-nulls true}) {:unit :celsius}) (pocket-book.real-world-walkthrough/rainfall-totals (pocket-book.real-world-walkthrough/clean-data (pocket-book.real-world-walkthrough/fetch-readings {:city \"London\", :days 7, :source :api}) {:precision 10, :remove-nulls true}) {:unit :mm}))",
+  :fn-name "pocket-book.real-world-walkthrough/summary",
+  :args-str
+  "[(pocket-book.real-world-walkthrough/temperature-trends (pocket-book.real-world-walkthrough/clean-data (pocket-book.real-world-walkthrough/fetch-readings {:city \"London\", :days 7, :source :api}) {:precision 10, :remove-nulls true}) {:unit :celsius}) (pocket-book.real-world-walkthrough/rainfall-totals (pocket-book.real-world-walkthrough/clean-data (pocket-book.real-world-walkthrough/fetch-readings {:city \"London\", :days 7, :source :api}) {:precision 10, :remove-nulls true}) {:unit :mm})]",
+  :created-at "2026-02-06T12:17:08.120611266Z"}
+ {:path
+  "/tmp/pocket-walkthrough/.cache/93/9309825516de10ffc3376546f08c45afffa90056",
+  :id
+  "(pocket-book.real-world-walkthrough/summary (pocket-book.real-world-walkthrough/temperature-trends (pocket-book.real-world-walkthrough/clean-data (pocket-book.real-world-walkthrough/fetch-readings {:city \"Paris\", :days 7, :source :api}) {:precision 10, :remove-nulls true}) {:unit :celsius}) (pocket-book.real-world-walkthrough/rainfall-totals (pocket-book.real-world-walkthrough/clean-data (pocket-book.real-world-walkthrough/fetch-readings {:city \"Paris\", :days 7, :source :api}) {:precision 10, :remove-nulls true}) {:unit :mm}))",
+  :fn-name "pocket-book.real-world-walkthrough/summary",
+  :args-str
+  "[(pocket-book.real-world-walkthrough/temperature-trends (pocket-book.real-world-walkthrough/clean-data (pocket-book.real-world-walkthrough/fetch-readings {:city \"Paris\", :days 7, :source :api}) {:precision 10, :remove-nulls true}) {:unit :celsius}) (pocket-book.real-world-walkthrough/rainfall-totals (pocket-book.real-world-walkthrough/clean-data (pocket-book.real-world-walkthrough/fetch-readings {:city \"Paris\", :days 7, :source :api}) {:precision 10, :remove-nulls true}) {:unit :mm})]",
+  :created-at "2026-02-06T12:17:09.438401666Z"}
+ {:path
+  "/tmp/pocket-walkthrough/.cache/43/(pocket-book.real-world-walkthrough⁄fetch-readings {:city \"Paris\", :days 7, :source :api})",
+  :id
+  "(pocket-book.real-world-walkthrough/fetch-readings {:city \"Paris\", :days 7, :source :api})",
+  :fn-name "pocket-book.real-world-walkthrough/fetch-readings",
+  :args-str "[{:city \"Paris\", :days 7, :source :api}]",
+  :created-at "2026-02-06T12:17:08.431181242Z"}
+ {:path
+  "/tmp/pocket-walkthrough/.cache/cc/(pocket-book.real-world-walkthrough⁄clean-data (pocket-book.real-world-walkthrough⁄fetch-readings {:city \"Paris\", :days 7, :source :api}) {:precision 10, :remove-nulls true})",
+  :id
+  "(pocket-book.real-world-walkthrough/clean-data (pocket-book.real-world-walkthrough/fetch-readings {:city \"Paris\", :days 7, :source :api}) {:precision 10, :remove-nulls true})",
+  :fn-name "pocket-book.real-world-walkthrough/clean-data",
+  :args-str
+  "[(pocket-book.real-world-walkthrough/fetch-readings {:city \"Paris\", :days 7, :source :api}) {:precision 10, :remove-nulls true}]",
+  :created-at "2026-02-06T12:17:08.632550280Z"}
+ {:path
+  "/tmp/pocket-walkthrough/.cache/97/(pocket-book.real-world-walkthrough⁄clean-data (pocket-book.real-world-walkthrough⁄fetch-readings {:city \"London\", :days 7, :source :api}) {:precision 10, :remove-nulls true})",
+  :id
+  "(pocket-book.real-world-walkthrough/clean-data (pocket-book.real-world-walkthrough/fetch-readings {:city \"London\", :days 7, :source :api}) {:precision 10, :remove-nulls true})",
+  :fn-name "pocket-book.real-world-walkthrough/clean-data",
+  :args-str
+  "[(pocket-book.real-world-walkthrough/fetch-readings {:city \"London\", :days 7, :source :api}) {:precision 10, :remove-nulls true}]",
+  :created-at "2026-02-06T12:17:07.313148335Z"}]
+
+```
+:::
+
+
+
+### Cache statistics
+
+
+::: {.sourceClojure}
+```clojure
+(pocket/cache-stats)
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+{:total-entries 10,
+ :total-size-bytes 16707,
+ :entries-per-fn
+ {"pocket-book.real-world-walkthrough/fetch-readings" 2,
+  "pocket-book.real-world-walkthrough/rainfall-totals" 2,
+  "pocket-book.real-world-walkthrough/temperature-trends" 2,
+  "pocket-book.real-world-walkthrough/summary" 2,
+  "pocket-book.real-world-walkthrough/clean-data" 2}}
+
+```
+:::
+
+
+
+### Directory tree
+
+Each entry contains either a `value.nippy` file (serialized value)
+or a `nil` marker, plus a `meta.edn` with metadata.
+Here is the actual cache directory tree, generated dynamically:
+
+
+::: {.sourceClojure}
+```clojure
+(kind/code (pocket/dir-tree))
+```
+:::
+
+
+
+::: {.sourceClojure}
+```clojure
+.cache
+├── 1f
+│   └── (pocket-book.real-world-walkthrough⁄fetch-readings {:city "London", :days 7, :source :api})
+│       ├── meta.edn
+│       └── value.nippy
+├── 24
+│   └── (pocket-book.real-world-walkthrough⁄rainfall-totals (pocket-book.real-world-walkthrough⁄clean-data (pocket-book.real-world-walkthrough⁄fetch-readings {:city "London", :days 7, :source :api}) {:precision 10, :remove-nulls true}) {:unit :mm})
+│       ├── meta.edn
+│       └── value.nippy
+├── 2a
+│   └── 2a820dbc32606f9a2a1ffa074c3acf5784b48894
+│       ├── meta.edn
+│       └── value.nippy
+├── 43
+│   └── (pocket-book.real-world-walkthrough⁄fetch-readings {:city "Paris", :days 7, :source :api})
+│       ├── meta.edn
+│       └── value.nippy
+├── 6a
+│   └── 6a762a4c89e59ac4326e5ef8bff321cc817f397e
+│       ├── meta.edn
+│       └── value.nippy
+├── 93
+│   └── 9309825516de10ffc3376546f08c45afffa90056
+│       ├── meta.edn
+│       └── value.nippy
+├── 97
+│   └── (pocket-book.real-world-walkthrough⁄clean-data (pocket-book.real-world-walkthrough⁄fetch-readings {:city "London", :days 7, :source :api}) {:precision 10, :remove-nulls true})
+│       ├── meta.edn
+│       └── value.nippy
+├── ba
+│   └── ba537d067887188386995083bdbfd1dcc84fdadb
+│       ├── meta.edn
+│       └── value.nippy
+├── cc
+│   └── (pocket-book.real-world-walkthrough⁄clean-data (pocket-book.real-world-walkthrough⁄fetch-readings {:city "Paris", :days 7, :source :api}) {:precision 10, :remove-nulls true})
+│       ├── meta.edn
+│       └── value.nippy
+└── d7
+    └── (pocket-book.real-world-walkthrough⁄rainfall-totals (pocket-book.real-world-walkthrough⁄clean-data (pocket-book.real-world-walkthrough⁄fetch-readings {:city "Paris", :days 7, :source :api}) {:precision 10, :remove-nulls true}) {:unit :mm})
+        ├── meta.edn
+        └── value.nippy
+
+```
+:::
+
+
+
+## Cleanup
+
+Remove all cached data:
+
+
+::: {.sourceClojure}
+```clojure
+(pocket/cleanup!)
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+14:17:09.458 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-walkthrough
+
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+{:dir "/tmp/pocket-walkthrough", :existed true}
+
+```
+:::
+
+
+
+```{=html}
+<div style="background-color:grey;height:2px;width:100%;"></div>
+```
+
+
+
+```{=html}
+<div><pre><small><small>source: <a href="https://github.com/scicloj/pocket/blob/master/notebooks/pocket_book/real_world_walkthrough.clj">notebooks/pocket_book/real_world_walkthrough.clj</a></small></small></pre></div>
+```

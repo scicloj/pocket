@@ -1,0 +1,476 @@
+---
+format:
+  html:
+    toc: true
+    toc-depth: 4
+    theme: [cosmo, notebooks/custom.scss]
+    toc-expand: 2
+    number-depth: 1
+
+---
+<style></style><style>.printedClojure .sourceCode {
+  background-color: transparent;
+  border-style: none;
+}
+</style><style>.clay-limit-image-width .clay-image {max-width: 100%}
+.clay-side-by-side .sourceCode {margin: 0}
+.clay-side-by-side {margin: 1em 0}
+</style>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js" type="text/javascript"></script><script src="https://code.jquery.com/ui/1.13.1/jquery-ui.min.js" type="text/javascript"></script>
+
+# Getting Started
+
+[Pocket](https://github.com/scicloj/pocket) is a Clojure library for
+filesystem-based caching of expensive computations. It persists results
+to disk so they survive JVM restarts. Cache keys are derived from the
+function identity and its arguments, so the same computation always
+maps to the same cache entry.
+
+
+## Setup
+
+
+::: {.sourceClojure}
+```clojure
+(ns pocket-book.getting-started
+  (:require
+   ;; Pocket API:
+   [scicloj.pocket :as pocket]
+   ;; Annotating kinds of visualizations:
+   [scicloj.kindly.v4.kind :as kind]
+   ;; Logging setup for this chapter (see Logging chapter):
+   [pocket-book.logging]))
+```
+:::
+
+
+First, we set up a cache directory and define an expensive computation:
+
+
+::: {.sourceClojure}
+```clojure
+(def cache-dir "/tmp/pocket-demo")
+```
+:::
+
+
+
+::: {.sourceClojure}
+```clojure
+(pocket/set-base-cache-dir! cache-dir)
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+14:17:03.442 INFO scicloj.pocket - Cache dir set to: /tmp/pocket-demo
+
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+"/tmp/pocket-demo"
+
+```
+:::
+
+
+Start fresh so the examples below run from a clean slate:
+
+
+::: {.sourceClojure}
+```clojure
+(pocket/cleanup!)
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+14:17:03.443 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo
+
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+{:dir "/tmp/pocket-demo", :existed false}
+
+```
+:::
+
+
+
+::: {.sourceClojure}
+```clojure
+(defn expensive-calculation
+  "Simulates an expensive computation"
+  [x y]
+  (println (str "Computing " x " + " y " (this is expensive!)"))
+  (Thread/sleep 400)
+  (+ x y))
+```
+:::
+
+
+
+## Background: deref in Clojure
+
+In Clojure, [`deref`](https://clojure.org/reference/concurrency#deref)
+extracts a value from a reference type. It can be written as `(deref x)`
+or with the shorthand reader macro `@x` — both are equivalent.
+Pocket's `cached` returns a `Cached` object that implements `IDeref`,
+so you use `@` (or `deref`) to trigger the computation and retrieve
+the result.
+
+
+## Creating a cached computation
+
+`cached` creates a [lazy](https://en.wikipedia.org/wiki/Lazy_evaluation) cached computation.
+It returns a `Cached` object — the computation won't run until we deref it:
+
+
+::: {.sourceClojure}
+```clojure
+(def cached-result
+  (pocket/cached #'expensive-calculation 10 20))
+```
+:::
+
+
+
+::: {.sourceClojure}
+```clojure
+(type cached-result)
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+scicloj.pocket.impl.cache.Cached
+
+```
+:::
+
+
+First deref (computes and caches):
+
+
+::: {.sourceClojure}
+```clojure
+(time @cached-result)
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+14:17:03.447 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.getting-started/expensive-calculation
+Computing 10 + 20 (this is expensive!)
+14:17:03.849 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo/.cache/6b/(pocket-book.getting-started⁄expensive-calculation 10 20)
+"Elapsed time: 402.136377 msecs"
+
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+30
+
+```
+:::
+
+
+Second deref (loaded from cache, instant):
+
+
+::: {.sourceClojure}
+```clojure
+(time @cached-result)
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+"Elapsed time: 0.222963 msecs"
+
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+30
+
+```
+:::
+
+
+
+## Wrapping functions with `caching-fn`
+
+For convenience, `caching-fn` wraps a function so that every call
+returns a `Cached` object:
+
+
+::: {.sourceClojure}
+```clojure
+(def cached-expensive
+  (pocket/caching-fn #'expensive-calculation))
+```
+:::
+
+
+First call:
+
+
+::: {.sourceClojure}
+```clojure
+(time @(cached-expensive 5 15))
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+14:17:03.856 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.getting-started/expensive-calculation
+Computing 5 + 15 (this is expensive!)
+14:17:04.258 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo/.cache/93/(pocket-book.getting-started⁄expensive-calculation 5 15)
+"Elapsed time: 403.084603 msecs"
+
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+20
+
+```
+:::
+
+
+Same args — cache hit:
+
+
+::: {.sourceClojure}
+```clojure
+(time @(cached-expensive 5 15))
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+"Elapsed time: 0.410441 msecs"
+
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+20
+
+```
+:::
+
+
+Different args — new computation:
+
+
+::: {.sourceClojure}
+```clojure
+(time @(cached-expensive 7 8))
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+14:17:04.264 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.getting-started/expensive-calculation
+Computing 7 + 8 (this is expensive!)
+14:17:04.665 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo/.cache/d9/(pocket-book.getting-started⁄expensive-calculation 7 8)
+"Elapsed time: 401.993282 msecs"
+
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+15
+
+```
+:::
+
+
+
+## Nil handling
+
+Pocket properly handles `nil` values. Since the cache uses files on disk,
+it needs to distinguish "never computed" from "computed and got `nil`".
+It does this with a special marker file:
+
+
+::: {.sourceClojure}
+```clojure
+(defn returns-nil [] nil)
+```
+:::
+
+
+
+::: {.sourceClojure}
+```clojure
+(def nil-result (pocket/cached #'returns-nil))
+```
+:::
+
+
+Cached nil value:
+
+
+::: {.sourceClojure}
+```clojure
+(deref nil-result)
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+14:17:04.668 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.getting-started/returns-nil
+14:17:04.669 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo/.cache/f5/(pocket-book.getting-started⁄returns-nil)
+
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+nil
+
+```
+:::
+
+
+Loading nil from cache:
+
+
+::: {.sourceClojure}
+```clojure
+(deref nil-result)
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+nil
+
+```
+:::
+
+
+
+## Important: use vars for functions
+
+Always pass functions as **vars** (`#'fn-name`), not as bare function
+objects. Vars have stable names that produce consistent cache keys
+across sessions. Pocket throws an error if you forget:
+
+```clojure
+;; ✅ (pocket/cached #'my-function args)
+;; ❌ (pocket/cached my-function args)
+```
+
+See the [Usage Practices](pocket_book.usage_practices.html) chapter
+for a detailed explanation and more best practices.
+
+
+## Next steps
+
+
+- [Configuration](pocket_book.configuration.html) — cache directory,
+  in-memory eviction policies, `pocket.edn`
+
+- [Recursive Caching in Pipelines](pocket_book.recursive_caching_in_pipelines.html) —
+  chaining cached computations
+
+- [Usage Practices](pocket_book.usage_practices.html) — invalidation
+  strategies, testing, serialization, and more
+
+
+## Cleanup
+
+
+::: {.sourceClojure}
+```clojure
+(pocket/cleanup!)
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+14:17:04.673 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo
+
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+{:dir "/tmp/pocket-demo", :existed true}
+
+```
+:::
+
+
+
+```{=html}
+<div style="background-color:grey;height:2px;width:100%;"></div>
+```
+
+
+
+```{=html}
+<div><pre><small><small>source: <a href="https://github.com/scicloj/pocket/blob/master/notebooks/pocket_book/getting_started.clj">notebooks/pocket_book/getting_started.clj</a></small></small></pre></div>
+```

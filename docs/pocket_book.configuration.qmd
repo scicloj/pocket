@@ -1,0 +1,719 @@
+---
+format:
+  html:
+    toc: true
+    toc-depth: 4
+    theme: [cosmo, notebooks/custom.scss]
+    toc-expand: 2
+    number-depth: 1
+
+---
+<style></style><style>.printedClojure .sourceCode {
+  background-color: transparent;
+  border-style: none;
+}
+</style><style>.clay-limit-image-width .clay-image {max-width: 100%}
+.clay-side-by-side .sourceCode {margin: 0}
+.clay-side-by-side {margin: 1em 0}
+</style>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js" type="text/javascript"></script><script src="https://code.jquery.com/ui/1.13.1/jquery-ui.min.js" type="text/javascript"></script><script src="https://cdn.jsdelivr.net/npm/mermaid@11.10.1/dist/mermaid.min.js" type="text/javascript"></script>
+
+# Configuration
+
+
+::: {.sourceClojure}
+```clojure
+(ns pocket-book.configuration
+  (:require
+   ;; Logging setup for this chapter (see Logging chapter):
+   [pocket-book.logging]
+   ;; Pocket API:
+   [scicloj.pocket :as pocket]
+   ;; Annotating kinds of visualizations:
+   [scicloj.kindly.v4.kind :as kind]))
+```
+:::
+
+
+
+## Setup
+Pocket resolves configuration using a precedence chain
+(for both cache directory and in-memory cache options),
+from highest to lowest priority:
+
+1. `binding` (thread-local override)
+2. `set-*!` functions (`set-base-cache-dir!`, `set-mem-cache-options!`)
+3. Environment variable (`POCKET_BASE_CACHE_DIR`, `POCKET_MEM_CACHE`)
+4. `pocket.edn` on classpath
+5. Library defaults (`pocket-defaults.edn`)
+
+
+```{=html}
+<div class="mermaid">flowchart TD
+    B(binding) -->|if nil| S(set-*!)
+    S -->|if nil| E(Environment variable)
+    E -->|if nil| P(pocket.edn)
+    P -->|if nil| D(Hardcoded default)
+    style B fill:#4a9,color:#fff
+    style D fill:#888,color:#fff</div>
+```
+
+
+
+## `pocket.edn`
+
+Place a `pocket.edn` file on your classpath root for declarative,
+project-level configuration:
+
+```edn
+{:base-cache-dir "/tmp/my-project-cache"
+ :mem-cache {:policy :lru :threshold 256}}
+```
+
+It is re-read on each cache operation (with a 1-second TTL cache),
+so changes take effect quickly during REPL development.
+It provides defaults that can be
+overridden by environment variables, `set-*!` calls, or `binding`.
+
+
+## Library defaults
+
+Pocket ships with `pocket-defaults.edn` containing the library defaults.
+These are used when no other configuration is provided:
+
+
+::: {.sourceClojure}
+```clojure
+(-> (clojure.java.io/resource "pocket-defaults.edn")
+    slurp
+    clojure.edn/read-string)
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+{:base-cache-dir ".cache/pocket",
+ :mem-cache {:policy :lru, :threshold 256},
+ :storage :mem+disk,
+ :filename-length-limit 240}
+
+```
+:::
+
+
+You can override any of these via `pocket.edn`, environment variables,
+or the `set-*!` functions.
+
+
+
+## Cache directory
+
+The cache directory can be set in several ways.
+
+**Environment variable** — `POCKET_BASE_CACHE_DIR`:
+
+```bash
+export POCKET_BASE_CACHE_DIR=/path/to/cache
+```
+
+**Programmatically** with `set-base-cache-dir!`:
+
+
+::: {.sourceClojure}
+```clojure
+(pocket/set-base-cache-dir! "/tmp/pocket-demo-config")
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+14:17:04.702 INFO scicloj.pocket - Cache dir set to: /tmp/pocket-demo-config
+
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+"/tmp/pocket-demo-config"
+
+```
+:::
+
+
+
+::: {.sourceClojure}
+```clojure
+(pocket/cleanup!)
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+14:17:04.703 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo-config
+
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+{:dir "/tmp/pocket-demo-config", :existed false}
+
+```
+:::
+
+
+You can inspect the effective resolved configuration at any time:
+
+
+::: {.sourceClojure}
+```clojure
+(pocket/config)
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+{:base-cache-dir "/tmp/pocket-demo-config",
+ :mem-cache {:policy :lru, :threshold 256},
+ :storage :mem+disk,
+ :filename-length-limit 240}
+
+```
+:::
+
+
+**Thread-local binding** (useful for tests):
+
+```clojure
+(binding [pocket/*base-cache-dir* "/tmp/test-cache"]
+  @(pocket/cached #'my-fn args))
+```
+
+
+## In-memory cache and thread safety
+
+Pocket maintains an in-memory cache in front of the disk layer,
+backed by [core.cache](https://github.com/clojure/core.cache).
+
+
+```{=html}
+<div class="mermaid">flowchart LR
+    D(deref) --> MC{In-memory
+cache?}
+    MC -->|hit| R[Return value]
+    MC -->|miss| DC{Disk
+cache?}
+    DC -->|hit| R
+    DC -->|miss| C[Compute] --> W[Write to disk] --> R</div>
+```
+
+
+This provides two benefits:
+
+1. **Performance** — repeated derefs of the same computation skip disk I/O entirely
+   (until the entry is evicted from memory).
+2. **[Thread safety](https://en.wikipedia.org/wiki/Thread_safety)** — when multiple
+   threads deref the same `Cached` value concurrently, the computation runs exactly once.
+   This is coordinated via a [`ConcurrentHashMap`](https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/ConcurrentHashMap.html)
+   of [delays](https://clojure.org/reference/concurrency#delay), so no duplicate work is performed.
+   See the [Concurrency chapter](pocket_book.concurrency.html) for a detailed explanation.
+
+By default, the in-memory layer uses an **[LRU](https://en.wikipedia.org/wiki/Cache_replacement_policies#LRU)**
+(Least Recently Used) policy — see defaults above.
+
+
+## Cache policies
+
+Supported policies and their parameters:
+
+| Policy | Key | Parameters |
+|--------|---------|-----------|
+| [LRU](https://en.wikipedia.org/wiki/Cache_replacement_policies#LRU) (Least Recently Used) | `:lru` | `:threshold` (see defaults above) |
+| [FIFO](https://en.wikipedia.org/wiki/Cache_replacement_policies#FIFO) (First In First Out) | `:fifo` | `:threshold` (see defaults above) |
+| [LFU](https://en.wikipedia.org/wiki/Least_frequently_used) (Least Frequently Used) | `:lu` | `:threshold` (see defaults above) |
+| [TTL](https://en.wikipedia.org/wiki/Time_to_live) (Time To Live) | `:ttl` | `:ttl` in ms (see defaults above) |
+| [LIRS](https://en.wikipedia.org/wiki/LIRS_caching_algorithm) | `:lirs` | `:s-history-limit`, `:q-history-limit` |
+| [Soft references](https://docs.oracle.com/javase/8/docs/api/java/lang/ref/SoftReference.html) | `:soft` | (none — uses JVM garbage collection) |
+| Basic (unbounded) | `:basic` | (none) |
+
+Configure via `set-mem-cache-options!`:
+
+
+::: {.sourceClojure}
+```clojure
+(pocket/set-mem-cache-options! {:policy :fifo :threshold 100})
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+14:17:04.706 INFO scicloj.pocket - Mem-cache options set: {:policy :fifo, :threshold 100}
+14:17:04.706 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :fifo, :threshold 100}
+
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+{:policy :fifo, :threshold 100}
+
+```
+:::
+
+
+Or a TTL policy where entries expire after 60 seconds:
+
+
+::: {.sourceClojure}
+```clojure
+(pocket/set-mem-cache-options! {:policy :ttl :ttl 60000})
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+14:17:04.707 INFO scicloj.pocket - Mem-cache options set: {:policy :ttl, :ttl 60000}
+14:17:04.708 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :ttl, :ttl 60000}
+
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+{:policy :ttl, :ttl 60000}
+
+```
+:::
+
+
+Reset to the default LRU policy:
+
+
+::: {.sourceClojure}
+```clojure
+(pocket/set-mem-cache-options! {:policy :lru :threshold 256})
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+14:17:04.708 INFO scicloj.pocket - Mem-cache options set: {:policy :lru, :threshold 256}
+14:17:04.708 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :lru, :threshold 256}
+
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+{:policy :lru, :threshold 256}
+
+```
+:::
+
+
+**Environment variable** — `POCKET_MEM_CACHE` (EDN string):
+
+```bash
+export POCKET_MEM_CACHE='{:policy :lru :threshold 512}'
+```
+
+**Thread-local binding** (useful for tests):
+
+```clojure
+(binding [pocket/*mem-cache-options* {:policy :fifo :threshold 50}]
+  @(pocket/cached #'my-fn args))
+```
+
+**Caution**: binding `*mem-cache-options*` reconfigures the shared global
+mem-cache, which affects all threads. This is useful for test fixtures
+but should be avoided in concurrent production use with different policies.
+
+
+## Storage policies
+
+Pocket supports three storage modes, controlled by `*storage*`:
+
+| Mode | Behavior |
+|------|----------|
+| `:mem+disk` | In-memory cache backed by disk persistence (default) |
+| `:mem` | In-memory cache only — no disk I/O |
+| `:none` | No shared cache — instance-local memoization only |
+
+`:mem` is useful for cheap computations that are called many times
+with the same arguments. It avoids disk serialization overhead while
+still deduplicating concurrent access.
+
+`:none` is useful for trivially cheap functions that you want to
+participate in DAG identity tracking (see
+[Recursive Caching in Pipelines](pocket_book.recursive_caching_in_pipelines.html))
+without any shared caching. Each `Cached` instance memoizes its own
+result (like a `delay`), but separate instances recompute.
+
+**Programmatically** with `set-storage!`:
+
+
+::: {.sourceClojure}
+```clojure
+(pocket/set-storage! :mem)
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+14:17:04.709 INFO scicloj.pocket - Storage policy set to: :mem
+
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+:mem
+
+```
+:::
+
+
+
+::: {.sourceClojure}
+```clojure
+(pocket/config)
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+{:base-cache-dir "/tmp/pocket-demo-config",
+ :mem-cache {:policy :lru, :threshold 256},
+ :storage :mem,
+ :filename-length-limit 240}
+
+```
+:::
+
+
+**Per-function** via `caching-fn` options:
+
+```clojure
+(def fast-fn* (pocket/caching-fn #'fast-fn {:storage :mem}))
+(def identity-fn* (pocket/caching-fn #'identity-fn {:storage :none}))
+```
+
+The option map can also override `:cache-dir` and `:mem-cache`:
+
+```clojure
+(pocket/caching-fn #'f {:storage :mem+disk
+                        :cache-dir "/data/project-cache"
+                        :mem-cache {:policy :ttl :ttl 60000}})
+```
+
+**Thread-local binding**:
+
+```clojure
+(binding [pocket/*storage* :mem]
+  @(pocket/cached #'my-fn args))
+```
+
+**Environment variable** — `POCKET_STORAGE`:
+
+```bash
+export POCKET_STORAGE=mem
+```
+
+**Note**: `:mem`-only entries do not appear in `cache-entries` or
+`cache-stats`, which scan the disk cache. `:none` entries are not
+tracked anywhere — they exist only as in-memory `Cached` objects.
+
+Reset to default:
+
+
+::: {.sourceClojure}
+```clojure
+(pocket/set-storage! nil)
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+14:17:04.711 INFO scicloj.pocket - Storage policy set to: nil
+
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+nil
+
+```
+:::
+
+
+
+## Filename length limit (Windows)
+
+Most operating systems have a **255-character filename limit**, which
+Pocket handles with its default threshold of 240. However, Windows has
+a **260-character full path limit** (unless long path support is enabled).
+If your base cache directory is deep, the combined path may exceed this.
+
+When a cache key exceeds the configured limit, Pocket falls back to
+a SHA-1 hash as the directory name. The default (240) is safe for
+Linux and macOS, but Windows users with deep base directories may
+need to lower it.
+
+**Configure in `pocket.edn`:**
+
+```clojure
+{:filename-length-limit 80}  ; for Windows with deep paths
+```
+
+**Or at runtime:**
+
+
+::: {.sourceClojure}
+```clojure
+(pocket/set-filename-length-limit! 80)
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+14:17:04.713 INFO scicloj.pocket - Filename length limit set to: 80
+
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+80
+
+```
+:::
+
+
+**Or via environment variable:**
+
+```bash
+export POCKET_FILENAME_LENGTH_LIMIT=80
+```
+
+The current limit is included in `config`:
+
+
+::: {.sourceClojure}
+```clojure
+(:filename-length-limit (pocket/config))
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+80
+
+```
+:::
+
+
+Reset to default (240):
+
+
+::: {.sourceClojure}
+```clojure
+(pocket/set-filename-length-limit! nil)
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+14:17:04.714 INFO scicloj.pocket - Filename length limit set to: nil
+
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+nil
+
+```
+:::
+
+
+
+## Per-function configuration with `caching-fn`
+
+The `caching-fn` wrapper accepts an optional options map. When provided,
+the wrapper binds the corresponding dynamic vars before calling `cached`.
+This is equivalent to wrapping the call in `binding` yourself:
+
+```clojure
+;; These two are equivalent:
+(def c-fn (pocket/caching-fn #'my-fn {:storage :mem}))
+
+(defn c-fn [& args]
+  (binding [pocket/*storage* :mem]
+    (apply pocket/cached #'my-fn args)))
+```
+
+
+### Available options
+
+| Option | Binds |
+|--------|-------|
+| `:storage` | `*storage*` |
+| `:cache-dir` | `*base-cache-dir*` |
+| `:mem-cache` | `*mem-cache-options*` |
+| `:filename-length-limit` | `*filename-length-limit*` |
+
+
+### Example: Mixed storage policies
+
+A data science pipeline might use different storage for different steps:
+
+
+::: {.sourceClojure}
+```clojure
+(defn load-data [path] (slurp path))
+```
+:::
+
+
+
+::: {.sourceClojure}
+```clojure
+(defn compute-stats [data] {:lines (count (clojure.string/split-lines data))})
+```
+:::
+
+
+
+::: {.sourceClojure}
+```clojure
+(defn train-model [data stats] {:model "trained" :stats stats})
+```
+:::
+
+
+Expensive data loading — default (disk + memory):
+
+
+::: {.sourceClojure}
+```clojure
+(def c-load (pocket/caching-fn #'load-data))
+```
+:::
+
+
+Cheap stats — memory only, no disk I/O:
+
+
+::: {.sourceClojure}
+```clojure
+(def c-stats (pocket/caching-fn #'compute-stats {:storage :mem}))
+```
+:::
+
+
+Expensive training — shorter filenames for Windows compatibility:
+
+
+::: {.sourceClojure}
+```clojure
+(def c-train (pocket/caching-fn #'train-model {:filename-length-limit 80}))
+```
+:::
+
+
+
+## Cleanup
+
+To delete all cached values (both disk and in-memory), use `cleanup!`:
+
+
+::: {.sourceClojure}
+```clojure
+(pocket/cleanup!)
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+14:17:04.717 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo-config
+
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+{:dir "/tmp/pocket-demo-config", :existed false}
+
+```
+:::
+
+
+
+```{=html}
+<div style="background-color:grey;height:2px;width:100%;"></div>
+```
+
+
+
+```{=html}
+<div><pre><small><small>source: <a href="https://github.com/scicloj/pocket/blob/master/notebooks/pocket_book/configuration.clj">notebooks/pocket_book/configuration.clj</a></small></small></pre></div>
+```
