@@ -170,7 +170,7 @@
 
 ;; No log output — served entirely from the in-memory cache.
 
-;; ## Changing a downstream step
+;; ## Changing an upstream input
 
 ;; Now suppose we want a different city. The entire pipeline
 ;; recomputes because the root input changed:
@@ -219,7 +219,13 @@
 ;;
 ;; Each entry contains either a `value.nippy` file (serialized value)
 ;; or a `nil` marker, plus a `meta.edn` with metadata.
-;; Here is the actual cache directory tree, generated dynamically:
+;; Here is the actual cache directory tree, generated dynamically.
+;;
+;; Notice that some entries use human-readable directory names while
+;; others fall back to SHA-1 hashes — this happens when the cache key
+;; (which includes the full upstream computation chain) exceeds 240
+;; characters. The `meta.edn` inside each entry always contains the
+;; full details.
 
 (pocket/dir-tree)
 

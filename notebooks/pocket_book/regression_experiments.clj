@@ -22,12 +22,14 @@
 ;; - Part 4: DAG workflows — when preprocessing steps share dependencies
 ;; - Part 5: Hyperparameter sweeps — comparing many experiments at once
 ;;
-;; **Prerequisites**: This notebook uses libraries from the `:dev` alias:
+;; **Note**: This notebook uses
 ;; [tablecloth](https://scicloj.github.io/tablecloth/) for data manipulation,
-;; [metamorph.ml](https://github.com/scicloj/metamorph.ml) for ML pipelines,
-;; [tribuo](https://github.com/scicloj/scicloj.ml.tribuo) for algorithms, and
+;; [metamorph.ml](https://github.com/scicloj/metamorph.ml) and
+;; [tribuo](https://github.com/scicloj/scicloj.ml.tribuo) for ML, and
 ;; [Plotly.js](https://plotly.com/javascript/) for visualization.
-;; Start your REPL with `clojure -M:dev` to have them available.
+;; These are not Pocket dependencies — they illustrate a realistic ML
+;; workflow. All output is shown inline; to reproduce it, add
+;; [noj](https://scicloj.github.io/noj/) to your project dependencies.
 
 ;; ## Setup
 
