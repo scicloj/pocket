@@ -440,9 +440,10 @@
                 (let [mermaid-id (gen-id)
                       v (:value node)
                       label (pr-str v)
-                      label (if (> (count label) 40)
-                              (str (subs label 0 37) "...")
-                              label)]
+                      label (if (> (count label) 200)
+                              (str (subs label 0 197) "...")
+                              label)
+                      label (str/replace label ", " ",<br>")]
                   (swap! lines conj (str "  " mermaid-id "[/\"" (mermaid-escape label) "\"/]"))
                   mermaid-id)))]
       (walk tree)

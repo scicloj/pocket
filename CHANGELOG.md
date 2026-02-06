@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - `cached` and `caching-fn` now accept **keywords** in addition to vars (e.g., `(cached :train split-c)`)
 - `origin-story-mermaid` preserves `:` prefix for keyword function nodes
+- `origin-story-mermaid` wraps map values at commas (`<br>`) for readable multi-line boxes
 
 ## [0.1.0] - 2026-02-06
 
