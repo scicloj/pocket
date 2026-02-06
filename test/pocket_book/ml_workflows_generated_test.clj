@@ -291,11 +291,11 @@
     (let
      [low
       (first
-       (filter (fn* [p1__70235#] (= 0.1 (:noise-sd p1__70235#))) rows))
+       (filter (fn* [p1__69870#] (= 0.1 (:noise-sd p1__69870#))) rows))
       high
       (first
        (filter
-        (fn* [p1__70236#] (= 5.0 (:noise-sd p1__70236#)))
+        (fn* [p1__69871#] (= 5.0 (:noise-sd p1__69871#)))
         rows))]
      (and
       (< (:cart-rmse low) (:sgd-rmse low))
@@ -351,10 +351,10 @@
        +
        (map
         (fn*
-         [p1__70237#]
+         [p1__69872#]
          (*
-          (- p1__70237# (/ (reduce + x-vals) (count x-vals)))
-          (- p1__70237# (/ (reduce + x-vals) (count x-vals)))))
+          (- p1__69872# (/ (reduce + x-vals) (count x-vals)))
+          (- p1__69872# (/ (reduce + x-vals) (count x-vals)))))
         x-vals))
       (count x-vals)))})))
 

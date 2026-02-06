@@ -59,7 +59,7 @@ format:
 ::: {.callout-note}
 ## OUT
 ```
-[nREPL-session-94df5099-9db7-4f41-be96-e3b17949b1df] INFO scicloj.pocket - Cache dir set to: /tmp/pocket-extending
+[nREPL-session-c2a049f3-1c43-4124-94ec-c4c74c4c0bd4] INFO scicloj.pocket - Cache dir set to: /tmp/pocket-extending
 
 ```
 :::
@@ -86,7 +86,7 @@ format:
 ::: {.callout-note}
 ## OUT
 ```
-[nREPL-session-94df5099-9db7-4f41-be96-e3b17949b1df] INFO scicloj.pocket - Cache cleanup: /tmp/pocket-extending
+[nREPL-session-c2a049f3-1c43-4124-94ec-c4c74c4c0bd4] INFO scicloj.pocket - Cache cleanup: /tmp/pocket-extending
 
 ```
 :::
@@ -332,7 +332,7 @@ First deref computes:
 ::: {.callout-note}
 ## OUT
 ```
-[nREPL-session-94df5099-9db7-4f41-be96-e3b17949b1df] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.extending-pocket/analyze-dataset
+[nREPL-session-c2a049f3-1c43-4124-94ec-c4c74c4c0bd4] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.extending-pocket/analyze-dataset
   Analyzing census v 3 ...
 
 ```
@@ -383,7 +383,7 @@ A different version creates a different cache entry:
 ::: {.callout-note}
 ## OUT
 ```
-[nREPL-session-94df5099-9db7-4f41-be96-e3b17949b1df] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.extending-pocket/analyze-dataset
+[nREPL-session-c2a049f3-1c43-4124-94ec-c4c74c4c0bd4] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.extending-pocket/analyze-dataset
   Analyzing census v 4 ...
 
 ```
@@ -415,13 +415,13 @@ The cache directory names reflect our custom identities:
 
 ::: {.sourceClojure}
 ```clojure
-.cache
-├── 99
-│   └── (pocket-book.extending-pocket⁄analyze-dataset census-v4 {:method :regression})
+pocket-extending
+├── 62
+│   └── (pocket-book.extending-pocket_analyze-dataset census-v3 {:method :regression})
 │       ├── meta.edn
 │       └── value.nippy
-└── f1
-    └── (pocket-book.extending-pocket⁄analyze-dataset census-v3 {:method :regression})
+└── f6
+    └── (pocket-book.extending-pocket_analyze-dataset census-v4 {:method :regression})
         ├── meta.edn
         └── value.nippy
 
@@ -524,7 +524,7 @@ for more details.
 ::: {.callout-note}
 ## OUT
 ```
-[nREPL-session-94df5099-9db7-4f41-be96-e3b17949b1df] INFO scicloj.pocket - Cache cleanup: /tmp/pocket-extending
+[nREPL-session-c2a049f3-1c43-4124-94ec-c4c74c4c0bd4] INFO scicloj.pocket - Cache cleanup: /tmp/pocket-extending
 
 ```
 :::

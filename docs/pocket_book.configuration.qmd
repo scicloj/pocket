@@ -133,7 +133,7 @@ export POCKET_BASE_CACHE_DIR=/path/to/cache
 ::: {.callout-note}
 ## OUT
 ```
-[nREPL-session-94df5099-9db7-4f41-be96-e3b17949b1df] INFO scicloj.pocket - Cache dir set to: /tmp/pocket-demo-config
+[nREPL-session-c2a049f3-1c43-4124-94ec-c4c74c4c0bd4] INFO scicloj.pocket - Cache dir set to: /tmp/pocket-demo-config
 
 ```
 :::
@@ -160,7 +160,7 @@ export POCKET_BASE_CACHE_DIR=/path/to/cache
 ::: {.callout-note}
 ## OUT
 ```
-[nREPL-session-94df5099-9db7-4f41-be96-e3b17949b1df] INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo-config
+[nREPL-session-c2a049f3-1c43-4124-94ec-c4c74c4c0bd4] INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo-config
 
 ```
 :::
@@ -265,8 +265,8 @@ Configure via `set-mem-cache-options!`:
 ::: {.callout-note}
 ## OUT
 ```
-[nREPL-session-94df5099-9db7-4f41-be96-e3b17949b1df] INFO scicloj.pocket - Mem-cache options set: {:policy :fifo, :threshold 100}
-[nREPL-session-94df5099-9db7-4f41-be96-e3b17949b1df] INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :fifo, :threshold 100}
+[nREPL-session-c2a049f3-1c43-4124-94ec-c4c74c4c0bd4] INFO scicloj.pocket - Mem-cache options set: {:policy :fifo, :threshold 100}
+[nREPL-session-c2a049f3-1c43-4124-94ec-c4c74c4c0bd4] INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :fifo, :threshold 100}
 
 ```
 :::
@@ -295,8 +295,8 @@ Or a TTL policy where entries expire after 60 seconds:
 ::: {.callout-note}
 ## OUT
 ```
-[nREPL-session-94df5099-9db7-4f41-be96-e3b17949b1df] INFO scicloj.pocket - Mem-cache options set: {:policy :ttl, :ttl 60000}
-[nREPL-session-94df5099-9db7-4f41-be96-e3b17949b1df] INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :ttl, :ttl 60000}
+[nREPL-session-c2a049f3-1c43-4124-94ec-c4c74c4c0bd4] INFO scicloj.pocket - Mem-cache options set: {:policy :ttl, :ttl 60000}
+[nREPL-session-c2a049f3-1c43-4124-94ec-c4c74c4c0bd4] INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :ttl, :ttl 60000}
 
 ```
 :::
@@ -325,8 +325,8 @@ Reset to the default LRU policy:
 ::: {.callout-note}
 ## OUT
 ```
-[nREPL-session-94df5099-9db7-4f41-be96-e3b17949b1df] INFO scicloj.pocket - Mem-cache options set: {:policy :lru, :threshold 256}
-[nREPL-session-94df5099-9db7-4f41-be96-e3b17949b1df] INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :lru, :threshold 256}
+[nREPL-session-c2a049f3-1c43-4124-94ec-c4c74c4c0bd4] INFO scicloj.pocket - Mem-cache options set: {:policy :lru, :threshold 256}
+[nREPL-session-c2a049f3-1c43-4124-94ec-c4c74c4c0bd4] INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :lru, :threshold 256}
 
 ```
 :::
@@ -393,7 +393,7 @@ result (like a `delay`), but separate instances recompute.
 ::: {.callout-note}
 ## OUT
 ```
-[nREPL-session-94df5099-9db7-4f41-be96-e3b17949b1df] INFO scicloj.pocket - Storage policy set to: :mem
+[nREPL-session-c2a049f3-1c43-4124-94ec-c4c74c4c0bd4] INFO scicloj.pocket - Storage policy set to: :mem
 
 ```
 :::
@@ -474,7 +474,7 @@ Reset to default:
 ::: {.callout-note}
 ## OUT
 ```
-[nREPL-session-94df5099-9db7-4f41-be96-e3b17949b1df] INFO scicloj.pocket - Storage policy set to: nil
+[nREPL-session-c2a049f3-1c43-4124-94ec-c4c74c4c0bd4] INFO scicloj.pocket - Storage policy set to: nil
 
 ```
 :::
@@ -522,7 +522,7 @@ need to lower it.
 ::: {.callout-note}
 ## OUT
 ```
-[nREPL-session-94df5099-9db7-4f41-be96-e3b17949b1df] INFO scicloj.pocket - Filename length limit set to: 80
+[nREPL-session-c2a049f3-1c43-4124-94ec-c4c74c4c0bd4] INFO scicloj.pocket - Filename length limit set to: 80
 
 ```
 :::
@@ -576,7 +576,7 @@ Reset to default (240):
 ::: {.callout-note}
 ## OUT
 ```
-[nREPL-session-94df5099-9db7-4f41-be96-e3b17949b1df] INFO scicloj.pocket - Filename length limit set to: nil
+[nREPL-session-c2a049f3-1c43-4124-94ec-c4c74c4c0bd4] INFO scicloj.pocket - Filename length limit set to: nil
 
 ```
 :::
@@ -693,7 +693,7 @@ To delete all cached values (both disk and in-memory), use `cleanup!`:
 ::: {.callout-note}
 ## OUT
 ```
-[nREPL-session-94df5099-9db7-4f41-be96-e3b17949b1df] INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo-config
+[nREPL-session-c2a049f3-1c43-4124-94ec-c4c74c4c0bd4] INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo-config
 
 ```
 :::

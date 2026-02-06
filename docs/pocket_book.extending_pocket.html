@@ -306,7 +306,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <div id="callout-1" class="callout-1-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>[nREPL-session-94df5099-9db7-4f41-be96-e3b17949b1df] INFO scicloj.pocket - Cache dir set to: /tmp/pocket-extending
+<pre><code>[nREPL-session-c2a049f3-1c43-4124-94ec-c4c74c4c0bd4] INFO scicloj.pocket - Cache dir set to: /tmp/pocket-extending
 </code></pre>
 </div>
 </div>
@@ -329,7 +329,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <div id="callout-2" class="callout-2-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>[nREPL-session-94df5099-9db7-4f41-be96-e3b17949b1df] INFO scicloj.pocket - Cache cleanup: /tmp/pocket-extending
+<pre><code>[nREPL-session-c2a049f3-1c43-4124-94ec-c4c74c4c0bd4] INFO scicloj.pocket - Cache cleanup: /tmp/pocket-extending
 </code></pre>
 </div>
 </div>
@@ -452,7 +452,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <div id="callout-3" class="callout-3-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>[nREPL-session-94df5099-9db7-4f41-be96-e3b17949b1df] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.extending-pocket/analyze-dataset
+<pre><code>[nREPL-session-c2a049f3-1c43-4124-94ec-c4c74c4c0bd4] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.extending-pocket/analyze-dataset
   Analyzing census v 3 ...
 </code></pre>
 </div>
@@ -486,7 +486,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <div id="callout-4" class="callout-4-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>[nREPL-session-94df5099-9db7-4f41-be96-e3b17949b1df] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.extending-pocket/analyze-dataset
+<pre><code>[nREPL-session-c2a049f3-1c43-4124-94ec-c4c74c4c0bd4] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.extending-pocket/analyze-dataset
   Analyzing census v 4 ...
 </code></pre>
 </div>
@@ -503,13 +503,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb35"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>(pocket/dir-tree)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="sourceClojure">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb36"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>.cache</span>
-<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>├── <span class="dv">99</span></span>
-<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>│   └── (pocket-book.extending-pocket⁄analyze-dataset census-v4 {<span class="at">:method</span> <span class="at">:regression</span>})</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb36"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>pocket-extending</span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>├── <span class="dv">62</span></span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>│   └── (pocket-book.extending-pocket_analyze-dataset census-v3 {<span class="at">:method</span> <span class="at">:regression</span>})</span>
 <span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a>│       ├── <span class="kw">meta</span>.edn</span>
 <span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a>│       └── value.nippy</span>
-<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a>└── f1</span>
-<span id="cb36-7"><a href="#cb36-7" aria-hidden="true" tabindex="-1"></a>    └── (pocket-book.extending-pocket⁄analyze-dataset census-v3 {<span class="at">:method</span> <span class="at">:regression</span>})</span>
+<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a>└── f6</span>
+<span id="cb36-7"><a href="#cb36-7" aria-hidden="true" tabindex="-1"></a>    └── (pocket-book.extending-pocket_analyze-dataset census-v4 {<span class="at">:method</span> <span class="at">:regression</span>})</span>
 <span id="cb36-8"><a href="#cb36-8" aria-hidden="true" tabindex="-1"></a>        ├── <span class="kw">meta</span>.edn</span>
 <span id="cb36-9"><a href="#cb36-9" aria-hidden="true" tabindex="-1"></a>        └── value.nippy</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
@@ -575,7 +575,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <div id="callout-5" class="callout-5-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>[nREPL-session-94df5099-9db7-4f41-be96-e3b17949b1df] INFO scicloj.pocket - Cache cleanup: /tmp/pocket-extending
+<pre><code>[nREPL-session-c2a049f3-1c43-4124-94ec-c4c74c4c0bd4] INFO scicloj.pocket - Cache cleanup: /tmp/pocket-extending
 </code></pre>
 </div>
 </div>
