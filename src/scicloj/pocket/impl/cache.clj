@@ -139,7 +139,7 @@
      (throw (ex-info "No cache directory configured. Set it via pocket/set-base-cache-dir!, the POCKET_BASE_CACHE_DIR env var, or pocket.edn."
                      {})))
    (let [idstr (-> (str id)
-                   (str/replace "/" "⁄"))]
+                   (str/replace "/" "_"))]
      (str base-dir
           "/.cache/"
           (subs (sha idstr) 0 2)
