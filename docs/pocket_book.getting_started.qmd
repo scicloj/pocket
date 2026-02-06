@@ -67,7 +67,7 @@ First, we set up a cache directory and define an expensive computation:
 ::: {.callout-note}
 ## OUT
 ```
-[nREPL-session-c2a049f3-1c43-4124-94ec-c4c74c4c0bd4] INFO scicloj.pocket - Cache dir set to: /tmp/pocket-demo
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket - Cache dir set to: /tmp/pocket-demo
 
 ```
 :::
@@ -96,7 +96,7 @@ Start fresh so the examples below run from a clean slate:
 ::: {.callout-note}
 ## OUT
 ```
-[nREPL-session-c2a049f3-1c43-4124-94ec-c4c74c4c0bd4] INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo
 
 ```
 :::
@@ -180,9 +180,9 @@ First deref (computes and caches):
 ::: {.callout-note}
 ## OUT
 ```
-[nREPL-session-c2a049f3-1c43-4124-94ec-c4c74c4c0bd4] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.getting-started/expensive-calculation
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.getting-started/expensive-calculation
 Computing 10 + 20 (this is expensive!)
-"Elapsed time: 402.40684 msecs"
+"Elapsed time: 402.491488 msecs"
 
 ```
 :::
@@ -211,7 +211,7 @@ Second deref (loaded from cache, instant):
 ::: {.callout-note}
 ## OUT
 ```
-"Elapsed time: 0.284966 msecs"
+"Elapsed time: 0.205896 msecs"
 
 ```
 :::
@@ -255,9 +255,9 @@ First call:
 ::: {.callout-note}
 ## OUT
 ```
-[nREPL-session-c2a049f3-1c43-4124-94ec-c4c74c4c0bd4] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.getting-started/expensive-calculation
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.getting-started/expensive-calculation
 Computing 5 + 15 (this is expensive!)
-"Elapsed time: 401.468225 msecs"
+"Elapsed time: 401.652516 msecs"
 
 ```
 :::
@@ -286,7 +286,7 @@ Same args — cache hit:
 ::: {.callout-note}
 ## OUT
 ```
-"Elapsed time: 0.221247 msecs"
+"Elapsed time: 0.332295 msecs"
 
 ```
 :::
@@ -315,9 +315,9 @@ Different args — new computation:
 ::: {.callout-note}
 ## OUT
 ```
-[nREPL-session-c2a049f3-1c43-4124-94ec-c4c74c4c0bd4] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.getting-started/expensive-calculation
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.getting-started/expensive-calculation
 Computing 7 + 8 (this is expensive!)
-"Elapsed time: 401.736316 msecs"
+"Elapsed time: 401.571462 msecs"
 
 ```
 :::
@@ -369,7 +369,7 @@ Cached nil value:
 ::: {.callout-note}
 ## OUT
 ```
-[nREPL-session-c2a049f3-1c43-4124-94ec-c4c74c4c0bd4] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.getting-started/returns-nil
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.getting-started/returns-nil
 
 ```
 :::
@@ -404,17 +404,19 @@ nil
 
 
 
-## Important: use vars for functions
+## Important: use vars or keywords for functions
 
-Always pass functions as **vars** (`#'fn-name`), not as bare function
-objects. Vars have stable names that produce consistent cache keys
-across sessions. Pocket throws an error if you forget:
+Always pass functions as **vars** (`#'fn-name`) or **keywords**,
+not as bare function objects. Vars have stable names that produce
+consistent cache keys across sessions. Keywords are useful for
+extracting from cached maps (e.g., `(cached :train split-c)`).
+Pocket throws an error if you pass a bare function:
 
 ```clojure
 ;; ✅ (pocket/cached #'my-function args)
+;; ✅ (pocket/cached :train cached-map)
 ;; ❌ (pocket/cached my-function args)
 ```
-
 See the [Usage Practices](pocket_book.usage_practices.html) chapter
 for a detailed explanation and more best practices.
 
@@ -446,7 +448,7 @@ for a detailed explanation and more best practices.
 ::: {.callout-note}
 ## OUT
 ```
-[nREPL-session-c2a049f3-1c43-4124-94ec-c4c74c4c0bd4] INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo
 
 ```
 :::

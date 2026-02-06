@@ -232,7 +232,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#creating-a-cached-computation" id="toc-creating-a-cached-computation" class="nav-link" data-scroll-target="#creating-a-cached-computation">Creating a cached computation</a></li>
   <li><a href="#wrapping-functions-with-caching-fn" id="toc-wrapping-functions-with-caching-fn" class="nav-link" data-scroll-target="#wrapping-functions-with-caching-fn">Wrapping functions with <code>caching-fn</code></a></li>
   <li><a href="#nil-handling" id="toc-nil-handling" class="nav-link" data-scroll-target="#nil-handling">Nil handling</a></li>
-  <li><a href="#important-use-vars-for-functions" id="toc-important-use-vars-for-functions" class="nav-link" data-scroll-target="#important-use-vars-for-functions">Important: use vars for functions</a></li>
+  <li><a href="#important-use-vars-or-keywords-for-functions" id="toc-important-use-vars-or-keywords-for-functions" class="nav-link" data-scroll-target="#important-use-vars-or-keywords-for-functions">Important: use vars or keywords for functions</a></li>
   <li><a href="#next-steps" id="toc-next-steps" class="nav-link" data-scroll-target="#next-steps">Next steps</a></li>
   <li><a href="#cleanup" id="toc-cleanup" class="nav-link" data-scroll-target="#cleanup">Cleanup</a></li>
   </ul>
@@ -304,7 +304,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <div id="callout-1" class="callout-1-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>[nREPL-session-c2a049f3-1c43-4124-94ec-c4c74c4c0bd4] INFO scicloj.pocket - Cache dir set to: /tmp/pocket-demo
+<pre><code>[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket - Cache dir set to: /tmp/pocket-demo
 </code></pre>
 </div>
 </div>
@@ -328,7 +328,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <div id="callout-2" class="callout-2-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>[nREPL-session-c2a049f3-1c43-4124-94ec-c4c74c4c0bd4] INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo
+<pre><code>[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo
 </code></pre>
 </div>
 </div>
@@ -378,9 +378,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <div id="callout-3" class="callout-3-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>[nREPL-session-c2a049f3-1c43-4124-94ec-c4c74c4c0bd4] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.getting-started/expensive-calculation
+<pre><code>[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.getting-started/expensive-calculation
 Computing 10 + 20 (this is expensive!)
-"Elapsed time: 402.40684 msecs"
+"Elapsed time: 402.491488 msecs"
 </code></pre>
 </div>
 </div>
@@ -404,7 +404,7 @@ Computing 10 + 20 (this is expensive!)
 </div>
 <div id="callout-4" class="callout-4-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>"Elapsed time: 0.284966 msecs"
+<pre><code>"Elapsed time: 0.205896 msecs"
 </code></pre>
 </div>
 </div>
@@ -436,9 +436,9 @@ Computing 10 + 20 (this is expensive!)
 </div>
 <div id="callout-5" class="callout-5-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>[nREPL-session-c2a049f3-1c43-4124-94ec-c4c74c4c0bd4] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.getting-started/expensive-calculation
+<pre><code>[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.getting-started/expensive-calculation
 Computing 5 + 15 (this is expensive!)
-"Elapsed time: 401.468225 msecs"
+"Elapsed time: 401.652516 msecs"
 </code></pre>
 </div>
 </div>
@@ -462,7 +462,7 @@ Computing 5 + 15 (this is expensive!)
 </div>
 <div id="callout-6" class="callout-6-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>"Elapsed time: 0.221247 msecs"
+<pre><code>"Elapsed time: 0.332295 msecs"
 </code></pre>
 </div>
 </div>
@@ -486,9 +486,9 @@ Computing 5 + 15 (this is expensive!)
 </div>
 <div id="callout-7" class="callout-7-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>[nREPL-session-c2a049f3-1c43-4124-94ec-c4c74c4c0bd4] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.getting-started/expensive-calculation
+<pre><code>[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.getting-started/expensive-calculation
 Computing 7 + 8 (this is expensive!)
-"Elapsed time: 401.736316 msecs"
+"Elapsed time: 401.571462 msecs"
 </code></pre>
 </div>
 </div>
@@ -522,7 +522,7 @@ Computing 7 + 8 (this is expensive!)
 </div>
 <div id="callout-8" class="callout-8-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>[nREPL-session-c2a049f3-1c43-4124-94ec-c4c74c4c0bd4] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.getting-started/returns-nil
+<pre><code>[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.getting-started/returns-nil
 </code></pre>
 </div>
 </div>
@@ -538,11 +538,12 @@ Computing 7 + 8 (this is expensive!)
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb35"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="va">nil</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
-<section id="important-use-vars-for-functions" class="level2">
-<h2 class="anchored" data-anchor-id="important-use-vars-for-functions">Important: use vars for functions</h2>
-<p>Always pass functions as <strong>vars</strong> (<code>#'fn-name</code>), not as bare function objects. Vars have stable names that produce consistent cache keys across sessions. Pocket throws an error if you forget:</p>
+<section id="important-use-vars-or-keywords-for-functions" class="level2">
+<h2 class="anchored" data-anchor-id="important-use-vars-or-keywords-for-functions">Important: use vars or keywords for functions</h2>
+<p>Always pass functions as <strong>vars</strong> (<code>#'fn-name</code>) or <strong>keywords</strong>, not as bare function objects. Vars have stable names that produce consistent cache keys across sessions. Keywords are useful for extracting from cached maps (e.g., <code>(cached :train split-c)</code>). Pocket throws an error if you pass a bare function:</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb36"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="co">;; ✅ (pocket/cached #'my-function args)</span></span>
-<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a><span class="co">;; ❌ (pocket/cached my-function args)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a><span class="co">;; ✅ (pocket/cached :train cached-map)</span></span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a><span class="co">;; ❌ (pocket/cached my-function args)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>See the <a href="pocket_book.usage_practices.html">Usage Practices</a> chapter for a detailed explanation and more best practices.</p>
 </section>
 <section id="next-steps" class="level2">
@@ -570,7 +571,7 @@ Computing 7 + 8 (this is expensive!)
 </div>
 <div id="callout-9" class="callout-9-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>[nREPL-session-c2a049f3-1c43-4124-94ec-c4c74c4c0bd4] INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo
+<pre><code>[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo
 </code></pre>
 </div>
 </div>
