@@ -60,28 +60,28 @@
       ds
       (tc/add-column
        :x2
-       (mapv (fn* [p1__96408#] (* p1__96408# p1__96408#)) xv)))
+       (mapv (fn* [p1__97720#] (* p1__97720# p1__97720#)) xv)))
      :trig
      (->
       ds
       (tc/add-column
        :sin-x
-       (mapv (fn* [p1__96409#] (Math/sin p1__96409#)) xv))
+       (mapv (fn* [p1__97721#] (Math/sin p1__97721#)) xv))
       (tc/add-column
        :cos-x
-       (mapv (fn* [p1__96410#] (Math/cos p1__96410#)) xv)))
+       (mapv (fn* [p1__97722#] (Math/cos p1__97722#)) xv)))
      :poly+trig
      (->
       ds
       (tc/add-column
        :x2
-       (mapv (fn* [p1__96411#] (* p1__96411# p1__96411#)) xv))
+       (mapv (fn* [p1__97723#] (* p1__97723# p1__97723#)) xv))
       (tc/add-column
        :sin-x
-       (mapv (fn* [p1__96412#] (Math/sin p1__96412#)) xv))
+       (mapv (fn* [p1__97724#] (Math/sin p1__97724#)) xv))
       (tc/add-column
        :cos-x
-       (mapv (fn* [p1__96413#] (Math/cos p1__96413#)) xv))))
+       (mapv (fn* [p1__97725#] (Math/cos p1__97725#)) xv))))
     (ds-mod/set-inference-target :y)))))
 
 
@@ -304,11 +304,11 @@
     (let
      [low
       (first
-       (filter (fn* [p1__96414#] (= 0.1 (:noise-sd p1__96414#))) rows))
+       (filter (fn* [p1__97726#] (= 0.1 (:noise-sd p1__97726#))) rows))
       high
       (first
        (filter
-        (fn* [p1__96415#] (= 5.0 (:noise-sd p1__96415#)))
+        (fn* [p1__97727#] (= 5.0 (:noise-sd p1__97727#)))
         rows))]
      (and
       (< (:cart-rmse low) (:sgd-rmse low))
@@ -364,10 +364,10 @@
        +
        (map
         (fn*
-         [p1__96416#]
+         [p1__97728#]
          (*
-          (- p1__96416# (/ (reduce + x-vals) (count x-vals)))
-          (- p1__96416# (/ (reduce + x-vals) (count x-vals)))))
+          (- p1__97728# (/ (reduce + x-vals) (count x-vals)))
+          (- p1__97728# (/ (reduce + x-vals) (count x-vals)))))
         x-vals))
       (count x-vals)))})))
 
@@ -385,7 +385,7 @@
     ds
     :x-norm
     (mapv
-     (fn* [p1__96417#] (/ (- p1__96417# x-mean) x-std))
+     (fn* [p1__97729#] (/ (- p1__97729# x-mean) x-std))
      (:x ds))))))
 
 
@@ -543,22 +543,23 @@
       (select-keys exp [:noise-sd :feature-set :max-depth])
       (:result exp)))
     comparison)
-   by-feature
-   (group-by :feature-set rows)]
+   grouped
+   (group-by (juxt :feature-set :noise-sd) rows)
+   feature-colors
+   {:raw "steelblue", :poly "tomato", :poly+trig "green"}]
   (kind/plotly
    {:data
     (for
-     [[feature-set pts] by-feature]
+     [[[feature-set noise-sd] pts] (sort-by first grouped)]
      {:x (mapv :max-depth pts),
       :y (mapv :rmse pts),
       :mode "markers",
-      :name (name feature-set),
+      :name (str (name feature-set) " (noise=" noise-sd ")"),
+      :legendgroup (name feature-set),
       :marker
-      {:size
-       (mapv
-        (fn* [p1__96418#] (+ 5 (* 10 (:noise-sd p1__96418#))))
-        pts)}}),
+      {:size (+ 8 (* 15 noise-sd)),
+       :color (feature-colors feature-set)}}),
     :layout {:xaxis {:title "max-depth"}, :yaxis {:title "rmse"}}})))
 
 
-(def v79_l514 (pocket/cleanup!))
+(def v79_l518 (pocket/cleanup!))
