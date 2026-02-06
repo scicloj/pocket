@@ -657,16 +657,17 @@ noise-results
       grouped (group-by (juxt :feature-set :noise-sd) rows)
       feature-colors {:raw "steelblue" :poly "tomato" :poly+trig "green"}]
   (kind/plotly
-   {:data (for [[[feature-set noise-sd] pts] (sort-by first grouped)
-                :let [max-depths (mapv :max-depth pts)
-                      rmses (mapv :rmse pts)]]
-            {:x max-depths
-             :y rmses
-             :mode "markers"
-             :name (str (name feature-set) " (noise=" noise-sd ")")
-             :legendgroup (name feature-set)
-             :marker {:size (+ 8 (* 15 noise-sd))
-                      :color (feature-colors feature-set)}})
+   {:data (vec (for [[[feature-set noise-sd] pts] (sort-by first grouped)
+                     :let [max-depths (mapv :max-depth pts)
+                           rmses (mapv :rmse pts)]]
+                 {:x max-depths
+                  :y rmses
+                  :mode "markers"
+                  :name (str (name feature-set) " (noise=" noise-sd ")")
+                  :legendgroup (name feature-set)
+                  :marker {:size (+ 8 (* 15 noise-sd))
+                           :color (feature-colors feature-set)}}))
+
     :layout {:xaxis {:title "max-depth"} :yaxis {:title "rmse"}}}))
 
 ;; ## What we learned

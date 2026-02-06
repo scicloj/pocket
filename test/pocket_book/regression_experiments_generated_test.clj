@@ -291,11 +291,11 @@
     (let
      [low
       (first
-       (filter (fn* [p1__70358#] (= 0.1 (:noise-sd p1__70358#))) rows))
+       (filter (fn* [p1__73164#] (= 0.1 (:noise-sd p1__73164#))) rows))
       high
       (first
        (filter
-        (fn* [p1__70359#] (= 5.0 (:noise-sd p1__70359#)))
+        (fn* [p1__73165#] (= 5.0 (:noise-sd p1__73165#)))
         rows))]
      (and
       (< (:cart-rmse low) (:sgd-rmse low))
@@ -351,10 +351,10 @@
        +
        (map
         (fn*
-         [p1__70360#]
+         [p1__73166#]
          (*
-          (- p1__70360# (/ (reduce + x-vals) (count x-vals)))
-          (- p1__70360# (/ (reduce + x-vals) (count x-vals)))))
+          (- p1__73166# (/ (reduce + x-vals) (count x-vals)))
+          (- p1__73166# (/ (reduce + x-vals) (count x-vals)))))
         x-vals))
       (count x-vals)))})))
 
@@ -394,67 +394,77 @@
 
 
 (def
- v53_l511
+ v53_l519
+ (def
+  c-compute-stats
+  (pocket/caching-fn #'compute-stats {:storage :mem})))
+
+
+(def
+ v54_l522
+ (def
+  c-normalize
+  (pocket/caching-fn #'normalize-with-stats {:storage :mem})))
+
+
+(def
+ v55_l525
+ (def c-train (pocket/caching-fn #'train-normalized-model)))
+
+
+(def
+ v56_l528
+ (def c-evaluate (pocket/caching-fn #'evaluate-model {:storage :none})))
+
+
+(def
+ v58_l533
  (def
   dag-data
   @(pocket/cached #'make-regression-data #'nonlinear-fn 200 0.3 99)))
 
 
 (def
- v54_l514
+ v59_l536
  (def dag-split (first (tc/split->seq dag-data :holdout {:seed 99}))))
 
 
-(def
- v56_l520
- (def stats-c (pocket/cached #'compute-stats (:train dag-split))))
+(def v61_l543 (def stats-c (c-compute-stats (:train dag-split))))
 
 
 (def
- v57_l523
- (def
-  train-norm-c
-  (pocket/cached #'normalize-with-stats (:train dag-split) stats-c)))
+ v62_l546
+ (def train-norm-c (c-normalize (:train dag-split) stats-c)))
 
 
-(def
- v58_l526
- (def
-  test-norm-c
-  (pocket/cached #'normalize-with-stats (:test dag-split) stats-c)))
+(def v63_l549 (def test-norm-c (c-normalize (:test dag-split) stats-c)))
 
 
-(def
- v59_l529
- (def
-  model-c
-  (pocket/cached #'train-normalized-model train-norm-c cart-spec)))
+(def v64_l552 (def model-c (c-train train-norm-c cart-spec)))
 
 
-(def
- v60_l532
- (def metrics-c (pocket/cached #'evaluate-model test-norm-c model-c)))
+(def v65_l555 (def metrics-c (c-evaluate test-norm-c model-c)))
 
 
-(def v62_l546 (pocket/origin-story metrics-c))
+(def v67_l569 (pocket/origin-story metrics-c))
 
 
-(def v64_l554 (pocket/origin-story-graph metrics-c))
+(def v69_l577 (pocket/origin-story-graph metrics-c))
 
 
-(def v66_l561 (pocket/origin-story-mermaid metrics-c))
+(def v71_l584 (pocket/origin-story-mermaid metrics-c))
 
 
-(def v68_l565 (deref metrics-c))
+(def v73_l588 (deref metrics-c))
 
 
 (deftest
- t69_l567
- (is ((fn [m] (and (map? m) (contains? m :rmse))) v68_l565)))
+ t74_l590
+ (is ((fn [m] (and (map? m) (contains? m :rmse))) v73_l588)))
 
 
 (def
- v71_l582
+ v76_l605
  (defn
   run-pipeline
   "Run a complete pipeline with given hyperparameters."
@@ -483,7 +493,7 @@
 
 
 (def
- v73_l600
+ v78_l623
  (def
   experiments
   (for
@@ -495,14 +505,14 @@
      :max-depth max-depth}))))
 
 
-(def v75_l611 (def comparison (pocket/compare-experiments experiments)))
+(def v80_l634 (def comparison (pocket/compare-experiments experiments)))
 
 
-(def v76_l614 (tc/dataset comparison))
+(def v81_l637 (tc/dataset comparison))
 
 
 (deftest
- t77_l616
+ t82_l639
  (is
   ((fn
     [ds]
@@ -511,11 +521,11 @@
      (some #{:noise-sd} (tc/column-names ds))
      (some #{:feature-set} (tc/column-names ds))
      (some #{:max-depth} (tc/column-names ds))))
-   v76_l614)))
+   v81_l637)))
 
 
 (def
- v79_l629
+ v84_l652
  (let
   [rows
    (map
@@ -531,20 +541,21 @@
    {:raw "steelblue", :poly "tomato", :poly+trig "green"}]
   (kind/plotly
    {:data
-    (for
-     [[[feature-set noise-sd] pts]
-      (sort-by first grouped)
-      :let
-      [max-depths (mapv :max-depth pts) rmses (mapv :rmse pts)]]
-     {:x max-depths,
-      :y rmses,
-      :mode "markers",
-      :name (str (name feature-set) " (noise=" noise-sd ")"),
-      :legendgroup (name feature-set),
-      :marker
-      {:size (+ 8 (* 15 noise-sd)),
-       :color (feature-colors feature-set)}}),
+    (vec
+     (for
+      [[[feature-set noise-sd] pts]
+       (sort-by first grouped)
+       :let
+       [max-depths (mapv :max-depth pts) rmses (mapv :rmse pts)]]
+      {:x max-depths,
+       :y rmses,
+       :mode "markers",
+       :name (str (name feature-set) " (noise=" noise-sd ")"),
+       :legendgroup (name feature-set),
+       :marker
+       {:size (+ 8 (* 15 noise-sd)),
+        :color (feature-colors feature-set)}})),
     :layout {:xaxis {:title "max-depth"}, :yaxis {:title "rmse"}}})))
 
 
-(def v81_l681 (pocket/cleanup!))
+(def v86_l705 (pocket/cleanup!))
