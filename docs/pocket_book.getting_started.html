@@ -201,14 +201,20 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./pocket_book.regression_experiments.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Demo: Caching a Machine Learning Workflow</span></span></a>
+  <a href="./pocket_book.ml_workflows.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Example: Machine Learning Workflows</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./pocket_book.developing_pocket.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Developing Pocket</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./pocket_book.api_reference.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">API Reference</span></span></a>
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">API Reference</span></span></a>
   </div>
 </li>
     </ul>
@@ -298,7 +304,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <div id="callout-1" class="callout-1-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>18:40:44.947 INFO scicloj.pocket - Cache dir set to: /tmp/pocket-demo
+<pre><code>[nREPL-session-94df5099-9db7-4f41-be96-e3b17949b1df] INFO scicloj.pocket - Cache dir set to: /tmp/pocket-demo
 </code></pre>
 </div>
 </div>
@@ -322,7 +328,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <div id="callout-2" class="callout-2-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>18:40:44.948 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo
+<pre><code>[nREPL-session-94df5099-9db7-4f41-be96-e3b17949b1df] INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo
 </code></pre>
 </div>
 </div>
@@ -372,10 +378,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <div id="callout-3" class="callout-3-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>18:40:44.951 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.getting-started/expensive-calculation
+<pre><code>[nREPL-session-94df5099-9db7-4f41-be96-e3b17949b1df] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.getting-started/expensive-calculation
 Computing 10 + 20 (this is expensive!)
-18:40:45.353 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo/.cache/6b/(pocket-book.getting-started⁄expensive-calculation 10 20)
-"Elapsed time: 401.892332 msecs"
+"Elapsed time: 401.709115 msecs"
 </code></pre>
 </div>
 </div>
@@ -399,7 +404,7 @@ Computing 10 + 20 (this is expensive!)
 </div>
 <div id="callout-4" class="callout-4-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>"Elapsed time: 0.171984 msecs"
+<pre><code>"Elapsed time: 0.213214 msecs"
 </code></pre>
 </div>
 </div>
@@ -431,10 +436,9 @@ Computing 10 + 20 (this is expensive!)
 </div>
 <div id="callout-5" class="callout-5-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>18:40:45.357 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.getting-started/expensive-calculation
+<pre><code>[nREPL-session-94df5099-9db7-4f41-be96-e3b17949b1df] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.getting-started/expensive-calculation
 Computing 5 + 15 (this is expensive!)
-18:40:45.758 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo/.cache/93/(pocket-book.getting-started⁄expensive-calculation 5 15)
-"Elapsed time: 401.624496 msecs"
+"Elapsed time: 401.685555 msecs"
 </code></pre>
 </div>
 </div>
@@ -458,7 +462,7 @@ Computing 5 + 15 (this is expensive!)
 </div>
 <div id="callout-6" class="callout-6-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>"Elapsed time: 0.300424 msecs"
+<pre><code>"Elapsed time: 1.058075 msecs"
 </code></pre>
 </div>
 </div>
@@ -482,10 +486,9 @@ Computing 5 + 15 (this is expensive!)
 </div>
 <div id="callout-7" class="callout-7-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>18:40:45.762 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.getting-started/expensive-calculation
+<pre><code>[nREPL-session-94df5099-9db7-4f41-be96-e3b17949b1df] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.getting-started/expensive-calculation
 Computing 7 + 8 (this is expensive!)
-18:40:46.163 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo/.cache/d9/(pocket-book.getting-started⁄expensive-calculation 7 8)
-"Elapsed time: 401.117875 msecs"
+"Elapsed time: 401.391799 msecs"
 </code></pre>
 </div>
 </div>
@@ -519,8 +522,7 @@ Computing 7 + 8 (this is expensive!)
 </div>
 <div id="callout-8" class="callout-8-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>18:40:46.165 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.getting-started/returns-nil
-18:40:46.165 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo/.cache/f5/(pocket-book.getting-started⁄returns-nil)
+<pre><code>[nREPL-session-94df5099-9db7-4f41-be96-e3b17949b1df] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.getting-started/returns-nil
 </code></pre>
 </div>
 </div>
@@ -568,7 +570,7 @@ Computing 7 + 8 (this is expensive!)
 </div>
 <div id="callout-9" class="callout-9-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>18:40:46.166 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo
+<pre><code>[nREPL-session-94df5099-9db7-4f41-be96-e3b17949b1df] INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo
 </code></pre>
 </div>
 </div>

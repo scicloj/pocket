@@ -91,7 +91,7 @@ both `temperature-trends` and `rainfall-totals` → `summary`.
 ::: {.callout-note}
 ## OUT
 ```
-18:40:48.145 INFO scicloj.pocket - Cache dir set to: /tmp/pocket-walkthrough
+[nREPL-session-94df5099-9db7-4f41-be96-e3b17949b1df] INFO scicloj.pocket - Cache dir set to: /tmp/pocket-walkthrough
 
 ```
 :::
@@ -118,7 +118,7 @@ both `temperature-trends` and `rainfall-totals` → `summary`.
 ::: {.callout-note}
 ## OUT
 ```
-18:40:48.146 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-walkthrough
+[nREPL-session-94df5099-9db7-4f41-be96-e3b17949b1df] INFO scicloj.pocket - Cache cleanup: /tmp/pocket-walkthrough
 
 ```
 :::
@@ -302,22 +302,17 @@ nil
 ::: {.callout-note}
 ## OUT
 ```
-18:40:48.151 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.real-world-walkthrough/summary
-18:40:48.151 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.real-world-walkthrough/temperature-trends
-18:40:48.151 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.real-world-walkthrough/clean-data
-18:40:48.151 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.real-world-walkthrough/fetch-readings
+[nREPL-session-94df5099-9db7-4f41-be96-e3b17949b1df] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.real-world-walkthrough/summary
+[nREPL-session-94df5099-9db7-4f41-be96-e3b17949b1df] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.real-world-walkthrough/temperature-trends
+[nREPL-session-94df5099-9db7-4f41-be96-e3b17949b1df] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.real-world-walkthrough/clean-data
+[nREPL-session-94df5099-9db7-4f41-be96-e3b17949b1df] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.real-world-walkthrough/fetch-readings
   Fetching readings for London ...
-18:40:48.453 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-walkthrough/.cache/1f/(pocket-book.real-world-walkthrough⁄fetch-readings {:city "London", :days 7, :source :api})
   Cleaning data for London with {:precision 10, :remove-nulls true} ...
-18:40:48.656 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-walkthrough/.cache/97/(pocket-book.real-world-walkthrough⁄clean-data (pocket-book.real-world-walkthrough⁄fetch-readings {:city "London", :days 7, :source :api}) {:precision 10, :remove-nulls true})
   Analyzing temperature for London ...
-18:40:48.957 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-walkthrough/.cache/ba/ba537d067887188386995083bdbfd1dcc84fdadb
-18:40:48.958 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.real-world-walkthrough/rainfall-totals
+[nREPL-session-94df5099-9db7-4f41-be96-e3b17949b1df] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.real-world-walkthrough/rainfall-totals
   Analyzing rainfall for London ...
-18:40:49.260 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-walkthrough/.cache/24/(pocket-book.real-world-walkthrough⁄rainfall-totals (pocket-book.real-world-walkthrough⁄clean-data (pocket-book.real-world-walkthrough⁄fetch-readings {:city "London", :days 7, :source :api}) {:precision 10, :remove-nulls true}) {:unit :mm})
   Generating summary for London ...
-18:40:49.462 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-walkthrough/.cache/6a/6a762a4c89e59ac4326e5ef8bff321cc817f397e
-"Elapsed time: 1310.904053 msecs"
+"Elapsed time: 1310.654258 msecs"
 
 ```
 :::
@@ -394,7 +389,7 @@ nil
 ::: {.callout-note}
 ## OUT
 ```
-"Elapsed time: 0.116703 msecs"
+"Elapsed time: 0.109041 msecs"
 
 ```
 :::
@@ -471,22 +466,17 @@ nil
 ::: {.callout-note}
 ## OUT
 ```
-18:40:49.468 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.real-world-walkthrough/summary
-18:40:49.468 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.real-world-walkthrough/temperature-trends
-18:40:49.468 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.real-world-walkthrough/clean-data
-18:40:49.468 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.real-world-walkthrough/fetch-readings
+[nREPL-session-94df5099-9db7-4f41-be96-e3b17949b1df] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.real-world-walkthrough/summary
+[nREPL-session-94df5099-9db7-4f41-be96-e3b17949b1df] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.real-world-walkthrough/temperature-trends
+[nREPL-session-94df5099-9db7-4f41-be96-e3b17949b1df] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.real-world-walkthrough/clean-data
+[nREPL-session-94df5099-9db7-4f41-be96-e3b17949b1df] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.real-world-walkthrough/fetch-readings
   Fetching readings for Paris ...
-18:40:49.770 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-walkthrough/.cache/43/(pocket-book.real-world-walkthrough⁄fetch-readings {:city "Paris", :days 7, :source :api})
   Cleaning data for Paris with {:precision 10, :remove-nulls true} ...
-18:40:49.971 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-walkthrough/.cache/cc/(pocket-book.real-world-walkthrough⁄clean-data (pocket-book.real-world-walkthrough⁄fetch-readings {:city "Paris", :days 7, :source :api}) {:precision 10, :remove-nulls true})
   Analyzing temperature for Paris ...
-18:40:50.273 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-walkthrough/.cache/2a/2a820dbc32606f9a2a1ffa074c3acf5784b48894
-18:40:50.274 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.real-world-walkthrough/rainfall-totals
+[nREPL-session-94df5099-9db7-4f41-be96-e3b17949b1df] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.real-world-walkthrough/rainfall-totals
   Analyzing rainfall for Paris ...
-18:40:50.576 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-walkthrough/.cache/d7/(pocket-book.real-world-walkthrough⁄rainfall-totals (pocket-book.real-world-walkthrough⁄clean-data (pocket-book.real-world-walkthrough⁄fetch-readings {:city "Paris", :days 7, :source :api}) {:precision 10, :remove-nulls true}) {:unit :mm})
   Generating summary for Paris ...
-18:40:50.777 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-walkthrough/.cache/93/9309825516de10ffc3376546f08c45afffa90056
-"Elapsed time: 1309.189261 msecs"
+"Elapsed time: 1308.954806 msecs"
 
 ```
 :::
@@ -557,7 +547,7 @@ nil
 ::: {.callout-note}
 ## OUT
 ```
-"Elapsed time: 0.139024 msecs"
+"Elapsed time: 0.137921 msecs"
 
 ```
 :::
@@ -605,83 +595,83 @@ directory named after the function and arguments.
 ::: {.printedClojure}
 ```clojure
 [{:path
-  "/tmp/pocket-walkthrough/.cache/1f/(pocket-book.real-world-walkthrough⁄fetch-readings {:city \"London\", :days 7, :source :api})",
+  "/tmp/pocket-walkthrough/.cache/e0/(pocket-book.real-world-walkthrough⁄fetch-readings {:city \"Paris\", :days 7, :source :api})",
   :id
-  "(pocket-book.real-world-walkthrough/fetch-readings {:city \"London\", :days 7, :source :api})",
+  "(pocket-book.real-world-walkthrough/fetch-readings {:city \"Paris\", :days 7, :source :api})",
   :fn-name "pocket-book.real-world-walkthrough/fetch-readings",
-  :args-str "[{:city \"London\", :days 7, :source :api}]",
-  :created-at "2026-02-06T16:40:48.452711061Z"}
+  :args-str "[{:city \"Paris\", :days 7, :source :api}]",
+  :created-at "2026-02-06T17:42:14.723919826Z"}
  {:path
-  "/tmp/pocket-walkthrough/.cache/d7/(pocket-book.real-world-walkthrough⁄rainfall-totals (pocket-book.real-world-walkthrough⁄clean-data (pocket-book.real-world-walkthrough⁄fetch-readings {:city \"Paris\", :days 7, :source :api}) {:precision 10, :remove-nulls true}) {:unit :mm})",
-  :id
-  "(pocket-book.real-world-walkthrough/rainfall-totals (pocket-book.real-world-walkthrough/clean-data (pocket-book.real-world-walkthrough/fetch-readings {:city \"Paris\", :days 7, :source :api}) {:precision 10, :remove-nulls true}) {:unit :mm})",
-  :fn-name "pocket-book.real-world-walkthrough/rainfall-totals",
-  :args-str
-  "[(pocket-book.real-world-walkthrough/clean-data (pocket-book.real-world-walkthrough/fetch-readings {:city \"Paris\", :days 7, :source :api}) {:precision 10, :remove-nulls true}) {:unit :mm}]",
-  :created-at "2026-02-06T16:40:50.574746772Z"}
- {:path
-  "/tmp/pocket-walkthrough/.cache/24/(pocket-book.real-world-walkthrough⁄rainfall-totals (pocket-book.real-world-walkthrough⁄clean-data (pocket-book.real-world-walkthrough⁄fetch-readings {:city \"London\", :days 7, :source :api}) {:precision 10, :remove-nulls true}) {:unit :mm})",
-  :id
-  "(pocket-book.real-world-walkthrough/rainfall-totals (pocket-book.real-world-walkthrough/clean-data (pocket-book.real-world-walkthrough/fetch-readings {:city \"London\", :days 7, :source :api}) {:precision 10, :remove-nulls true}) {:unit :mm})",
-  :fn-name "pocket-book.real-world-walkthrough/rainfall-totals",
-  :args-str
-  "[(pocket-book.real-world-walkthrough/clean-data (pocket-book.real-world-walkthrough/fetch-readings {:city \"London\", :days 7, :source :api}) {:precision 10, :remove-nulls true}) {:unit :mm}]",
-  :created-at "2026-02-06T16:40:49.259336052Z"}
- {:path
-  "/tmp/pocket-walkthrough/.cache/ba/ba537d067887188386995083bdbfd1dcc84fdadb",
+  "/tmp/pocket-walkthrough/.cache/c5/c525d35cd8db735967050d94c90504d4fff4fd88",
   :id
   "(pocket-book.real-world-walkthrough/temperature-trends (pocket-book.real-world-walkthrough/clean-data (pocket-book.real-world-walkthrough/fetch-readings {:city \"London\", :days 7, :source :api}) {:precision 10, :remove-nulls true}) {:unit :celsius})",
   :fn-name "pocket-book.real-world-walkthrough/temperature-trends",
   :args-str
   "[(pocket-book.real-world-walkthrough/clean-data (pocket-book.real-world-walkthrough/fetch-readings {:city \"London\", :days 7, :source :api}) {:precision 10, :remove-nulls true}) {:unit :celsius}]",
-  :created-at "2026-02-06T16:40:48.957078564Z"}
+  :created-at "2026-02-06T17:42:13.912414934Z"}
  {:path
-  "/tmp/pocket-walkthrough/.cache/2a/2a820dbc32606f9a2a1ffa074c3acf5784b48894",
-  :id
-  "(pocket-book.real-world-walkthrough/temperature-trends (pocket-book.real-world-walkthrough/clean-data (pocket-book.real-world-walkthrough/fetch-readings {:city \"Paris\", :days 7, :source :api}) {:precision 10, :remove-nulls true}) {:unit :celsius})",
-  :fn-name "pocket-book.real-world-walkthrough/temperature-trends",
-  :args-str
-  "[(pocket-book.real-world-walkthrough/clean-data (pocket-book.real-world-walkthrough/fetch-readings {:city \"Paris\", :days 7, :source :api}) {:precision 10, :remove-nulls true}) {:unit :celsius}]",
-  :created-at "2026-02-06T16:40:50.272252992Z"}
- {:path
-  "/tmp/pocket-walkthrough/.cache/6a/6a762a4c89e59ac4326e5ef8bff321cc817f397e",
-  :id
-  "(pocket-book.real-world-walkthrough/summary (pocket-book.real-world-walkthrough/temperature-trends (pocket-book.real-world-walkthrough/clean-data (pocket-book.real-world-walkthrough/fetch-readings {:city \"London\", :days 7, :source :api}) {:precision 10, :remove-nulls true}) {:unit :celsius}) (pocket-book.real-world-walkthrough/rainfall-totals (pocket-book.real-world-walkthrough/clean-data (pocket-book.real-world-walkthrough/fetch-readings {:city \"London\", :days 7, :source :api}) {:precision 10, :remove-nulls true}) {:unit :mm}))",
-  :fn-name "pocket-book.real-world-walkthrough/summary",
-  :args-str
-  "[(pocket-book.real-world-walkthrough/temperature-trends (pocket-book.real-world-walkthrough/clean-data (pocket-book.real-world-walkthrough/fetch-readings {:city \"London\", :days 7, :source :api}) {:precision 10, :remove-nulls true}) {:unit :celsius}) (pocket-book.real-world-walkthrough/rainfall-totals (pocket-book.real-world-walkthrough/clean-data (pocket-book.real-world-walkthrough/fetch-readings {:city \"London\", :days 7, :source :api}) {:precision 10, :remove-nulls true}) {:unit :mm})]",
-  :created-at "2026-02-06T16:40:49.461531105Z"}
- {:path
-  "/tmp/pocket-walkthrough/.cache/93/9309825516de10ffc3376546f08c45afffa90056",
-  :id
-  "(pocket-book.real-world-walkthrough/summary (pocket-book.real-world-walkthrough/temperature-trends (pocket-book.real-world-walkthrough/clean-data (pocket-book.real-world-walkthrough/fetch-readings {:city \"Paris\", :days 7, :source :api}) {:precision 10, :remove-nulls true}) {:unit :celsius}) (pocket-book.real-world-walkthrough/rainfall-totals (pocket-book.real-world-walkthrough/clean-data (pocket-book.real-world-walkthrough/fetch-readings {:city \"Paris\", :days 7, :source :api}) {:precision 10, :remove-nulls true}) {:unit :mm}))",
-  :fn-name "pocket-book.real-world-walkthrough/summary",
-  :args-str
-  "[(pocket-book.real-world-walkthrough/temperature-trends (pocket-book.real-world-walkthrough/clean-data (pocket-book.real-world-walkthrough/fetch-readings {:city \"Paris\", :days 7, :source :api}) {:precision 10, :remove-nulls true}) {:unit :celsius}) (pocket-book.real-world-walkthrough/rainfall-totals (pocket-book.real-world-walkthrough/clean-data (pocket-book.real-world-walkthrough/fetch-readings {:city \"Paris\", :days 7, :source :api}) {:precision 10, :remove-nulls true}) {:unit :mm})]",
-  :created-at "2026-02-06T16:40:50.776480237Z"}
- {:path
-  "/tmp/pocket-walkthrough/.cache/43/(pocket-book.real-world-walkthrough⁄fetch-readings {:city \"Paris\", :days 7, :source :api})",
-  :id
-  "(pocket-book.real-world-walkthrough/fetch-readings {:city \"Paris\", :days 7, :source :api})",
-  :fn-name "pocket-book.real-world-walkthrough/fetch-readings",
-  :args-str "[{:city \"Paris\", :days 7, :source :api}]",
-  :created-at "2026-02-06T16:40:49.768904757Z"}
- {:path
-  "/tmp/pocket-walkthrough/.cache/cc/(pocket-book.real-world-walkthrough⁄clean-data (pocket-book.real-world-walkthrough⁄fetch-readings {:city \"Paris\", :days 7, :source :api}) {:precision 10, :remove-nulls true})",
+  "/tmp/pocket-walkthrough/.cache/b9/(pocket-book.real-world-walkthrough⁄clean-data (pocket-book.real-world-walkthrough⁄fetch-readings {:city \"Paris\", :days 7, :source :api}) {:precision 10, :remove-nulls true})",
   :id
   "(pocket-book.real-world-walkthrough/clean-data (pocket-book.real-world-walkthrough/fetch-readings {:city \"Paris\", :days 7, :source :api}) {:precision 10, :remove-nulls true})",
   :fn-name "pocket-book.real-world-walkthrough/clean-data",
   :args-str
   "[(pocket-book.real-world-walkthrough/fetch-readings {:city \"Paris\", :days 7, :source :api}) {:precision 10, :remove-nulls true}]",
-  :created-at "2026-02-06T16:40:49.970532653Z"}
+  :created-at "2026-02-06T17:42:14.925599128Z"}
  {:path
-  "/tmp/pocket-walkthrough/.cache/97/(pocket-book.real-world-walkthrough⁄clean-data (pocket-book.real-world-walkthrough⁄fetch-readings {:city \"London\", :days 7, :source :api}) {:precision 10, :remove-nulls true})",
+  "/tmp/pocket-walkthrough/.cache/3b/3b52543eb01fa985687706e01cefef95d49377c0",
+  :id
+  "(pocket-book.real-world-walkthrough/temperature-trends (pocket-book.real-world-walkthrough/clean-data (pocket-book.real-world-walkthrough/fetch-readings {:city \"Paris\", :days 7, :source :api}) {:precision 10, :remove-nulls true}) {:unit :celsius})",
+  :fn-name "pocket-book.real-world-walkthrough/temperature-trends",
+  :args-str
+  "[(pocket-book.real-world-walkthrough/clean-data (pocket-book.real-world-walkthrough/fetch-readings {:city \"Paris\", :days 7, :source :api}) {:precision 10, :remove-nulls true}) {:unit :celsius}]",
+  :created-at "2026-02-06T17:42:15.227243799Z"}
+ {:path
+  "/tmp/pocket-walkthrough/.cache/36/36d7883057896a6ed9a01638cf44c1b5e7b043ce",
+  :id
+  "(pocket-book.real-world-walkthrough/summary (pocket-book.real-world-walkthrough/temperature-trends (pocket-book.real-world-walkthrough/clean-data (pocket-book.real-world-walkthrough/fetch-readings {:city \"London\", :days 7, :source :api}) {:precision 10, :remove-nulls true}) {:unit :celsius}) (pocket-book.real-world-walkthrough/rainfall-totals (pocket-book.real-world-walkthrough/clean-data (pocket-book.real-world-walkthrough/fetch-readings {:city \"London\", :days 7, :source :api}) {:precision 10, :remove-nulls true}) {:unit :mm}))",
+  :fn-name "pocket-book.real-world-walkthrough/summary",
+  :args-str
+  "[(pocket-book.real-world-walkthrough/temperature-trends (pocket-book.real-world-walkthrough/clean-data (pocket-book.real-world-walkthrough/fetch-readings {:city \"London\", :days 7, :source :api}) {:precision 10, :remove-nulls true}) {:unit :celsius}) (pocket-book.real-world-walkthrough/rainfall-totals (pocket-book.real-world-walkthrough/clean-data (pocket-book.real-world-walkthrough/fetch-readings {:city \"London\", :days 7, :source :api}) {:precision 10, :remove-nulls true}) {:unit :mm})]",
+  :created-at "2026-02-06T17:42:14.416671013Z"}
+ {:path
+  "/tmp/pocket-walkthrough/.cache/ac/(pocket-book.real-world-walkthrough⁄fetch-readings {:city \"London\", :days 7, :source :api})",
+  :id
+  "(pocket-book.real-world-walkthrough/fetch-readings {:city \"London\", :days 7, :source :api})",
+  :fn-name "pocket-book.real-world-walkthrough/fetch-readings",
+  :args-str "[{:city \"London\", :days 7, :source :api}]",
+  :created-at "2026-02-06T17:42:13.408504411Z"}
+ {:path
+  "/tmp/pocket-walkthrough/.cache/a5/(pocket-book.real-world-walkthrough⁄clean-data (pocket-book.real-world-walkthrough⁄fetch-readings {:city \"London\", :days 7, :source :api}) {:precision 10, :remove-nulls true})",
   :id
   "(pocket-book.real-world-walkthrough/clean-data (pocket-book.real-world-walkthrough/fetch-readings {:city \"London\", :days 7, :source :api}) {:precision 10, :remove-nulls true})",
   :fn-name "pocket-book.real-world-walkthrough/clean-data",
   :args-str
   "[(pocket-book.real-world-walkthrough/fetch-readings {:city \"London\", :days 7, :source :api}) {:precision 10, :remove-nulls true}]",
-  :created-at "2026-02-06T16:40:48.655255318Z"}]
+  :created-at "2026-02-06T17:42:13.610759137Z"}
+ {:path
+  "/tmp/pocket-walkthrough/.cache/6a/6ad34b3726540ad8be7ea6846ceabfef80622947",
+  :id
+  "(pocket-book.real-world-walkthrough/summary (pocket-book.real-world-walkthrough/temperature-trends (pocket-book.real-world-walkthrough/clean-data (pocket-book.real-world-walkthrough/fetch-readings {:city \"Paris\", :days 7, :source :api}) {:precision 10, :remove-nulls true}) {:unit :celsius}) (pocket-book.real-world-walkthrough/rainfall-totals (pocket-book.real-world-walkthrough/clean-data (pocket-book.real-world-walkthrough/fetch-readings {:city \"Paris\", :days 7, :source :api}) {:precision 10, :remove-nulls true}) {:unit :mm}))",
+  :fn-name "pocket-book.real-world-walkthrough/summary",
+  :args-str
+  "[(pocket-book.real-world-walkthrough/temperature-trends (pocket-book.real-world-walkthrough/clean-data (pocket-book.real-world-walkthrough/fetch-readings {:city \"Paris\", :days 7, :source :api}) {:precision 10, :remove-nulls true}) {:unit :celsius}) (pocket-book.real-world-walkthrough/rainfall-totals (pocket-book.real-world-walkthrough/clean-data (pocket-book.real-world-walkthrough/fetch-readings {:city \"Paris\", :days 7, :source :api}) {:precision 10, :remove-nulls true}) {:unit :mm})]",
+  :created-at "2026-02-06T17:42:15.730926681Z"}
+ {:path
+  "/tmp/pocket-walkthrough/.cache/9b/(pocket-book.real-world-walkthrough⁄rainfall-totals (pocket-book.real-world-walkthrough⁄clean-data (pocket-book.real-world-walkthrough⁄fetch-readings {:city \"London\", :days 7, :source :api}) {:precision 10, :remove-nulls true}) {:unit :mm})",
+  :id
+  "(pocket-book.real-world-walkthrough/rainfall-totals (pocket-book.real-world-walkthrough/clean-data (pocket-book.real-world-walkthrough/fetch-readings {:city \"London\", :days 7, :source :api}) {:precision 10, :remove-nulls true}) {:unit :mm})",
+  :fn-name "pocket-book.real-world-walkthrough/rainfall-totals",
+  :args-str
+  "[(pocket-book.real-world-walkthrough/clean-data (pocket-book.real-world-walkthrough/fetch-readings {:city \"London\", :days 7, :source :api}) {:precision 10, :remove-nulls true}) {:unit :mm}]",
+  :created-at "2026-02-06T17:42:14.214507125Z"}
+ {:path
+  "/tmp/pocket-walkthrough/.cache/78/(pocket-book.real-world-walkthrough⁄rainfall-totals (pocket-book.real-world-walkthrough⁄clean-data (pocket-book.real-world-walkthrough⁄fetch-readings {:city \"Paris\", :days 7, :source :api}) {:precision 10, :remove-nulls true}) {:unit :mm})",
+  :id
+  "(pocket-book.real-world-walkthrough/rainfall-totals (pocket-book.real-world-walkthrough/clean-data (pocket-book.real-world-walkthrough/fetch-readings {:city \"Paris\", :days 7, :source :api}) {:precision 10, :remove-nulls true}) {:unit :mm})",
+  :fn-name "pocket-book.real-world-walkthrough/rainfall-totals",
+  :args-str
+  "[(pocket-book.real-world-walkthrough/clean-data (pocket-book.real-world-walkthrough/fetch-readings {:city \"Paris\", :days 7, :source :api}) {:precision 10, :remove-nulls true}) {:unit :mm}]",
+  :created-at "2026-02-06T17:42:15.529203393Z"}]
 
 ```
 :::
@@ -705,10 +695,10 @@ directory named after the function and arguments.
  :total-size-bytes 16707,
  :entries-per-fn
  {"pocket-book.real-world-walkthrough/fetch-readings" 2,
-  "pocket-book.real-world-walkthrough/rainfall-totals" 2,
   "pocket-book.real-world-walkthrough/temperature-trends" 2,
+  "pocket-book.real-world-walkthrough/clean-data" 2,
   "pocket-book.real-world-walkthrough/summary" 2,
-  "pocket-book.real-world-walkthrough/clean-data" 2}}
+  "pocket-book.real-world-walkthrough/rainfall-totals" 2}}
 
 ```
 :::
@@ -739,44 +729,44 @@ full details.
 ::: {.sourceClojure}
 ```clojure
 .cache
-├── 1f
-│   └── (pocket-book.real-world-walkthrough⁄fetch-readings {:city "London", :days 7, :source :api})
+├── 36
+│   └── 36d7883057896a6ed9a01638cf44c1b5e7b043ce
 │       ├── meta.edn
 │       └── value.nippy
-├── 24
-│   └── (pocket-book.real-world-walkthrough⁄rainfall-totals (pocket-book.real-world-walkthrough⁄clean-data (pocket-book.real-world-walkthrough⁄fetch-readings {:city "London", :days 7, :source :api}) {:precision 10, :remove-nulls true}) {:unit :mm})
-│       ├── meta.edn
-│       └── value.nippy
-├── 2a
-│   └── 2a820dbc32606f9a2a1ffa074c3acf5784b48894
-│       ├── meta.edn
-│       └── value.nippy
-├── 43
-│   └── (pocket-book.real-world-walkthrough⁄fetch-readings {:city "Paris", :days 7, :source :api})
+├── 3b
+│   └── 3b52543eb01fa985687706e01cefef95d49377c0
 │       ├── meta.edn
 │       └── value.nippy
 ├── 6a
-│   └── 6a762a4c89e59ac4326e5ef8bff321cc817f397e
+│   └── 6ad34b3726540ad8be7ea6846ceabfef80622947
 │       ├── meta.edn
 │       └── value.nippy
-├── 93
-│   └── 9309825516de10ffc3376546f08c45afffa90056
+├── 78
+│   └── (pocket-book.real-world-walkthrough⁄rainfall-totals (pocket-book.real-world-walkthrough⁄clean-data (pocket-book.real-world-walkthrough⁄fetch-readings {:city "Paris", :days 7, :source :api}) {:precision 10, :remove-nulls true}) {:unit :mm})
 │       ├── meta.edn
 │       └── value.nippy
-├── 97
+├── 9b
+│   └── (pocket-book.real-world-walkthrough⁄rainfall-totals (pocket-book.real-world-walkthrough⁄clean-data (pocket-book.real-world-walkthrough⁄fetch-readings {:city "London", :days 7, :source :api}) {:precision 10, :remove-nulls true}) {:unit :mm})
+│       ├── meta.edn
+│       └── value.nippy
+├── a5
 │   └── (pocket-book.real-world-walkthrough⁄clean-data (pocket-book.real-world-walkthrough⁄fetch-readings {:city "London", :days 7, :source :api}) {:precision 10, :remove-nulls true})
 │       ├── meta.edn
 │       └── value.nippy
-├── ba
-│   └── ba537d067887188386995083bdbfd1dcc84fdadb
+├── ac
+│   └── (pocket-book.real-world-walkthrough⁄fetch-readings {:city "London", :days 7, :source :api})
 │       ├── meta.edn
 │       └── value.nippy
-├── cc
+├── b9
 │   └── (pocket-book.real-world-walkthrough⁄clean-data (pocket-book.real-world-walkthrough⁄fetch-readings {:city "Paris", :days 7, :source :api}) {:precision 10, :remove-nulls true})
 │       ├── meta.edn
 │       └── value.nippy
-└── d7
-    └── (pocket-book.real-world-walkthrough⁄rainfall-totals (pocket-book.real-world-walkthrough⁄clean-data (pocket-book.real-world-walkthrough⁄fetch-readings {:city "Paris", :days 7, :source :api}) {:precision 10, :remove-nulls true}) {:unit :mm})
+├── c5
+│   └── c525d35cd8db735967050d94c90504d4fff4fd88
+│       ├── meta.edn
+│       └── value.nippy
+└── e0
+    └── (pocket-book.real-world-walkthrough⁄fetch-readings {:city "Paris", :days 7, :source :api})
         ├── meta.edn
         └── value.nippy
 
@@ -801,7 +791,7 @@ Remove all cached data:
 ::: {.callout-note}
 ## OUT
 ```
-18:40:50.785 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-walkthrough
+[nREPL-session-94df5099-9db7-4f41-be96-e3b17949b1df] INFO scicloj.pocket - Cache cleanup: /tmp/pocket-walkthrough
 
 ```
 :::

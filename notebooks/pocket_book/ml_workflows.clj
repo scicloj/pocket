@@ -1,4 +1,4 @@
-;; # Demo: Caching a Machine Learning Workflow
+;; # Example: Machine Learning Workflows
 
 ;; This chapter demonstrates Pocket in a realistic machine learning
 ;; scenario. If you're new to ML, don't worry — we'll explain the
@@ -45,7 +45,7 @@
 
 ;; ## Setup
 
-(ns pocket-book.regression-experiments
+(ns pocket-book.ml-workflows
   (:require
    ;; Logging setup for this chapter (see Logging chapter):
    [pocket-book.logging]

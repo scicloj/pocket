@@ -201,14 +201,20 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./pocket_book.regression_experiments.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Demo: Caching a Machine Learning Workflow</span></span></a>
+  <a href="./pocket_book.ml_workflows.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Example: Machine Learning Workflows</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./pocket_book.developing_pocket.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Developing Pocket</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./pocket_book.api_reference.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">API Reference</span></span></a>
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">API Reference</span></span></a>
   </div>
 </li>
     </ul>
@@ -305,7 +311,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <div id="callout-1" class="callout-1-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>18:40:46.217 INFO scicloj.pocket - Cache dir set to: /tmp/pocket-demo-pipelines
+<pre><code>[nREPL-session-94df5099-9db7-4f41-be96-e3b17949b1df] INFO scicloj.pocket - Cache dir set to: /tmp/pocket-demo-pipelines
 </code></pre>
 </div>
 </div>
@@ -328,7 +334,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <div id="callout-2" class="callout-2-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>18:40:46.217 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo-pipelines
+<pre><code>[nREPL-session-94df5099-9db7-4f41-be96-e3b17949b1df] INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo-pipelines
 </code></pre>
 </div>
 </div>
@@ -400,16 +406,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <div id="callout-3" class="callout-3-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>18:40:46.220 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.recursive-caching-in-pipelines/train-model
-18:40:46.220 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.recursive-caching-in-pipelines/preprocess
-18:40:46.220 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.recursive-caching-in-pipelines/load-dataset
+<pre><code>[nREPL-session-94df5099-9db7-4f41-be96-e3b17949b1df] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.recursive-caching-in-pipelines/train-model
+[nREPL-session-94df5099-9db7-4f41-be96-e3b17949b1df] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.recursive-caching-in-pipelines/preprocess
+[nREPL-session-94df5099-9db7-4f41-be96-e3b17949b1df] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.recursive-caching-in-pipelines/load-dataset
 Loading dataset from data/raw.csv ...
-18:40:46.522 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo-pipelines/.cache/d3/(pocket-book.recursive-caching-in-pipelines⁄load-dataset "data⁄raw.csv")
 Preprocessing with options: {:scale 2}
-18:40:46.826 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo-pipelines/.cache/d7/(pocket-book.recursive-caching-in-pipelines⁄preprocess (pocket-book.recursive-caching-in-pipelines⁄load-dataset "data⁄raw.csv") {:scale 2})
 Training model with params: {:epochs 100}
-18:40:47.128 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo-pipelines/.cache/c0/(pocket-book.recursive-caching-in-pipelines⁄train-model (pocket-book.recursive-caching-in-pipelines⁄preprocess (pocket-book.recursive-caching-in-pipelines⁄load-dataset "data⁄raw.csv") {:scale 2}) {:epochs 100})
-"Elapsed time: 909.046825 msecs"
+"Elapsed time: 907.121946 msecs"
 </code></pre>
 </div>
 </div>
@@ -440,7 +443,7 @@ Training model with params: {:epochs 100}
 </div>
 <div id="callout-4" class="callout-4-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>"Elapsed time: 0.295126 msecs"
+<pre><code>"Elapsed time: 0.241391 msecs"
 </code></pre>
 </div>
 </div>
@@ -459,8 +462,8 @@ Training model with params: {:epochs 100}
 </div>
 <div class="printedClojure">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>[<span class="st">"(pocket-book.recursive-caching-in-pipelines/train-model (pocket-book.recursive-caching-in-pipelines/preprocess (pocket-book.recursive-caching-in-pipelines/load-dataset </span><span class="sc">\"</span><span class="st">data/raw.csv</span><span class="sc">\"</span><span class="st">) {:scale 2}) {:epochs 100})"</span></span>
-<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a> <span class="st">"(pocket-book.recursive-caching-in-pipelines/preprocess (pocket-book.recursive-caching-in-pipelines/load-dataset </span><span class="sc">\"</span><span class="st">data/raw.csv</span><span class="sc">\"</span><span class="st">) {:scale 2})"</span></span>
-<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a> <span class="st">"(pocket-book.recursive-caching-in-pipelines/load-dataset </span><span class="sc">\"</span><span class="st">data/raw.csv</span><span class="sc">\"</span><span class="st">)"</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a> <span class="st">"(pocket-book.recursive-caching-in-pipelines/load-dataset </span><span class="sc">\"</span><span class="st">data/raw.csv</span><span class="sc">\"</span><span class="st">)"</span></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a> <span class="st">"(pocket-book.recursive-caching-in-pipelines/preprocess (pocket-book.recursive-caching-in-pipelines/load-dataset </span><span class="sc">\"</span><span class="st">data/raw.csv</span><span class="sc">\"</span><span class="st">) {:scale 2})"</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="sourceClojure">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb23"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>(<span class="kw">-&gt;&gt;</span> (pocket/cache-entries)</span>
@@ -470,8 +473,8 @@ Training model with params: {:epochs 100}
 </div>
 <div class="sourceClojure">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb24"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>(pocket-book.recursive-caching-in-pipelines/train-model (pocket-book.recursive-caching-in-pipelines/preprocess (pocket-book.recursive-caching-in-pipelines/load-dataset <span class="st">"data/raw.csv"</span>) {<span class="at">:scale</span> <span class="dv">2</span>}) {<span class="at">:epochs</span> <span class="dv">100</span>})</span>
-<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>(pocket-book.recursive-caching-in-pipelines/preprocess (pocket-book.recursive-caching-in-pipelines/load-dataset <span class="st">"data/raw.csv"</span>) {<span class="at">:scale</span> <span class="dv">2</span>})</span>
-<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>(pocket-book.recursive-caching-in-pipelines/load-dataset <span class="st">"data/raw.csv"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>(pocket-book.recursive-caching-in-pipelines/load-dataset <span class="st">"data/raw.csv"</span>)</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>(pocket-book.recursive-caching-in-pipelines/preprocess (pocket-book.recursive-caching-in-pipelines/load-dataset <span class="st">"data/raw.csv"</span>) {<span class="at">:scale</span> <span class="dv">2</span>})</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>The inner step appears as a literal sub-expression in the outer step’s identity. This is how Pocket tracks provenance: the cache key for <code>train-model</code> records that its input came from <code>preprocess</code>, which in turn came from <code>load-dataset</code>.</p>
 <p>This happens automatically when you pass <code>Cached</code> objects (without derefing) from one cached step to the next. If you deref early with <code>@</code> (or <code>deref</code>), the downstream step sees a plain value and the provenance link is lost — the cache key is based on the value’s hash instead. Both patterns work; the choice is whether you need traceability.</p>
@@ -531,15 +534,12 @@ Training model with params: {:epochs 100}
 </div>
 <div id="callout-5" class="callout-5-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>18:40:47.135 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.recursive-caching-in-pipelines/train-model
-18:40:47.135 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.recursive-caching-in-pipelines/preprocess
-18:40:47.135 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.recursive-caching-in-pipelines/load-dataset
+<pre><code>[nREPL-session-94df5099-9db7-4f41-be96-e3b17949b1df] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.recursive-caching-in-pipelines/train-model
+[nREPL-session-94df5099-9db7-4f41-be96-e3b17949b1df] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.recursive-caching-in-pipelines/preprocess
+[nREPL-session-94df5099-9db7-4f41-be96-e3b17949b1df] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.recursive-caching-in-pipelines/load-dataset
 Loading dataset from data/experiment.csv ...
-18:40:47.437 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo-pipelines/.cache/21/(pocket-book.recursive-caching-in-pipelines⁄load-dataset "data⁄experiment.csv")
 Preprocessing with options: {:scale 2}
-18:40:47.739 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo-pipelines/.cache/dc/(pocket-book.recursive-caching-in-pipelines⁄preprocess (pocket-book.recursive-caching-in-pipelines⁄load-dataset "data⁄experiment.csv") {:scale 2})
 Training model with params: {:epochs 100}
-18:40:48.041 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo-pipelines/.cache/ab/(pocket-book.recursive-caching-in-pipelines⁄train-model (pocket-book.recursive-caching-in-pipelines⁄preprocess (pocket-book.recursive-caching-in-pipelines⁄load-dataset "data⁄experiment.csv") {:scale 2}) {:epochs 100})
 </code></pre>
 </div>
 </div>
@@ -637,7 +637,7 @@ Training model with params: {:epochs 100}
 </div>
 <div id="callout-6" class="callout-6-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>18:40:48.045 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo-pipelines
+<pre><code>[nREPL-session-94df5099-9db7-4f41-be96-e3b17949b1df] INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo-pipelines
 </code></pre>
 </div>
 </div>

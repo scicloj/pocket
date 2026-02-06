@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Pocket</title>
+<title>11&nbsp; Developing Pocket – Pocket</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -65,7 +65,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="site_libs/quarto-search/fuse.min.js"></script>
 <script src="site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="./">
-<link href="./pocket_book.getting_started.html" rel="next">
+<link href="./pocket_book.api_reference.html" rel="next">
+<link href="./pocket_book.ml_workflows.html" rel="prev">
 <script src="site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
 <script src="site_libs/quarto-html/axe/axe-check.js" type="module"></script>
@@ -117,7 +118,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./index.html"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Preface</span></a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./pocket_book.developing_pocket.html"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Developing Pocket</span></a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -146,7 +147,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <ul class="list-unstyled mt-1">
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./index.html" class="sidebar-item-text sidebar-link active">
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Preface</span></span></a>
   </div>
 </li>
@@ -206,7 +207,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./pocket_book.developing_pocket.html" class="sidebar-item-text sidebar-link">
+  <a href="./pocket_book.developing_pocket.html" class="sidebar-item-text sidebar-link active">
  <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Developing Pocket</span></span></a>
   </div>
 </li>
@@ -226,15 +227,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#preface" id="toc-preface" class="nav-link active" data-scroll-target="#preface"><span class="header-section-number">1</span> Preface</a>
+  <li><a href="#rendering-notebooks" id="toc-rendering-notebooks" class="nav-link active" data-scroll-target="#rendering-notebooks">Rendering notebooks</a></li>
+  <li><a href="#running-tests" id="toc-running-tests" class="nav-link" data-scroll-target="#running-tests">Running tests</a></li>
+  <li><a href="#literate-testing-with-kindtest-last" id="toc-literate-testing-with-kindtest-last" class="nav-link" data-scroll-target="#literate-testing-with-kindtest-last">Literate testing with <code>kind/test-last</code></a></li>
+  <li><a href="#api-reference-with-kinddoc" id="toc-api-reference-with-kinddoc" class="nav-link" data-scroll-target="#api-reference-with-kinddoc">API Reference with <code>kind/doc</code></a>
   <ul>
-  <li><a href="#what-is-this-about" id="toc-what-is-this-about" class="nav-link" data-scroll-target="#what-is-this-about">What is this about?</a></li>
-  <li><a href="#key-features" id="toc-key-features" class="nav-link" data-scroll-target="#key-features">Key features</a></li>
-  <li><a href="#general-info" id="toc-general-info" class="nav-link" data-scroll-target="#general-info">General info</a></li>
-  <li><a href="#quick-example" id="toc-quick-example" class="nav-link" data-scroll-target="#quick-example">Quick example</a></li>
-  <li><a href="#discussion" id="toc-discussion" class="nav-link" data-scroll-target="#discussion">Discussion</a></li>
-  <li><a href="#license" id="toc-license" class="nav-link" data-scroll-target="#license">License</a></li>
-  <li><a href="#chapters-in-this-book" id="toc-chapters-in-this-book" class="nav-link" data-scroll-target="#chapters-in-this-book">Chapters in this book</a></li>
+  <li><a href="#map" id="toc-map" class="nav-link" data-scroll-target="#map"><code>map</code></a></li>
   </ul></li>
   </ul>
 </nav>
@@ -244,7 +242,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Pocket</h1>
+<h1 class="title"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Developing Pocket</span></h1>
 </div>
 
 
@@ -273,101 +271,112 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </style>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js" type="text/javascript"></script>
 <script src="https://code.jquery.com/ui/1.13.1/jquery-ui.min.js" type="text/javascript"></script>
-<section id="preface" class="level1" data-number="1">
-<h1 data-number="1"><span class="header-section-number">1</span> Preface</h1>
-<p>Filesystem-based <a href="https://en.wikipedia.org/wiki/Cache_(computing)">caching</a> for expensive Clojure computations</p>
-<section id="what-is-this-about" class="level2">
-<h2 class="anchored" data-anchor-id="what-is-this-about">What is this about?</h2>
-<p>Pocket makes it easy to cache expensive function calls to disk and reuse results across sessions. If a computation takes longer than disk I/O, Pocket can help — wrap it once, and the result is saved for next time. This is especially useful for data science workflows with expensive intermediate steps that need to survive JVM restarts.</p>
-<p>Under the hood, Pocket derives cache keys from the function identity and its arguments (so the same computation always maps to the same cache entry), uses <a href="https://github.com/taoensso/nippy">Nippy</a> for fast serialization, and provides an in-memory layer backed by <a href="https://github.com/clojure/core.cache">core.cache</a> with configurable <a href="https://en.wikipedia.org/wiki/Cache_replacement_policies">eviction policies</a>. Concurrent uses of the same computation are <a href="https://en.wikipedia.org/wiki/Thread_safety">thread-safe</a> — the computation runs only once.</p>
+<p>This chapter is for contributors and curious readers. It describes how Pocket’s documentation is built, how tests are structured, and the conventions the notebooks follow.</p>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>(<span class="kw">ns</span> pocket-book.developing-pocket</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  (<span class="at">:require</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>   [scicloj.kindly.v4.kind <span class="at">:as</span> kind]</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>   [clojure.string <span class="at">:as</span> <span class="kw">str</span>]))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<section id="rendering-notebooks" class="level2">
+<h2 class="anchored" data-anchor-id="rendering-notebooks">Rendering notebooks</h2>
+<p>Pocket’s documentation is a <a href="https://scicloj.github.io/clay/">Clay</a> book — a collection of Clojure source files that Clay evaluates and renders as HTML (via <a href="https://quarto.org/">Quarto</a>) or as GitHub Flavored Markdown.</p>
+<p>The chapter list lives in <code>notebooks/chapters.edn</code>:</p>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>(<span class="kw">-&gt;&gt;</span> <span class="st">"notebooks/chapters.edn"</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>     <span class="kw">slurp</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>     clojure.edn/read-string)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="printedClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>[<span class="st">"getting_started"</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a> <span class="st">"configuration"</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a> <span class="st">"logging"</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a> <span class="st">"recursive_caching_in_pipelines"</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a> <span class="st">"usage_practices"</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a> <span class="st">"real_world_walkthrough"</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a> <span class="st">"concurrency"</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a> <span class="st">"extending_pocket"</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a> <span class="st">"ml_workflows"</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a> <span class="st">"developing_pocket"</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a> <span class="st">"api_reference"</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Each entry maps to a file under <code>notebooks/pocket_book/</code>. For example, <code>"getting_started"</code> corresponds to <code>notebooks/pocket_book/getting_started.clj</code>.</p>
+<p>The rendering helpers live in <code>notebooks/dev.clj</code>. From a REPL with the <code>:dev</code> alias:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>(<span class="kw">require</span> '[dev <span class="at">:as</span> dev] <span class="at">:reload</span>)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="co">;; Render the full HTML book (opens a browser):</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>(dev/make-book!)</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="co">;; Render one or more chapters as GitHub Flavored Markdown</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="co">;; (useful for reviewing in a terminal or diff tool):</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>(dev/make-gfm! <span class="st">"pocket_book/getting_started.clj"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The Quarto configuration is in <code>clay.edn</code> at the project root.</p>
 </section>
-<section id="key-features" class="level2">
-<h2 class="anchored" data-anchor-id="key-features">Key features</h2>
+<section id="running-tests" class="level2">
+<h2 class="anchored" data-anchor-id="running-tests">Running tests</h2>
+<p>The test suite combines hand-written tests with tests generated from notebooks:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">./run_tests.sh</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>This runs <code>clojure -M:dev:test -m cognitect.test-runner</code>, which scans the <code>test/</code> directory recursively. It picks up:</p>
 <ul>
-<li><strong>Lazy evaluation</strong> — <code>cached</code> returns a deref-able value; computation runs only when needed</li>
-<li><strong>Pipeline caching</strong> — chain cached steps into pipelines with automatic provenance tracking</li>
-<li><strong>Storage policies</strong> — <code>:mem+disk</code> (default), <code>:mem</code> (no disk I/O), or <code>:none</code> (identity tracking only)</li>
-<li><strong>DAG introspection</strong> — reconstruct the full computation graph and render it as a flowchart</li>
-<li><strong>Thread-safe</strong> — concurrent uses of the same computation run it exactly once</li>
-<li><strong>Configurable</strong> — cache directory, eviction policy, and storage mode via <code>pocket.edn</code>, environment variables, or code</li>
+<li><strong><code>test/scicloj/pocket_test.clj</code></strong> — hand-written unit tests</li>
+<li><strong><code>test/pocket_book/*_generated_test.clj</code></strong> — tests generated from notebook <code>kind/test-last</code> annotations (see below)</li>
 </ul>
 </section>
-<section id="general-info" class="level2">
-<h2 class="anchored" data-anchor-id="general-info">General info</h2>
-<table class="caption-top table">
-<tbody>
-<tr class="odd">
-<td>Website</td>
-<td><a href="https://scicloj.github.io/pocket/">https://scicloj.github.io/pocket/</a></td>
-</tr>
-<tr class="even">
-<td>Source</td>
-<td><a href="https://github.com/scicloj/pocket"><img src="https://img.shields.io/badge/github-%23121011.svg?style=for-the-badge&amp;logo=github&amp;logoColor=white" class="img-fluid" alt="(GitHub repo)"></a></td>
-</tr>
-<tr class="odd">
-<td>Deps</td>
-<td><a href="https://clojars.org/org.scicloj/pocket"><img src="https://img.shields.io/clojars/v/org.scicloj/pocket.svg" class="img-fluid" alt="Clojars Project"></a></td>
-</tr>
-<tr class="even">
-<td>License</td>
-<td><a href="https://github.com/scicloj/pocket/blob/master/LICENSE">MIT</a></td>
-</tr>
-<tr class="odd">
-<td>Status</td>
-<td>🛠alpha🛠</td>
-</tr>
-</tbody>
-</table>
+<section id="literate-testing-with-kindtest-last" class="level2">
+<h2 class="anchored" data-anchor-id="literate-testing-with-kindtest-last">Literate testing with <code>kind/test-last</code></h2>
+<p>Clay notebooks can embed inline assertions using <code>kind/test-last</code>. A form like:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>(<span class="kw">+</span> <span class="dv">1</span> <span class="dv">2</span>)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>(kind/test-last [<span class="kw">=</span> <span class="dv">3</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>asserts that the result of the <strong>previous</strong> form equals 3. The <code>kind/test-last</code> form is invisible in the rendered documentation — readers see only the code and its output.</p>
+<p>When Clay renders the notebook, it generates a standard <code>clojure.test</code> file as a side effect. For example, a notebook <code>notebooks/pocket_book/foo.clj</code> produces <code>test/pocket_book/foo_generated_test.clj</code>.</p>
+<p>Here is a live example:</p>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>(<span class="bu">def</span><span class="fu"> demo-value </span>(<span class="kw">+</span> <span class="dv">10</span> <span class="dv">20</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>demo-value</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="printedClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="dv">30</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>The assertion above is invisible in the rendered output — but it generated a <code>deftest</code> that runs with every test suite execution.</p>
+<p>The predicate can be any function. Common patterns:</p>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>(<span class="kw">type</span> demo-value)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="printedClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>java.lang.Long</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>(<span class="kw">str</span> <span class="st">"result is "</span> demo-value)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="printedClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="st">"result is 30"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
 </section>
-<section id="quick-example" class="level2">
-<h2 class="anchored" data-anchor-id="quick-example">Quick example</h2>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>(<span class="kw">require</span> '[scicloj.pocket <span class="at">:as</span> pocket])</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>(pocket/set-base-cache-dir! <span class="st">"/tmp/my-cache"</span>)</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>(<span class="bu">defn</span><span class="fu"> expensive-calculation </span>[x y]</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  (Thread/sleep <span class="dv">5000</span>)</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">+</span> x y))</span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="co">;; Create a lazy cached computation</span></span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>(<span class="bu">def</span><span class="fu"> result </span>(pocket/cached <span class="va">#'expensive-calculation</span> <span class="dv">10</span> <span class="dv">20</span>))</span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="at">@result</span>  <span class="co">;; =&gt; 30 (computes and caches — takes 5 seconds)</span></span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="at">@result</span>  <span class="co">;; =&gt; 30 (loads from cache — instant)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</section>
-<section id="discussion" class="level2">
-<h2 class="anchored" data-anchor-id="discussion">Discussion</h2>
-<p>The best places to discuss this project are:</p>
-<ul>
-<li>a topic thread under the <a href="https://clojurians.zulipchat.com/#narrow/channel/151924-data-science/">#data-science channel</a> at the Clojurians Zulip (more about chat channels <a href="https://scicloj.github.io/docs/community/chat/">here</a>)
-<ul>
-<li>It is highly recommended to create separate <a href="https://zulip.com/help/introduction-to-topics">topics</a> for separate questions.</li>
-</ul></li>
-<li>a <a href="https://github.com/scicloj/pocket/issues">github issue</a></li>
-</ul>
-</section>
-<section id="license" class="level2">
-<h2 class="anchored" data-anchor-id="license">License</h2>
-<p>Copyright © 2025-2026 Scicloj</p>
-<p>Distributed under the MIT License — see <a href="https://github.com/scicloj/pocket/blob/master/LICENSE">LICENSE</a>.</p>
-</section>
-<section id="chapters-in-this-book" class="level2">
-<h2 class="anchored" data-anchor-id="chapters-in-this-book">Chapters in this book</h2>
-<ul>
-<li><p><a href="pocket_book.getting_started.html">Getting Started</a></p></li>
-<li><p><a href="pocket_book.configuration.html">Configuration</a></p></li>
-<li><p><a href="pocket_book.logging.html">Logging</a></p></li>
-<li><p><a href="pocket_book.recursive_caching_in_pipelines.html">Recursive Caching in Pipelines</a></p></li>
-<li><p><a href="pocket_book.usage_practices.html">Usage Practices</a></p></li>
-<li><p><a href="pocket_book.real_world_walkthrough.html">Real-World Walkthrough: Weather Analysis Pipeline</a></p></li>
-<li><p><a href="pocket_book.concurrency.html">Concurrency</a></p></li>
-<li><p><a href="pocket_book.extending_pocket.html">Extending Pocket</a></p></li>
-<li><p><a href="pocket_book.ml_workflows.html">Example: Machine Learning Workflows</a></p></li>
-<li><p><a href="pocket_book.developing_pocket.html">Developing Pocket</a></p></li>
-<li><p><a href="pocket_book.api_reference.html">API Reference</a></p></li>
-</ul>
+<section id="api-reference-with-kinddoc" class="level2">
+<h2 class="anchored" data-anchor-id="api-reference-with-kinddoc">API Reference with <code>kind/doc</code></h2>
+<p>The <a href="pocket_book.api_reference.html">API Reference</a> chapter uses <code>kind/doc</code> to render a var’s docstring as formatted documentation:</p>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>(kind/doc <span class="va">#'clojure.core/map</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<section id="map" class="level3">
+<h3 class="anchored" data-anchor-id="map"><code>map</code></h3>
+<p><code>[f]</code></p>
+<p><code>[f coll]</code></p>
+<p><code>[f c1 c2]</code></p>
+<p><code>[f c1 c2 c3]</code></p>
+<p><code>[f c1 c2 c3 &amp; colls]</code></p>
+<p>Returns a lazy sequence consisting of the result of applying f to the set of first items of each coll, followed by applying f to the set of second items in each coll, until any one of the colls is exhausted. Any remaining items in other colls are ignored. Function f should accept number-of-colls arguments. Returns a transducer when no collection is provided.</p>
+<p>Each <code>kind/doc</code> call produces a documentation block from the var’s metadata (docstring, arglists, etc.). Live code examples follow naturally after each block.</p>
+<p>The API Reference namespace uses a metadata hint to hide the <code>kind/doc</code> source code in the rendered output:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>^{<span class="at">:kindly/hide-code</span> <span class="va">true</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">:kindly/options</span> {<span class="at">:kinds-that-hide-code</span> #{<span class="at">:kind/doc</span>}}}</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>(<span class="kw">ns</span> pocket-book.api-reference ...)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>This means readers see the formatted docstring but not the <code>(kind/doc ...)</code> call that produced it.</p>
 <div style="background-color:grey;height:2px;width:100%;"></div>
-<div><pre><small><small>source: <a href="https://github.com/scicloj/pocket/blob/master/notebooks/index.clj">notebooks/index.clj</a></small></small></pre></div>
+<div><pre><small><small>source: <a href="https://github.com/scicloj/pocket/blob/master/notebooks/pocket_book/developing_pocket.clj">notebooks/pocket_book/developing_pocket.clj</a></small></small></pre></div>
 
 
 </section>
@@ -776,10 +785,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   </script>
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
+      <a href="./pocket_book.ml_workflows.html" class="pagination-link" aria-label="Example: Machine Learning Workflows">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Example: Machine Learning Workflows</span></span>
+      </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="./pocket_book.getting_started.html" class="pagination-link" aria-label="Getting Started">
-        <span class="nav-page-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Getting Started</span></span> <i class="bi bi-arrow-right-short"></i>
+      <a href="./pocket_book.api_reference.html" class="pagination-link" aria-label="API Reference">
+        <span class="nav-page-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">API Reference</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>

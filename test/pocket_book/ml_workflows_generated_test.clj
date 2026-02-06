@@ -1,5 +1,5 @@
 (ns
- pocket-book.regression-experiments-generated-test
+ pocket-book.ml-workflows-generated-test
  (:require
   [pocket-book.logging]
   [scicloj.pocket :as pocket]
@@ -291,11 +291,11 @@
     (let
      [low
       (first
-       (filter (fn* [p1__74398#] (= 0.1 (:noise-sd p1__74398#))) rows))
+       (filter (fn* [p1__70235#] (= 0.1 (:noise-sd p1__70235#))) rows))
       high
       (first
        (filter
-        (fn* [p1__74399#] (= 5.0 (:noise-sd p1__74399#)))
+        (fn* [p1__70236#] (= 5.0 (:noise-sd p1__70236#)))
         rows))]
      (and
       (< (:cart-rmse low) (:sgd-rmse low))
@@ -331,11 +331,11 @@
 (def v44_l380 (pocket/cache-entries))
 
 
-(def v46_l428 (pocket/cleanup!))
+(def v46_l398 (pocket/cleanup!))
 
 
 (def
- v48_l474
+ v48_l444
  (defn
   compute-stats
   "Compute normalization statistics from training data.\n   Returns mean and std for each numeric column."
@@ -351,16 +351,16 @@
        +
        (map
         (fn*
-         [p1__74400#]
+         [p1__70237#]
          (*
-          (- p1__74400# (/ (reduce + x-vals) (count x-vals)))
-          (- p1__74400# (/ (reduce + x-vals) (count x-vals)))))
+          (- p1__70237# (/ (reduce + x-vals) (count x-vals)))
+          (- p1__70237# (/ (reduce + x-vals) (count x-vals)))))
         x-vals))
       (count x-vals)))})))
 
 
 (def
- v49_l486
+ v49_l456
  (defn
   normalize-with-stats
   "Normalize a dataset using pre-computed statistics."
@@ -372,7 +372,7 @@
 
 
 (def
- v50_l494
+ v50_l464
  (defn
   train-normalized-model
   "Train a model on normalized data."
@@ -382,7 +382,7 @@
 
 
 (def
- v51_l500
+ v51_l470
  (defn
   evaluate-model
   "Evaluate a model on test data."
@@ -394,77 +394,77 @@
 
 
 (def
- v53_l519
+ v53_l489
  (def
   c-compute-stats
   (pocket/caching-fn #'compute-stats {:storage :mem})))
 
 
 (def
- v54_l522
+ v54_l492
  (def
   c-normalize
   (pocket/caching-fn #'normalize-with-stats {:storage :mem})))
 
 
 (def
- v55_l525
+ v55_l495
  (def c-train (pocket/caching-fn #'train-normalized-model)))
 
 
 (def
- v56_l528
+ v56_l498
  (def c-evaluate (pocket/caching-fn #'evaluate-model {:storage :none})))
 
 
 (def
- v58_l533
+ v58_l503
  (def
   dag-data
   @(pocket/cached #'make-regression-data #'nonlinear-fn 200 0.3 99)))
 
 
 (def
- v59_l536
+ v59_l506
  (def dag-split (first (tc/split->seq dag-data :holdout {:seed 99}))))
 
 
-(def v61_l543 (def stats-c (c-compute-stats (:train dag-split))))
+(def v61_l513 (def stats-c (c-compute-stats (:train dag-split))))
 
 
 (def
- v62_l546
+ v62_l516
  (def train-norm-c (c-normalize (:train dag-split) stats-c)))
 
 
-(def v63_l549 (def test-norm-c (c-normalize (:test dag-split) stats-c)))
+(def v63_l519 (def test-norm-c (c-normalize (:test dag-split) stats-c)))
 
 
-(def v64_l552 (def model-c (c-train train-norm-c cart-spec)))
+(def v64_l522 (def model-c (c-train train-norm-c cart-spec)))
 
 
-(def v65_l555 (def metrics-c (c-evaluate test-norm-c model-c)))
+(def v65_l525 (def metrics-c (c-evaluate test-norm-c model-c)))
 
 
-(def v67_l569 (pocket/origin-story metrics-c))
+(def v67_l539 (pocket/origin-story metrics-c))
 
 
-(def v69_l577 (pocket/origin-story-graph metrics-c))
+(def v69_l547 (pocket/origin-story-graph metrics-c))
 
 
-(def v71_l584 (pocket/origin-story-mermaid metrics-c))
+(def v71_l554 (pocket/origin-story-mermaid metrics-c))
 
 
-(def v73_l588 (deref metrics-c))
+(def v73_l558 (deref metrics-c))
 
 
 (deftest
- t74_l590
- (is ((fn [m] (and (map? m) (contains? m :rmse))) v73_l588)))
+ t74_l560
+ (is ((fn [m] (and (map? m) (contains? m :rmse))) v73_l558)))
 
 
 (def
- v76_l605
+ v76_l575
  (defn
   run-pipeline
   "Run a complete pipeline with given hyperparameters."
@@ -493,7 +493,7 @@
 
 
 (def
- v78_l623
+ v78_l593
  (def
   experiments
   (for
@@ -505,14 +505,14 @@
      :max-depth max-depth}))))
 
 
-(def v80_l634 (def comparison (pocket/compare-experiments experiments)))
+(def v80_l604 (def comparison (pocket/compare-experiments experiments)))
 
 
-(def v81_l637 (tc/dataset comparison))
+(def v81_l607 (tc/dataset comparison))
 
 
 (deftest
- t82_l639
+ t82_l609
  (is
   ((fn
     [ds]
@@ -521,11 +521,11 @@
      (some #{:noise-sd} (tc/column-names ds))
      (some #{:feature-set} (tc/column-names ds))
      (some #{:max-depth} (tc/column-names ds))))
-   v81_l637)))
+   v81_l607)))
 
 
 (def
- v84_l652
+ v84_l622
  (let
   [rows
    (map
@@ -558,4 +558,4 @@
     :layout {:xaxis {:title "max-depth"}, :yaxis {:title "rmse"}}})))
 
 
-(def v86_l705 (pocket/cleanup!))
+(def v86_l675 (pocket/cleanup!))
