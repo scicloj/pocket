@@ -422,7 +422,10 @@
                 ;; Cached node (has :fn) - rectangle shape
                 (:fn node)
                 (let [mermaid-id (gen-id)
-                      label (-> (:fn node) symbol name)]
+                      f (:fn node)
+                      label (if (keyword? f)
+                              (str f)
+                              (-> f symbol name))]
                   ;; Register this node's origin-story :id if present
                   (when-let [os-id (:id node)]
                     (swap! node-ids assoc os-id mermaid-id))
