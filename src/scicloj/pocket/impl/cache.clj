@@ -328,6 +328,8 @@
 (defn origin-story
   "Walk a Cached value's argument tree and return a DAG description.
    
+   Returns a kindly-wrapped value for notebook rendering.
+   
    Each cached step is `{:fn <var> :args [<nodes>] :id <string>}`,
    with `:value` included if the computation has been realized.
    Plain (non-Cached) arguments become `{:value <val>}` leaf nodes.
@@ -340,12 +342,12 @@
    Does not trigger computation — only peeks at already-realized values.
    Works with all storage policies (`:mem+disk`, `:mem`, `:none`)."
   [x]
-  (origin-story* x (atom {}) (atom 0)))
+  (kind/pprint (origin-story* x (atom {}) (atom 0))))
 
 (defn origin-story-graph
   "Walk a Cached value's argument tree and return a normalized graph.
    
-   Returns `{:nodes {<id> <node-map>} :edges [[<from> <to>] ...]}`.
+   Returns a kindly-wrapped `{:nodes {<id> <node-map>} :edges [[<from> <to>] ...]}`.
    
    Node maps contain `:fn` (for cached steps) or `:value` (for leaves),
    plus `:value` if the cached computation has been realized.
@@ -381,7 +383,7 @@
                   (when parent-id
                     (swap! edges conj [parent-id leaf-id])))))]
       (walk x nil)
-      {:nodes @nodes :edges @edges})))
+      (kind/pprint {:nodes @nodes :edges @edges}))))
 
 (defn- mermaid-escape
   "Escape a string for use in a Mermaid node label."

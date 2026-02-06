@@ -61,28 +61,28 @@
       ds
       (tc/add-column
        :x2
-       (mapv (fn* [p1__72569#] (* p1__72569# p1__72569#)) xv)))
+       (mapv (fn* [p1__74066#] (* p1__74066# p1__74066#)) xv)))
      :trig
      (->
       ds
       (tc/add-column
        :sin-x
-       (mapv (fn* [p1__72570#] (Math/sin p1__72570#)) xv))
+       (mapv (fn* [p1__74067#] (Math/sin p1__74067#)) xv))
       (tc/add-column
        :cos-x
-       (mapv (fn* [p1__72571#] (Math/cos p1__72571#)) xv)))
+       (mapv (fn* [p1__74068#] (Math/cos p1__74068#)) xv)))
      :poly+trig
      (->
       ds
       (tc/add-column
        :x2
-       (mapv (fn* [p1__72572#] (* p1__72572# p1__72572#)) xv))
+       (mapv (fn* [p1__74069#] (* p1__74069# p1__74069#)) xv))
       (tc/add-column
        :sin-x
-       (mapv (fn* [p1__72573#] (Math/sin p1__72573#)) xv))
+       (mapv (fn* [p1__74070#] (Math/sin p1__74070#)) xv))
       (tc/add-column
        :cos-x
-       (mapv (fn* [p1__72574#] (Math/cos p1__72574#)) xv))))
+       (mapv (fn* [p1__74071#] (Math/cos p1__74071#)) xv))))
     (ds-mod/set-inference-target :y)))))
 
 
@@ -303,11 +303,11 @@
     (let
      [low
       (first
-       (filter (fn* [p1__72575#] (= 0.1 (:noise-sd p1__72575#))) rows))
+       (filter (fn* [p1__74072#] (= 0.1 (:noise-sd p1__74072#))) rows))
       high
       (first
        (filter
-        (fn* [p1__72576#] (= 5.0 (:noise-sd p1__72576#)))
+        (fn* [p1__74073#] (= 5.0 (:noise-sd p1__74073#)))
         rows))]
      (and
       (< (:cart-rmse low) (:sgd-rmse low))
@@ -360,10 +360,10 @@
        +
        (map
         (fn*
-         [p1__72577#]
+         [p1__74074#]
          (*
-          (- p1__72577# (/ (reduce + x-vals) (count x-vals)))
-          (- p1__72577# (/ (reduce + x-vals) (count x-vals)))))
+          (- p1__74074# (/ (reduce + x-vals) (count x-vals)))
+          (- p1__74074# (/ (reduce + x-vals) (count x-vals)))))
         x-vals))
       (count x-vals)))})))
 
@@ -381,7 +381,7 @@
     ds
     :x-norm
     (mapv
-     (fn* [p1__72578#] (/ (- p1__72578# x-mean) x-std))
+     (fn* [p1__74075#] (/ (- p1__74075# x-mean) x-std))
      (:x ds))))))
 
 
@@ -456,7 +456,7 @@
 (def v62_l428 (pocket/origin-story-graph metrics-c))
 
 
-(def v64_l435 (kind/mermaid (pocket/origin-story-mermaid metrics-c)))
+(def v64_l435 (pocket/origin-story-mermaid metrics-c))
 
 
 (def v66_l439 (deref metrics-c))
