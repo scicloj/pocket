@@ -120,7 +120,7 @@
 ;;
 ;; This happens automatically when you pass `Cached` objects (without
 ;; derefing) from one cached step to the next. If you deref early
-;; with `@`, the downstream step sees a plain value and the
+;; with `@` (or `deref`), the downstream step sees a plain value and the
 ;; provenance link is lost — the cache key is based on the value's
 ;; hash instead. Both patterns work; the choice is whether you need
 ;; traceability.
@@ -154,7 +154,7 @@
 
 ;; No `:value` keys yet. Now trigger computation:
 
-@model-c
+(deref model-c)
 
 ;; After deref, every node includes its `:value`:
 
