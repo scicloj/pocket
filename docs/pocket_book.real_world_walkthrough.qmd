@@ -90,7 +90,7 @@ both `temperature-trends` and `rainfall-totals` → `summary`.
 ::: {.callout-note}
 ## OUT
 ```
-14:17:06.797 INFO scicloj.pocket - Cache dir set to: /tmp/pocket-walkthrough
+15:38:40.822 INFO scicloj.pocket - Cache dir set to: /tmp/pocket-walkthrough
 
 ```
 :::
@@ -117,7 +117,7 @@ both `temperature-trends` and `rainfall-totals` → `summary`.
 ::: {.callout-note}
 ## OUT
 ```
-14:17:06.798 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-walkthrough
+15:38:40.823 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-walkthrough
 
 ```
 :::
@@ -301,22 +301,22 @@ nil
 ::: {.callout-note}
 ## OUT
 ```
-14:17:06.809 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.real-world-walkthrough/summary
-14:17:06.809 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.real-world-walkthrough/temperature-trends
-14:17:06.809 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.real-world-walkthrough/clean-data
-14:17:06.809 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.real-world-walkthrough/fetch-readings
+15:38:40.828 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.real-world-walkthrough/summary
+15:38:40.828 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.real-world-walkthrough/temperature-trends
+15:38:40.828 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.real-world-walkthrough/clean-data
+15:38:40.828 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.real-world-walkthrough/fetch-readings
   Fetching readings for London ...
-14:17:07.111 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-walkthrough/.cache/1f/(pocket-book.real-world-walkthrough⁄fetch-readings {:city "London", :days 7, :source :api})
+15:38:41.130 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-walkthrough/.cache/1f/(pocket-book.real-world-walkthrough⁄fetch-readings {:city "London", :days 7, :source :api})
   Cleaning data for London with {:precision 10, :remove-nulls true} ...
-14:17:07.314 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-walkthrough/.cache/97/(pocket-book.real-world-walkthrough⁄clean-data (pocket-book.real-world-walkthrough⁄fetch-readings {:city "London", :days 7, :source :api}) {:precision 10, :remove-nulls true})
+15:38:41.332 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-walkthrough/.cache/97/(pocket-book.real-world-walkthrough⁄clean-data (pocket-book.real-world-walkthrough⁄fetch-readings {:city "London", :days 7, :source :api}) {:precision 10, :remove-nulls true})
   Analyzing temperature for London ...
-14:17:07.616 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-walkthrough/.cache/ba/ba537d067887188386995083bdbfd1dcc84fdadb
-14:17:07.617 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.real-world-walkthrough/rainfall-totals
+15:38:41.634 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-walkthrough/.cache/ba/ba537d067887188386995083bdbfd1dcc84fdadb
+15:38:41.635 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.real-world-walkthrough/rainfall-totals
   Analyzing rainfall for London ...
-14:17:07.919 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-walkthrough/.cache/24/(pocket-book.real-world-walkthrough⁄rainfall-totals (pocket-book.real-world-walkthrough⁄clean-data (pocket-book.real-world-walkthrough⁄fetch-readings {:city "London", :days 7, :source :api}) {:precision 10, :remove-nulls true}) {:unit :mm})
+15:38:41.936 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-walkthrough/.cache/24/(pocket-book.real-world-walkthrough⁄rainfall-totals (pocket-book.real-world-walkthrough⁄clean-data (pocket-book.real-world-walkthrough⁄fetch-readings {:city "London", :days 7, :source :api}) {:precision 10, :remove-nulls true}) {:unit :mm})
   Generating summary for London ...
-14:17:08.121 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-walkthrough/.cache/6a/6a762a4c89e59ac4326e5ef8bff321cc817f397e
-"Elapsed time: 1312.376364 msecs"
+15:38:42.138 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-walkthrough/.cache/6a/6a762a4c89e59ac4326e5ef8bff321cc817f397e
+"Elapsed time: 1310.012201 msecs"
 
 ```
 :::
@@ -393,7 +393,7 @@ nil
 ::: {.callout-note}
 ## OUT
 ```
-"Elapsed time: 0.211046 msecs"
+"Elapsed time: 0.122756 msecs"
 
 ```
 :::
@@ -470,22 +470,22 @@ nil
 ::: {.callout-note}
 ## OUT
 ```
-14:17:08.130 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.real-world-walkthrough/summary
-14:17:08.130 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.real-world-walkthrough/temperature-trends
-14:17:08.130 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.real-world-walkthrough/clean-data
-14:17:08.130 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.real-world-walkthrough/fetch-readings
+15:38:42.144 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.real-world-walkthrough/summary
+15:38:42.144 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.real-world-walkthrough/temperature-trends
+15:38:42.144 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.real-world-walkthrough/clean-data
+15:38:42.144 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.real-world-walkthrough/fetch-readings
   Fetching readings for Paris ...
-14:17:08.432 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-walkthrough/.cache/43/(pocket-book.real-world-walkthrough⁄fetch-readings {:city "Paris", :days 7, :source :api})
+15:38:42.445 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-walkthrough/.cache/43/(pocket-book.real-world-walkthrough⁄fetch-readings {:city "Paris", :days 7, :source :api})
   Cleaning data for Paris with {:precision 10, :remove-nulls true} ...
-14:17:08.633 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-walkthrough/.cache/cc/(pocket-book.real-world-walkthrough⁄clean-data (pocket-book.real-world-walkthrough⁄fetch-readings {:city "Paris", :days 7, :source :api}) {:precision 10, :remove-nulls true})
+15:38:42.647 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-walkthrough/.cache/cc/(pocket-book.real-world-walkthrough⁄clean-data (pocket-book.real-world-walkthrough⁄fetch-readings {:city "Paris", :days 7, :source :api}) {:precision 10, :remove-nulls true})
   Analyzing temperature for Paris ...
-14:17:08.934 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-walkthrough/.cache/2a/2a820dbc32606f9a2a1ffa074c3acf5784b48894
-14:17:08.935 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.real-world-walkthrough/rainfall-totals
+15:38:42.948 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-walkthrough/.cache/2a/2a820dbc32606f9a2a1ffa074c3acf5784b48894
+15:38:42.948 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.real-world-walkthrough/rainfall-totals
   Analyzing rainfall for Paris ...
-14:17:09.237 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-walkthrough/.cache/d7/(pocket-book.real-world-walkthrough⁄rainfall-totals (pocket-book.real-world-walkthrough⁄clean-data (pocket-book.real-world-walkthrough⁄fetch-readings {:city "Paris", :days 7, :source :api}) {:precision 10, :remove-nulls true}) {:unit :mm})
+15:38:43.250 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-walkthrough/.cache/d7/(pocket-book.real-world-walkthrough⁄rainfall-totals (pocket-book.real-world-walkthrough⁄clean-data (pocket-book.real-world-walkthrough⁄fetch-readings {:city "Paris", :days 7, :source :api}) {:precision 10, :remove-nulls true}) {:unit :mm})
   Generating summary for Paris ...
-14:17:09.440 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-walkthrough/.cache/93/9309825516de10ffc3376546f08c45afffa90056
-"Elapsed time: 1310.244807 msecs"
+15:38:43.451 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-walkthrough/.cache/93/9309825516de10ffc3376546f08c45afffa90056
+"Elapsed time: 1306.573024 msecs"
 
 ```
 :::
@@ -556,7 +556,7 @@ nil
 ::: {.callout-note}
 ## OUT
 ```
-"Elapsed time: 0.224584 msecs"
+"Elapsed time: 0.14886 msecs"
 
 ```
 :::
@@ -609,7 +609,7 @@ directory named after the function and arguments.
   "(pocket-book.real-world-walkthrough/fetch-readings {:city \"London\", :days 7, :source :api})",
   :fn-name "pocket-book.real-world-walkthrough/fetch-readings",
   :args-str "[{:city \"London\", :days 7, :source :api}]",
-  :created-at "2026-02-06T12:17:07.110419353Z"}
+  :created-at "2026-02-06T13:38:41.129668782Z"}
  {:path
   "/tmp/pocket-walkthrough/.cache/d7/(pocket-book.real-world-walkthrough⁄rainfall-totals (pocket-book.real-world-walkthrough⁄clean-data (pocket-book.real-world-walkthrough⁄fetch-readings {:city \"Paris\", :days 7, :source :api}) {:precision 10, :remove-nulls true}) {:unit :mm})",
   :id
@@ -617,7 +617,7 @@ directory named after the function and arguments.
   :fn-name "pocket-book.real-world-walkthrough/rainfall-totals",
   :args-str
   "[(pocket-book.real-world-walkthrough/clean-data (pocket-book.real-world-walkthrough/fetch-readings {:city \"Paris\", :days 7, :source :api}) {:precision 10, :remove-nulls true}) {:unit :mm}]",
-  :created-at "2026-02-06T12:17:09.236287208Z"}
+  :created-at "2026-02-06T13:38:43.249307737Z"}
  {:path
   "/tmp/pocket-walkthrough/.cache/24/(pocket-book.real-world-walkthrough⁄rainfall-totals (pocket-book.real-world-walkthrough⁄clean-data (pocket-book.real-world-walkthrough⁄fetch-readings {:city \"London\", :days 7, :source :api}) {:precision 10, :remove-nulls true}) {:unit :mm})",
   :id
@@ -625,7 +625,7 @@ directory named after the function and arguments.
   :fn-name "pocket-book.real-world-walkthrough/rainfall-totals",
   :args-str
   "[(pocket-book.real-world-walkthrough/clean-data (pocket-book.real-world-walkthrough/fetch-readings {:city \"London\", :days 7, :source :api}) {:precision 10, :remove-nulls true}) {:unit :mm}]",
-  :created-at "2026-02-06T12:17:07.918131113Z"}
+  :created-at "2026-02-06T13:38:41.936167223Z"}
  {:path
   "/tmp/pocket-walkthrough/.cache/ba/ba537d067887188386995083bdbfd1dcc84fdadb",
   :id
@@ -633,7 +633,7 @@ directory named after the function and arguments.
   :fn-name "pocket-book.real-world-walkthrough/temperature-trends",
   :args-str
   "[(pocket-book.real-world-walkthrough/clean-data (pocket-book.real-world-walkthrough/fetch-readings {:city \"London\", :days 7, :source :api}) {:precision 10, :remove-nulls true}) {:unit :celsius}]",
-  :created-at "2026-02-06T12:17:07.615471617Z"}
+  :created-at "2026-02-06T13:38:41.633942491Z"}
  {:path
   "/tmp/pocket-walkthrough/.cache/2a/2a820dbc32606f9a2a1ffa074c3acf5784b48894",
   :id
@@ -641,7 +641,7 @@ directory named after the function and arguments.
   :fn-name "pocket-book.real-world-walkthrough/temperature-trends",
   :args-str
   "[(pocket-book.real-world-walkthrough/clean-data (pocket-book.real-world-walkthrough/fetch-readings {:city \"Paris\", :days 7, :source :api}) {:precision 10, :remove-nulls true}) {:unit :celsius}]",
-  :created-at "2026-02-06T12:17:08.933819074Z"}
+  :created-at "2026-02-06T13:38:42.947446301Z"}
  {:path
   "/tmp/pocket-walkthrough/.cache/6a/6a762a4c89e59ac4326e5ef8bff321cc817f397e",
   :id
@@ -649,7 +649,7 @@ directory named after the function and arguments.
   :fn-name "pocket-book.real-world-walkthrough/summary",
   :args-str
   "[(pocket-book.real-world-walkthrough/temperature-trends (pocket-book.real-world-walkthrough/clean-data (pocket-book.real-world-walkthrough/fetch-readings {:city \"London\", :days 7, :source :api}) {:precision 10, :remove-nulls true}) {:unit :celsius}) (pocket-book.real-world-walkthrough/rainfall-totals (pocket-book.real-world-walkthrough/clean-data (pocket-book.real-world-walkthrough/fetch-readings {:city \"London\", :days 7, :source :api}) {:precision 10, :remove-nulls true}) {:unit :mm})]",
-  :created-at "2026-02-06T12:17:08.120611266Z"}
+  :created-at "2026-02-06T13:38:42.137862623Z"}
  {:path
   "/tmp/pocket-walkthrough/.cache/93/9309825516de10ffc3376546f08c45afffa90056",
   :id
@@ -657,14 +657,14 @@ directory named after the function and arguments.
   :fn-name "pocket-book.real-world-walkthrough/summary",
   :args-str
   "[(pocket-book.real-world-walkthrough/temperature-trends (pocket-book.real-world-walkthrough/clean-data (pocket-book.real-world-walkthrough/fetch-readings {:city \"Paris\", :days 7, :source :api}) {:precision 10, :remove-nulls true}) {:unit :celsius}) (pocket-book.real-world-walkthrough/rainfall-totals (pocket-book.real-world-walkthrough/clean-data (pocket-book.real-world-walkthrough/fetch-readings {:city \"Paris\", :days 7, :source :api}) {:precision 10, :remove-nulls true}) {:unit :mm})]",
-  :created-at "2026-02-06T12:17:09.438401666Z"}
+  :created-at "2026-02-06T13:38:43.450528992Z"}
  {:path
   "/tmp/pocket-walkthrough/.cache/43/(pocket-book.real-world-walkthrough⁄fetch-readings {:city \"Paris\", :days 7, :source :api})",
   :id
   "(pocket-book.real-world-walkthrough/fetch-readings {:city \"Paris\", :days 7, :source :api})",
   :fn-name "pocket-book.real-world-walkthrough/fetch-readings",
   :args-str "[{:city \"Paris\", :days 7, :source :api}]",
-  :created-at "2026-02-06T12:17:08.431181242Z"}
+  :created-at "2026-02-06T13:38:42.445087760Z"}
  {:path
   "/tmp/pocket-walkthrough/.cache/cc/(pocket-book.real-world-walkthrough⁄clean-data (pocket-book.real-world-walkthrough⁄fetch-readings {:city \"Paris\", :days 7, :source :api}) {:precision 10, :remove-nulls true})",
   :id
@@ -672,7 +672,7 @@ directory named after the function and arguments.
   :fn-name "pocket-book.real-world-walkthrough/clean-data",
   :args-str
   "[(pocket-book.real-world-walkthrough/fetch-readings {:city \"Paris\", :days 7, :source :api}) {:precision 10, :remove-nulls true}]",
-  :created-at "2026-02-06T12:17:08.632550280Z"}
+  :created-at "2026-02-06T13:38:42.646312039Z"}
  {:path
   "/tmp/pocket-walkthrough/.cache/97/(pocket-book.real-world-walkthrough⁄clean-data (pocket-book.real-world-walkthrough⁄fetch-readings {:city \"London\", :days 7, :source :api}) {:precision 10, :remove-nulls true})",
   :id
@@ -680,7 +680,7 @@ directory named after the function and arguments.
   :fn-name "pocket-book.real-world-walkthrough/clean-data",
   :args-str
   "[(pocket-book.real-world-walkthrough/fetch-readings {:city \"London\", :days 7, :source :api}) {:precision 10, :remove-nulls true}]",
-  :created-at "2026-02-06T12:17:07.313148335Z"}]
+  :created-at "2026-02-06T13:38:41.332062962Z"}]
 
 ```
 :::
@@ -794,7 +794,7 @@ Remove all cached data:
 ::: {.callout-note}
 ## OUT
 ```
-14:17:09.458 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-walkthrough
+15:38:43.461 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-walkthrough
 
 ```
 :::

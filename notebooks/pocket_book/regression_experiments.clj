@@ -17,7 +17,7 @@
 ;; in `deps.edn` — [tablecloth](https://scicloj.github.io/tablecloth/),
 ;; [metamorph.ml](https://github.com/scicloj/metamorph.ml),
 ;; [tribuo](https://github.com/scicloj/scicloj.ml.tribuo), and
-;; [tableplot](https://scicloj.github.io/tableplot/). Start your REPL
+;; [Plotly.js](https://plotly.com/javascript/). Start your REPL
 ;; with `clojure -M:dev` to have them available.
 
 ;; ## Setup
@@ -37,9 +37,7 @@
    ;; Machine learning:
    [scicloj.metamorph.ml :as ml]
    [scicloj.metamorph.ml.loss :as loss]
-   [scicloj.ml.tribuo]
-   ;; Visualization:
-   [scicloj.tableplot.v1.plotly :as plotly]))
+   [scicloj.ml.tribuo]))
 
 (def cache-dir "/tmp/pocket-regression")
 
@@ -217,17 +215,19 @@ feature-results
       sgd-pred (:y (ml/predict (prepared [:poly+trig :test])
                                (models [:poly+trig :sgd])))
       cart-pred (:y (ml/predict test-ds
-                                (models [:raw :cart])))]
-  (-> (tc/dataset {:x (:x test-ds)
-                   :actual (:y test-ds)
-                   :Linear-SGD sgd-pred
-                   :CART cart-pred})
-      (plotly/layer-point {:=x :x :=y :actual :=name "actual"
-                           :=mark-opacity 0.3 :=mark-color "gray"})
-      (plotly/layer-point {:=x :x :=y :Linear-SGD :=name "Linear SGD (poly+trig)"
-                           :=mark-opacity 0.5 :=mark-color "steelblue"})
-      (plotly/layer-point {:=x :x :=y :CART :=name "CART (raw)"
-                           :=mark-opacity 0.5 :=mark-color "tomato"})))
+                                (models [:raw :cart])))
+      xs (vec (:x test-ds))
+      actuals (vec (:y test-ds))
+      sgd-vals (vec sgd-pred)
+      cart-vals (vec cart-pred)]
+  (kind/plotly
+   {:data [{:x xs :y actuals :mode "markers" :name "actual"
+            :marker {:opacity 0.3 :color "gray"}}
+           {:x xs :y sgd-vals :mode "markers" :name "Linear SGD (poly+trig)"
+            :marker {:opacity 0.5 :color "steelblue"}}
+           {:x xs :y cart-vals :mode "markers" :name "CART (raw)"
+            :marker {:opacity 0.5 :color "tomato"}}]
+    :layout {:xaxis {:title "x"} :yaxis {:title "y"}}}))
 
 ;; ---
 
@@ -271,13 +271,13 @@ noise-results
 
 ;; ### RMSE vs. noise
 
-(let [rows (mapcat (fn [{:keys [noise-sd cart-rmse sgd-rmse]}]
-                     [{:noise-sd noise-sd :model "CART" :rmse cart-rmse}
-                      {:noise-sd noise-sd :model "Linear SGD" :rmse sgd-rmse}])
-                   noise-results)]
-  (-> (tc/dataset rows)
-      (plotly/layer-line {:=x :noise-sd :=y :rmse :=color :model})
-      (plotly/layer-point {:=x :noise-sd :=y :rmse :=color :model})))
+(let [noise-sds (vec (map :noise-sd noise-results))
+      cart-rmses (vec (map :cart-rmse noise-results))
+      sgd-rmses (vec (map :sgd-rmse noise-results))]
+  (kind/plotly
+   {:data [{:x noise-sds :y cart-rmses :mode "lines+markers" :name "CART"}
+           {:x noise-sds :y sgd-rmses :mode "lines+markers" :name "Linear SGD"}]
+    :layout {:xaxis {:title "noise-sd"} :yaxis {:title "rmse"}}}))
 
 ;; ---
 
@@ -498,11 +498,20 @@ noise-results
 (let [rows (map (fn [exp]
                   (merge (select-keys exp [:noise-sd :feature-set :max-depth])
                          (:result exp)))
-                comparison)]
-  (-> (tc/dataset rows)
-      (plotly/layer-point {:=x :max-depth :=y :rmse
-                           :=color :feature-set
-                           :=size :noise-sd})))
+                comparison)
+      ;; Group by both feature-set and noise-sd for legend entries
+      grouped (group-by (juxt :feature-set :noise-sd) rows)
+      feature-colors {:raw "steelblue" :poly "tomato" :poly+trig "green"}]
+  (kind/plotly
+   {:data (for [[[feature-set noise-sd] pts] (sort-by first grouped)]
+            {:x (mapv :max-depth pts)
+             :y (mapv :rmse pts)
+             :mode "markers"
+             :name (str (name feature-set) " (noise=" noise-sd ")")
+             :legendgroup (name feature-set)
+             :marker {:size (+ 8 (* 15 noise-sd))
+                      :color (feature-colors feature-set)}})
+    :layout {:xaxis {:title "max-depth"} :yaxis {:title "rmse"}}}))
 
 ;; ## Cleanup
 

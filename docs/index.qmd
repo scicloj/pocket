@@ -44,7 +44,7 @@ Under the hood, Pocket derives cache keys from the function identity and its arg
 |-|-|
 |Website | [https://scicloj.github.io/pocket/](https://scicloj.github.io/pocket/)
 |Source |[![(GitHub repo)](https://img.shields.io/badge/github-%23121011.svg?style=for-the-badge&logo=github&logoColor=white)](https://github.com/scicloj/pocket)|
-|Deps |[![Clojars Project](https://img.shields.io/clojars/v/io.github.scicloj/pocket.svg)](https://clojars.org/io.github.scicloj/pocket)|
+|Deps |[![Clojars Project](https://img.shields.io/clojars/v/org.scicloj/pocket.svg)](https://clojars.org/org.scicloj/pocket)|
 |License |[MIT](https://github.com/scicloj/pocket/blob/master/LICENSE)|
 |Status |🛠alpha🛠|
 

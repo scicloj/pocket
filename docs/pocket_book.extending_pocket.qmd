@@ -58,7 +58,7 @@ format:
 ::: {.callout-note}
 ## OUT
 ```
-14:17:16.096 INFO scicloj.pocket - Cache dir set to: /tmp/pocket-extending
+15:38:49.776 INFO scicloj.pocket - Cache dir set to: /tmp/pocket-extending
 
 ```
 :::
@@ -85,7 +85,7 @@ format:
 ::: {.callout-note}
 ## OUT
 ```
-14:17:16.097 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-extending
+15:38:49.776 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-extending
 
 ```
 :::
@@ -331,9 +331,9 @@ First deref computes:
 ::: {.callout-note}
 ## OUT
 ```
-14:17:16.118 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.extending-pocket/analyze-dataset
+15:38:49.786 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.extending-pocket/analyze-dataset
   Analyzing census v 3 ...
-14:17:16.321 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-extending/.cache/a8/(pocket-book.extending-pocket⁄analyze-dataset census-v3 {:method :regression})
+15:38:49.988 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-extending/.cache/a8/(pocket-book.extending-pocket⁄analyze-dataset census-v3 {:method :regression})
 
 ```
 :::
@@ -383,9 +383,9 @@ A different version creates a different cache entry:
 ::: {.callout-note}
 ## OUT
 ```
-14:17:16.326 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.extending-pocket/analyze-dataset
+15:38:49.996 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.extending-pocket/analyze-dataset
   Analyzing census v 4 ...
-14:17:16.527 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-extending/.cache/6f/(pocket-book.extending-pocket⁄analyze-dataset census-v4 {:method :regression})
+15:38:50.197 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-extending/.cache/6f/(pocket-book.extending-pocket⁄analyze-dataset census-v4 {:method :regression})
 
 ```
 :::
@@ -525,7 +525,7 @@ for more details.
 ::: {.callout-note}
 ## OUT
 ```
-14:17:16.532 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-extending
+15:38:50.201 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-extending
 
 ```
 :::

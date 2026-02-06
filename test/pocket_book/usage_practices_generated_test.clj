@@ -24,7 +24,7 @@
 (deftest
  t7_l74
  (is
-  ((fn* [p1__93872#] (re-find #"requires a var" p1__93872#)) v6_l69)))
+  ((fn* [p1__95243#] (re-find #"requires a var" p1__95243#)) v6_l69)))
 
 
 (def v9_l86 (pocket/cleanup!))
@@ -168,7 +168,7 @@
 
 (deftest
  t66_l241
- (is ((fn* [p1__93873#] (re-find #":pending" p1__93873#)) v65_l239)))
+ (is ((fn* [p1__95244#] (re-find #":pending" p1__95244#)) v65_l239)))
 
 
 (def v67_l243 (deref pending-value))
@@ -179,7 +179,7 @@
 
 (deftest
  t70_l248
- (is ((fn* [p1__93874#] (re-find #":cached" p1__93874#)) v69_l246)))
+ (is ((fn* [p1__95245#] (re-find #":cached" p1__95245#)) v69_l246)))
 
 
 (def v72_l268 (pocket/cleanup!))

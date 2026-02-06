@@ -10,21 +10,20 @@
   [scicloj.metamorph.ml :as ml]
   [scicloj.metamorph.ml.loss :as loss]
   [scicloj.ml.tribuo]
-  [scicloj.tableplot.v1.plotly :as plotly]
   [clojure.test :refer [deftest is]]))
 
 
-(def v2_l44 (def cache-dir "/tmp/pocket-regression"))
+(def v2_l42 (def cache-dir "/tmp/pocket-regression"))
 
 
-(def v3_l46 (pocket/set-base-cache-dir! cache-dir))
+(def v3_l44 (pocket/set-base-cache-dir! cache-dir))
 
 
-(def v4_l48 (pocket/cleanup!))
+(def v4_l46 (pocket/cleanup!))
 
 
 (def
- v6_l55
+ v6_l53
  (defn
   make-regression-data
   "Generate a synthetic regression dataset.\n  `f` is a function from x to y (the ground truth).\n  Returns a dataset with columns `:x` and `:y`."
@@ -44,7 +43,7 @@
 
 
 (def
- v7_l68
+ v7_l66
  (defn
   prepare-features
   "Add derived columns to a dataset according to `feature-set`.\n  Supported feature sets:\n  - `:raw`       — no extra columns\n  - `:quadratic` — add x²\n  - `:trig`      — add sin(x) and cos(x)\n  - `:poly+trig` — add x², sin(x), and cos(x)"
@@ -61,33 +60,33 @@
       ds
       (tc/add-column
        :x2
-       (mapv (fn* [p1__94572#] (* p1__94572# p1__94572#)) xv)))
+       (mapv (fn* [p1__96408#] (* p1__96408# p1__96408#)) xv)))
      :trig
      (->
       ds
       (tc/add-column
        :sin-x
-       (mapv (fn* [p1__94573#] (Math/sin p1__94573#)) xv))
+       (mapv (fn* [p1__96409#] (Math/sin p1__96409#)) xv))
       (tc/add-column
        :cos-x
-       (mapv (fn* [p1__94574#] (Math/cos p1__94574#)) xv)))
+       (mapv (fn* [p1__96410#] (Math/cos p1__96410#)) xv)))
      :poly+trig
      (->
       ds
       (tc/add-column
        :x2
-       (mapv (fn* [p1__94575#] (* p1__94575# p1__94575#)) xv))
+       (mapv (fn* [p1__96411#] (* p1__96411# p1__96411#)) xv))
       (tc/add-column
        :sin-x
-       (mapv (fn* [p1__94576#] (Math/sin p1__94576#)) xv))
+       (mapv (fn* [p1__96412#] (Math/sin p1__96412#)) xv))
       (tc/add-column
        :cos-x
-       (mapv (fn* [p1__94577#] (Math/cos p1__94577#)) xv))))
+       (mapv (fn* [p1__96413#] (Math/cos p1__96413#)) xv))))
     (ds-mod/set-inference-target :y)))))
 
 
 (def
- v8_l90
+ v8_l88
  (defn
   train-model
   "Train a model on a dataset."
@@ -96,7 +95,7 @@
 
 
 (def
- v9_l95
+ v9_l93
  (defn
   predict-and-rmse
   "Predict on test data and return RMSE."
@@ -107,12 +106,12 @@
 
 
 (def
- v11_l106
+ v11_l104
  (defn nonlinear-fn "y = sin(x) · x" [x] (* (Math/sin x) x)))
 
 
 (def
- v13_l117
+ v13_l115
  (def
   linear-sgd-spec
   {:model-type :scicloj.ml.tribuo/regression,
@@ -127,7 +126,7 @@
 
 
 (def
- v14_l128
+ v14_l126
  (def
   cart-spec
   {:model-type :scicloj.ml.tribuo/regression,
@@ -139,25 +138,25 @@
 
 
 (def
- v16_l145
+ v16_l143
  (def
   data
   @(pocket/cached #'make-regression-data #'nonlinear-fn 500 0.5 42)))
 
 
-(def v17_l148 (tc/head data))
+(def v17_l146 (tc/head data))
 
 
 (def
- v19_l152
+ v19_l150
  (def split (first (tc/split->seq data :holdout {:seed 42}))))
 
 
-(def v21_l157 (def feature-sets [:raw :quadratic :trig :poly+trig]))
+(def v21_l155 (def feature-sets [:raw :quadratic :trig :poly+trig]))
 
 
 (def
- v23_l164
+ v23_l162
  (def
   prepared
   (into
@@ -168,7 +167,7 @@
 
 
 (def
- v25_l175
+ v25_l173
  (def
   models
   (into
@@ -183,7 +182,7 @@
 
 
 (def
- v27_l187
+ v27_l185
  (def
   feature-results
   (vec
@@ -200,11 +199,11 @@
       (models [fs model-name]))}))))
 
 
-(def v28_l196 feature-results)
+(def v28_l194 feature-results)
 
 
 (deftest
- t29_l198
+ t29_l196
  (is
   ((fn
     [rows]
@@ -214,11 +213,11 @@
       (> (m [:raw "sgd"]) 3.0)
       (< (m [:poly+trig "sgd"]) 2.0)
       (< (Math/abs (- (m [:raw "cart"]) (m [:trig "cart"]))) 0.5))))
-   v28_l196)))
+   v28_l194)))
 
 
 (def
- v31_l216
+ v31_l214
  (let
   [test-ds
    (prepared [:raw :test])
@@ -228,31 +227,33 @@
      (prepared [:poly+trig :test])
      (models [:poly+trig :sgd])))
    cart-pred
-   (:y (ml/predict test-ds (models [:raw :cart])))]
-  (->
-   (tc/dataset
-    {:x (:x test-ds),
-     :actual (:y test-ds),
-     :Linear-SGD sgd-pred,
-     :CART cart-pred})
-   (plotly/layer-point
-    {:=x :x,
-     :=y :actual,
-     :=name "actual",
-     :=mark-opacity 0.3,
-     :=mark-color "gray"})
-   (plotly/layer-point
-    {:=x :x,
-     :=y :Linear-SGD,
-     :=name "Linear SGD (poly+trig)",
-     :=mark-opacity 0.5,
-     :=mark-color "steelblue"})
-   (plotly/layer-point
-    {:=x :x,
-     :=y :CART,
-     :=name "CART (raw)",
-     :=mark-opacity 0.5,
-     :=mark-color "tomato"}))))
+   (:y (ml/predict test-ds (models [:raw :cart])))
+   xs
+   (vec (:x test-ds))
+   actuals
+   (vec (:y test-ds))
+   sgd-vals
+   (vec sgd-pred)
+   cart-vals
+   (vec cart-pred)]
+  (kind/plotly
+   {:data
+    [{:x xs,
+      :y actuals,
+      :mode "markers",
+      :name "actual",
+      :marker {:opacity 0.3, :color "gray"}}
+     {:x xs,
+      :y sgd-vals,
+      :mode "markers",
+      :name "Linear SGD (poly+trig)",
+      :marker {:opacity 0.5, :color "steelblue"}}
+     {:x xs,
+      :y cart-vals,
+      :mode "markers",
+      :name "CART (raw)",
+      :marker {:opacity 0.5, :color "tomato"}}],
+    :layout {:xaxis {:title "x"}, :yaxis {:title "y"}}})))
 
 
 (def v33_l240 (def noise-levels [0.1 0.5 1.0 2.0 5.0]))
@@ -303,11 +304,11 @@
     (let
      [low
       (first
-       (filter (fn* [p1__94578#] (= 0.1 (:noise-sd p1__94578#))) rows))
+       (filter (fn* [p1__96414#] (= 0.1 (:noise-sd p1__96414#))) rows))
       high
       (first
        (filter
-        (fn* [p1__94579#] (= 5.0 (:noise-sd p1__94579#)))
+        (fn* [p1__96415#] (= 5.0 (:noise-sd p1__96415#)))
         rows))]
      (and
       (< (:cart-rmse low) (:sgd-rmse low))
@@ -318,17 +319,20 @@
 (def
  v38_l274
  (let
-  [rows
-   (mapcat
-    (fn
-     [{:keys [noise-sd cart-rmse sgd-rmse]}]
-     [{:noise-sd noise-sd, :model "CART", :rmse cart-rmse}
-      {:noise-sd noise-sd, :model "Linear SGD", :rmse sgd-rmse}])
-    noise-results)]
-  (->
-   (tc/dataset rows)
-   (plotly/layer-line {:=x :noise-sd, :=y :rmse, :=color :model})
-   (plotly/layer-point {:=x :noise-sd, :=y :rmse, :=color :model}))))
+  [noise-sds
+   (vec (map :noise-sd noise-results))
+   cart-rmses
+   (vec (map :cart-rmse noise-results))
+   sgd-rmses
+   (vec (map :sgd-rmse noise-results))]
+  (kind/plotly
+   {:data
+    [{:x noise-sds, :y cart-rmses, :mode "lines+markers", :name "CART"}
+     {:x noise-sds,
+      :y sgd-rmses,
+      :mode "lines+markers",
+      :name "Linear SGD"}],
+    :layout {:xaxis {:title "noise-sd"}, :yaxis {:title "rmse"}}})))
 
 
 (def v40_l290 (:total-entries (pocket/cache-stats)))
@@ -360,10 +364,10 @@
        +
        (map
         (fn*
-         [p1__94580#]
+         [p1__96416#]
          (*
-          (- p1__94580# (/ (reduce + x-vals) (count x-vals)))
-          (- p1__94580# (/ (reduce + x-vals) (count x-vals)))))
+          (- p1__96416# (/ (reduce + x-vals) (count x-vals)))
+          (- p1__96416# (/ (reduce + x-vals) (count x-vals)))))
         x-vals))
       (count x-vals)))})))
 
@@ -381,7 +385,7 @@
     ds
     :x-norm
     (mapv
-     (fn* [p1__94581#] (/ (- p1__94581# x-mean) x-std))
+     (fn* [p1__96417#] (/ (- p1__96417# x-mean) x-std))
      (:x ds))))))
 
 
@@ -538,14 +542,23 @@
      (merge
       (select-keys exp [:noise-sd :feature-set :max-depth])
       (:result exp)))
-    comparison)]
-  (->
-   (tc/dataset rows)
-   (plotly/layer-point
-    {:=x :max-depth,
-     :=y :rmse,
-     :=color :feature-set,
-     :=size :noise-sd}))))
+    comparison)
+   by-feature
+   (group-by :feature-set rows)]
+  (kind/plotly
+   {:data
+    (for
+     [[feature-set pts] by-feature]
+     {:x (mapv :max-depth pts),
+      :y (mapv :rmse pts),
+      :mode "markers",
+      :name (name feature-set),
+      :marker
+      {:size
+       (mapv
+        (fn* [p1__96418#] (+ 5 (* 10 (:noise-sd p1__96418#))))
+        pts)}}),
+    :layout {:xaxis {:title "max-depth"}, :yaxis {:title "rmse"}}})))
 
 
-(def v79_l509 (pocket/cleanup!))
+(def v79_l514 (pocket/cleanup!))
