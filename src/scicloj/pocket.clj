@@ -325,7 +325,6 @@
    to extract parameter maps, identifies which parameters vary across
    experiments, and returns a seq of maps containing the varying params
    plus the experiment result.
-  ```
    
    Only parameters that differ across experiments are included.
    The `:result` key contains the derefed value of each Cached."
