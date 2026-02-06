@@ -12,7 +12,8 @@
             [scicloj.pocket.protocols :as protocols]
             [babashka.fs :as fs]
             [clojure.edn :as edn]
-            [clojure.tools.logging :as log]))
+            [clojure.tools.logging :as log]
+            [scicloj.kindly.v4.kind :as kind]))
 
 (def ^:dynamic *base-cache-dir*
   "Base directory for cache storage.
@@ -65,7 +66,6 @@
       (:base-cache-dir (impl/pocket-edn))
       (:base-cache-dir @impl/pocket-defaults-edn)))
 
-
 (defn- resolve-mem-cache-options
   "Resolve mem-cache options using the precedence chain."
   []
@@ -74,7 +74,6 @@
       (:mem-cache (impl/pocket-edn))
       (:mem-cache @impl/pocket-defaults-edn)))
 
-
 (defn- resolve-storage
   "Resolve the storage policy using the precedence chain."
   []
@@ -82,8 +81,6 @@
       (some-> (System/getenv "POCKET_STORAGE") keyword)
       (:storage (impl/pocket-edn))
       (:storage @impl/pocket-defaults-edn)))
-
-
 
 (defn- resolve-filename-length-limit
   "Resolve the filename length limit using the precedence chain."
@@ -103,7 +100,6 @@
    :storage (resolve-storage)
    :filename-length-limit (resolve-filename-length-limit)})
 
-
 (defn set-base-cache-dir!
   "Set the base cache directory by altering `*base-cache-dir*`.
    Returns the directory path."
@@ -120,7 +116,6 @@
   (alter-var-root #'*storage* (constantly storage))
   (log/info "Storage policy set to:" storage)
   storage)
-
 
 (defn set-filename-length-limit!
   "Set the filename length limit by altering `*filename-length-limit*`.
@@ -267,12 +262,13 @@
 
 (defn dir-tree
   "Render the cache directory as a tree string, like the Unix `tree` command.
-   Shows the hierarchical structure of cached entries on disk."
+   Shows the hierarchical structure of cached entries on disk.
+   Returns a kindly-wrapped value (`kind/code`) for notebook rendering."
   []
   (let [base-dir (resolve-base-cache-dir)
         dir (when base-dir (str base-dir "/.cache"))]
     (when (and dir (fs/exists? dir))
-      (impl/dir-tree dir))))
+      (kind/code (impl/dir-tree dir)))))
 
 (defn origin-story
   "Given a value, return its computation DAG as a nested map.

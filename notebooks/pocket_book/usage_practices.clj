@@ -207,7 +207,7 @@
 (kind/test-last [= 3])
 
 ;; Visualize cache structure:
-(kind/code (pocket/dir-tree))
+(pocket/dir-tree)
 
 ;; Each directory contains a `meta.edn` file with metadata
 ;; about the cached computation:
@@ -278,7 +278,7 @@
 
 ;; The entry is stored with a hash-based directory name:
 
-(kind/code (pocket/dir-tree))
+(pocket/dir-tree)
 
 ;; But `meta.edn` inside still contains the full details,
 ;; so `cache-entries` and `invalidate-fn!` work correctly:

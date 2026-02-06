@@ -6,6 +6,7 @@ format:
     theme: [cosmo, notebooks/custom.scss]
     toc-expand: 2
     number-depth: 1
+    filters: [notebooks/collapse-callouts.lua]
 
 ---
 <style></style><style>.printedClojure .sourceCode {
@@ -64,7 +65,7 @@ constraints, and debugging tips.
 ::: {.callout-note}
 ## OUT
 ```
-15:54:50.521 INFO scicloj.pocket - Cache dir set to: /tmp/pocket-dev-practices
+16:50:41.367 INFO scicloj.pocket - Cache dir set to: /tmp/pocket-dev-practices
 
 ```
 :::
@@ -183,7 +184,7 @@ entries of a function:
 ::: {.callout-note}
 ## OUT
 ```
-15:54:50.523 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-dev-practices
+16:50:41.369 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-dev-practices
 
 ```
 :::
@@ -220,8 +221,8 @@ Cache a computation:
 ::: {.callout-note}
 ## OUT
 ```
-15:54:50.524 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.usage-practices/transform
-15:54:50.524 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-dev-practices/.cache/89/(pocket-book.usage-practices⁄transform 10)
+16:50:41.369 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.usage-practices/transform
+16:50:41.370 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-dev-practices/.cache/89/(pocket-book.usage-practices⁄transform 10)
 
 ```
 :::
@@ -250,7 +251,7 @@ Function implementation changed — invalidate a single entry:
 ::: {.callout-note}
 ## OUT
 ```
-15:54:50.525 INFO scicloj.pocket.impl.cache - Invalidated: /tmp/pocket-dev-practices/.cache/89/(pocket-book.usage-practices⁄transform 10) existed= true
+16:50:41.371 INFO scicloj.pocket.impl.cache - Invalidated: /tmp/pocket-dev-practices/.cache/89/(pocket-book.usage-practices⁄transform 10) existed= true
 
 ```
 :::
@@ -281,8 +282,8 @@ Or invalidate all entries for a function:
 ::: {.callout-note}
 ## OUT
 ```
-15:54:50.525 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.usage-practices/transform
-15:54:50.526 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-dev-practices/.cache/b7/(pocket-book.usage-practices⁄transform 1)
+16:50:41.371 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.usage-practices/transform
+16:50:41.371 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-dev-practices/.cache/b7/(pocket-book.usage-practices⁄transform 1)
 
 ```
 :::
@@ -309,8 +310,8 @@ Or invalidate all entries for a function:
 ::: {.callout-note}
 ## OUT
 ```
-15:54:50.526 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.usage-practices/transform
-15:54:50.526 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-dev-practices/.cache/8a/(pocket-book.usage-practices⁄transform 2)
+16:50:41.372 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.usage-practices/transform
+16:50:41.372 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-dev-practices/.cache/8a/(pocket-book.usage-practices⁄transform 2)
 
 ```
 :::
@@ -337,7 +338,7 @@ Or invalidate all entries for a function:
 ::: {.callout-note}
 ## OUT
 ```
-15:54:50.527 INFO scicloj.pocket.impl.cache - Invalidated 2 entries for pocket-book.usage-practices/transform
+16:50:41.373 INFO scicloj.pocket.impl.cache - Invalidated 2 entries for pocket-book.usage-practices/transform
 
 ```
 :::
@@ -374,7 +375,7 @@ creates new cache entries while preserving old ones for comparison:
 ::: {.callout-note}
 ## OUT
 ```
-15:54:50.527 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-dev-practices
+16:50:41.373 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-dev-practices
 
 ```
 :::
@@ -413,8 +414,8 @@ Version 1:
 ::: {.callout-note}
 ## OUT
 ```
-15:54:50.529 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.usage-practices/process-data
-15:54:50.529 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-dev-practices/.cache/ff/(pocket-book.usage-practices⁄process-data {:data [1 2 3], :version 1})
+16:50:41.375 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.usage-practices/process-data
+16:50:41.375 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-dev-practices/.cache/ff/(pocket-book.usage-practices⁄process-data {:data [1 2 3], :version 1})
 
 ```
 :::
@@ -443,8 +444,8 @@ After changing the function, bump version:
 ::: {.callout-note}
 ## OUT
 ```
-15:54:50.530 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.usage-practices/process-data
-15:54:50.530 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-dev-practices/.cache/6a/(pocket-book.usage-practices⁄process-data {:data [1 2 3], :version 2})
+16:50:41.376 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.usage-practices/process-data
+16:50:41.376 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-dev-practices/.cache/6a/(pocket-book.usage-practices⁄process-data {:data [1 2 3], :version 2})
 
 ```
 :::
@@ -478,7 +479,7 @@ For a fresh start, use `cleanup!` to delete the entire cache:
 ::: {.callout-note}
 ## OUT
 ```
-15:54:50.531 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-dev-practices
+16:50:41.377 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-dev-practices
 
 ```
 :::
@@ -538,7 +539,7 @@ Use an atom to track computation calls:
 ::: {.callout-note}
 ## OUT
 ```
-15:54:50.531 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-dev-practices
+16:50:41.378 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-dev-practices
 
 ```
 :::
@@ -604,8 +605,8 @@ First call computes:
 ::: {.callout-note}
 ## OUT
 ```
-15:54:50.532 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.usage-practices/tracked-fn
-15:54:50.533 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-dev-practices/.cache/a5/(pocket-book.usage-practices⁄tracked-fn 5)
+16:50:41.379 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.usage-practices/tracked-fn
+16:50:41.379 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-dev-practices/.cache/a5/(pocket-book.usage-practices⁄tracked-fn 5)
 
 ```
 :::
@@ -661,7 +662,7 @@ Use introspection functions to understand cache state:
 ::: {.callout-note}
 ## OUT
 ```
-15:54:50.534 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-dev-practices
+16:50:41.381 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-dev-practices
 
 ```
 :::
@@ -688,8 +689,8 @@ Use introspection functions to understand cache state:
 ::: {.callout-note}
 ## OUT
 ```
-15:54:50.534 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.usage-practices/transform
-15:54:50.535 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-dev-practices/.cache/b7/(pocket-book.usage-practices⁄transform 1)
+16:50:41.382 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.usage-practices/transform
+16:50:41.382 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-dev-practices/.cache/b7/(pocket-book.usage-practices⁄transform 1)
 
 ```
 :::
@@ -716,8 +717,8 @@ Use introspection functions to understand cache state:
 ::: {.callout-note}
 ## OUT
 ```
-15:54:50.535 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.usage-practices/transform
-15:54:50.535 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-dev-practices/.cache/8a/(pocket-book.usage-practices⁄transform 2)
+16:50:41.382 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.usage-practices/transform
+16:50:41.383 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-dev-practices/.cache/8a/(pocket-book.usage-practices⁄transform 2)
 
 ```
 :::
@@ -744,8 +745,8 @@ Use introspection functions to understand cache state:
 ::: {.callout-note}
 ## OUT
 ```
-15:54:50.536 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.usage-practices/tracked-fn
-15:54:50.536 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-dev-practices/.cache/64/(pocket-book.usage-practices⁄tracked-fn 3)
+16:50:41.383 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.usage-practices/tracked-fn
+16:50:41.383 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-dev-practices/.cache/64/(pocket-book.usage-practices⁄tracked-fn 3)
 
 ```
 :::
@@ -851,7 +852,7 @@ about the cached computation:
 {:id "(pocket-book.usage-practices/transform 1)",
  :fn-name "pocket-book.usage-practices/transform",
  :args-str "[1]",
- :created-at "2026-02-06T13:54:50.534936560Z"}
+ :created-at "2026-02-06T14:50:41.382072828Z"}
 
 ```
 :::
@@ -875,19 +876,19 @@ This same information is available through the API:
   :id "(pocket-book.usage-practices/transform 1)",
   :fn-name "pocket-book.usage-practices/transform",
   :args-str "[1]",
-  :created-at "2026-02-06T13:54:50.534936560Z"}
+  :created-at "2026-02-06T14:50:41.382072828Z"}
  {:path
   "/tmp/pocket-dev-practices/.cache/64/(pocket-book.usage-practices⁄tracked-fn 3)",
   :id "(pocket-book.usage-practices/tracked-fn 3)",
   :fn-name "pocket-book.usage-practices/tracked-fn",
   :args-str "[3]",
-  :created-at "2026-02-06T13:54:50.536104933Z"}
+  :created-at "2026-02-06T14:50:41.383521404Z"}
  {:path
   "/tmp/pocket-dev-practices/.cache/8a/(pocket-book.usage-practices⁄transform 2)",
   :id "(pocket-book.usage-practices/transform 2)",
   :fn-name "pocket-book.usage-practices/transform",
   :args-str "[2]",
-  :created-at "2026-02-06T13:54:50.535543255Z"}]
+  :created-at "2026-02-06T14:50:41.382862773Z"}]
 
 ```
 :::
@@ -911,13 +912,13 @@ Filter entries by function name:
   :id "(pocket-book.usage-practices/transform 1)",
   :fn-name "pocket-book.usage-practices/transform",
   :args-str "[1]",
-  :created-at "2026-02-06T13:54:50.534936560Z"}
+  :created-at "2026-02-06T14:50:41.382072828Z"}
  {:path
   "/tmp/pocket-dev-practices/.cache/8a/(pocket-book.usage-practices⁄transform 2)",
   :id "(pocket-book.usage-practices/transform 2)",
   :fn-name "pocket-book.usage-practices/transform",
   :args-str "[2]",
-  :created-at "2026-02-06T13:54:50.535543255Z"}]
+  :created-at "2026-02-06T14:50:41.382862773Z"}]
 
 ```
 :::
@@ -940,7 +941,7 @@ Filter entries by function name:
 ::: {.callout-note}
 ## OUT
 ```
-15:54:50.540 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-dev-practices
+16:50:41.388 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-dev-practices
 
 ```
 :::
@@ -994,8 +995,8 @@ Before deref:
 ::: {.callout-note}
 ## OUT
 ```
-15:54:50.541 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.usage-practices/transform
-15:54:50.541 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-dev-practices/.cache/6d/(pocket-book.usage-practices⁄transform 99)
+16:50:41.389 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.usage-practices/transform
+16:50:41.389 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-dev-practices/.cache/6d/(pocket-book.usage-practices⁄transform 99)
 
 ```
 :::
@@ -1062,7 +1063,7 @@ caching behavior.
 ::: {.callout-note}
 ## OUT
 ```
-15:54:50.542 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-dev-practices
+16:50:41.391 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-dev-practices
 
 ```
 :::
@@ -1106,8 +1107,8 @@ caching behavior.
 ::: {.callout-note}
 ## OUT
 ```
-15:54:50.543 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.usage-practices/process-long-text
-15:54:50.543 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-dev-practices/.cache/66/66ca82f71c1e7e5a1fcebd04da5cff4cf0e04366
+16:50:41.391 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.usage-practices/process-long-text
+16:50:41.392 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-dev-practices/.cache/66/66ca82f71c1e7e5a1fcebd04da5cff4cf0e04366
 
 ```
 :::
@@ -1215,7 +1216,7 @@ Use `doall` or `vec` to force evaluation inside your function:
 ::: {.callout-note}
 ## OUT
 ```
-15:54:50.545 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-dev-practices
+16:50:41.395 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-dev-practices
 
 ```
 :::
@@ -1252,8 +1253,8 @@ Use `doall` or `vec` to force evaluation inside your function:
 ::: {.callout-note}
 ## OUT
 ```
-15:54:50.546 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.usage-practices/generate-data
-15:54:50.546 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-dev-practices/.cache/70/(pocket-book.usage-practices⁄generate-data 5)
+16:50:41.396 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.usage-practices/generate-data
+16:50:41.396 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-dev-practices/.cache/70/(pocket-book.usage-practices⁄generate-data 5)
 
 ```
 :::
@@ -1317,7 +1318,7 @@ Use `doall` or `vec` to force evaluation inside your function:
 ::: {.callout-note}
 ## OUT
 ```
-15:54:50.547 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-dev-practices
+16:50:41.397 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-dev-practices
 
 ```
 :::

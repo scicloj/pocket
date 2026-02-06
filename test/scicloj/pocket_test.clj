@@ -497,11 +497,11 @@
         (is (= 1 @call-count))))))
 
 (deftest test-dir-tree
-  (testing "dir-tree returns a string representation"
+  (testing "dir-tree returns a kindly-wrapped string representation"
     @(pocket/cached #'expensive-add 1 2)
     (let [tree (pocket/dir-tree)]
-      (is (string? tree))
-      (is (re-find #"\.cache" tree)))))
+      (is (= :kind/code (:kindly/kind (meta tree))))
+      (is (re-find #"\.cache" (first tree))))))
 
 (deftest test-corrupted-cache-entry
   (testing "read-cached throws on entry with neither value.nippy nor nil marker"
@@ -837,8 +837,6 @@
           "Values should use parallelogram shape [/.../]")
       (is (re-find #"n\d+\[/\"2\"" mermaid)
           "Values should use parallelogram shape [/.../]"))))
-
-
 
 (defn run-experiment
   "A fake experiment function that takes config and returns metrics."

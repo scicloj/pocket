@@ -202,7 +202,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./pocket_book.regression_experiments.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Regression Experiments</span></span></a>
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Demo: Caching a Machine Learning Workflow</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
@@ -439,17 +439,20 @@ lookup-or-miss
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>(pocket/set-base-cache-dir! test-dir)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
 <span class="screen-reader-only">Note</span>OUT
 </div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
+<div id="callout-1" class="callout-1-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>15:54:53.865 INFO scicloj.pocket - Cache dir set to: /tmp/pocket-concurrency-test
+<pre><code>16:50:44.717 INFO scicloj.pocket - Cache dir set to: /tmp/pocket-concurrency-test
 </code></pre>
+</div>
 </div>
 </div>
 <div class="printedClojure">
@@ -497,24 +500,27 @@ Thread B:                  [─── request ───][ wait ]──→ result
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>(fresh-scenario!)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
 <span class="screen-reader-only">Note</span>OUT
 </div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
+<div id="callout-2" class="callout-2-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>15:54:53.868 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-concurrency-test
-15:54:53.868 INFO scicloj.pocket - Mem-cache options set: {:policy :lru, :threshold 3}
-15:54:53.868 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :lru, :threshold 3}
+<pre><code>16:50:44.719 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-concurrency-test
+16:50:44.719 INFO scicloj.pocket - Mem-cache options set: {:policy :lru, :threshold 3}
+16:50:44.720 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :lru, :threshold 3}
 </code></pre>
+</div>
 </div>
 </div>
 <div class="printedClojure">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>{<span class="at">:started-at</span></span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a> #object[java.<span class="kw">time</span>.LocalTime <span class="bn">0x66f39082</span> <span class="st">"15:54:53.868450192"</span>],</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a> #object[java.<span class="kw">time</span>.LocalTime <span class="bn">0x2ea48324</span> <span class="st">"16:50:44.720026043"</span>],</span>
 <span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a> <span class="at">:mem-cache</span> {<span class="at">:policy</span> <span class="at">:lru</span>, <span class="at">:threshold</span> <span class="dv">3</span>}}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Launch 5 threads that all deref the same cached value:</p>
@@ -527,18 +533,21 @@ Thread B:                  [─── request ───][ wait ]──→ result
 <span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>   <span class="at">:computation-count</span> <span class="at">@computation-count</span>})</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-3-contents" aria-controls="callout-3" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
 <span class="screen-reader-only">Note</span>OUT
 </div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
+<div id="callout-3" class="callout-3-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>15:54:53.870 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
-15:54:54.171 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-concurrency-test/.cache/a8/(pocket-book.concurrency⁄slow-computation 10)
+<pre><code>16:50:44.722 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
+16:50:45.023 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-concurrency-test/.cache/a8/(pocket-book.concurrency⁄slow-computation 10)
 </code></pre>
+</div>
 </div>
 </div>
 <div class="printedClojure">
@@ -560,24 +569,27 @@ Thread B:                         [request]──→ instant result
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>(fresh-scenario!)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-4-contents" aria-controls="callout-4" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
 <span class="screen-reader-only">Note</span>OUT
 </div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
+<div id="callout-4" class="callout-4-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>15:54:54.179 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-concurrency-test
-15:54:54.179 INFO scicloj.pocket - Mem-cache options set: {:policy :lru, :threshold 3}
-15:54:54.179 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :lru, :threshold 3}
+<pre><code>16:50:45.027 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-concurrency-test
+16:50:45.027 INFO scicloj.pocket - Mem-cache options set: {:policy :lru, :threshold 3}
+16:50:45.027 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :lru, :threshold 3}
 </code></pre>
+</div>
 </div>
 </div>
 <div class="printedClojure">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb24"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>{<span class="at">:started-at</span></span>
-<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a> #object[java.<span class="kw">time</span>.LocalTime <span class="bn">0x3d55fd06</span> <span class="st">"15:54:54.179506207"</span>],</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a> #object[java.<span class="kw">time</span>.LocalTime <span class="bn">0x368b507e</span> <span class="st">"16:50:45.027541108"</span>],</span>
 <span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a> <span class="at">:mem-cache</span> {<span class="at">:policy</span> <span class="at">:lru</span>, <span class="at">:threshold</span> <span class="dv">3</span>}}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>First request computes, second is instant (memory hit):</p>
@@ -597,18 +609,21 @@ Thread B:                         [request]──→ instant result
 <span id="cb25-13"><a href="#cb25-13" aria-hidden="true" tabindex="-1"></a>   <span class="at">:computations-after-second</span> count-after-second})</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-5-contents" aria-controls="callout-5" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
 <span class="screen-reader-only">Note</span>OUT
 </div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
+<div id="callout-5" class="callout-5-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>15:54:54.180 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
-15:54:54.481 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-concurrency-test/.cache/94/(pocket-book.concurrency⁄slow-computation 20)
+<pre><code>16:50:45.028 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
+16:50:45.329 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-concurrency-test/.cache/94/(pocket-book.concurrency⁄slow-computation 20)
 </code></pre>
+</div>
 </div>
 </div>
 <div class="printedClojure">
@@ -631,24 +646,27 @@ Thread B:                         [request]──→ instant result
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb29"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>(fresh-scenario!)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-6-contents" aria-controls="callout-6" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
 <span class="screen-reader-only">Note</span>OUT
 </div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
+<div id="callout-6" class="callout-6-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>15:54:54.487 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-concurrency-test
-15:54:54.487 INFO scicloj.pocket - Mem-cache options set: {:policy :lru, :threshold 3}
-15:54:54.487 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :lru, :threshold 3}
+<pre><code>16:50:45.333 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-concurrency-test
+16:50:45.333 INFO scicloj.pocket - Mem-cache options set: {:policy :lru, :threshold 3}
+16:50:45.333 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :lru, :threshold 3}
 </code></pre>
+</div>
 </div>
 </div>
 <div class="printedClojure">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb31"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>{<span class="at">:started-at</span></span>
-<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a> #object[java.<span class="kw">time</span>.LocalTime <span class="bn">0x318a4831</span> <span class="st">"15:54:54.487738756"</span>],</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a> #object[java.<span class="kw">time</span>.LocalTime <span class="bn">0x7dd66436</span> <span class="st">"16:50:45.333782410"</span>],</span>
 <span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a> <span class="at">:mem-cache</span> {<span class="at">:policy</span> <span class="at">:lru</span>, <span class="at">:threshold</span> <span class="dv">3</span>}}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Step 1: Compute initial value, then fill cache to cause eviction:</p>
@@ -669,25 +687,28 @@ Thread B:                         [request]──→ instant result
 <span id="cb32-14"><a href="#cb32-14" aria-hidden="true" tabindex="-1"></a>   <span class="at">:disk-hit</span>? (<span class="kw">=</span> count-before-retry count-after-retry)})</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-7-contents" aria-controls="callout-7" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
 <span class="screen-reader-only">Note</span>OUT
 </div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
+<div id="callout-7" class="callout-7-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>15:54:54.488 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
-15:54:54.789 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-concurrency-test/.cache/1b/(pocket-book.concurrency⁄slow-computation 30)
-15:54:54.789 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
-15:54:55.091 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-concurrency-test/.cache/5b/(pocket-book.concurrency⁄slow-computation 31)
-15:54:55.091 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
-15:54:55.392 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-concurrency-test/.cache/98/(pocket-book.concurrency⁄slow-computation 32)
-15:54:55.393 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
-15:54:55.694 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-concurrency-test/.cache/62/(pocket-book.concurrency⁄slow-computation 33)
-15:54:55.695 DEBUG scicloj.pocket.impl.cache - Cache hit (disk): pocket-book.concurrency/slow-computation /tmp/pocket-concurrency-test/.cache/1b/(pocket-book.concurrency⁄slow-computation 30)
+<pre><code>16:50:45.334 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
+16:50:45.635 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-concurrency-test/.cache/1b/(pocket-book.concurrency⁄slow-computation 30)
+16:50:45.636 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
+16:50:45.937 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-concurrency-test/.cache/5b/(pocket-book.concurrency⁄slow-computation 31)
+16:50:45.937 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
+16:50:46.238 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-concurrency-test/.cache/98/(pocket-book.concurrency⁄slow-computation 32)
+16:50:46.238 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
+16:50:46.539 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-concurrency-test/.cache/62/(pocket-book.concurrency⁄slow-computation 33)
+16:50:46.540 DEBUG scicloj.pocket.impl.cache - Cache hit (disk): pocket-book.concurrency/slow-computation /tmp/pocket-concurrency-test/.cache/1b/(pocket-book.concurrency⁄slow-computation 30)
 </code></pre>
+</div>
 </div>
 </div>
 <div class="printedClojure">
@@ -725,17 +746,20 @@ Thread B:                         [request]──→ instant result
 <span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">:ready</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-8-contents" aria-controls="callout-8" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
 <span class="screen-reader-only">Note</span>OUT
 </div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
+<div id="callout-8" class="callout-8-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>15:54:55.700 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-concurrency-test
+<pre><code>16:50:46.545 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-concurrency-test
 </code></pre>
+</div>
 </div>
 </div>
 <div class="printedClojure">
@@ -760,19 +784,22 @@ Thread B:                         [request]──→ instant result
 <span id="cb41-15"><a href="#cb41-15" aria-hidden="true" tabindex="-1"></a>   <span class="at">:counts</span> [count-after<span class="dv">-1</span> count-after<span class="dv">-2</span> count-after<span class="dv">-3</span>]})</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-9-contents" aria-controls="callout-9" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
 <span class="screen-reader-only">Note</span>OUT
 </div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
+<div id="callout-9" class="callout-9-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>15:54:55.701 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/flaky-computation
-15:54:55.701 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/flaky-computation
-15:54:55.701 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-concurrency-test/.cache/27/(pocket-book.concurrency⁄flaky-computation 5)
+<pre><code>16:50:46.546 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/flaky-computation
+16:50:46.546 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/flaky-computation
+16:50:46.547 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-concurrency-test/.cache/27/(pocket-book.concurrency⁄flaky-computation 5)
 </code></pre>
+</div>
 </div>
 </div>
 <div class="printedClojure">
@@ -797,24 +824,27 @@ Thread C (x=42): [──── computing ────]──→ 1764
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb45"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>(fresh-scenario!)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-10-contents" aria-controls="callout-10" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
 <span class="screen-reader-only">Note</span>OUT
 </div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
+<div id="callout-10" class="callout-10-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>15:54:55.703 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-concurrency-test
-15:54:55.703 INFO scicloj.pocket - Mem-cache options set: {:policy :lru, :threshold 3}
-15:54:55.703 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :lru, :threshold 3}
+<pre><code>16:50:46.548 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-concurrency-test
+16:50:46.548 INFO scicloj.pocket - Mem-cache options set: {:policy :lru, :threshold 3}
+16:50:46.548 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :lru, :threshold 3}
 </code></pre>
+</div>
 </div>
 </div>
 <div class="printedClojure">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb47"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a>{<span class="at">:started-at</span></span>
-<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a> #object[java.<span class="kw">time</span>.LocalTime <span class="bn">0x7fd9e4e5</span> <span class="st">"15:54:55.703407773"</span>],</span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a> #object[java.<span class="kw">time</span>.LocalTime <span class="bn">0x16e7b461</span> <span class="st">"16:50:46.548544401"</span>],</span>
 <span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a> <span class="at">:mem-cache</span> {<span class="at">:policy</span> <span class="at">:lru</span>, <span class="at">:threshold</span> <span class="dv">3</span>}}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="sourceClojure">
@@ -828,22 +858,25 @@ Thread C (x=42): [──── computing ────]──→ 1764
 <span id="cb48-8"><a href="#cb48-8" aria-hidden="true" tabindex="-1"></a>   <span class="at">:parallel</span>? (<span class="kw">&lt;</span> elapsed <span class="dv">500</span>)})</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-11-contents" aria-controls="callout-11" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
 <span class="screen-reader-only">Note</span>OUT
 </div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
+<div id="callout-11" class="callout-11-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>15:54:55.704 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
-15:54:55.704 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
-15:54:55.704 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
-15:54:56.005 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-concurrency-test/.cache/84/(pocket-book.concurrency⁄slow-computation 41)
-15:54:56.005 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-concurrency-test/.cache/51/(pocket-book.concurrency⁄slow-computation 40)
-15:54:56.005 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-concurrency-test/.cache/9e/(pocket-book.concurrency⁄slow-computation 42)
+<pre><code>16:50:46.549 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
+16:50:46.549 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
+16:50:46.549 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
+16:50:46.850 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-concurrency-test/.cache/9e/(pocket-book.concurrency⁄slow-computation 42)
+16:50:46.850 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-concurrency-test/.cache/84/(pocket-book.concurrency⁄slow-computation 41)
+16:50:46.850 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-concurrency-test/.cache/51/(pocket-book.concurrency⁄slow-computation 40)
 </code></pre>
+</div>
 </div>
 </div>
 <div class="printedClojure">
@@ -862,24 +895,27 @@ Threads A, B, C all request x=50
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb52"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a>(fresh-scenario!)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-12-contents" aria-controls="callout-12" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
 <span class="screen-reader-only">Note</span>OUT
 </div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
+<div id="callout-12" class="callout-12-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>15:54:56.009 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-concurrency-test
-15:54:56.009 INFO scicloj.pocket - Mem-cache options set: {:policy :lru, :threshold 3}
-15:54:56.009 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :lru, :threshold 3}
+<pre><code>16:50:46.854 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-concurrency-test
+16:50:46.854 INFO scicloj.pocket - Mem-cache options set: {:policy :lru, :threshold 3}
+16:50:46.854 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :lru, :threshold 3}
 </code></pre>
+</div>
 </div>
 </div>
 <div class="printedClojure">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb54"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a>{<span class="at">:started-at</span></span>
-<span id="cb54-2"><a href="#cb54-2" aria-hidden="true" tabindex="-1"></a> #object[java.<span class="kw">time</span>.LocalTime <span class="bn">0x7f1f7fb5</span> <span class="st">"15:54:56.010001266"</span>],</span>
+<span id="cb54-2"><a href="#cb54-2" aria-hidden="true" tabindex="-1"></a> #object[java.<span class="kw">time</span>.LocalTime <span class="bn">0x5453f3ec</span> <span class="st">"16:50:46.854339231"</span>],</span>
 <span id="cb54-3"><a href="#cb54-3" aria-hidden="true" tabindex="-1"></a> <span class="at">:mem-cache</span> {<span class="at">:policy</span> <span class="at">:lru</span>, <span class="at">:threshold</span> <span class="dv">3</span>}}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Compute, clear memory, then hit disk:</p>
@@ -900,19 +936,22 @@ Threads A, B, C all request x=50
 <span id="cb55-14"><a href="#cb55-14" aria-hidden="true" tabindex="-1"></a>   <span class="at">:no-recompute</span>? (<span class="kw">=</span> count-after-compute count-after-disk-hits)})</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-13-contents" aria-controls="callout-13" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
 <span class="screen-reader-only">Note</span>OUT
 </div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
+<div id="callout-13" class="callout-13-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>15:54:56.011 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
-15:54:56.312 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-concurrency-test/.cache/bf/(pocket-book.concurrency⁄slow-computation 50)
-15:54:56.313 DEBUG scicloj.pocket.impl.cache - Cache hit (disk): pocket-book.concurrency/slow-computation /tmp/pocket-concurrency-test/.cache/bf/(pocket-book.concurrency⁄slow-computation 50)
+<pre><code>16:50:46.855 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
+16:50:47.166 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-concurrency-test/.cache/bf/(pocket-book.concurrency⁄slow-computation 50)
+16:50:47.167 DEBUG scicloj.pocket.impl.cache - Cache hit (disk): pocket-book.concurrency/slow-computation /tmp/pocket-concurrency-test/.cache/bf/(pocket-book.concurrency⁄slow-computation 50)
 </code></pre>
+</div>
 </div>
 </div>
 <div class="printedClojure">
@@ -938,24 +977,27 @@ Threads A, B, C all request x=50
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb59"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb59-1"><a href="#cb59-1" aria-hidden="true" tabindex="-1"></a>(fresh-scenario! {<span class="at">:mem-cache-opts</span> {<span class="at">:policy</span> <span class="at">:lru</span> <span class="at">:threshold</span> <span class="dv">2</span>}})</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-14-contents" aria-controls="callout-14" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
 <span class="screen-reader-only">Note</span>OUT
 </div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
+<div id="callout-14" class="callout-14-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>15:54:56.317 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-concurrency-test
-15:54:56.317 INFO scicloj.pocket - Mem-cache options set: {:policy :lru, :threshold 2}
-15:54:56.317 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :lru, :threshold 2}
+<pre><code>16:50:47.169 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-concurrency-test
+16:50:47.169 INFO scicloj.pocket - Mem-cache options set: {:policy :lru, :threshold 2}
+16:50:47.169 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :lru, :threshold 2}
 </code></pre>
+</div>
 </div>
 </div>
 <div class="printedClojure">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb61"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb61-1"><a href="#cb61-1" aria-hidden="true" tabindex="-1"></a>{<span class="at">:started-at</span></span>
-<span id="cb61-2"><a href="#cb61-2" aria-hidden="true" tabindex="-1"></a> #object[java.<span class="kw">time</span>.LocalTime <span class="bn">0x7d70f872</span> <span class="st">"15:54:56.317778419"</span>],</span>
+<span id="cb61-2"><a href="#cb61-2" aria-hidden="true" tabindex="-1"></a> #object[java.<span class="kw">time</span>.LocalTime <span class="bn">0x7496e684</span> <span class="st">"16:50:47.169893042"</span>],</span>
 <span id="cb61-3"><a href="#cb61-3" aria-hidden="true" tabindex="-1"></a> <span class="at">:mem-cache</span> {<span class="at">:policy</span> <span class="at">:lru</span>, <span class="at">:threshold</span> <span class="dv">2</span>}}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="sourceClojure">
@@ -993,26 +1035,29 @@ Threads A, B, C all request x=50
 <span id="cb62-32"><a href="#cb62-32" aria-hidden="true" tabindex="-1"></a>   <span class="at">:count-step-6</span> count-step<span class="dv">-6</span>})</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-15-contents" aria-controls="callout-15" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
 <span class="screen-reader-only">Note</span>OUT
 </div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
+<div id="callout-15" class="callout-15-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>15:54:56.318 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
-15:54:56.619 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-concurrency-test/.cache/ae/(pocket-book.concurrency⁄slow-computation 60)
-15:54:56.620 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
-15:54:56.921 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-concurrency-test/.cache/6c/(pocket-book.concurrency⁄slow-computation 61)
-15:54:56.922 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
-15:54:57.222 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-concurrency-test/.cache/62/(pocket-book.concurrency⁄slow-computation 62)
-15:54:57.223 DEBUG scicloj.pocket.impl.cache - Cache hit (disk): pocket-book.concurrency/slow-computation /tmp/pocket-concurrency-test/.cache/ae/(pocket-book.concurrency⁄slow-computation 60)
-15:54:57.223 INFO scicloj.pocket.impl.cache - Invalidated: /tmp/pocket-concurrency-test/.cache/ae/(pocket-book.concurrency⁄slow-computation 60) existed= true
-15:54:57.223 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
-15:54:57.525 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-concurrency-test/.cache/ae/(pocket-book.concurrency⁄slow-computation 60)
+<pre><code>16:50:47.170 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
+16:50:47.471 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-concurrency-test/.cache/ae/(pocket-book.concurrency⁄slow-computation 60)
+16:50:47.472 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
+16:50:47.773 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-concurrency-test/.cache/6c/(pocket-book.concurrency⁄slow-computation 61)
+16:50:47.774 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
+16:50:48.074 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-concurrency-test/.cache/62/(pocket-book.concurrency⁄slow-computation 62)
+16:50:48.075 DEBUG scicloj.pocket.impl.cache - Cache hit (disk): pocket-book.concurrency/slow-computation /tmp/pocket-concurrency-test/.cache/ae/(pocket-book.concurrency⁄slow-computation 60)
+16:50:48.075 INFO scicloj.pocket.impl.cache - Invalidated: /tmp/pocket-concurrency-test/.cache/ae/(pocket-book.concurrency⁄slow-computation 60) existed= true
+16:50:48.075 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
+16:50:48.376 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-concurrency-test/.cache/ae/(pocket-book.concurrency⁄slow-computation 60)
 </code></pre>
+</div>
 </div>
 </div>
 <div class="printedClojure">
@@ -1031,24 +1076,27 @@ Threads A, B, C all request x=50
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb65"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb65-1"><a href="#cb65-1" aria-hidden="true" tabindex="-1"></a>(fresh-scenario!)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-16-contents" aria-controls="callout-16" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
 <span class="screen-reader-only">Note</span>OUT
 </div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
+<div id="callout-16" class="callout-16-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>15:54:57.529 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-concurrency-test
-15:54:57.529 INFO scicloj.pocket - Mem-cache options set: {:policy :lru, :threshold 3}
-15:54:57.529 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :lru, :threshold 3}
+<pre><code>16:50:48.381 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-concurrency-test
+16:50:48.381 INFO scicloj.pocket - Mem-cache options set: {:policy :lru, :threshold 3}
+16:50:48.381 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :lru, :threshold 3}
 </code></pre>
+</div>
 </div>
 </div>
 <div class="printedClojure">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb67"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb67-1"><a href="#cb67-1" aria-hidden="true" tabindex="-1"></a>{<span class="at">:started-at</span></span>
-<span id="cb67-2"><a href="#cb67-2" aria-hidden="true" tabindex="-1"></a> #object[java.<span class="kw">time</span>.LocalTime <span class="bn">0x604e75e8</span> <span class="st">"15:54:57.529350360"</span>],</span>
+<span id="cb67-2"><a href="#cb67-2" aria-hidden="true" tabindex="-1"></a> #object[java.<span class="kw">time</span>.LocalTime <span class="bn">0xafdca58</span> <span class="st">"16:50:48.381526820"</span>],</span>
 <span id="cb67-3"><a href="#cb67-3" aria-hidden="true" tabindex="-1"></a> <span class="at">:mem-cache</span> {<span class="at">:policy</span> <span class="at">:lru</span>, <span class="at">:threshold</span> <span class="dv">3</span>}}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="sourceClojure">
@@ -1062,18 +1110,21 @@ Threads A, B, C all request x=50
 <span id="cb68-8"><a href="#cb68-8" aria-hidden="true" tabindex="-1"></a>   <span class="at">:computation-count</span> <span class="at">@computation-count</span>})</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-17-contents" aria-controls="callout-17" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
 <span class="screen-reader-only">Note</span>OUT
 </div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
+<div id="callout-17" class="callout-17-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>15:54:57.531 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
-15:54:57.832 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-concurrency-test/.cache/9b/(pocket-book.concurrency⁄slow-computation 70)
+<pre><code>16:50:48.384 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
+16:50:48.685 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-concurrency-test/.cache/9b/(pocket-book.concurrency⁄slow-computation 70)
 </code></pre>
+</div>
 </div>
 </div>
 <div class="printedClojure">
@@ -1115,19 +1166,22 @@ Threads A, B, C all request x=50
 <span id="cb75-6"><a href="#cb75-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">:ready</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-18-contents" aria-controls="callout-18" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
 <span class="screen-reader-only">Note</span>OUT
 </div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
+<div id="callout-18" class="callout-18-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>15:54:57.843 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-concurrency-test
-15:54:57.843 INFO scicloj.pocket - Mem-cache options set: {:policy :lru, :threshold 10}
-15:54:57.843 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :lru, :threshold 10}
+<pre><code>16:50:48.691 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-concurrency-test
+16:50:48.691 INFO scicloj.pocket - Mem-cache options set: {:policy :lru, :threshold 10}
+16:50:48.691 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :lru, :threshold 10}
 </code></pre>
+</div>
 </div>
 </div>
 <div class="printedClojure">
@@ -1148,20 +1202,23 @@ Threads A, B, C all request x=50
 <span id="cb78-11"><a href="#cb78-11" aria-hidden="true" tabindex="-1"></a>   <span class="at">:step-b-count</span> <span class="at">@step-b-count</span>})</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-19-contents" aria-controls="callout-19" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
 <span class="screen-reader-only">Note</span>OUT
 </div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
+<div id="callout-19" class="callout-19-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>15:54:57.845 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/pipeline-step-b
-15:54:57.846 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/pipeline-step-a
-15:54:58.047 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-concurrency-test/.cache/72/(pocket-book.concurrency⁄pipeline-step-a 7)
-15:54:58.248 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-concurrency-test/.cache/4a/(pocket-book.concurrency⁄pipeline-step-b (pocket-book.concurrency⁄pipeline-step-a 7))
+<pre><code>16:50:48.693 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/pipeline-step-b
+16:50:48.693 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/pipeline-step-a
+16:50:48.894 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-concurrency-test/.cache/72/(pocket-book.concurrency⁄pipeline-step-a 7)
+16:50:49.095 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-concurrency-test/.cache/4a/(pocket-book.concurrency⁄pipeline-step-b (pocket-book.concurrency⁄pipeline-step-a 7))
 </code></pre>
+</div>
 </div>
 </div>
 <div class="printedClojure">
@@ -1194,19 +1251,22 @@ Threads A, B, C all request x=50
 <span id="cb83-5"><a href="#cb83-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">:ready</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-20-contents" aria-controls="callout-20" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
 <span class="screen-reader-only">Note</span>OUT
 </div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
+<div id="callout-20" class="callout-20-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>15:54:58.253 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-concurrency-test
-15:54:58.254 INFO scicloj.pocket - Mem-cache options set: {:policy :lru, :threshold 10}
-15:54:58.254 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :lru, :threshold 10}
+<pre><code>16:50:49.103 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-concurrency-test
+16:50:49.103 INFO scicloj.pocket - Mem-cache options set: {:policy :lru, :threshold 10}
+16:50:49.103 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :lru, :threshold 10}
 </code></pre>
+</div>
 </div>
 </div>
 <div class="printedClojure">
@@ -1231,19 +1291,22 @@ Threads A, B, C all request x=50
 <span id="cb86-15"><a href="#cb86-15" aria-hidden="true" tabindex="-1"></a>   <span class="at">:total-calls</span> <span class="at">@concurrent-fail-count</span>})</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-21-contents" aria-controls="callout-21" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
 <span class="screen-reader-only">Note</span>OUT
 </div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
+<div id="callout-21" class="callout-21-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>15:54:58.260 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/fail-once-computation
-15:54:58.461 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/fail-once-computation
-15:54:58.562 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-concurrency-test/.cache/94/(pocket-book.concurrency⁄fail-once-computation 8)
+<pre><code>16:50:49.106 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/fail-once-computation
+16:50:49.307 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/fail-once-computation
+16:50:49.408 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-concurrency-test/.cache/94/(pocket-book.concurrency⁄fail-once-computation 8)
 </code></pre>
+</div>
 </div>
 </div>
 <div class="printedClojure">
@@ -1261,24 +1324,27 @@ Threads A, B, C all request x=50
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb89"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb89-1"><a href="#cb89-1" aria-hidden="true" tabindex="-1"></a>(fresh-scenario! {<span class="at">:mem-cache-opts</span> {<span class="at">:policy</span> <span class="at">:lru</span> <span class="at">:threshold</span> <span class="dv">2</span>}})</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-22-contents" aria-controls="callout-22" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
 <span class="screen-reader-only">Note</span>OUT
 </div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
+<div id="callout-22" class="callout-22-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>15:54:58.567 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-concurrency-test
-15:54:58.567 INFO scicloj.pocket - Mem-cache options set: {:policy :lru, :threshold 2}
-15:54:58.567 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :lru, :threshold 2}
+<pre><code>16:50:49.411 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-concurrency-test
+16:50:49.411 INFO scicloj.pocket - Mem-cache options set: {:policy :lru, :threshold 2}
+16:50:49.411 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :lru, :threshold 2}
 </code></pre>
+</div>
 </div>
 </div>
 <div class="printedClojure">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb91"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb91-1"><a href="#cb91-1" aria-hidden="true" tabindex="-1"></a>{<span class="at">:started-at</span></span>
-<span id="cb91-2"><a href="#cb91-2" aria-hidden="true" tabindex="-1"></a> #object[java.<span class="kw">time</span>.LocalTime <span class="bn">0x7673c8e6</span> <span class="st">"15:54:58.567385430"</span>],</span>
+<span id="cb91-2"><a href="#cb91-2" aria-hidden="true" tabindex="-1"></a> #object[java.<span class="kw">time</span>.LocalTime <span class="bn">0x622f7a5c</span> <span class="st">"16:50:49.411778264"</span>],</span>
 <span id="cb91-3"><a href="#cb91-3" aria-hidden="true" tabindex="-1"></a> <span class="at">:mem-cache</span> {<span class="at">:policy</span> <span class="at">:lru</span>, <span class="at">:threshold</span> <span class="dv">2</span>}}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Launch 4 threads per key, for 3 different keys. Each key should compute exactly once despite eviction pressure.</p>
@@ -1298,22 +1364,25 @@ Threads A, B, C all request x=50
 <span id="cb92-13"><a href="#cb92-13" aria-hidden="true" tabindex="-1"></a>                            (<span class="kw">*</span> x x)))})</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-23-contents" aria-controls="callout-23" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
 <span class="screen-reader-only">Note</span>OUT
 </div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
+<div id="callout-23" class="callout-23-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>15:54:58.571 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
-15:54:58.571 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
-15:54:58.571 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
-15:54:58.872 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-concurrency-test/.cache/77/(pocket-book.concurrency⁄slow-computation 80)
-15:54:58.872 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-concurrency-test/.cache/f0/(pocket-book.concurrency⁄slow-computation 81)
-15:54:58.872 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-concurrency-test/.cache/73/(pocket-book.concurrency⁄slow-computation 82)
+<pre><code>16:50:49.415 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
+16:50:49.415 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
+16:50:49.415 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
+16:50:49.716 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-concurrency-test/.cache/f0/(pocket-book.concurrency⁄slow-computation 81)
+16:50:49.716 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-concurrency-test/.cache/77/(pocket-book.concurrency⁄slow-computation 80)
+16:50:49.716 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-concurrency-test/.cache/73/(pocket-book.concurrency⁄slow-computation 82)
 </code></pre>
+</div>
 </div>
 </div>
 <div class="printedClojure">
@@ -1332,24 +1401,27 @@ Threads A, B, C all request x=50
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb95"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb95-1"><a href="#cb95-1" aria-hidden="true" tabindex="-1"></a>(fresh-scenario!)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-24-contents" aria-controls="callout-24" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
 <span class="screen-reader-only">Note</span>OUT
 </div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
+<div id="callout-24" class="callout-24-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>15:54:58.877 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-concurrency-test
-15:54:58.877 INFO scicloj.pocket - Mem-cache options set: {:policy :lru, :threshold 3}
-15:54:58.877 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :lru, :threshold 3}
+<pre><code>16:50:49.721 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-concurrency-test
+16:50:49.721 INFO scicloj.pocket - Mem-cache options set: {:policy :lru, :threshold 3}
+16:50:49.721 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :lru, :threshold 3}
 </code></pre>
+</div>
 </div>
 </div>
 <div class="printedClojure">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb97"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb97-1"><a href="#cb97-1" aria-hidden="true" tabindex="-1"></a>{<span class="at">:started-at</span></span>
-<span id="cb97-2"><a href="#cb97-2" aria-hidden="true" tabindex="-1"></a> #object[java.<span class="kw">time</span>.LocalTime <span class="bn">0x71488b27</span> <span class="st">"15:54:58.877901315"</span>],</span>
+<span id="cb97-2"><a href="#cb97-2" aria-hidden="true" tabindex="-1"></a> #object[java.<span class="kw">time</span>.LocalTime <span class="bn">0x7e51a0dd</span> <span class="st">"16:50:49.721229339"</span>],</span>
 <span id="cb97-3"><a href="#cb97-3" aria-hidden="true" tabindex="-1"></a> <span class="at">:mem-cache</span> {<span class="at">:policy</span> <span class="at">:lru</span>, <span class="at">:threshold</span> <span class="dv">3</span>}}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Compute and cache a value:</p>
@@ -1371,21 +1443,24 @@ Threads A, B, C all request x=50
 <span id="cb98-15"><a href="#cb98-15" aria-hidden="true" tabindex="-1"></a>   <span class="at">:count-after-retry</span> count-after-retry})</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-25-contents" aria-controls="callout-25" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
 <span class="screen-reader-only">Note</span>OUT
 </div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
+<div id="callout-25" class="callout-25-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>15:54:58.880 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
-15:54:59.181 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-concurrency-test/.cache/44/(pocket-book.concurrency⁄slow-computation 90)
-15:54:59.181 INFO scicloj.pocket.impl.cache - Invalidated: /tmp/pocket-concurrency-test/.cache/44/(pocket-book.concurrency⁄slow-computation 90) existed= true
-15:54:59.183 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
-15:54:59.484 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-concurrency-test/.cache/44/(pocket-book.concurrency⁄slow-computation 90)
+<pre><code>16:50:49.722 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
+16:50:50.023 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-concurrency-test/.cache/44/(pocket-book.concurrency⁄slow-computation 90)
+16:50:50.024 INFO scicloj.pocket.impl.cache - Invalidated: /tmp/pocket-concurrency-test/.cache/44/(pocket-book.concurrency⁄slow-computation 90) existed= true
+16:50:50.026 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
+16:50:50.327 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-concurrency-test/.cache/44/(pocket-book.concurrency⁄slow-computation 90)
 </code></pre>
+</div>
 </div>
 </div>
 <div class="printedClojure">
@@ -1424,17 +1499,20 @@ Threads A, B, C all request x=50
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb101"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb101-1"><a href="#cb101-1" aria-hidden="true" tabindex="-1"></a>(pocket/cleanup!)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-26-contents" aria-controls="callout-26" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
 <span class="screen-reader-only">Note</span>OUT
 </div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
+<div id="callout-26" class="callout-26-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>15:54:59.488 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-concurrency-test
+<pre><code>16:50:50.334 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-concurrency-test
 </code></pre>
+</div>
 </div>
 </div>
 <div class="printedClojure">
@@ -1444,18 +1522,21 @@ Threads A, B, C all request x=50
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb104"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb104-1"><a href="#cb104-1" aria-hidden="true" tabindex="-1"></a>(pocket/reset-mem-cache-options!)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-27-contents" aria-controls="callout-27" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
 <span class="screen-reader-only">Note</span>OUT
 </div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
+<div id="callout-27" class="callout-27-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>15:54:59.489 INFO scicloj.pocket - Mem-cache options reset to defaults: {:policy :lru, :threshold 256}
-15:54:59.489 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :lru, :threshold 256}
+<pre><code>16:50:50.334 INFO scicloj.pocket - Mem-cache options reset to defaults: {:policy :lru, :threshold 256}
+16:50:50.334 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :lru, :threshold 256}
 </code></pre>
+</div>
 </div>
 </div>
 <div class="printedClojure">

@@ -6,6 +6,7 @@ format:
     theme: [cosmo, notebooks/custom.scss]
     toc-expand: 2
     number-depth: 1
+    filters: [notebooks/collapse-callouts.lua]
 
 ---
 <style></style><style>.printedClojure .sourceCode {

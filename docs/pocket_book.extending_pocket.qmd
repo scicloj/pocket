@@ -6,6 +6,7 @@ format:
     theme: [cosmo, notebooks/custom.scss]
     toc-expand: 2
     number-depth: 1
+    filters: [notebooks/collapse-callouts.lua]
 
 ---
 <style></style><style>.printedClojure .sourceCode {
@@ -58,7 +59,7 @@ format:
 ::: {.callout-note}
 ## OUT
 ```
-15:54:59.546 INFO scicloj.pocket - Cache dir set to: /tmp/pocket-extending
+16:50:50.401 INFO scicloj.pocket - Cache dir set to: /tmp/pocket-extending
 
 ```
 :::
@@ -85,7 +86,7 @@ format:
 ::: {.callout-note}
 ## OUT
 ```
-15:54:59.547 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-extending
+16:50:50.401 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-extending
 
 ```
 :::
@@ -331,9 +332,9 @@ First deref computes:
 ::: {.callout-note}
 ## OUT
 ```
-15:54:59.556 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.extending-pocket/analyze-dataset
+16:50:50.411 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.extending-pocket/analyze-dataset
   Analyzing census v 3 ...
-15:54:59.758 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-extending/.cache/a8/(pocket-book.extending-pocket⁄analyze-dataset census-v3 {:method :regression})
+16:50:50.613 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-extending/.cache/a8/(pocket-book.extending-pocket⁄analyze-dataset census-v3 {:method :regression})
 
 ```
 :::
@@ -383,9 +384,9 @@ A different version creates a different cache entry:
 ::: {.callout-note}
 ## OUT
 ```
-15:54:59.765 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.extending-pocket/analyze-dataset
+16:50:50.617 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.extending-pocket/analyze-dataset
   Analyzing census v 4 ...
-15:54:59.965 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-extending/.cache/6f/(pocket-book.extending-pocket⁄analyze-dataset census-v4 {:method :regression})
+16:50:50.817 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-extending/.cache/6f/(pocket-book.extending-pocket⁄analyze-dataset census-v4 {:method :regression})
 
 ```
 :::
@@ -525,7 +526,7 @@ for more details.
 ::: {.callout-note}
 ## OUT
 ```
-15:54:59.968 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-extending
+16:50:50.821 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-extending
 
 ```
 :::

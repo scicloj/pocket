@@ -202,7 +202,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./pocket_book.regression_experiments.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Regression Experiments</span></span></a>
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Demo: Caching a Machine Learning Workflow</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
@@ -305,17 +305,20 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>(pocket/set-base-cache-dir! cache-dir)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
 <span class="screen-reader-only">Note</span>OUT
 </div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
+<div id="callout-1" class="callout-1-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>15:54:50.589 INFO scicloj.pocket - Cache dir set to: /tmp/pocket-walkthrough
+<pre><code>16:50:41.442 INFO scicloj.pocket - Cache dir set to: /tmp/pocket-walkthrough
 </code></pre>
+</div>
 </div>
 </div>
 <div class="printedClojure">
@@ -325,17 +328,20 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>(pocket/cleanup!)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
 <span class="screen-reader-only">Note</span>OUT
 </div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
+<div id="callout-2" class="callout-2-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>15:54:50.589 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-walkthrough
+<pre><code>16:50:41.443 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-walkthrough
 </code></pre>
+</div>
 </div>
 </div>
 <div class="printedClojure">
@@ -438,17 +444,20 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>(<span class="kw">println</span> <span class="st">"=== First run ==="</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-3-contents" aria-controls="callout-3" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
 <span class="screen-reader-only">Note</span>OUT
 </div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
+<div id="callout-3" class="callout-3-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <pre><code>=== First run ===
 </code></pre>
+</div>
 </div>
 </div>
 <div class="printedClojure">
@@ -463,32 +472,35 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">time</span> (<span class="kw">deref</span> <span class="kw">report</span>)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-4-contents" aria-controls="callout-4" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
 <span class="screen-reader-only">Note</span>OUT
 </div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
+<div id="callout-4" class="callout-4-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>15:54:50.595 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.real-world-walkthrough/summary
-15:54:50.595 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.real-world-walkthrough/temperature-trends
-15:54:50.595 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.real-world-walkthrough/clean-data
-15:54:50.595 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.real-world-walkthrough/fetch-readings
+<pre><code>16:50:41.449 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.real-world-walkthrough/summary
+16:50:41.449 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.real-world-walkthrough/temperature-trends
+16:50:41.449 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.real-world-walkthrough/clean-data
+16:50:41.449 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.real-world-walkthrough/fetch-readings
   Fetching readings for London ...
-15:54:50.897 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-walkthrough/.cache/1f/(pocket-book.real-world-walkthrough⁄fetch-readings {:city "London", :days 7, :source :api})
+16:50:41.750 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-walkthrough/.cache/1f/(pocket-book.real-world-walkthrough⁄fetch-readings {:city "London", :days 7, :source :api})
   Cleaning data for London with {:precision 10, :remove-nulls true} ...
-15:54:51.099 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-walkthrough/.cache/97/(pocket-book.real-world-walkthrough⁄clean-data (pocket-book.real-world-walkthrough⁄fetch-readings {:city "London", :days 7, :source :api}) {:precision 10, :remove-nulls true})
+16:50:41.952 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-walkthrough/.cache/97/(pocket-book.real-world-walkthrough⁄clean-data (pocket-book.real-world-walkthrough⁄fetch-readings {:city "London", :days 7, :source :api}) {:precision 10, :remove-nulls true})
   Analyzing temperature for London ...
-15:54:51.401 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-walkthrough/.cache/ba/ba537d067887188386995083bdbfd1dcc84fdadb
-15:54:51.401 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.real-world-walkthrough/rainfall-totals
+16:50:42.253 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-walkthrough/.cache/ba/ba537d067887188386995083bdbfd1dcc84fdadb
+16:50:42.253 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.real-world-walkthrough/rainfall-totals
   Analyzing rainfall for London ...
-15:54:51.703 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-walkthrough/.cache/24/(pocket-book.real-world-walkthrough⁄rainfall-totals (pocket-book.real-world-walkthrough⁄clean-data (pocket-book.real-world-walkthrough⁄fetch-readings {:city "London", :days 7, :source :api}) {:precision 10, :remove-nulls true}) {:unit :mm})
+16:50:42.556 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-walkthrough/.cache/24/(pocket-book.real-world-walkthrough⁄rainfall-totals (pocket-book.real-world-walkthrough⁄clean-data (pocket-book.real-world-walkthrough⁄fetch-readings {:city "London", :days 7, :source :api}) {:precision 10, :remove-nulls true}) {:unit :mm})
   Generating summary for London ...
-15:54:51.904 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-walkthrough/.cache/6a/6a762a4c89e59ac4326e5ef8bff321cc817f397e
-"Elapsed time: 1309.33747 msecs"
+16:50:42.758 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-walkthrough/.cache/6a/6a762a4c89e59ac4326e5ef8bff321cc817f397e
+"Elapsed time: 1308.7762 msecs"
 </code></pre>
+</div>
 </div>
 </div>
 <div class="printedClojure">
@@ -512,18 +524,21 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>(<span class="kw">println</span> <span class="st">"</span><span class="sc">\n</span><span class="st">=== Second run (fully cached) ==="</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-5-contents" aria-controls="callout-5" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
 <span class="screen-reader-only">Note</span>OUT
 </div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
+<div id="callout-5" class="callout-5-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <pre><code>
 === Second run (fully cached) ===
 </code></pre>
+</div>
 </div>
 </div>
 <div class="printedClojure">
@@ -538,17 +553,20 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">time</span> (<span class="kw">deref</span> <span class="kw">report</span>)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-6-contents" aria-controls="callout-6" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
 <span class="screen-reader-only">Note</span>OUT
 </div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
+<div id="callout-6" class="callout-6-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>"Elapsed time: 0.179379 msecs"
+<pre><code>"Elapsed time: 0.150602 msecs"
 </code></pre>
+</div>
 </div>
 </div>
 <div class="printedClojure">
@@ -572,18 +590,21 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb26"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>(<span class="kw">println</span> <span class="st">"</span><span class="sc">\n</span><span class="st">=== Different city ==="</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-7-contents" aria-controls="callout-7" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
 <span class="screen-reader-only">Note</span>OUT
 </div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
+<div id="callout-7" class="callout-7-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <pre><code>
 === Different city ===
 </code></pre>
+</div>
 </div>
 </div>
 <div class="printedClojure">
@@ -598,32 +619,35 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">time</span> (<span class="kw">deref</span> <span class="kw">report</span>)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-8-contents" aria-controls="callout-8" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
 <span class="screen-reader-only">Note</span>OUT
 </div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
+<div id="callout-8" class="callout-8-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>15:54:51.911 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.real-world-walkthrough/summary
-15:54:51.911 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.real-world-walkthrough/temperature-trends
-15:54:51.911 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.real-world-walkthrough/clean-data
-15:54:51.911 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.real-world-walkthrough/fetch-readings
+<pre><code>16:50:42.767 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.real-world-walkthrough/summary
+16:50:42.767 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.real-world-walkthrough/temperature-trends
+16:50:42.767 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.real-world-walkthrough/clean-data
+16:50:42.767 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.real-world-walkthrough/fetch-readings
   Fetching readings for Paris ...
-15:54:52.212 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-walkthrough/.cache/43/(pocket-book.real-world-walkthrough⁄fetch-readings {:city "Paris", :days 7, :source :api})
+16:50:43.069 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-walkthrough/.cache/43/(pocket-book.real-world-walkthrough⁄fetch-readings {:city "Paris", :days 7, :source :api})
   Cleaning data for Paris with {:precision 10, :remove-nulls true} ...
-15:54:52.414 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-walkthrough/.cache/cc/(pocket-book.real-world-walkthrough⁄clean-data (pocket-book.real-world-walkthrough⁄fetch-readings {:city "Paris", :days 7, :source :api}) {:precision 10, :remove-nulls true})
+16:50:43.270 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-walkthrough/.cache/cc/(pocket-book.real-world-walkthrough⁄clean-data (pocket-book.real-world-walkthrough⁄fetch-readings {:city "Paris", :days 7, :source :api}) {:precision 10, :remove-nulls true})
   Analyzing temperature for Paris ...
-15:54:52.715 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-walkthrough/.cache/2a/2a820dbc32606f9a2a1ffa074c3acf5784b48894
-15:54:52.716 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.real-world-walkthrough/rainfall-totals
+16:50:43.571 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-walkthrough/.cache/2a/2a820dbc32606f9a2a1ffa074c3acf5784b48894
+16:50:43.572 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.real-world-walkthrough/rainfall-totals
   Analyzing rainfall for Paris ...
-15:54:53.017 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-walkthrough/.cache/d7/(pocket-book.real-world-walkthrough⁄rainfall-totals (pocket-book.real-world-walkthrough⁄clean-data (pocket-book.real-world-walkthrough⁄fetch-readings {:city "Paris", :days 7, :source :api}) {:precision 10, :remove-nulls true}) {:unit :mm})
+16:50:43.874 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-walkthrough/.cache/d7/(pocket-book.real-world-walkthrough⁄rainfall-totals (pocket-book.real-world-walkthrough⁄clean-data (pocket-book.real-world-walkthrough⁄fetch-readings {:city "Paris", :days 7, :source :api}) {:precision 10, :remove-nulls true}) {:unit :mm})
   Generating summary for Paris ...
-15:54:53.219 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-walkthrough/.cache/93/9309825516de10ffc3376546f08c45afffa90056
-"Elapsed time: 1307.596168 msecs"
+16:50:44.075 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-walkthrough/.cache/93/9309825516de10ffc3376546f08c45afffa90056
+"Elapsed time: 1308.366936 msecs"
 </code></pre>
+</div>
 </div>
 </div>
 <div class="printedClojure">
@@ -643,18 +667,21 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb32"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>(<span class="kw">println</span> <span class="st">"</span><span class="sc">\n</span><span class="st">=== Paris again (cached) ==="</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-9-contents" aria-controls="callout-9" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
 <span class="screen-reader-only">Note</span>OUT
 </div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
+<div id="callout-9" class="callout-9-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <pre><code>
 === Paris again (cached) ===
 </code></pre>
+</div>
 </div>
 </div>
 <div class="printedClojure">
@@ -669,17 +696,20 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">time</span> (<span class="kw">deref</span> <span class="kw">report</span>)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-10-contents" aria-controls="callout-10" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
 <span class="screen-reader-only">Note</span>OUT
 </div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
+<div id="callout-10" class="callout-10-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>"Elapsed time: 0.148584 msecs"
+<pre><code>"Elapsed time: 0.162191 msecs"
 </code></pre>
+</div>
 </div>
 </div>
 <div class="printedClojure">
@@ -711,7 +741,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a>  <span class="st">"(pocket-book.real-world-walkthrough/fetch-readings {:city </span><span class="sc">\"</span><span class="st">London</span><span class="sc">\"</span><span class="st">, :days 7, :source :api})"</span>,</span>
 <span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">:fn-name</span> <span class="st">"pocket-book.real-world-walkthrough/fetch-readings"</span>,</span>
 <span id="cb39-6"><a href="#cb39-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">:args-str</span> <span class="st">"[{:city </span><span class="sc">\"</span><span class="st">London</span><span class="sc">\"</span><span class="st">, :days 7, :source :api}]"</span>,</span>
-<span id="cb39-7"><a href="#cb39-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">:created-at</span> <span class="st">"2026-02-06T13:54:50.896402068Z"</span>}</span>
+<span id="cb39-7"><a href="#cb39-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">:created-at</span> <span class="st">"2026-02-06T14:50:41.750024970Z"</span>}</span>
 <span id="cb39-8"><a href="#cb39-8" aria-hidden="true" tabindex="-1"></a> {<span class="at">:path</span></span>
 <span id="cb39-9"><a href="#cb39-9" aria-hidden="true" tabindex="-1"></a>  <span class="st">"/tmp/pocket-walkthrough/.cache/d7/(pocket-book.real-world-walkthrough⁄rainfall-totals (pocket-book.real-world-walkthrough⁄clean-data (pocket-book.real-world-walkthrough⁄fetch-readings {:city </span><span class="sc">\"</span><span class="st">Paris</span><span class="sc">\"</span><span class="st">, :days 7, :source :api}) {:precision 10, :remove-nulls true}) {:unit :mm})"</span>,</span>
 <span id="cb39-10"><a href="#cb39-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">:id</span></span>
@@ -719,7 +749,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb39-12"><a href="#cb39-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">:fn-name</span> <span class="st">"pocket-book.real-world-walkthrough/rainfall-totals"</span>,</span>
 <span id="cb39-13"><a href="#cb39-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">:args-str</span></span>
 <span id="cb39-14"><a href="#cb39-14" aria-hidden="true" tabindex="-1"></a>  <span class="st">"[(pocket-book.real-world-walkthrough/clean-data (pocket-book.real-world-walkthrough/fetch-readings {:city </span><span class="sc">\"</span><span class="st">Paris</span><span class="sc">\"</span><span class="st">, :days 7, :source :api}) {:precision 10, :remove-nulls true}) {:unit :mm}]"</span>,</span>
-<span id="cb39-15"><a href="#cb39-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">:created-at</span> <span class="st">"2026-02-06T13:54:53.017015781Z"</span>}</span>
+<span id="cb39-15"><a href="#cb39-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">:created-at</span> <span class="st">"2026-02-06T14:50:43.872697976Z"</span>}</span>
 <span id="cb39-16"><a href="#cb39-16" aria-hidden="true" tabindex="-1"></a> {<span class="at">:path</span></span>
 <span id="cb39-17"><a href="#cb39-17" aria-hidden="true" tabindex="-1"></a>  <span class="st">"/tmp/pocket-walkthrough/.cache/24/(pocket-book.real-world-walkthrough⁄rainfall-totals (pocket-book.real-world-walkthrough⁄clean-data (pocket-book.real-world-walkthrough⁄fetch-readings {:city </span><span class="sc">\"</span><span class="st">London</span><span class="sc">\"</span><span class="st">, :days 7, :source :api}) {:precision 10, :remove-nulls true}) {:unit :mm})"</span>,</span>
 <span id="cb39-18"><a href="#cb39-18" aria-hidden="true" tabindex="-1"></a>  <span class="at">:id</span></span>
@@ -727,7 +757,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb39-20"><a href="#cb39-20" aria-hidden="true" tabindex="-1"></a>  <span class="at">:fn-name</span> <span class="st">"pocket-book.real-world-walkthrough/rainfall-totals"</span>,</span>
 <span id="cb39-21"><a href="#cb39-21" aria-hidden="true" tabindex="-1"></a>  <span class="at">:args-str</span></span>
 <span id="cb39-22"><a href="#cb39-22" aria-hidden="true" tabindex="-1"></a>  <span class="st">"[(pocket-book.real-world-walkthrough/clean-data (pocket-book.real-world-walkthrough/fetch-readings {:city </span><span class="sc">\"</span><span class="st">London</span><span class="sc">\"</span><span class="st">, :days 7, :source :api}) {:precision 10, :remove-nulls true}) {:unit :mm}]"</span>,</span>
-<span id="cb39-23"><a href="#cb39-23" aria-hidden="true" tabindex="-1"></a>  <span class="at">:created-at</span> <span class="st">"2026-02-06T13:54:51.702360643Z"</span>}</span>
+<span id="cb39-23"><a href="#cb39-23" aria-hidden="true" tabindex="-1"></a>  <span class="at">:created-at</span> <span class="st">"2026-02-06T14:50:42.554855224Z"</span>}</span>
 <span id="cb39-24"><a href="#cb39-24" aria-hidden="true" tabindex="-1"></a> {<span class="at">:path</span></span>
 <span id="cb39-25"><a href="#cb39-25" aria-hidden="true" tabindex="-1"></a>  <span class="st">"/tmp/pocket-walkthrough/.cache/ba/ba537d067887188386995083bdbfd1dcc84fdadb"</span>,</span>
 <span id="cb39-26"><a href="#cb39-26" aria-hidden="true" tabindex="-1"></a>  <span class="at">:id</span></span>
@@ -735,7 +765,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb39-28"><a href="#cb39-28" aria-hidden="true" tabindex="-1"></a>  <span class="at">:fn-name</span> <span class="st">"pocket-book.real-world-walkthrough/temperature-trends"</span>,</span>
 <span id="cb39-29"><a href="#cb39-29" aria-hidden="true" tabindex="-1"></a>  <span class="at">:args-str</span></span>
 <span id="cb39-30"><a href="#cb39-30" aria-hidden="true" tabindex="-1"></a>  <span class="st">"[(pocket-book.real-world-walkthrough/clean-data (pocket-book.real-world-walkthrough/fetch-readings {:city </span><span class="sc">\"</span><span class="st">London</span><span class="sc">\"</span><span class="st">, :days 7, :source :api}) {:precision 10, :remove-nulls true}) {:unit :celsius}]"</span>,</span>
-<span id="cb39-31"><a href="#cb39-31" aria-hidden="true" tabindex="-1"></a>  <span class="at">:created-at</span> <span class="st">"2026-02-06T13:54:51.400163724Z"</span>}</span>
+<span id="cb39-31"><a href="#cb39-31" aria-hidden="true" tabindex="-1"></a>  <span class="at">:created-at</span> <span class="st">"2026-02-06T14:50:42.252950704Z"</span>}</span>
 <span id="cb39-32"><a href="#cb39-32" aria-hidden="true" tabindex="-1"></a> {<span class="at">:path</span></span>
 <span id="cb39-33"><a href="#cb39-33" aria-hidden="true" tabindex="-1"></a>  <span class="st">"/tmp/pocket-walkthrough/.cache/2a/2a820dbc32606f9a2a1ffa074c3acf5784b48894"</span>,</span>
 <span id="cb39-34"><a href="#cb39-34" aria-hidden="true" tabindex="-1"></a>  <span class="at">:id</span></span>
@@ -743,7 +773,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb39-36"><a href="#cb39-36" aria-hidden="true" tabindex="-1"></a>  <span class="at">:fn-name</span> <span class="st">"pocket-book.real-world-walkthrough/temperature-trends"</span>,</span>
 <span id="cb39-37"><a href="#cb39-37" aria-hidden="true" tabindex="-1"></a>  <span class="at">:args-str</span></span>
 <span id="cb39-38"><a href="#cb39-38" aria-hidden="true" tabindex="-1"></a>  <span class="st">"[(pocket-book.real-world-walkthrough/clean-data (pocket-book.real-world-walkthrough/fetch-readings {:city </span><span class="sc">\"</span><span class="st">Paris</span><span class="sc">\"</span><span class="st">, :days 7, :source :api}) {:precision 10, :remove-nulls true}) {:unit :celsius}]"</span>,</span>
-<span id="cb39-39"><a href="#cb39-39" aria-hidden="true" tabindex="-1"></a>  <span class="at">:created-at</span> <span class="st">"2026-02-06T13:54:52.714806673Z"</span>}</span>
+<span id="cb39-39"><a href="#cb39-39" aria-hidden="true" tabindex="-1"></a>  <span class="at">:created-at</span> <span class="st">"2026-02-06T14:50:43.570878909Z"</span>}</span>
 <span id="cb39-40"><a href="#cb39-40" aria-hidden="true" tabindex="-1"></a> {<span class="at">:path</span></span>
 <span id="cb39-41"><a href="#cb39-41" aria-hidden="true" tabindex="-1"></a>  <span class="st">"/tmp/pocket-walkthrough/.cache/6a/6a762a4c89e59ac4326e5ef8bff321cc817f397e"</span>,</span>
 <span id="cb39-42"><a href="#cb39-42" aria-hidden="true" tabindex="-1"></a>  <span class="at">:id</span></span>
@@ -751,7 +781,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb39-44"><a href="#cb39-44" aria-hidden="true" tabindex="-1"></a>  <span class="at">:fn-name</span> <span class="st">"pocket-book.real-world-walkthrough/summary"</span>,</span>
 <span id="cb39-45"><a href="#cb39-45" aria-hidden="true" tabindex="-1"></a>  <span class="at">:args-str</span></span>
 <span id="cb39-46"><a href="#cb39-46" aria-hidden="true" tabindex="-1"></a>  <span class="st">"[(pocket-book.real-world-walkthrough/temperature-trends (pocket-book.real-world-walkthrough/clean-data (pocket-book.real-world-walkthrough/fetch-readings {:city </span><span class="sc">\"</span><span class="st">London</span><span class="sc">\"</span><span class="st">, :days 7, :source :api}) {:precision 10, :remove-nulls true}) {:unit :celsius}) (pocket-book.real-world-walkthrough/rainfall-totals (pocket-book.real-world-walkthrough/clean-data (pocket-book.real-world-walkthrough/fetch-readings {:city </span><span class="sc">\"</span><span class="st">London</span><span class="sc">\"</span><span class="st">, :days 7, :source :api}) {:precision 10, :remove-nulls true}) {:unit :mm})]"</span>,</span>
-<span id="cb39-47"><a href="#cb39-47" aria-hidden="true" tabindex="-1"></a>  <span class="at">:created-at</span> <span class="st">"2026-02-06T13:54:51.903858728Z"</span>}</span>
+<span id="cb39-47"><a href="#cb39-47" aria-hidden="true" tabindex="-1"></a>  <span class="at">:created-at</span> <span class="st">"2026-02-06T14:50:42.757277392Z"</span>}</span>
 <span id="cb39-48"><a href="#cb39-48" aria-hidden="true" tabindex="-1"></a> {<span class="at">:path</span></span>
 <span id="cb39-49"><a href="#cb39-49" aria-hidden="true" tabindex="-1"></a>  <span class="st">"/tmp/pocket-walkthrough/.cache/93/9309825516de10ffc3376546f08c45afffa90056"</span>,</span>
 <span id="cb39-50"><a href="#cb39-50" aria-hidden="true" tabindex="-1"></a>  <span class="at">:id</span></span>
@@ -759,14 +789,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb39-52"><a href="#cb39-52" aria-hidden="true" tabindex="-1"></a>  <span class="at">:fn-name</span> <span class="st">"pocket-book.real-world-walkthrough/summary"</span>,</span>
 <span id="cb39-53"><a href="#cb39-53" aria-hidden="true" tabindex="-1"></a>  <span class="at">:args-str</span></span>
 <span id="cb39-54"><a href="#cb39-54" aria-hidden="true" tabindex="-1"></a>  <span class="st">"[(pocket-book.real-world-walkthrough/temperature-trends (pocket-book.real-world-walkthrough/clean-data (pocket-book.real-world-walkthrough/fetch-readings {:city </span><span class="sc">\"</span><span class="st">Paris</span><span class="sc">\"</span><span class="st">, :days 7, :source :api}) {:precision 10, :remove-nulls true}) {:unit :celsius}) (pocket-book.real-world-walkthrough/rainfall-totals (pocket-book.real-world-walkthrough/clean-data (pocket-book.real-world-walkthrough/fetch-readings {:city </span><span class="sc">\"</span><span class="st">Paris</span><span class="sc">\"</span><span class="st">, :days 7, :source :api}) {:precision 10, :remove-nulls true}) {:unit :mm})]"</span>,</span>
-<span id="cb39-55"><a href="#cb39-55" aria-hidden="true" tabindex="-1"></a>  <span class="at">:created-at</span> <span class="st">"2026-02-06T13:54:53.218211485Z"</span>}</span>
+<span id="cb39-55"><a href="#cb39-55" aria-hidden="true" tabindex="-1"></a>  <span class="at">:created-at</span> <span class="st">"2026-02-06T14:50:44.074600825Z"</span>}</span>
 <span id="cb39-56"><a href="#cb39-56" aria-hidden="true" tabindex="-1"></a> {<span class="at">:path</span></span>
 <span id="cb39-57"><a href="#cb39-57" aria-hidden="true" tabindex="-1"></a>  <span class="st">"/tmp/pocket-walkthrough/.cache/43/(pocket-book.real-world-walkthrough⁄fetch-readings {:city </span><span class="sc">\"</span><span class="st">Paris</span><span class="sc">\"</span><span class="st">, :days 7, :source :api})"</span>,</span>
 <span id="cb39-58"><a href="#cb39-58" aria-hidden="true" tabindex="-1"></a>  <span class="at">:id</span></span>
 <span id="cb39-59"><a href="#cb39-59" aria-hidden="true" tabindex="-1"></a>  <span class="st">"(pocket-book.real-world-walkthrough/fetch-readings {:city </span><span class="sc">\"</span><span class="st">Paris</span><span class="sc">\"</span><span class="st">, :days 7, :source :api})"</span>,</span>
 <span id="cb39-60"><a href="#cb39-60" aria-hidden="true" tabindex="-1"></a>  <span class="at">:fn-name</span> <span class="st">"pocket-book.real-world-walkthrough/fetch-readings"</span>,</span>
 <span id="cb39-61"><a href="#cb39-61" aria-hidden="true" tabindex="-1"></a>  <span class="at">:args-str</span> <span class="st">"[{:city </span><span class="sc">\"</span><span class="st">Paris</span><span class="sc">\"</span><span class="st">, :days 7, :source :api}]"</span>,</span>
-<span id="cb39-62"><a href="#cb39-62" aria-hidden="true" tabindex="-1"></a>  <span class="at">:created-at</span> <span class="st">"2026-02-06T13:54:52.212030669Z"</span>}</span>
+<span id="cb39-62"><a href="#cb39-62" aria-hidden="true" tabindex="-1"></a>  <span class="at">:created-at</span> <span class="st">"2026-02-06T14:50:43.067938120Z"</span>}</span>
 <span id="cb39-63"><a href="#cb39-63" aria-hidden="true" tabindex="-1"></a> {<span class="at">:path</span></span>
 <span id="cb39-64"><a href="#cb39-64" aria-hidden="true" tabindex="-1"></a>  <span class="st">"/tmp/pocket-walkthrough/.cache/cc/(pocket-book.real-world-walkthrough⁄clean-data (pocket-book.real-world-walkthrough⁄fetch-readings {:city </span><span class="sc">\"</span><span class="st">Paris</span><span class="sc">\"</span><span class="st">, :days 7, :source :api}) {:precision 10, :remove-nulls true})"</span>,</span>
 <span id="cb39-65"><a href="#cb39-65" aria-hidden="true" tabindex="-1"></a>  <span class="at">:id</span></span>
@@ -774,7 +804,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb39-67"><a href="#cb39-67" aria-hidden="true" tabindex="-1"></a>  <span class="at">:fn-name</span> <span class="st">"pocket-book.real-world-walkthrough/clean-data"</span>,</span>
 <span id="cb39-68"><a href="#cb39-68" aria-hidden="true" tabindex="-1"></a>  <span class="at">:args-str</span></span>
 <span id="cb39-69"><a href="#cb39-69" aria-hidden="true" tabindex="-1"></a>  <span class="st">"[(pocket-book.real-world-walkthrough/fetch-readings {:city </span><span class="sc">\"</span><span class="st">Paris</span><span class="sc">\"</span><span class="st">, :days 7, :source :api}) {:precision 10, :remove-nulls true}]"</span>,</span>
-<span id="cb39-70"><a href="#cb39-70" aria-hidden="true" tabindex="-1"></a>  <span class="at">:created-at</span> <span class="st">"2026-02-06T13:54:52.413356329Z"</span>}</span>
+<span id="cb39-70"><a href="#cb39-70" aria-hidden="true" tabindex="-1"></a>  <span class="at">:created-at</span> <span class="st">"2026-02-06T14:50:43.269643690Z"</span>}</span>
 <span id="cb39-71"><a href="#cb39-71" aria-hidden="true" tabindex="-1"></a> {<span class="at">:path</span></span>
 <span id="cb39-72"><a href="#cb39-72" aria-hidden="true" tabindex="-1"></a>  <span class="st">"/tmp/pocket-walkthrough/.cache/97/(pocket-book.real-world-walkthrough⁄clean-data (pocket-book.real-world-walkthrough⁄fetch-readings {:city </span><span class="sc">\"</span><span class="st">London</span><span class="sc">\"</span><span class="st">, :days 7, :source :api}) {:precision 10, :remove-nulls true})"</span>,</span>
 <span id="cb39-73"><a href="#cb39-73" aria-hidden="true" tabindex="-1"></a>  <span class="at">:id</span></span>
@@ -782,7 +812,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb39-75"><a href="#cb39-75" aria-hidden="true" tabindex="-1"></a>  <span class="at">:fn-name</span> <span class="st">"pocket-book.real-world-walkthrough/clean-data"</span>,</span>
 <span id="cb39-76"><a href="#cb39-76" aria-hidden="true" tabindex="-1"></a>  <span class="at">:args-str</span></span>
 <span id="cb39-77"><a href="#cb39-77" aria-hidden="true" tabindex="-1"></a>  <span class="st">"[(pocket-book.real-world-walkthrough/fetch-readings {:city </span><span class="sc">\"</span><span class="st">London</span><span class="sc">\"</span><span class="st">, :days 7, :source :api}) {:precision 10, :remove-nulls true}]"</span>,</span>
-<span id="cb39-78"><a href="#cb39-78" aria-hidden="true" tabindex="-1"></a>  <span class="at">:created-at</span> <span class="st">"2026-02-06T13:54:51.098513420Z"</span>}]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb39-78"><a href="#cb39-78" aria-hidden="true" tabindex="-1"></a>  <span class="at">:created-at</span> <span class="st">"2026-02-06T14:50:41.951526101Z"</span>}]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
 <section id="cache-statistics" class="level3">
@@ -859,17 +889,20 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb44"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>(pocket/cleanup!)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-11-contents" aria-controls="callout-11" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
 <span class="screen-reader-only">Note</span>OUT
 </div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
+<div id="callout-11" class="callout-11-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>15:54:53.228 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-walkthrough
+<pre><code>16:50:44.087 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-walkthrough
 </code></pre>
+</div>
 </div>
 </div>
 <div class="printedClojure">

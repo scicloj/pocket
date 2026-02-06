@@ -126,7 +126,7 @@
 ;;
 ;; The cache directory names reflect our custom identities:
 
-(kind/code (pocket/dir-tree))
+(pocket/dir-tree)
 
 ;; ## Guidelines
 ;;

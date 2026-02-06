@@ -1,24 +1,33 @@
-;; # Regression Experiments
+;; # Demo: Caching a Machine Learning Workflow
 
-;; Training a machine learning model is often expensive. When you are
-;; exploring combinations of feature engineering and model types,
-;; re-evaluating a notebook should not recompute everything from scratch.
+;; This chapter demonstrates Pocket in a realistic machine learning
+;; scenario. If you're new to ML, don't worry — we'll explain the
+;; concepts as we go. The focus is on how caching helps when you're
+;; exploring many combinations of data, features, and models.
 ;;
-;; Pocket caches each step independently. Change one feature set and
-;; only the affected models retrain. Change the noise level and only
-;; that data regenerates. With larger data or heavier models, the same
-;; cache graph that we build here saves hours instead of seconds.
+;; **The problem**: We want to predict a numeric value (like house
+;; prices or temperature) from input data. This is called *regression*.
+;; We'll generate synthetic data, try different ways of preparing it,
+;; and compare two learning algorithms.
 ;;
-;; This chapter walks through a regression problem with synthetic data,
-;; two algorithms, four feature-engineering strategies, and five noise
-;; levels — a combinatorial exploration where every step is cached.
+;; **Why caching matters**: Training models can be slow. When you're
+;; experimenting — tweaking parameters, trying new features — you don't
+;; want to recompute everything each time. Pocket caches each step
+;; independently, so only the parts you changed get recomputed.
 ;;
-;; **Prerequisites**: This notebook uses libraries from the `:dev` alias
-;; in `deps.edn` — [tablecloth](https://scicloj.github.io/tablecloth/),
-;; [metamorph.ml](https://github.com/scicloj/metamorph.ml),
-;; [tribuo](https://github.com/scicloj/scicloj.ml.tribuo), and
-;; [Plotly.js](https://plotly.com/javascript/). Start your REPL
-;; with `clojure -M:dev` to have them available.
+;; **What we'll cover**:
+;; - Part 1: Feature engineering — transforming inputs to help models learn
+;; - Part 2: Noise sensitivity — how models behave with messy data
+;; - Part 3: The caching payoff — what got cached and why it matters
+;; - Part 4: DAG workflows — when preprocessing steps share dependencies
+;; - Part 5: Hyperparameter sweeps — comparing many experiments at once
+;;
+;; **Prerequisites**: This notebook uses libraries from the `:dev` alias:
+;; [tablecloth](https://scicloj.github.io/tablecloth/) for data manipulation,
+;; [metamorph.ml](https://github.com/scicloj/metamorph.ml) for ML pipelines,
+;; [tribuo](https://github.com/scicloj/scicloj.ml.tribuo) for algorithms, and
+;; [Plotly.js](https://plotly.com/javascript/) for visualization.
+;; Start your REPL with `clojure -M:dev` to have them available.
 
 ;; ## Setup
 
@@ -48,8 +57,8 @@
 
 ;; ## Helper functions
 
-;; These are the building blocks. Each is a plain function that
-;; knows nothing about caching.
+;; These are the building blocks — plain Clojure functions that know
+;; nothing about caching. Pocket will wrap them later.
 
 (defn make-regression-data
   "Generate a synthetic regression dataset.
@@ -99,8 +108,13 @@
 
 ;; ## Ground truth
 
-;; Our target function is $y = \sin(x) \cdot x$. A linear model
-;; cannot capture this shape without help from feature engineering.
+;; We need a function to predict. In real problems you don't know
+;; the true relationship — that's what you're trying to learn. Here
+;; we define it explicitly so we can measure how well our models do.
+;;
+;; Our target is $y = \sin(x) \cdot x$ — a wavy curve that grows
+;; with $x$. A straight line can't fit this shape, so a simple
+;; linear model will struggle unless we help it with better features.
 
 (defn nonlinear-fn
   "y = sin(x) · x"
@@ -109,9 +123,18 @@
 
 ;; ## Model specifications
 
-;; A linear model (gradient descent) and a decision tree.
-;; They have fundamentally different relationships with feature
-;; engineering — that contrast is the heart of Part 1.
+;; We'll compare two fundamentally different algorithms:
+;;
+;; **Linear model** (gradient descent): Finds the best straight-line
+;; (or hyperplane) relationship between inputs and output. Simple and
+;; fast, but can only learn linear patterns. Needs good features.
+;;
+;; **Decision tree** (CART): Learns by splitting data into regions
+;; based on thresholds ("if x > 5, go left"). Can capture complex
+;; patterns automatically, but may overfit noisy data.
+;;
+;; These algorithms respond differently to feature engineering —
+;; that contrast is the heart of Part 1.
 
 (def linear-sgd-spec
   {:model-type :scicloj.ml.tribuo/regression
@@ -133,11 +156,21 @@
 
 ;; ---
 
-;; ## Part 1 — Feature engineering × model type
+;; ## Part 1 — Feature engineering matters (for some models)
 
-;; The ground truth is $y = \sin(x) \cdot x$. We generate 500 points
-;; with moderate noise and explore four feature sets crossed with
-;; two model types — eight models in total. Every step is cached.
+;; *Feature engineering* means transforming raw inputs into forms
+;; that help models learn. For example, if the true relationship
+;; involves $x^2$, adding a squared column gives the model that
+;; pattern directly instead of forcing it to discover it.
+;;
+;; We'll test four feature sets:
+;; - `:raw` — just the original $x$ value
+;; - `:quadratic` — add $x^2$
+;; - `:trig` — add $\sin(x)$ and $\cos(x)$
+;; - `:poly+trig` — add all three
+;;
+;; Crossed with two model types, that's eight combinations. Every
+;; step is cached, so re-running is instant.
 
 ;; ### Generate data
 
@@ -201,12 +234,19 @@ feature-results
            (< (m [:poly+trig "sgd"]) 2.0)
            (< (Math/abs (- (m [:raw "cart"]) (m [:trig "cart"]))) 0.5))))])
 
-;; A linear model's world is defined by its features. With only raw
-;; $x$, it fits a straight line through a sine wave — hopeless. Give
-;; it $\sin(x)$ and $\cos(x)$ and it can approximate the curve.
+;; **What the results show**:
 ;;
-;; A decision tree discovers nonlinearity through splits. Extra
-;; features do not help — the tree already found the shape.
+;; The linear model (SGD) has high error with raw features — it's
+;; trying to draw a straight line through a wavy curve. But give it
+;; $\sin(x)$ and $\cos(x)$ as features, and it can combine them to
+;; approximate the true shape. Feature engineering saved the day.
+;;
+;; The decision tree (CART) doesn't care. It discovers the wavy
+;; pattern by splitting the data into regions. Extra features
+;; don't help because the tree already found the structure.
+;;
+;; **Takeaway**: Some models need feature engineering; others don't.
+;; Caching lets you explore both without waiting.
 
 ;; ### Predictions plot
 
@@ -232,11 +272,16 @@ feature-results
 
 ;; ---
 
-;; ## Part 2 — Noise sensitivity
+;; ## Part 2 — How models handle noisy data
 
-;; How do these models behave as noise increases? We generate data
-;; at five noise levels. The noise=0.5 dataset reuses the cache
-;; from Part 1 — Pocket recognizes the same arguments.
+;; Real data is messy. Measurements have errors, inputs are approximate.
+;; *Noise* is the random variation that obscures the true pattern.
+;;
+;; How do our models behave as noise increases? We'll test five
+;; levels, from nearly clean (0.1) to very noisy (5.0).
+;;
+;; Notice: the noise=0.5 dataset reuses the cache from Part 1 —
+;; Pocket recognizes the same function and arguments.
 
 (def noise-levels [0.1 0.5 1.0 2.0 5.0])
 
@@ -265,10 +310,18 @@ noise-results
       (and (< (:cart-rmse low) (:sgd-rmse low))
            (> (:cart-rmse high) (:sgd-rmse high)))))])
 
-;; At low noise the tree captures fine structure that the linear
-;; model misses. As noise increases the tree overfits to randomness,
-;; while the linear model — constrained by its parametric form —
-;; degrades more gracefully.
+;; **What the results show**:
+;;
+;; At low noise, the tree wins — it captures fine details the linear
+;; model smooths over. But as noise increases, the tree starts
+;; memorizing random wiggles (*overfitting*), and its error explodes.
+;;
+;; The linear model degrades more gracefully. Its rigid structure
+;; (a weighted sum of features) acts as a built-in regularizer —
+;; it can't chase noise even if it wanted to.
+;;
+;; **Takeaway**: Flexible models (trees) excel with clean data but
+;; suffer with noise. Simple models (linear) are more robust.
 
 ;; ### RMSE vs. noise
 
@@ -282,11 +335,11 @@ noise-results
 
 ;; ---
 
-;; ## Part 3 — The caching payoff
+;; ## Part 3 — What got cached?
 
-;; This notebook generated and trained many combinations of data,
-;; features, and models. Each call to `pocket/cached` is an
-;; independent cache entry.
+;; We've run many combinations of data, features, and models.
+;; Each `pocket/cached` call created an independent cache entry.
+;; Let's see what we accumulated:
 
 (:total-entries (pocket/cache-stats))
 
@@ -295,10 +348,12 @@ noise-results
 
 (pocket/cache-entries)
 
-;; With small synthetic data every step runs quickly. The same
-;; structure applies to real workflows where data generation
-;; takes minutes and model training takes hours. The cache
-;; graph is identical — only the savings grow.
+;; With this small synthetic data, each step runs in milliseconds.
+;; But the *structure* is what matters. In real workflows — large
+;; datasets, deep neural networks, hyperparameter searches — the
+;; same cache graph saves hours or days.
+;;
+;; Here's what happens when you change something:
 ;;
 ;; | Change                        | What recomputes          |
 ;; |-------------------------------|--------------------------|
@@ -313,11 +368,16 @@ noise-results
 
 ;; ---
 
-;; ## Part 4 — DAG workflow with shared statistics
+;; ## Part 4 — Sharing computations across branches
 
-;; In real preprocessing pipelines, statistics computed from the
-;; training set (e.g., mean, std, outlier thresholds) must be applied
-;; to both training and test sets. This creates a diamond dependency:
+;; Real preprocessing often requires computing something from the
+;; training data and applying it to both train and test sets.
+;; For example, *normalization*: you compute the mean and standard
+;; deviation from training data, then use those same values to
+;; scale both sets. (Using test statistics would leak information.)
+;;
+;; This creates a *diamond dependency* — one computation feeds
+;; into multiple downstream steps:
 ;;
 ;; ```
 ;;     train/test split
@@ -341,10 +401,14 @@ noise-results
 ;;   evaluate
 ;; ```
 ;;
-;; Pocket's DAG support handles this naturally — the shared `stats`
-;; node appears once in the computation graph and is computed once.
+;; Pocket handles this naturally. The `stats-c` node is computed
+;; once and feeds both preprocessing steps. When you change the
+;; training data, stats recompute, and both branches update.
 
 ;; ### Pipeline functions
+;;
+;; These are plain functions. Each does one thing: compute stats,
+;; normalize data, train, or evaluate. Pocket will wire them together.
 
 (defn compute-stats
   "Compute normalization statistics from training data.
@@ -444,10 +508,15 @@ noise-results
 
 ;; ---
 
-;; ## Part 5 — Hyperparameter sweep with compare-experiments
+;; ## Part 5 — Comparing many experiments at once
 
-;; When running multiple experiments with different hyperparameters,
-;; `compare-experiments` extracts the varying parameters automatically.
+;; *Hyperparameters* are settings you choose before training: tree
+;; depth, learning rate, which features to use. Finding good values
+;; usually means trying many combinations — a *hyperparameter sweep*.
+;;
+;; Pocket's `compare-experiments` helps here. You pass a collection
+;; of cached experiments, and it extracts the parameters that vary
+;; across them (ignoring ones that are constant).
 
 (defn run-pipeline
   "Run a complete pipeline with given hyperparameters."
@@ -490,9 +559,9 @@ noise-results
          (some #{:feature-set} (tc/column-names ds))
          (some #{:max-depth} (tc/column-names ds))))])
 
-;; The `:result` column contains the metrics from each experiment.
-;; Parameters that were the same across all experiments (like seed=42)
-;; are automatically excluded from the comparison table.
+;; Each row shows the varying parameters plus the result. Parameters
+;; that were constant (like seed=42) are excluded automatically —
+;; you see only what differs.
 
 ;; ### Results visualization
 

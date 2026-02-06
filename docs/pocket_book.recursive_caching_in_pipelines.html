@@ -202,7 +202,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./pocket_book.regression_experiments.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Regression Experiments</span></span></a>
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Demo: Caching a Machine Learning Workflow</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
@@ -294,17 +294,20 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>(pocket/set-base-cache-dir! cache-dir)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
 <span class="screen-reader-only">Note</span>OUT
 </div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
+<div id="callout-1" class="callout-1-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>15:54:48.672 INFO scicloj.pocket - Cache dir set to: /tmp/pocket-demo-pipelines
+<pre><code>16:50:39.520 INFO scicloj.pocket - Cache dir set to: /tmp/pocket-demo-pipelines
 </code></pre>
+</div>
 </div>
 </div>
 <div class="printedClojure">
@@ -314,17 +317,20 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>(pocket/cleanup!)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
 <span class="screen-reader-only">Note</span>OUT
 </div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
+<div id="callout-2" class="callout-2-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>15:54:48.673 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo-pipelines
+<pre><code>16:50:39.521 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo-pipelines
 </code></pre>
+</div>
 </div>
 </div>
 <div class="printedClojure">
@@ -383,26 +389,29 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>     (<span class="kw">select-keys</span> [<span class="at">:model</span> <span class="at">:accuracy</span>])))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-3-contents" aria-controls="callout-3" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
 <span class="screen-reader-only">Note</span>OUT
 </div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
+<div id="callout-3" class="callout-3-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>15:54:48.676 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.recursive-caching-in-pipelines/train-model
-15:54:48.676 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.recursive-caching-in-pipelines/preprocess
-15:54:48.676 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.recursive-caching-in-pipelines/load-dataset
+<pre><code>16:50:39.524 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.recursive-caching-in-pipelines/train-model
+16:50:39.524 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.recursive-caching-in-pipelines/preprocess
+16:50:39.524 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.recursive-caching-in-pipelines/load-dataset
 Loading dataset from data/raw.csv ...
-15:54:48.977 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo-pipelines/.cache/d3/(pocket-book.recursive-caching-in-pipelines⁄load-dataset "data⁄raw.csv")
+16:50:39.825 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo-pipelines/.cache/d3/(pocket-book.recursive-caching-in-pipelines⁄load-dataset "data⁄raw.csv")
 Preprocessing with options: {:scale 2}
-15:54:49.279 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo-pipelines/.cache/d7/(pocket-book.recursive-caching-in-pipelines⁄preprocess (pocket-book.recursive-caching-in-pipelines⁄load-dataset "data⁄raw.csv") {:scale 2})
+16:50:40.127 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo-pipelines/.cache/d7/(pocket-book.recursive-caching-in-pipelines⁄preprocess (pocket-book.recursive-caching-in-pipelines⁄load-dataset "data⁄raw.csv") {:scale 2})
 Training model with params: {:epochs 100}
-15:54:49.581 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo-pipelines/.cache/c0/(pocket-book.recursive-caching-in-pipelines⁄train-model (pocket-book.recursive-caching-in-pipelines⁄preprocess (pocket-book.recursive-caching-in-pipelines⁄load-dataset "data⁄raw.csv") {:scale 2}) {:epochs 100})
-"Elapsed time: 905.422796 msecs"
+16:50:40.428 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo-pipelines/.cache/c0/(pocket-book.recursive-caching-in-pipelines⁄train-model (pocket-book.recursive-caching-in-pipelines⁄preprocess (pocket-book.recursive-caching-in-pipelines⁄load-dataset "data⁄raw.csv") {:scale 2}) {:epochs 100})
+"Elapsed time: 904.705599 msecs"
 </code></pre>
+</div>
 </div>
 </div>
 <div class="printedClojure">
@@ -420,17 +429,20 @@ Training model with params: {:epochs 100}
 <span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>     (<span class="kw">select-keys</span> [<span class="at">:model</span> <span class="at">:accuracy</span>])))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-4-contents" aria-controls="callout-4" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
 <span class="screen-reader-only">Note</span>OUT
 </div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
+<div id="callout-4" class="callout-4-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>"Elapsed time: 0.303577 msecs"
+<pre><code>"Elapsed time: 0.329925 msecs"
 </code></pre>
+</div>
 </div>
 </div>
 <div class="printedClojure">
@@ -508,25 +520,28 @@ Training model with params: {:epochs 100}
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb30"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>(<span class="kw">deref</span> model-c)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-5-contents" aria-controls="callout-5" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
 <span class="screen-reader-only">Note</span>OUT
 </div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
+<div id="callout-5" class="callout-5-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>15:54:49.587 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.recursive-caching-in-pipelines/train-model
-15:54:49.587 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.recursive-caching-in-pipelines/preprocess
-15:54:49.587 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.recursive-caching-in-pipelines/load-dataset
+<pre><code>16:50:40.432 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.recursive-caching-in-pipelines/train-model
+16:50:40.432 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.recursive-caching-in-pipelines/preprocess
+16:50:40.432 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.recursive-caching-in-pipelines/load-dataset
 Loading dataset from data/experiment.csv ...
-15:54:49.888 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo-pipelines/.cache/21/(pocket-book.recursive-caching-in-pipelines⁄load-dataset "data⁄experiment.csv")
+16:50:40.734 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo-pipelines/.cache/21/(pocket-book.recursive-caching-in-pipelines⁄load-dataset "data⁄experiment.csv")
 Preprocessing with options: {:scale 2}
-15:54:50.190 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo-pipelines/.cache/dc/(pocket-book.recursive-caching-in-pipelines⁄preprocess (pocket-book.recursive-caching-in-pipelines⁄load-dataset "data⁄experiment.csv") {:scale 2})
+16:50:41.035 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo-pipelines/.cache/dc/(pocket-book.recursive-caching-in-pipelines⁄preprocess (pocket-book.recursive-caching-in-pipelines⁄load-dataset "data⁄experiment.csv") {:scale 2})
 Training model with params: {:epochs 100}
-15:54:50.491 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo-pipelines/.cache/ab/(pocket-book.recursive-caching-in-pipelines⁄train-model (pocket-book.recursive-caching-in-pipelines⁄preprocess (pocket-book.recursive-caching-in-pipelines⁄load-dataset "data⁄experiment.csv") {:scale 2}) {:epochs 100})
+16:50:41.336 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo-pipelines/.cache/ab/(pocket-book.recursive-caching-in-pipelines⁄train-model (pocket-book.recursive-caching-in-pipelines⁄preprocess (pocket-book.recursive-caching-in-pipelines⁄load-dataset "data⁄experiment.csv") {:scale 2}) {:epochs 100})
 </code></pre>
+</div>
 </div>
 </div>
 <div class="printedClojure">
@@ -611,17 +626,20 @@ Training model with params: {:epochs 100}
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb38"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>(pocket/cleanup!)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-6-contents" aria-controls="callout-6" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
 <span class="screen-reader-only">Note</span>OUT
 </div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
+<div id="callout-6" class="callout-6-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>15:54:50.495 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo-pipelines
+<pre><code>16:50:41.340 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo-pipelines
 </code></pre>
+</div>
 </div>
 </div>
 <div class="printedClojure">

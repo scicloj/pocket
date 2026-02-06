@@ -221,7 +221,7 @@
 ;; or a `nil` marker, plus a `meta.edn` with metadata.
 ;; Here is the actual cache directory tree, generated dynamically:
 
-(kind/code (pocket/dir-tree))
+(pocket/dir-tree)
 
 ;; ## Cleanup
 

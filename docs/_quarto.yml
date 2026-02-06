@@ -5,6 +5,7 @@ format:
     theme: [cosmo, notebooks/custom.scss]
     toc-expand: 2
     number-depth: 1
+    filters: [notebooks/collapse-callouts.lua]
   revealjs: {theme: solarized, navigation-mode: vertical, transition: slide, background-transition: fade, incremental: true}
 project: {type: book}
 book:

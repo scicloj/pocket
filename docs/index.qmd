@@ -6,6 +6,7 @@ format:
     theme: [cosmo, notebooks/custom.scss]
     toc-expand: 2
     number-depth: 1
+    filters: [notebooks/collapse-callouts.lua]
 
 ---
 <style></style><style>.printedClojure .sourceCode {
@@ -109,7 +110,7 @@ Distributed under the MIT License — see [LICENSE](LICENSE).
 
 
 
-- [Regression Experiments](pocket_book.regression_experiments.html)
+- [Demo: Caching a Machine Learning Workflow](pocket_book.regression_experiments.html)
 
 
 

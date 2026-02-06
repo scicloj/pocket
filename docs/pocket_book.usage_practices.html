@@ -202,7 +202,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./pocket_book.regression_experiments.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Regression Experiments</span></span></a>
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Demo: Caching a Machine Learning Workflow</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
@@ -312,17 +312,20 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>(pocket/set-base-cache-dir! test-dir)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
 <span class="screen-reader-only">Note</span>OUT
 </div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
+<div id="callout-1" class="callout-1-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>15:54:50.521 INFO scicloj.pocket - Cache dir set to: /tmp/pocket-dev-practices
+<pre><code>16:50:41.367 INFO scicloj.pocket - Cache dir set to: /tmp/pocket-dev-practices
 </code></pre>
+</div>
 </div>
 </div>
 <div class="printedClojure">
@@ -425,17 +428,20 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>(pocket/cleanup!)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
 <span class="screen-reader-only">Note</span>OUT
 </div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
+<div id="callout-2" class="callout-2-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>15:54:50.523 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-dev-practices
+<pre><code>16:50:41.369 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-dev-practices
 </code></pre>
+</div>
 </div>
 </div>
 <div class="printedClojure">
@@ -449,18 +455,21 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>(<span class="kw">deref</span> (pocket/cached <span class="va">#'transform</span> <span class="dv">10</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-3-contents" aria-controls="callout-3" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
 <span class="screen-reader-only">Note</span>OUT
 </div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
+<div id="callout-3" class="callout-3-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>15:54:50.524 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.usage-practices/transform
-15:54:50.524 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-dev-practices/.cache/89/(pocket-book.usage-practices⁄transform 10)
+<pre><code>16:50:41.369 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.usage-practices/transform
+16:50:41.370 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-dev-practices/.cache/89/(pocket-book.usage-practices⁄transform 10)
 </code></pre>
+</div>
 </div>
 </div>
 <div class="printedClojure">
@@ -471,17 +480,20 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>(pocket/invalidate! <span class="va">#'transform</span> <span class="dv">10</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-4-contents" aria-controls="callout-4" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
 <span class="screen-reader-only">Note</span>OUT
 </div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
+<div id="callout-4" class="callout-4-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>15:54:50.525 INFO scicloj.pocket.impl.cache - Invalidated: /tmp/pocket-dev-practices/.cache/89/(pocket-book.usage-practices⁄transform 10) existed= true
+<pre><code>16:50:41.371 INFO scicloj.pocket.impl.cache - Invalidated: /tmp/pocket-dev-practices/.cache/89/(pocket-book.usage-practices⁄transform 10) existed= true
 </code></pre>
+</div>
 </div>
 </div>
 <div class="printedClojure">
@@ -494,18 +506,21 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>(<span class="kw">deref</span> (pocket/cached <span class="va">#'transform</span> <span class="dv">1</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-5-contents" aria-controls="callout-5" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
 <span class="screen-reader-only">Note</span>OUT
 </div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
+<div id="callout-5" class="callout-5-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>15:54:50.525 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.usage-practices/transform
-15:54:50.526 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-dev-practices/.cache/b7/(pocket-book.usage-practices⁄transform 1)
+<pre><code>16:50:41.371 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.usage-practices/transform
+16:50:41.371 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-dev-practices/.cache/b7/(pocket-book.usage-practices⁄transform 1)
 </code></pre>
+</div>
 </div>
 </div>
 <div class="printedClojure">
@@ -515,18 +530,21 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb23"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>(<span class="kw">deref</span> (pocket/cached <span class="va">#'transform</span> <span class="dv">2</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-6-contents" aria-controls="callout-6" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
 <span class="screen-reader-only">Note</span>OUT
 </div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
+<div id="callout-6" class="callout-6-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>15:54:50.526 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.usage-practices/transform
-15:54:50.526 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-dev-practices/.cache/8a/(pocket-book.usage-practices⁄transform 2)
+<pre><code>16:50:41.372 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.usage-practices/transform
+16:50:41.372 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-dev-practices/.cache/8a/(pocket-book.usage-practices⁄transform 2)
 </code></pre>
+</div>
 </div>
 </div>
 <div class="printedClojure">
@@ -536,17 +554,20 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb26"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>(pocket/invalidate-fn! <span class="va">#'transform</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-7-contents" aria-controls="callout-7" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
 <span class="screen-reader-only">Note</span>OUT
 </div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
+<div id="callout-7" class="callout-7-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>15:54:50.527 INFO scicloj.pocket.impl.cache - Invalidated 2 entries for pocket-book.usage-practices/transform
+<pre><code>16:50:41.373 INFO scicloj.pocket.impl.cache - Invalidated 2 entries for pocket-book.usage-practices/transform
 </code></pre>
+</div>
 </div>
 </div>
 <div class="printedClojure">
@@ -564,17 +585,20 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb29"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>(pocket/cleanup!)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-8-contents" aria-controls="callout-8" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
 <span class="screen-reader-only">Note</span>OUT
 </div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
+<div id="callout-8" class="callout-8-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>15:54:50.527 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-dev-practices
+<pre><code>16:50:41.373 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-dev-practices
 </code></pre>
+</div>
 </div>
 </div>
 <div class="printedClojure">
@@ -590,18 +614,21 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb33"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>(<span class="kw">deref</span> (pocket/cached <span class="va">#'process-data</span> {<span class="at">:data</span> [<span class="dv">1</span> <span class="dv">2</span> <span class="dv">3</span>] <span class="at">:version</span> <span class="dv">1</span>}))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-9-contents" aria-controls="callout-9" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
 <span class="screen-reader-only">Note</span>OUT
 </div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
+<div id="callout-9" class="callout-9-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>15:54:50.529 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.usage-practices/process-data
-15:54:50.529 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-dev-practices/.cache/ff/(pocket-book.usage-practices⁄process-data {:data [1 2 3], :version 1})
+<pre><code>16:50:41.375 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.usage-practices/process-data
+16:50:41.375 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-dev-practices/.cache/ff/(pocket-book.usage-practices⁄process-data {:data [1 2 3], :version 1})
 </code></pre>
+</div>
 </div>
 </div>
 <div class="printedClojure">
@@ -612,18 +639,21 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb36"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>(<span class="kw">deref</span> (pocket/cached <span class="va">#'process-data</span> {<span class="at">:data</span> [<span class="dv">1</span> <span class="dv">2</span> <span class="dv">3</span>] <span class="at">:version</span> <span class="dv">2</span>}))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-10-contents" aria-controls="callout-10" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
 <span class="screen-reader-only">Note</span>OUT
 </div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
+<div id="callout-10" class="callout-10-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>15:54:50.530 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.usage-practices/process-data
-15:54:50.530 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-dev-practices/.cache/6a/(pocket-book.usage-practices⁄process-data {:data [1 2 3], :version 2})
+<pre><code>16:50:41.376 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.usage-practices/process-data
+16:50:41.376 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-dev-practices/.cache/6a/(pocket-book.usage-practices⁄process-data {:data [1 2 3], :version 2})
 </code></pre>
+</div>
 </div>
 </div>
 <div class="printedClojure">
@@ -638,17 +668,20 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb39"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>(pocket/cleanup!)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-11-contents" aria-controls="callout-11" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
 <span class="screen-reader-only">Note</span>OUT
 </div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
+<div id="callout-11" class="callout-11-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>15:54:50.531 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-dev-practices
+<pre><code>16:50:41.377 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-dev-practices
 </code></pre>
+</div>
 </div>
 </div>
 <div class="printedClojure">
@@ -681,17 +714,20 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb43"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>(pocket/cleanup!)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-12-contents" aria-controls="callout-12" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
 <span class="screen-reader-only">Note</span>OUT
 </div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
+<div id="callout-12" class="callout-12-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>15:54:50.531 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-dev-practices
+<pre><code>16:50:41.378 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-dev-practices
 </code></pre>
+</div>
 </div>
 </div>
 <div class="printedClojure">
@@ -718,18 +754,21 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb50-3"><a href="#cb50-3" aria-hidden="true" tabindex="-1"></a>  {<span class="at">:result</span> result <span class="at">:calls</span> calls})</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-13-contents" aria-controls="callout-13" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
 <span class="screen-reader-only">Note</span>OUT
 </div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
+<div id="callout-13" class="callout-13-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>15:54:50.532 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.usage-practices/tracked-fn
-15:54:50.533 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-dev-practices/.cache/a5/(pocket-book.usage-practices⁄tracked-fn 5)
+<pre><code>16:50:41.379 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.usage-practices/tracked-fn
+16:50:41.379 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-dev-practices/.cache/a5/(pocket-book.usage-practices⁄tracked-fn 5)
 </code></pre>
+</div>
 </div>
 </div>
 <div class="printedClojure">
@@ -755,17 +794,20 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb55"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a>(pocket/cleanup!)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-14-contents" aria-controls="callout-14" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
 <span class="screen-reader-only">Note</span>OUT
 </div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
+<div id="callout-14" class="callout-14-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>15:54:50.534 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-dev-practices
+<pre><code>16:50:41.381 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-dev-practices
 </code></pre>
+</div>
 </div>
 </div>
 <div class="printedClojure">
@@ -775,18 +817,21 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb58"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a>(<span class="kw">deref</span> (pocket/cached <span class="va">#'transform</span> <span class="dv">1</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-15-contents" aria-controls="callout-15" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
 <span class="screen-reader-only">Note</span>OUT
 </div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
+<div id="callout-15" class="callout-15-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>15:54:50.534 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.usage-practices/transform
-15:54:50.535 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-dev-practices/.cache/b7/(pocket-book.usage-practices⁄transform 1)
+<pre><code>16:50:41.382 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.usage-practices/transform
+16:50:41.382 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-dev-practices/.cache/b7/(pocket-book.usage-practices⁄transform 1)
 </code></pre>
+</div>
 </div>
 </div>
 <div class="printedClojure">
@@ -796,18 +841,21 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb61"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb61-1"><a href="#cb61-1" aria-hidden="true" tabindex="-1"></a>(<span class="kw">deref</span> (pocket/cached <span class="va">#'transform</span> <span class="dv">2</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-16-contents" aria-controls="callout-16" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
 <span class="screen-reader-only">Note</span>OUT
 </div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
+<div id="callout-16" class="callout-16-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>15:54:50.535 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.usage-practices/transform
-15:54:50.535 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-dev-practices/.cache/8a/(pocket-book.usage-practices⁄transform 2)
+<pre><code>16:50:41.382 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.usage-practices/transform
+16:50:41.383 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-dev-practices/.cache/8a/(pocket-book.usage-practices⁄transform 2)
 </code></pre>
+</div>
 </div>
 </div>
 <div class="printedClojure">
@@ -817,18 +865,21 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb64"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb64-1"><a href="#cb64-1" aria-hidden="true" tabindex="-1"></a>(<span class="kw">deref</span> (pocket/cached <span class="va">#'tracked-fn</span> <span class="dv">3</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-17-contents" aria-controls="callout-17" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
 <span class="screen-reader-only">Note</span>OUT
 </div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
+<div id="callout-17" class="callout-17-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>15:54:50.536 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.usage-practices/tracked-fn
-15:54:50.536 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-dev-practices/.cache/64/(pocket-book.usage-practices⁄tracked-fn 3)
+<pre><code>16:50:41.383 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.usage-practices/tracked-fn
+16:50:41.383 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-dev-practices/.cache/64/(pocket-book.usage-practices⁄tracked-fn 3)
 </code></pre>
+</div>
 </div>
 </div>
 <div class="printedClojure">
@@ -880,7 +931,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb74"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb74-1"><a href="#cb74-1" aria-hidden="true" tabindex="-1"></a>{<span class="at">:id</span> <span class="st">"(pocket-book.usage-practices/transform 1)"</span>,</span>
 <span id="cb74-2"><a href="#cb74-2" aria-hidden="true" tabindex="-1"></a> <span class="at">:fn-name</span> <span class="st">"pocket-book.usage-practices/transform"</span>,</span>
 <span id="cb74-3"><a href="#cb74-3" aria-hidden="true" tabindex="-1"></a> <span class="at">:args-str</span> <span class="st">"[1]"</span>,</span>
-<span id="cb74-4"><a href="#cb74-4" aria-hidden="true" tabindex="-1"></a> <span class="at">:created-at</span> <span class="st">"2026-02-06T13:54:50.534936560Z"</span>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb74-4"><a href="#cb74-4" aria-hidden="true" tabindex="-1"></a> <span class="at">:created-at</span> <span class="st">"2026-02-06T14:50:41.382072828Z"</span>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>This same information is available through the API:</p>
 <div class="sourceClojure">
@@ -892,19 +943,19 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb76-3"><a href="#cb76-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">:id</span> <span class="st">"(pocket-book.usage-practices/transform 1)"</span>,</span>
 <span id="cb76-4"><a href="#cb76-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">:fn-name</span> <span class="st">"pocket-book.usage-practices/transform"</span>,</span>
 <span id="cb76-5"><a href="#cb76-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">:args-str</span> <span class="st">"[1]"</span>,</span>
-<span id="cb76-6"><a href="#cb76-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">:created-at</span> <span class="st">"2026-02-06T13:54:50.534936560Z"</span>}</span>
+<span id="cb76-6"><a href="#cb76-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">:created-at</span> <span class="st">"2026-02-06T14:50:41.382072828Z"</span>}</span>
 <span id="cb76-7"><a href="#cb76-7" aria-hidden="true" tabindex="-1"></a> {<span class="at">:path</span></span>
 <span id="cb76-8"><a href="#cb76-8" aria-hidden="true" tabindex="-1"></a>  <span class="st">"/tmp/pocket-dev-practices/.cache/64/(pocket-book.usage-practices⁄tracked-fn 3)"</span>,</span>
 <span id="cb76-9"><a href="#cb76-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">:id</span> <span class="st">"(pocket-book.usage-practices/tracked-fn 3)"</span>,</span>
 <span id="cb76-10"><a href="#cb76-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">:fn-name</span> <span class="st">"pocket-book.usage-practices/tracked-fn"</span>,</span>
 <span id="cb76-11"><a href="#cb76-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">:args-str</span> <span class="st">"[3]"</span>,</span>
-<span id="cb76-12"><a href="#cb76-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">:created-at</span> <span class="st">"2026-02-06T13:54:50.536104933Z"</span>}</span>
+<span id="cb76-12"><a href="#cb76-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">:created-at</span> <span class="st">"2026-02-06T14:50:41.383521404Z"</span>}</span>
 <span id="cb76-13"><a href="#cb76-13" aria-hidden="true" tabindex="-1"></a> {<span class="at">:path</span></span>
 <span id="cb76-14"><a href="#cb76-14" aria-hidden="true" tabindex="-1"></a>  <span class="st">"/tmp/pocket-dev-practices/.cache/8a/(pocket-book.usage-practices⁄transform 2)"</span>,</span>
 <span id="cb76-15"><a href="#cb76-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">:id</span> <span class="st">"(pocket-book.usage-practices/transform 2)"</span>,</span>
 <span id="cb76-16"><a href="#cb76-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">:fn-name</span> <span class="st">"pocket-book.usage-practices/transform"</span>,</span>
 <span id="cb76-17"><a href="#cb76-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">:args-str</span> <span class="st">"[2]"</span>,</span>
-<span id="cb76-18"><a href="#cb76-18" aria-hidden="true" tabindex="-1"></a>  <span class="at">:created-at</span> <span class="st">"2026-02-06T13:54:50.535543255Z"</span>}]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb76-18"><a href="#cb76-18" aria-hidden="true" tabindex="-1"></a>  <span class="at">:created-at</span> <span class="st">"2026-02-06T14:50:41.382862773Z"</span>}]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Filter entries by function name:</p>
 <div class="sourceClojure">
@@ -916,13 +967,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb78-3"><a href="#cb78-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">:id</span> <span class="st">"(pocket-book.usage-practices/transform 1)"</span>,</span>
 <span id="cb78-4"><a href="#cb78-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">:fn-name</span> <span class="st">"pocket-book.usage-practices/transform"</span>,</span>
 <span id="cb78-5"><a href="#cb78-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">:args-str</span> <span class="st">"[1]"</span>,</span>
-<span id="cb78-6"><a href="#cb78-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">:created-at</span> <span class="st">"2026-02-06T13:54:50.534936560Z"</span>}</span>
+<span id="cb78-6"><a href="#cb78-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">:created-at</span> <span class="st">"2026-02-06T14:50:41.382072828Z"</span>}</span>
 <span id="cb78-7"><a href="#cb78-7" aria-hidden="true" tabindex="-1"></a> {<span class="at">:path</span></span>
 <span id="cb78-8"><a href="#cb78-8" aria-hidden="true" tabindex="-1"></a>  <span class="st">"/tmp/pocket-dev-practices/.cache/8a/(pocket-book.usage-practices⁄transform 2)"</span>,</span>
 <span id="cb78-9"><a href="#cb78-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">:id</span> <span class="st">"(pocket-book.usage-practices/transform 2)"</span>,</span>
 <span id="cb78-10"><a href="#cb78-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">:fn-name</span> <span class="st">"pocket-book.usage-practices/transform"</span>,</span>
 <span id="cb78-11"><a href="#cb78-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">:args-str</span> <span class="st">"[2]"</span>,</span>
-<span id="cb78-12"><a href="#cb78-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">:created-at</span> <span class="st">"2026-02-06T13:54:50.535543255Z"</span>}]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb78-12"><a href="#cb78-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">:created-at</span> <span class="st">"2026-02-06T14:50:41.382862773Z"</span>}]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
 <section id="checking-cached-status" class="level3">
@@ -932,17 +983,20 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb79"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb79-1"><a href="#cb79-1" aria-hidden="true" tabindex="-1"></a>(pocket/cleanup!)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-18-contents" aria-controls="callout-18" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
 <span class="screen-reader-only">Note</span>OUT
 </div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
+<div id="callout-18" class="callout-18-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>15:54:50.540 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-dev-practices
+<pre><code>16:50:41.388 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-dev-practices
 </code></pre>
+</div>
 </div>
 </div>
 <div class="printedClojure">
@@ -962,18 +1016,21 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb85"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb85-1"><a href="#cb85-1" aria-hidden="true" tabindex="-1"></a>(<span class="kw">deref</span> pending-value)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-19-contents" aria-controls="callout-19" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
 <span class="screen-reader-only">Note</span>OUT
 </div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
+<div id="callout-19" class="callout-19-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>15:54:50.541 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.usage-practices/transform
-15:54:50.541 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-dev-practices/.cache/6d/(pocket-book.usage-practices⁄transform 99)
+<pre><code>16:50:41.389 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.usage-practices/transform
+16:50:41.389 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-dev-practices/.cache/6d/(pocket-book.usage-practices⁄transform 99)
 </code></pre>
+</div>
 </div>
 </div>
 <div class="printedClojure">
@@ -1006,17 +1063,20 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb90"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb90-1"><a href="#cb90-1" aria-hidden="true" tabindex="-1"></a>(pocket/cleanup!)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-20-contents" aria-controls="callout-20" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
 <span class="screen-reader-only">Note</span>OUT
 </div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
+<div id="callout-20" class="callout-20-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>15:54:50.542 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-dev-practices
+<pre><code>16:50:41.391 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-dev-practices
 </code></pre>
+</div>
 </div>
 </div>
 <div class="printedClojure">
@@ -1033,18 +1093,21 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb95"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb95-1"><a href="#cb95-1" aria-hidden="true" tabindex="-1"></a>(<span class="kw">deref</span> (pocket/cached <span class="va">#'process-long-text</span> long-text))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-21-contents" aria-controls="callout-21" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
 <span class="screen-reader-only">Note</span>OUT
 </div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
+<div id="callout-21" class="callout-21-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>15:54:50.543 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.usage-practices/process-long-text
-15:54:50.543 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-dev-practices/.cache/66/66ca82f71c1e7e5a1fcebd04da5cff4cf0e04366
+<pre><code>16:50:41.391 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.usage-practices/process-long-text
+16:50:41.392 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-dev-practices/.cache/66/66ca82f71c1e7e5a1fcebd04da5cff4cf0e04366
 </code></pre>
+</div>
 </div>
 </div>
 <div class="printedClojure">
@@ -1105,17 +1168,20 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb102"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb102-1"><a href="#cb102-1" aria-hidden="true" tabindex="-1"></a>(pocket/cleanup!)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-22-contents" aria-controls="callout-22" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
 <span class="screen-reader-only">Note</span>OUT
 </div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
+<div id="callout-22" class="callout-22-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>15:54:50.545 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-dev-practices
+<pre><code>16:50:41.395 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-dev-practices
 </code></pre>
+</div>
 </div>
 </div>
 <div class="printedClojure">
@@ -1130,18 +1196,21 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb106"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb106-1"><a href="#cb106-1" aria-hidden="true" tabindex="-1"></a>(<span class="kw">deref</span> (pocket/cached <span class="va">#'generate-data</span> <span class="dv">5</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-23-contents" aria-controls="callout-23" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
 <span class="screen-reader-only">Note</span>OUT
 </div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
+<div id="callout-23" class="callout-23-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>15:54:50.546 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.usage-practices/generate-data
-15:54:50.546 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-dev-practices/.cache/70/(pocket-book.usage-practices⁄generate-data 5)
+<pre><code>16:50:41.396 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.usage-practices/generate-data
+16:50:41.396 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-dev-practices/.cache/70/(pocket-book.usage-practices⁄generate-data 5)
 </code></pre>
+</div>
 </div>
 </div>
 <div class="printedClojure">
@@ -1202,17 +1271,20 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb109"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb109-1"><a href="#cb109-1" aria-hidden="true" tabindex="-1"></a>(pocket/cleanup!)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-24-contents" aria-controls="callout-24" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
 <span class="screen-reader-only">Note</span>OUT
 </div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
+<div id="callout-24" class="callout-24-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>15:54:50.547 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-dev-practices
+<pre><code>16:50:41.397 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-dev-practices
 </code></pre>
+</div>
 </div>
 </div>
 <div class="printedClojure">
