@@ -4,5 +4,6 @@
                           :toc-expand 2
                           :number-depth 1
                           :toc-depth 4
-                          :theme [:cosmo "notebooks/custom.scss"]}}}
+                          :theme [:cosmo "notebooks/custom.scss"]
+                          :filters ["notebooks/collapse-callouts.lua"]}}}
  :base-target-path ".clay-temp"}
