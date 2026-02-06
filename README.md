@@ -44,6 +44,13 @@ Under the hood, Pocket derives cache keys from the function identity and its arg
 @result  ;; => 30 (loads from cache — instant)
 ```
 
+## Discussion
+
+The best places to discuss this project are:
+* a topic thread under the [#data-science channel](https://clojurians.zulipchat.com/#narrow/channel/151924-data-science/) at the Clojurians Zulip (more about chat channels [here](https://scicloj.github.io/docs/community/chat/)) 
+  * It is highly recommended to create separate [topics](https://zulip.com/help/introduction-to-topics) for separate questions.
+* a [github issue](https://github.com/scicloj/pocket/issues)
+
 ## License
 
 Copyright © 2025-2026 Scicloj
