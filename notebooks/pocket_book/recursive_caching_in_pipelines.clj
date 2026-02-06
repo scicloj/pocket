@@ -173,9 +173,9 @@
 ;; ### `origin-story-mermaid` — visualization
 
 ;; Returns a Mermaid flowchart string. Arrows show data flow direction
-;; (from inputs toward the final result). Wrap with `kind/mermaid` to render.
+;; (from inputs toward the final result). It returns a kindly value that renders directly.
 
-(kind/mermaid (pocket/origin-story-mermaid model-c))
+(pocket/origin-story-mermaid model-c)
 
 ;; ## Cleanup
 

@@ -9,22 +9,22 @@
 
 
 (def
- v3_l27
+ v3_l32
  (kind/mermaid
   "flowchart TD\n    FR[fetch-readings] --> CD[clean-data]\n    CD --> TT[temperature-trends]\n    CD --> RT[rainfall-totals]\n    TT --> S[summary]\n    RT --> S"))
 
 
-(def v5_l38 (def cache-dir "/tmp/pocket-walkthrough"))
+(def v5_l43 (def cache-dir "/tmp/pocket-walkthrough"))
 
 
-(def v6_l40 (pocket/set-base-cache-dir! cache-dir))
+(def v6_l45 (pocket/set-base-cache-dir! cache-dir))
 
 
-(def v7_l42 (pocket/cleanup!))
+(def v7_l47 (pocket/cleanup!))
 
 
 (def
- v9_l50
+ v9_l55
  (defn
   fetch-readings
   "Simulate fetching raw sensor data for a city."
@@ -54,7 +54,7 @@
 
 
 (def
- v10_l75
+ v10_l80
  (defn
   clean-data
   "Remove readings with missing values and round numbers."
@@ -72,13 +72,13 @@
       rs
       (filter
        (fn*
-        [p1__30192#]
-        (and (:temp-c p1__30192#) (:rain-mm p1__30192#))))
+        [p1__87056#]
+        (and (:temp-c p1__87056#) (:rain-mm p1__87056#))))
       (mapv
        (fn*
-        [p1__30193#]
+        [p1__87057#]
         (->
-         p1__30193#
+         p1__87057#
          (update
           :temp-c
           (fn [t] (Math/round (* t (double precision)))))
@@ -88,7 +88,7 @@
 
 
 (def
- v11_l89
+ v11_l94
  (defn
   temperature-trends
   "Compute temperature statistics from cleaned data."
@@ -106,7 +106,7 @@
 
 
 (def
- v12_l103
+ v12_l108
  (defn
   rainfall-totals
   "Compute rainfall statistics from cleaned data."
@@ -126,7 +126,7 @@
 
 
 (def
- v13_l116
+ v13_l121
  (defn
   summary
   "Combine temperature and rainfall analyses into a report."
@@ -150,11 +150,11 @@
      " days")})))
 
 
-(def v15_l137 (println "=== First run ==="))
+(def v15_l142 (println "=== First run ==="))
 
 
 (def
- v16_l139
+ v16_l144
  (let
   [raw
    (pocket/cached
@@ -172,21 +172,21 @@
 
 
 (deftest
- t17_l146
+ t17_l151
  (is
   ((fn
     [result]
     (every?
      result
      [:city :report :min-temp :max-temp :total-rain :rainy-days]))
-   v16_l139)))
+   v16_l144)))
 
 
-(def v19_l155 (println "\n=== Second run (fully cached) ==="))
+(def v19_l160 (println "\n=== Second run (fully cached) ==="))
 
 
 (def
- v20_l157
+ v20_l162
  (let
   [raw
    (pocket/cached
@@ -204,15 +204,15 @@
 
 
 (deftest
- t21_l164
- (is ((fn [result] (= "London" (:city result))) v20_l157)))
+ t21_l169
+ (is ((fn [result] (= "London" (:city result))) v20_l162)))
 
 
-(def v23_l173 (println "\n=== Different city ==="))
+(def v23_l178 (println "\n=== Different city ==="))
 
 
 (def
- v24_l175
+ v24_l180
  (let
   [raw
    (pocket/cached
@@ -230,15 +230,15 @@
 
 
 (deftest
- t25_l182
- (is ((fn [result] (= "Paris" (:city result))) v24_l175)))
+ t25_l187
+ (is ((fn [result] (= "Paris" (:city result))) v24_l180)))
 
 
-(def v27_l186 (println "\n=== Paris again (cached) ==="))
+(def v27_l191 (println "\n=== Paris again (cached) ==="))
 
 
 (def
- v28_l188
+ v28_l193
  (let
   [raw
    (pocket/cached
@@ -255,18 +255,18 @@
   (time (deref report))))
 
 
-(def v30_l205 (pocket/cache-entries))
+(def v30_l210 (pocket/cache-entries))
 
 
-(def v32_l209 (pocket/cache-stats))
+(def v32_l214 (pocket/cache-stats))
 
 
 (deftest
- t33_l211
- (is ((fn [stats] (= 10 (:total-entries stats))) v32_l209)))
+ t33_l216
+ (is ((fn [stats] (= 10 (:total-entries stats))) v32_l214)))
 
 
-(def v35_l219 (kind/code (pocket/dir-tree)))
+(def v35_l224 (kind/code (pocket/dir-tree)))
 
 
-(def v37_l225 (pocket/cleanup!))
+(def v37_l230 (pocket/cleanup!))

@@ -243,9 +243,9 @@ pocket/*base-cache-dir*
 
 (kind/doc #'pocket/origin-story-mermaid)
 
-;; Returns a Mermaid flowchart string. Wrap with `kind/mermaid` for rendering:
+;; Returns a Mermaid flowchart with kindly metadata for notebook rendering:
 
-(kind/mermaid (pocket/origin-story-mermaid b-c))
+(pocket/origin-story-mermaid b-c)
 
 (kind/doc #'pocket/origin-story-graph)
 

@@ -8,23 +8,23 @@
   [clojure.test :refer [deftest is]]))
 
 
-(def v2_l21 (def cache-dir "/tmp/pocket-demo-pipelines"))
+(def v2_l26 (def cache-dir "/tmp/pocket-demo-pipelines"))
 
 
-(def v3_l23 (pocket/set-base-cache-dir! cache-dir))
+(def v3_l28 (pocket/set-base-cache-dir! cache-dir))
 
 
-(def v4_l25 (pocket/cleanup!))
+(def v4_l30 (pocket/cleanup!))
 
 
 (def
- v6_l35
+ v6_l40
  (kind/mermaid
   "flowchart LR\n    LD[load-dataset] --> PP[preprocess]\n    PP --> TM[train-model]"))
 
 
 (def
- v8_l42
+ v8_l47
  (defn
   load-dataset
   [path]
@@ -34,7 +34,7 @@
 
 
 (def
- v9_l47
+ v9_l52
  (defn
   preprocess
   [data opts]
@@ -43,11 +43,11 @@
   (update
    data
    :data
-   (fn* [p1__30006#] (map (fn [x] (* x (:scale opts))) p1__30006#)))))
+   (fn* [p1__73497#] (map (fn [x] (* x (:scale opts))) p1__73497#)))))
 
 
 (def
- v10_l52
+ v10_l57
  (defn
   train-model
   [data params]
@@ -56,17 +56,17 @@
   {:model :trained, :accuracy 0.95, :data data}))
 
 
-(def v12_l59 (def load-dataset* (pocket/caching-fn #'load-dataset)))
+(def v12_l64 (def load-dataset* (pocket/caching-fn #'load-dataset)))
 
 
-(def v13_l60 (def preprocess* (pocket/caching-fn #'preprocess)))
+(def v13_l65 (def preprocess* (pocket/caching-fn #'preprocess)))
 
 
-(def v14_l61 (def train-model* (pocket/caching-fn #'train-model)))
+(def v14_l66 (def train-model* (pocket/caching-fn #'train-model)))
 
 
 (def
- v16_l68
+ v16_l73
  (time
   (->
    "data/raw.csv"
@@ -77,11 +77,11 @@
    (select-keys [:model :accuracy]))))
 
 
-(deftest t17_l76 (is (= v16_l68 {:model :trained, :accuracy 0.95})))
+(deftest t17_l81 (is (= v16_l73 {:model :trained, :accuracy 0.95})))
 
 
 (def
- v19_l81
+ v19_l86
  (time
   (->
    "data/raw.csv"
@@ -92,36 +92,36 @@
    (select-keys [:model :accuracy]))))
 
 
-(deftest t20_l89 (is (= v19_l81 {:model :trained, :accuracy 0.95})))
+(deftest t20_l94 (is (= v19_l86 {:model :trained, :accuracy 0.95})))
 
 
-(def v22_l103 (->> (pocket/cache-entries) (mapv :id)))
+(def v22_l108 (->> (pocket/cache-entries) (mapv :id)))
 
 
 (def
- v23_l106
+ v23_l111
  (->> (pocket/cache-entries) (mapv :id) (str/join "\n") kind/code))
 
 
-(def v25_l136 (def data-c (load-dataset* "data/experiment.csv")))
+(def v25_l141 (def data-c (load-dataset* "data/experiment.csv")))
 
 
-(def v26_l137 (def preprocessed-c (preprocess* data-c {:scale 2})))
+(def v26_l142 (def preprocessed-c (preprocess* data-c {:scale 2})))
 
 
-(def v27_l138 (def model-c (train-model* preprocessed-c {:epochs 100})))
+(def v27_l143 (def model-c (train-model* preprocessed-c {:epochs 100})))
 
 
-(def v29_l148 (pocket/origin-story model-c))
+(def v29_l153 (pocket/origin-story model-c))
 
 
-(def v31_l156 (pocket/origin-story model-c))
+(def v31_l161 (pocket/origin-story model-c))
 
 
-(def v33_l166 (pocket/origin-story-graph model-c))
+(def v33_l171 (pocket/origin-story-graph model-c))
 
 
-(def v35_l173 (kind/mermaid (pocket/origin-story-mermaid model-c)))
+(def v35_l178 (pocket/origin-story-mermaid model-c))
 
 
-(def v37_l177 (pocket/cleanup!))
+(def v37_l182 (pocket/cleanup!))

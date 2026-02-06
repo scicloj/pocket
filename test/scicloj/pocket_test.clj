@@ -732,10 +732,13 @@
     (is (= {:value {:a 1}} (pocket/origin-story {:a 1})))))
 
 (deftest test-origin-story-mermaid
-  (testing "origin-story-mermaid returns valid Mermaid flowchart"
+  (testing "origin-story-mermaid returns valid Mermaid flowchart with kindly metadata"
     (let [a (pocket/cached #'expensive-add 1 2)
           b (pocket/cached #'expensive-add a 3)
-          mermaid (pocket/origin-story-mermaid b)]
+          result (pocket/origin-story-mermaid b)
+          mermaid (first result)]
+      (is (vector? result) "Returns a kindly-wrapped vector")
+      (is (= :kind/mermaid (:kindly/kind (meta result))) "Has kindly mermaid metadata")
       (is (string? mermaid))
       (is (.startsWith mermaid "flowchart TD"))
       (is (.contains mermaid "expensive-add"))
@@ -815,13 +818,27 @@
           b (pocket/cached #'expensive-add a 10)
           c (pocket/cached #'expensive-add a 20)
           d (pocket/cached #'expensive-add b c)
-          mermaid (pocket/origin-story-mermaid d)]
+          mermaid (first (pocket/origin-story-mermaid d))]
       (is (string? mermaid))
       (is (.startsWith mermaid "flowchart TD"))
       ;; Should have 4 expensive-add nodes (a, b, c, d)
       (is (= 4 (count (re-seq #"expensive-add" mermaid))))
       ;; Should have edges - at least 8 (4 fn nodes + 4 value leaves, with diamond)
       (is (>= (count (re-seq #"-->" mermaid)) 8)))))
+(deftest test-origin-story-mermaid-shapes
+  (testing "origin-story-mermaid uses distinct shapes for functions and values"
+    (let [c (pocket/cached #'expensive-add 1 2)
+          mermaid (first (pocket/origin-story-mermaid c))]
+      ;; Function nodes use rectangle shape: n0["expensive-add"]
+      (is (re-find #"n\d+\[\"" mermaid)
+          "Functions should use rectangle shape [...]")
+      ;; Value nodes use parallelogram shape: n1[/"1"/]
+      (is (re-find #"n\d+\[/\"1\"" mermaid)
+          "Values should use parallelogram shape [/.../]")
+      (is (re-find #"n\d+\[/\"2\"" mermaid)
+          "Values should use parallelogram shape [/.../]"))))
+
+
 
 (defn run-experiment
   "A fake experiment function that takes config and returns metrics."

@@ -432,7 +432,7 @@ noise-results
 ;; The diamond dependency is clearly visible — `stats-c` feeds both
 ;; preprocessing steps:
 
-(kind/mermaid (pocket/origin-story-mermaid metrics-c))
+(pocket/origin-story-mermaid metrics-c)
 
 ;; ### Execute the pipeline
 

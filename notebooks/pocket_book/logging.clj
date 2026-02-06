@@ -13,8 +13,8 @@
 ;; `tools.logging` auto-discovers a backend from the classpath;
 ;; without one, logging is silently disabled.
 ;;
-;; The `:dev` alias in this project includes `slf4j-simple` for
-;; notebook and REPL use.
+;; This documentation was rendered using `slf4j-simple` as a dev dependency
+;; of the Pocket project, so the log output shown here is real.
 
 ;; ## Log levels
 ;;

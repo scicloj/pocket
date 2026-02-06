@@ -7,55 +7,55 @@
   [clojure.test :refer [deftest is]]))
 
 
-(def v2_l16 (def test-dir "/tmp/pocket-dev-practices"))
+(def v2_l20 (def test-dir "/tmp/pocket-dev-practices"))
 
 
-(def v3_l17 (pocket/set-base-cache-dir! test-dir))
+(def v3_l21 (pocket/set-base-cache-dir! test-dir))
 
 
-(def v5_l63 (defn example-fn [x] (* x x)))
+(def v5_l67 (defn example-fn [x] (* x x)))
 
 
 (def
- v6_l65
+ v6_l69
  (try (pocket/cached example-fn 5) (catch Exception e (ex-message e))))
 
 
 (deftest
- t7_l70
+ t7_l74
  (is
-  ((fn* [p1__30058#] (re-find #"requires a var" p1__30058#)) v6_l65)))
+  ((fn* [p1__86922#] (re-find #"requires a var" p1__86922#)) v6_l69)))
 
 
-(def v9_l82 (pocket/cleanup!))
+(def v9_l86 (pocket/cleanup!))
 
 
-(def v10_l84 (defn transform [x] (* x 2)))
+(def v10_l88 (defn transform [x] (* x 2)))
 
 
-(def v12_l87 (deref (pocket/cached #'transform 10)))
+(def v12_l91 (deref (pocket/cached #'transform 10)))
 
 
-(deftest t13_l89 (is (= v12_l87 20)))
+(deftest t13_l93 (is (= v12_l91 20)))
 
 
-(def v15_l92 (pocket/invalidate! #'transform 10))
+(def v15_l96 (pocket/invalidate! #'transform 10))
 
 
-(def v17_l96 (deref (pocket/cached #'transform 1)))
+(def v17_l100 (deref (pocket/cached #'transform 1)))
 
 
-(def v18_l97 (deref (pocket/cached #'transform 2)))
+(def v18_l101 (deref (pocket/cached #'transform 2)))
 
 
-(def v19_l99 (pocket/invalidate-fn! #'transform))
+(def v19_l103 (pocket/invalidate-fn! #'transform))
 
 
-(def v21_l106 (pocket/cleanup!))
+(def v21_l110 (pocket/cleanup!))
 
 
 (def
- v22_l108
+ v22_l112
  (defn
   process-data
   [{:keys [data version]}]
@@ -63,85 +63,85 @@
 
 
 (def
- v24_l113
+ v24_l117
  (deref (pocket/cached #'process-data {:data [1 2 3], :version 1})))
 
 
-(deftest t25_l115 (is (= v24_l113 {:result 6, :version 1})))
+(deftest t25_l119 (is (= v24_l117 {:result 6, :version 1})))
 
 
 (def
- v27_l118
+ v27_l122
  (deref (pocket/cached #'process-data {:data [1 2 3], :version 2})))
 
 
-(deftest t28_l120 (is (= v27_l118 {:result 6, :version 2})))
+(deftest t28_l124 (is (= v27_l122 {:result 6, :version 2})))
 
 
-(def v30_l128 (pocket/cleanup!))
+(def v30_l132 (pocket/cleanup!))
 
 
-(def v32_l160 (pocket/cleanup!))
+(def v32_l164 (pocket/cleanup!))
 
 
-(def v33_l162 (def call-count (atom 0)))
+(def v33_l166 (def call-count (atom 0)))
 
 
-(def v34_l164 (defn tracked-fn [x] (swap! call-count inc) (* x x)))
+(def v34_l168 (defn tracked-fn [x] (swap! call-count inc) (* x x)))
 
 
-(def v36_l169 (reset! call-count 0))
+(def v36_l173 (reset! call-count 0))
 
 
 (def
- v37_l171
+ v37_l175
  (let
   [result (deref (pocket/cached #'tracked-fn 5)) calls @call-count]
   {:result result, :calls calls}))
 
 
-(deftest t38_l175 (is (= v37_l171 {:result 25, :calls 1})))
+(deftest t38_l179 (is (= v37_l175 {:result 25, :calls 1})))
 
 
 (def
- v40_l178
+ v40_l182
  (let
   [result (deref (pocket/cached #'tracked-fn 5)) calls @call-count]
   {:result result, :calls calls}))
 
 
-(deftest t41_l182 (is (= v40_l178 {:result 25, :calls 1})))
+(deftest t41_l186 (is (= v40_l182 {:result 25, :calls 1})))
 
 
-(def v43_l190 (pocket/cleanup!))
+(def v43_l194 (pocket/cleanup!))
 
 
-(def v44_l191 (deref (pocket/cached #'transform 1)))
+(def v44_l195 (deref (pocket/cached #'transform 1)))
 
 
-(def v45_l192 (deref (pocket/cached #'transform 2)))
+(def v45_l196 (deref (pocket/cached #'transform 2)))
 
 
-(def v46_l193 (deref (pocket/cached #'tracked-fn 3)))
+(def v46_l197 (deref (pocket/cached #'tracked-fn 3)))
 
 
-(def v48_l196 (count (pocket/cache-entries)))
+(def v48_l200 (count (pocket/cache-entries)))
 
 
-(deftest t49_l198 (is (= v48_l196 3)))
+(deftest t49_l202 (is (= v48_l200 3)))
 
 
-(def v51_l201 (:total-entries (pocket/cache-stats)))
+(def v51_l205 (:total-entries (pocket/cache-stats)))
 
 
-(deftest t52_l203 (is (= v51_l201 3)))
+(deftest t52_l207 (is (= v51_l205 3)))
 
 
-(def v54_l206 (kind/code (pocket/dir-tree)))
+(def v54_l210 (kind/code (pocket/dir-tree)))
 
 
 (def
- v56_l211
+ v56_l215
  (->
   (pocket/cache-entries)
   first
@@ -151,66 +151,66 @@
   clojure.edn/read-string))
 
 
-(def v58_l220 (pocket/cache-entries))
+(def v58_l224 (pocket/cache-entries))
 
 
-(def v60_l224 (pocket/cache-entries (str (ns-name *ns*) "/transform")))
+(def v60_l228 (pocket/cache-entries (str (ns-name *ns*) "/transform")))
 
 
-(def v62_l230 (pocket/cleanup!))
+(def v62_l234 (pocket/cleanup!))
 
 
-(def v63_l232 (def pending-value (pocket/cached #'transform 99)))
+(def v63_l236 (def pending-value (pocket/cached #'transform 99)))
 
 
-(def v65_l235 (pr-str pending-value))
-
-
-(deftest
- t66_l237
- (is ((fn* [p1__30059#] (re-find #":pending" p1__30059#)) v65_l235)))
-
-
-(def v67_l239 (deref pending-value))
-
-
-(def v69_l242 (pr-str pending-value))
+(def v65_l239 (pr-str pending-value))
 
 
 (deftest
- t70_l244
- (is ((fn* [p1__30060#] (re-find #":cached" p1__30060#)) v69_l242)))
+ t66_l241
+ (is ((fn* [p1__86923#] (re-find #":pending" p1__86923#)) v65_l239)))
 
 
-(def v72_l264 (pocket/cleanup!))
+(def v67_l243 (deref pending-value))
+
+
+(def v69_l246 (pr-str pending-value))
+
+
+(deftest
+ t70_l248
+ (is ((fn* [p1__86924#] (re-find #":cached" p1__86924#)) v69_l246)))
+
+
+(def v72_l268 (pocket/cleanup!))
 
 
 (def
- v73_l266
+ v73_l270
  (defn
   process-long-text
   [text]
   (str "Processed: " (count text) " chars")))
 
 
-(def v74_l269 (def long-text (apply str (repeat 300 "x"))))
+(def v74_l273 (def long-text (apply str (repeat 300 "x"))))
 
 
-(def v75_l271 (deref (pocket/cached #'process-long-text long-text)))
+(def v75_l275 (deref (pocket/cached #'process-long-text long-text)))
 
 
 (deftest
- t76_l273
+ t76_l277
  (is
   ((fn [result] (clojure.string/starts-with? result "Processed:"))
-   v75_l271)))
+   v75_l275)))
 
 
-(def v78_l277 (kind/code (pocket/dir-tree)))
+(def v78_l281 (kind/code (pocket/dir-tree)))
 
 
 (def
- v80_l282
+ v80_l286
  (->
   (pocket/cache-entries (str (ns-name *ns*) "/process-long-text"))
   first
@@ -218,26 +218,26 @@
 
 
 (deftest
- t81_l286
+ t81_l290
  (is
   ((fn
     [fn-name]
     (and
      fn-name
      (clojure.string/ends-with? fn-name "/process-long-text")))
-   v80_l282)))
+   v80_l286)))
 
 
-(def v83_l316 (pocket/cleanup!))
+(def v83_l320 (pocket/cleanup!))
 
 
-(def v84_l318 (defn generate-data [n] (doall (range n))))
+(def v84_l322 (defn generate-data [n] (doall (range n))))
 
 
-(def v85_l322 (deref (pocket/cached #'generate-data 5)))
+(def v85_l326 (deref (pocket/cached #'generate-data 5)))
 
 
-(deftest t86_l324 (is (= v85_l322 [0 1 2 3 4])))
+(deftest t86_l328 (is (= v85_l326 [0 1 2 3 4])))
 
 
-(def v88_l357 (pocket/cleanup!))
+(def v88_l361 (pocket/cleanup!))

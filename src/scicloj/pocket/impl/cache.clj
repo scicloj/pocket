@@ -7,7 +7,8 @@
             [clojure.edn :as edn]
             [clojure.string :as str]
             [clojure.tools.logging :as log]
-            [scicloj.pocket.protocols :as protocols :refer [PIdentifiable ->id]])
+            [scicloj.pocket.protocols :as protocols :refer [PIdentifiable ->id]]
+            [scicloj.kindly.v4.kind :as kind])
   (:import (org.apache.commons.codec.digest DigestUtils)
            (clojure.lang IPersistentMap IDeref Var)))
 
@@ -392,6 +393,12 @@
 (defn origin-story-mermaid
   "Render an origin-story DAG as a Mermaid flowchart string.
    
+   Returns a string with kindly metadata for notebook rendering.
+   
+   Node shapes distinguish types:
+   - Functions (Cached): rectangles
+   - Plain values: parallelograms (input data)
+   
    Handles both tree format and DAG format (with :id/:ref nodes).
    Shared nodes (via :ref) are rendered as edges to existing nodes."
   [tree]
@@ -405,7 +412,7 @@
                 (:ref node)
                 (get @node-ids (:ref node))
 
-                ;; Cached node (has :fn)
+                ;; Cached node (has :fn) - rectangle shape
                 (:fn node)
                 (let [mermaid-id (gen-id)
                       label (-> (:fn node) symbol name)]
@@ -418,7 +425,7 @@
                       (swap! lines conj (str "  " child-id " --> " mermaid-id))))
                   mermaid-id)
 
-                ;; Value leaf node
+                ;; Value leaf node - parallelogram shape (input data)
                 :else
                 (let [mermaid-id (gen-id)
                       v (:value node)
@@ -426,11 +433,10 @@
                       label (if (> (count label) 40)
                               (str (subs label 0 37) "...")
                               label)]
-                  (swap! lines conj (str "  " mermaid-id "[\"" (mermaid-escape label) "\"]"))
+                  (swap! lines conj (str "  " mermaid-id "[/\"" (mermaid-escape label) "\"/]"))
                   mermaid-id)))]
       (walk tree)
-      (str "flowchart TD\n" (str/join "\n" @lines)))))
-
+      (kind/mermaid (str "flowchart TD\n" (str/join "\n" @lines))))))
 (defn cached
   "Create a cached computation"
   [base-dir storage filename-length-limit func & args]

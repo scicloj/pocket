@@ -9,7 +9,7 @@
 
 
 (def
- v3_l65
+ v3_l70
  (let
   [call-count
    (atom 0)
@@ -33,33 +33,33 @@
 
 
 (deftest
- t4_l80
+ t4_l85
  (is
   ((fn
     [{:keys [results computation-count]}]
     (and
-     (every? (fn* [p1__30277#] (= 42 p1__30277#)) results)
+     (every? (fn* [p1__87141#] (= 42 p1__87141#)) results)
      (> computation-count 1)))
-   v3_l65)))
+   v3_l70)))
 
 
 (def
- v6_l127
+ v6_l132
  (kind/mermaid
   "flowchart TB\n    subgraph Request\n    D[deref Cached]\n    end\n    subgraph Synchronization\n    CHM[ConcurrentHashMap<br>in-flight]\n    DEL[delay]\n    end\n    subgraph Caching\n    MEM[Memory Cache<br>core.cache]\n    DISK[Disk Cache<br>Nippy files]\n    end\n    D --> CHM\n    CHM -->|one delay per key| DEL\n    DEL -->|on miss| MEM\n    MEM -->|on miss| DISK\n    DISK -->|on miss| COMP[Compute]\n    COMP --> DISK\n    DISK --> MEM\n    MEM --> D"))
 
 
-(def v8_l164 (def test-dir "/tmp/pocket-concurrency-test"))
+(def v8_l169 (def test-dir "/tmp/pocket-concurrency-test"))
 
 
-(def v9_l166 (pocket/set-base-cache-dir! test-dir))
+(def v9_l171 (pocket/set-base-cache-dir! test-dir))
 
 
-(def v11_l170 (def computation-count (atom 0)))
+(def v11_l175 (def computation-count (atom 0)))
 
 
 (def
- v12_l172
+ v12_l177
  (defn
   slow-computation
   "A computation that takes 300ms and increments a counter."
@@ -70,7 +70,7 @@
 
 
 (def
- v14_l181
+ v14_l186
  (defn
   fresh-scenario!
   "Reset counters and caches for a fresh scenario.\n   Returns the start time for timing measurements."
@@ -83,11 +83,11 @@
    {:started-at (java.time.LocalTime/now), :mem-cache mem-cache-opts})))
 
 
-(def v16_l210 (fresh-scenario!))
+(def v16_l215 (fresh-scenario!))
 
 
 (def
- v18_l214
+ v18_l219
  (let
   [cached-val
    (pocket/cached #'slow-computation 10)
@@ -99,22 +99,22 @@
 
 
 (deftest
- t19_l221
+ t19_l226
  (is
   ((fn
     [{:keys [results computation-count]}]
     (and
      (= 5 (count results))
-     (every? (fn* [p1__30278#] (= 100 p1__30278#)) results)
+     (every? (fn* [p1__87142#] (= 100 p1__87142#)) results)
      (= 1 computation-count)))
-   v18_l214)))
+   v18_l219)))
 
 
-(def v21_l244 (fresh-scenario!))
+(def v21_l249 (fresh-scenario!))
 
 
 (def
- v23_l248
+ v23_l253
  (let
   [result-1
    @(pocket/cached #'slow-computation 20)
@@ -136,7 +136,7 @@
 
 
 (deftest
- t24_l262
+ t24_l267
  (is
   ((fn
     [{:keys
@@ -151,14 +151,14 @@
      (< second-elapsed-ms 50)
      (= 1 computations-after-first)
      (= 1 computations-after-second)))
-   v23_l248)))
+   v23_l253)))
 
 
-(def v26_l285 (fresh-scenario!))
+(def v26_l290 (fresh-scenario!))
 
 
 (def
- v28_l289
+ v28_l294
  (let
   [_
    @(pocket/cached #'slow-computation 30)
@@ -181,7 +181,7 @@
 
 
 (deftest
- t29_l304
+ t29_l309
  (is
   ((fn
     [{:keys
@@ -194,14 +194,14 @@
      (= 4 computations-before-retry)
      (= 4 computations-after-retry)
      disk-hit?))
-   v28_l289)))
+   v28_l294)))
 
 
-(def v31_l325 (def failure-count (atom 0)))
+(def v31_l330 (def failure-count (atom 0)))
 
 
 (def
- v32_l327
+ v32_l332
  (defn
   flaky-computation
   "Fails on first call, succeeds thereafter."
@@ -214,11 +214,11 @@
    (do (swap! failure-count inc) (* x 100)))))
 
 
-(def v33_l336 (do (reset! failure-count 0) (pocket/cleanup!) :ready))
+(def v33_l341 (do (reset! failure-count 0) (pocket/cleanup!) :ready))
 
 
 (def
- v35_l343
+ v35_l348
  (let
   [attempt-1
    (try
@@ -241,7 +241,7 @@
 
 
 (deftest
- t36_l359
+ t36_l364
  (is
   ((fn
     [{:keys [attempt-1 attempt-2 attempt-3 counts]}]
@@ -253,22 +253,22 @@
      (= 1 (first counts))
      (= 2 (second counts))
      (= 2 (nth counts 2))))
-   v35_l343)))
+   v35_l348)))
 
 
-(def v38_l386 (fresh-scenario!))
+(def v38_l391 (fresh-scenario!))
 
 
 (def
- v39_l388
+ v39_l393
  (let
   [start
    (System/currentTimeMillis)
    futures
    (mapv
     (fn*
-     [p1__30279#]
-     (future @(pocket/cached #'slow-computation p1__30279#)))
+     [p1__87143#]
+     (future @(pocket/cached #'slow-computation p1__87143#)))
     [40 41 42])
    results
    (mapv deref futures)
@@ -278,19 +278,19 @@
 
 
 (deftest
- t40_l397
+ t40_l402
  (is
   ((fn
     [{:keys [results elapsed-ms parallel?]}]
     (and (= [1600 1681 1764] results) (< elapsed-ms 500) parallel?))
-   v39_l388)))
+   v39_l393)))
 
 
-(def v42_l417 (fresh-scenario!))
+(def v42_l422 (fresh-scenario!))
 
 
 (def
- v44_l421
+ v44_l426
  (let
   [_
    @(pocket/cached #'slow-computation 50)
@@ -313,7 +313,7 @@
 
 
 (deftest
- t45_l436
+ t45_l441
  (is
   ((fn
     [{:keys
@@ -323,20 +323,20 @@
        no-recompute?]}]
     (and
      (= 3 (count results))
-     (every? (fn* [p1__30280#] (= 2500 p1__30280#)) results)
+     (every? (fn* [p1__87144#] (= 2500 p1__87144#)) results)
      (= 1 count-after-compute)
      (= 1 count-after-disk-hits)
      no-recompute?))
-   v44_l421)))
+   v44_l426)))
 
 
 (def
- v47_l461
+ v47_l466
  (fresh-scenario! {:mem-cache-opts {:policy :lru, :threshold 2}}))
 
 
 (def
- v48_l463
+ v48_l468
  (let
   [_
    @(pocket/cached #'slow-computation 60)
@@ -377,7 +377,7 @@
 
 
 (deftest
- t49_l496
+ t49_l501
  (is
   ((fn
     [{:keys
@@ -394,14 +394,14 @@
      (= 3 count-step-3)
      (= 3 count-step-4)
      (= 4 count-step-6)))
-   v48_l463)))
+   v48_l468)))
 
 
-(def v51_l512 (fresh-scenario!))
+(def v51_l517 (fresh-scenario!))
 
 
 (def
- v52_l514
+ v52_l519
  (let
   [barrier
    (java.util.concurrent.CyclicBarrier. 5)
@@ -416,24 +416,24 @@
 
 
 (deftest
- t53_l523
+ t53_l528
  (is
   ((fn
     [{:keys [results computation-count]}]
     (and
-     (every? (fn* [p1__30281#] (= 4900 p1__30281#)) results)
+     (every? (fn* [p1__87145#] (= 4900 p1__87145#)) results)
      (= 1 computation-count)))
-   v52_l514)))
+   v52_l519)))
 
 
-(def v55_l536 (def step-a-count (atom 0)))
+(def v55_l541 (def step-a-count (atom 0)))
 
 
-(def v56_l537 (def step-b-count (atom 0)))
+(def v56_l542 (def step-b-count (atom 0)))
 
 
 (def
- v57_l539
+ v57_l544
  (defn
   pipeline-step-a
   "First pipeline step: slow transform."
@@ -444,7 +444,7 @@
 
 
 (def
- v58_l546
+ v58_l551
  (defn
   pipeline-step-b
   "Second pipeline step: depends on step-a result."
@@ -455,7 +455,7 @@
 
 
 (def
- v59_l553
+ v59_l558
  (do
   (reset! step-a-count 0)
   (reset! step-b-count 0)
@@ -465,7 +465,7 @@
 
 
 (def
- v61_l562
+ v61_l567
  (let
   [cached-a
    (pocket/cached #'pipeline-step-a 7)
@@ -483,22 +483,22 @@
 
 
 (deftest
- t62_l574
+ t62_l579
  (is
   ((fn
     [{:keys [results step-a-count step-b-count]}]
     (and
-     (every? (fn* [p1__30282#] (= 71 p1__30282#)) results)
+     (every? (fn* [p1__87146#] (= 71 p1__87146#)) results)
      (= 1 step-a-count)
      (= 1 step-b-count)))
-   v61_l562)))
+   v61_l567)))
 
 
-(def v64_l588 (def concurrent-fail-count (atom 0)))
+(def v64_l593 (def concurrent-fail-count (atom 0)))
 
 
 (def
- v65_l590
+ v65_l595
  (defn
   fail-once-computation
   "Fails when concurrent-fail-count is 0, succeeds after."
@@ -514,7 +514,7 @@
 
 
 (def
- v66_l600
+ v66_l605
  (do
   (reset! concurrent-fail-count 0)
   (pocket/cleanup!)
@@ -523,7 +523,7 @@
 
 
 (def
- v68_l608
+ v68_l613
  (let
   [barrier
    (java.util.concurrent.CyclicBarrier. 5)
@@ -549,7 +549,7 @@
 
 
 (deftest
- t69_l624
+ t69_l629
  (is
   ((fn
     [{:keys
@@ -559,16 +559,16 @@
      (= 5 (+ first-round-errors first-round-successes))
      (= 64 retry)
      (>= total-calls 2)))
-   v68_l608)))
+   v68_l613)))
 
 
 (def
- v71_l639
+ v71_l644
  (fresh-scenario! {:mem-cache-opts {:policy :lru, :threshold 2}}))
 
 
 (def
- v73_l644
+ v73_l649
  (let
   [barrier
    (java.util.concurrent.CyclicBarrier. 12)
@@ -585,19 +585,19 @@
 
 
 (deftest
- t74_l658
+ t74_l663
  (is
   ((fn
     [{:keys [results computation-count expected-results]}]
     (and (= expected-results results) (= 3 computation-count)))
-   v73_l644)))
+   v73_l649)))
 
 
-(def v76_l670 (fresh-scenario!))
+(def v76_l675 (fresh-scenario!))
 
 
 (def
- v78_l674
+ v78_l679
  (let
   [_
    @(pocket/cached #'slow-computation 90)
@@ -622,18 +622,18 @@
 
 
 (deftest
- t79_l690
+ t79_l695
  (is
   ((fn
     [{:keys [results count-after-first count-after-retry]}]
     (and
-     (every? (fn* [p1__30283#] (= 8100 p1__30283#)) results)
+     (every? (fn* [p1__87147#] (= 8100 p1__87147#)) results)
      (= 1 count-after-first)
      (= 2 count-after-retry)))
-   v78_l674)))
+   v78_l679)))
 
 
-(def v81_l726 (pocket/cleanup!))
+(def v81_l731 (pocket/cleanup!))
 
 
-(def v82_l727 (pocket/reset-mem-cache-options!))
+(def v82_l732 (pocket/reset-mem-cache-options!))
