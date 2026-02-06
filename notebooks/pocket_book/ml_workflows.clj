@@ -92,6 +92,16 @@
     (-> (tc/dataset {:x xs :y ys})
         (ds-mod/set-inference-target :y))))
 
+;; **Splitting**: `split-dataset` divides data into training and test
+;; sets. This is a cached step so the full provenance chain — from
+;; parameters through data generation to the split — is captured in
+;; the DAG.
+
+(defn split-dataset
+  "Split a dataset into train/test using holdout."
+  [ds seed]
+  (first (tc/split->seq ds :holdout {:seed seed})))
+
 ;; **Feature engineering**: `prepare-features` transforms raw data
 ;; by adding derived columns. The choice of feature set is a key
 ;; hyperparameter — a linear model with only `:raw` features can't
@@ -205,15 +215,22 @@
 
 ;; ### Generate data
 
-(def data
-  @(pocket/cached #'make-regression-data #'nonlinear-fn 500 0.5 42))
+(def data-c
+  (pocket/cached #'make-regression-data #'nonlinear-fn 500 0.5 42))
 
-(tc/head data)
+(tc/head (deref data-c))
 
 ;; ### Split into train and test
 
-(def split
-  (first (tc/split->seq data :holdout {:seed 42})))
+(def split-c
+  (pocket/cached #'split-dataset data-c 42))
+
+;; Extract train and test sets — using keywords as cached functions.
+;; The DAG now traces from numerical parameters through data
+;; generation to the split to each subset.
+
+(def train-c (pocket/cached :train split-c))
+(def test-c (pocket/cached :test split-c))
 
 ;; ### Feature sets
 
@@ -227,9 +244,9 @@
 (def prepared
   (into {}
         (for [fs feature-sets
-              role [:train :test]]
+              [role ds-c] [[:train train-c] [:test test-c]]]
           [[fs role]
-           @(pocket/cached #'prepare-features (role split) fs)])))
+           (pocket/cached #'prepare-features ds-c fs)])))
 
 ;; ### Train models (cached)
 
@@ -241,9 +258,9 @@
               [model-name spec] [[:sgd linear-sgd-spec]
                                  [:cart cart-spec]]]
           [[fs model-name]
-           @(pocket/cached #'train-model
-                           (prepared [fs :train])
-                           spec)])))
+           (pocket/cached #'train-model
+                          (prepared [fs :train])
+                          spec)])))
 
 ;; ### Results
 
@@ -253,8 +270,8 @@
                              [:cart cart-spec]]]
          {:feature-set fs
           :model (name model-name)
-          :rmse (predict-and-rmse (prepared [fs :test])
-                                  (models [fs model-name]))})))
+          :rmse (predict-and-rmse @(prepared [fs :test])
+                                  @(models [fs model-name]))})))
 
 feature-results
 
@@ -283,11 +300,11 @@ feature-results
 
 ;; Best linear model (poly+trig) vs best tree (raw) vs actual values.
 
-(let [test-ds (prepared [:raw :test])
-      sgd-pred (:y (ml/predict (prepared [:poly+trig :test])
-                               (models [:poly+trig :sgd])))
+(let [test-ds @(prepared [:raw :test])
+      sgd-pred (:y (ml/predict @(prepared [:poly+trig :test])
+                               @(models [:poly+trig :sgd])))
       cart-pred (:y (ml/predict test-ds
-                                (models [:raw :cart])))
+                                @(models [:raw :cart])))
       xs (vec (:x test-ds))
       actuals (vec (:y test-ds))
       sgd-vals (vec sgd-pred)
@@ -319,18 +336,20 @@ feature-results
 (def noise-results
   (vec
    (for [noise-sd noise-levels]
-     (let [ds @(pocket/cached #'make-regression-data
-                              #'nonlinear-fn 500 noise-sd 42)
-           sp (first (tc/split->seq ds :holdout {:seed 42}))
-           cart-train @(pocket/cached #'prepare-features (:train sp) :raw)
-           cart-test @(pocket/cached #'prepare-features (:test sp) :raw)
-           sgd-train @(pocket/cached #'prepare-features (:train sp) :poly+trig)
-           sgd-test @(pocket/cached #'prepare-features (:test sp) :poly+trig)
-           cart-model @(pocket/cached #'train-model cart-train cart-spec)
-           sgd-model @(pocket/cached #'train-model sgd-train linear-sgd-spec)]
+     (let [data-c (pocket/cached #'make-regression-data
+                                 #'nonlinear-fn 500 noise-sd 42)
+           split-c (pocket/cached #'split-dataset data-c 42)
+           train-c (pocket/cached :train split-c)
+           test-c (pocket/cached :test split-c)
+           cart-train (pocket/cached #'prepare-features train-c :raw)
+           cart-test (pocket/cached #'prepare-features test-c :raw)
+           sgd-train (pocket/cached #'prepare-features train-c :poly+trig)
+           sgd-test (pocket/cached #'prepare-features test-c :poly+trig)
+           cart-model (pocket/cached #'train-model cart-train cart-spec)
+           sgd-model (pocket/cached #'train-model sgd-train linear-sgd-spec)]
        {:noise-sd noise-sd
-        :cart-rmse (predict-and-rmse cart-test cart-model)
-        :sgd-rmse (predict-and-rmse sgd-test sgd-model)}))))
+        :cart-rmse (predict-and-rmse @cart-test @cart-model)
+        :sgd-rmse (predict-and-rmse @sgd-test @sgd-model)}))))
 
 noise-results
 
@@ -411,24 +430,26 @@ noise-results
 ;; into multiple downstream steps:
 ;;
 ;; ```
-;;     train/test split
-;;          │
-;;     ┌────┴────┐
-;;     ▼         ▼
-;;   train     test
-;;     │
-;;     ▼
-;;  compute-stats
-;;     │
-;;     ├─────────────────┐
-;;     ▼                 ▼
-;; preprocess(train)  preprocess(test)
-;;     │                 │
-;;     ▼                 │
-;; train-model          │
-;;     │                 │
-;;     ├─────────────────┘
-;;     ▼
+;;  make-regression-data
+;;          |
+;;     split-dataset
+;;          |
+;;     +----+----+
+;;     v         v
+;;  (:train)  (:test)
+;;     |         |
+;;     v         |
+;;  compute-stats|
+;;     |         |
+;;     +-------------+
+;;     v              v
+;; normalize(train) normalize(test)
+;;     |              |
+;;     v              |
+;; train-model        |
+;;     |              |
+;;     +--------------+
+;;     v
 ;;   evaluate
 ;; ```
 ;;
@@ -500,24 +521,27 @@ noise-results
 
 ;; Generate fresh data for this demo:
 
-(def dag-data
-  @(pocket/cached #'make-regression-data #'nonlinear-fn 200 0.3 99))
+(def dag-data-c
+  (pocket/cached #'make-regression-data #'nonlinear-fn 200 0.3 99))
 
-(def dag-split
-  (first (tc/split->seq dag-data :holdout {:seed 99})))
+(def dag-split-c
+  (pocket/cached #'split-dataset dag-data-c 99))
+
+(def dag-train-c (pocket/cached :train dag-split-c))
+(def dag-test-c (pocket/cached :test dag-split-c))
 
 ;; Now wire the pipeline. The `stats-c` node is computed once
 ;; (in memory) and feeds both preprocessing steps — a diamond
 ;; dependency handled naturally.
 
 (def stats-c
-  (c-compute-stats (:train dag-split)))
+  (c-compute-stats dag-train-c))
 
 (def train-norm-c
-  (c-normalize (:train dag-split) stats-c))
+  (c-normalize dag-train-c stats-c))
 
 (def test-norm-c
-  (c-normalize (:test dag-split) stats-c))
+  (c-normalize dag-test-c stats-c))
 
 (def model-c
   (c-train train-norm-c cart-spec))

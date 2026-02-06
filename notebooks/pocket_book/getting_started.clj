@@ -97,17 +97,19 @@
 ;;; Loading nil from cache:
 (deref nil-result)
 
-;; ## Important: use vars for functions
+;; ## Important: use vars or keywords for functions
 ;;
-;; Always pass functions as **vars** (`#'fn-name`), not as bare function
-;; objects. Vars have stable names that produce consistent cache keys
-;; across sessions. Pocket throws an error if you forget:
+;; Always pass functions as **vars** (`#'fn-name`) or **keywords**,
+;; not as bare function objects. Vars have stable names that produce
+;; consistent cache keys across sessions. Keywords are useful for
+;; extracting from cached maps (e.g., `(cached :train split-c)`).
+;; Pocket throws an error if you pass a bare function:
 ;;
 ;; ```clojure
 ;; ;; ✅ (pocket/cached #'my-function args)
+;; ;; ✅ (pocket/cached :train cached-map)
 ;; ;; ❌ (pocket/cached my-function args)
 ;; ```
-;;
 ;; See the [Usage Practices](pocket_book.usage_practices.html) chapter
 ;; for a detailed explanation and more best practices.
 

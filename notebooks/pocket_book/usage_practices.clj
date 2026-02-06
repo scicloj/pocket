@@ -45,10 +45,10 @@
 ;; | Pipeline caching | Yes (recursive) | No | No |
 
 
-;; ## Function Identity: Always Use Vars
+;; ## Function Identity: Use Vars or Keywords
 
-;; Pocket requires functions to be passed as **vars** (`#'fn-name`),
-;; not as bare function objects. This is the most common mistake:
+;; Pocket requires functions to be passed as **vars** (`#'fn-name`)
+;; or **keywords** (e.g., `:train`), not as bare function objects.
 
 ;; ```clojure
 ;; ;; ❌ WRONG - bare function, unstable identity
@@ -56,11 +56,15 @@
 ;;
 ;; ;; ✅ CORRECT - var, stable identity
 ;; (pocket/cached #'my-expensive-fn arg1 arg2)
+;;
+;; ;; ✅ CORRECT - keyword, stable identity
+;; (pocket/cached :train cached-split)
 ;; ```
 
 ;; **Why?** Function objects have different identity across JVM sessions,
 ;; making cache keys unpredictable. Vars provide stable symbol names
-;; that survive restarts.
+;; that survive restarts. Keywords are inherently stable and work
+;; naturally as map accessors on cached values.
 
 ;; Pocket validates this and throws a clear error if you forget:
 
@@ -71,7 +75,7 @@
   (catch Exception e
     (ex-message e)))
 
-(kind/test-last [#(re-find #"requires a var" %)])
+(kind/test-last [#(re-find #"requires a var or keyword" %)])
 
 ;; ## Cache Invalidation Strategies
 
