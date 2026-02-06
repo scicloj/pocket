@@ -1,0 +1,123 @@
+;; # Developing Pocket
+
+;; This chapter is for contributors and curious readers. It describes
+;; how Pocket's documentation is built, how tests are structured, and
+;; the conventions the notebooks follow.
+
+(ns pocket-book.developing-pocket
+  (:require
+   [scicloj.kindly.v4.kind :as kind]
+   [clojure.string :as str]))
+
+;; ## Rendering notebooks
+;;
+;; Pocket's documentation is a [Clay](https://scicloj.github.io/clay/)
+;; book — a collection of Clojure source files that Clay evaluates and
+;; renders as HTML (via [Quarto](https://quarto.org/)) or as GitHub
+;; Flavored Markdown.
+;;
+;; The chapter list lives in `notebooks/chapters.edn`:
+
+(->> "notebooks/chapters.edn"
+     slurp
+     clojure.edn/read-string)
+
+;; Each entry maps to a file under `notebooks/pocket_book/`. For example,
+;; `"getting_started"` corresponds to `notebooks/pocket_book/getting_started.clj`.
+;;
+;; The rendering helpers live in `notebooks/dev.clj`. From a REPL with
+;; the `:dev` alias:
+;;
+;; ```clojure
+;; (require '[dev :as dev] :reload)
+;;
+;; ;; Render the full HTML book (opens a browser):
+;; (dev/make-book!)
+;;
+;; ;; Render one or more chapters as GitHub Flavored Markdown
+;; ;; (useful for reviewing in a terminal or diff tool):
+;; (dev/make-gfm! "pocket_book/getting_started.clj")
+;; ```
+;;
+;; The Quarto configuration is in `clay.edn` at the project root.
+
+;; ## Running tests
+;;
+;; The test suite combines hand-written tests with tests generated
+;; from notebooks:
+;;
+;; ```bash
+;; ./run_tests.sh
+;; ```
+;;
+;; This runs `clojure -M:dev:test -m cognitect.test-runner`, which
+;; scans the `test/` directory recursively. It picks up:
+;;
+;; - **`test/scicloj/pocket_test.clj`** — hand-written unit tests
+;; - **`test/pocket_book/*_generated_test.clj`** — tests generated
+;;   from notebook `kind/test-last` annotations (see below)
+
+;; ## Literate testing with `kind/test-last`
+;;
+;; Clay notebooks can embed inline assertions using `kind/test-last`.
+;; A form like:
+;;
+;; ```clojure
+;; (+ 1 2)
+;;
+;; (kind/test-last [= 3])
+;; ```
+;;
+;; asserts that the result of the **previous** form equals 3.
+;; The `kind/test-last` form is invisible in the rendered
+;; documentation — readers see only the code and its output.
+;;
+;; When Clay renders the notebook, it generates a standard
+;; `clojure.test` file as a side effect. For example, a notebook
+;; `notebooks/pocket_book/foo.clj` produces
+;; `test/pocket_book/foo_generated_test.clj`.
+;;
+;; Here is a live example:
+
+(def demo-value (+ 10 20))
+
+demo-value
+
+(kind/test-last [= 30])
+
+;; The assertion above is invisible in the rendered output —
+;; but it generated a `deftest` that runs with every test suite
+;; execution.
+;;
+;; The predicate can be any function. Common patterns:
+
+(type demo-value)
+
+(kind/test-last [= Long])
+
+(str "result is " demo-value)
+
+(kind/test-last [#(str/starts-with? % "result")])
+
+;; ## API Reference with `kind/doc`
+;;
+;; The [API Reference](pocket_book.api_reference.html) chapter uses
+;; `kind/doc` to render a var's docstring as formatted documentation:
+
+(kind/doc #'clojure.core/map)
+
+;; Each `kind/doc` call produces a documentation block from the var's
+;; metadata (docstring, arglists, etc.). Live code examples follow
+;; naturally after each block.
+;;
+;; The API Reference namespace uses a metadata hint to hide the
+;; `kind/doc` source code in the rendered output:
+;;
+;; ```clojure
+;; ^{:kindly/hide-code true
+;;   :kindly/options {:kinds-that-hide-code #{:kind/doc}}}
+;; (ns pocket-book.api-reference ...)
+;; ```
+;;
+;; This means readers see the formatted docstring but not the
+;; `(kind/doc ...)` call that produced it.
