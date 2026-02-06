@@ -2,7 +2,7 @@
   (:require [clojure.tools.build.api :as b]
             [deps-deploy.deps-deploy :as dd]))
 
-(def lib 'io.github.scicloj/pocket)
+(def lib 'org.scicloj/pocket)
 (def version "0.1.0")
 (def snapshot (str version "-SNAPSHOT"))
 (def class-dir "target/classes")
@@ -24,13 +24,11 @@
            :src-dirs ["src"]
            :resource-dirs [])))
 
-(defn test
+(defn run-tests
   "Run tests via cognitect test runner"
   [opts]
-  (let [basis (b/create-basis {:aliases [:test]})
-        cmds ['clojure.test]]
-    (b/process {:command-args (into ["clojure" "-M:test" "-m" "cognitect.test-runner"] cmds)})
-    opts))
+  (b/process {:command-args ["clojure" "-M:test" "-m" "cognitect.test-runner"]})
+  opts)
 
 (defn- pom-template [version]
   [[:description "Filesystem-based caching for expensive Clojure computations"]
@@ -51,7 +49,7 @@
 (defn ci
   "Run the CI pipeline (test, clean, build JAR)"
   [opts]
-  (test opts)
+  (run-tests opts)
   (b/delete {:path "target"})
   (let [opts (jar-opts opts)
         version (get-version opts)]
