@@ -851,3 +851,59 @@
       (is (= [0.01 0.001 0.01] (mapv :lr comparison)))
       (is (= [100 100 200] (mapv :epochs comparison))))))
 
+;; Test for set/vector distinction (bug fixed in canonical-id)
+(deftest test-set-vector-distinct-cache-keys
+  (testing "Sets and vectors with same elements should have different cache keys"
+    (let [set-result @(pocket/cached #'identity #{1 2 3})
+          vec-result @(pocket/cached #'identity [1 2 3])]
+      (is (set? set-result) "Set input should return set")
+      (is (vector? vec-result) "Vector input should return vector"))))
+
+(deftest test-empty-collections
+  (testing "Empty collections are cached correctly"
+    (is (= [] @(pocket/cached #'identity [])))
+    (is (= {} @(pocket/cached #'identity {})))
+    (is (set? @(pocket/cached #'identity #{})) "Empty set should return set")))
+
+(deftest test-special-characters-in-args
+  (testing "Special characters in arguments are handled"
+    (is (= "hello/world" @(pocket/cached #'identity "hello/world")))
+    (is (= "with\nnewlines" @(pocket/cached #'identity "with\nnewlines")))
+    (is (= "with\ttabs" @(pocket/cached #'identity "with\ttabs")))))
+
+(deftest test-nested-cached-auto-deref
+  (testing "Cached arguments are auto-deref'd before function call"
+    (let [c1 (pocket/cached #'expensive-add 1 2)
+          c2 (pocket/cached #'expensive-add c1 10)]
+      (is (= 13 @c2)))))
+
+(deftest test-storage-mode-none
+  (testing ":none mode is instance-local"
+    (let [call-count (atom 0)
+          f (fn [x] (swap! call-count inc) x)
+          _ (intern *ns* 'local-fn f)
+          c-fn (pocket/caching-fn (resolve 'local-fn) {:storage :none})]
+      (reset! call-count 0)
+      (let [c1 (c-fn :test)
+            c2 (c-fn :test)]
+        @c1
+        @c2
+        ;; Two different instances should compute twice
+        (is (= 2 @call-count))
+        ;; But same instance should memoize
+        @c1
+        (is (= 2 @call-count))))))
+
+(deftest test-exception-not-cached
+  (testing "Exceptions are not cached"
+    (let [call-count (atom 0)
+          f (fn [x] (swap! call-count inc) (throw (ex-info "test" {:x x})))
+          _ (intern *ns* 'throwing-fn f)
+          c-fn (pocket/caching-fn (resolve 'throwing-fn))]
+      (reset! call-count 0)
+      ;; First call throws
+      (is (thrown? Exception @(c-fn :test)))
+      ;; Second call also throws (not cached)
+      (is (thrown? Exception @(c-fn :test)))
+      ;; Function was called twice
+      (is (= 2 @call-count)))))

@@ -149,7 +149,8 @@
   "Deep-sort all maps and sets in an id structure for canonical string representation.
    Walks the structure recursively: sorts map keys, recurses into sequential
    and map values. Preserves the type of sequentials (lists stay lists,
-   vectors stay vectors). Sets are sorted into vectors for consistent string form."
+   vectors stay vectors). Sets are wrapped as (set [...]) to distinguish
+   them from vectors with the same elements."
   [x]
   (cond
     (instance? IPersistentMap x)
@@ -165,7 +166,7 @@
         (vec items)))
 
     (set? x)
-    (vec (sort (map canonical-id x)))
+    (list 'set (vec (sort (map canonical-id x))))
 
     :else x))
 
