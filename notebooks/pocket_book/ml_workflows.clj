@@ -83,7 +83,7 @@
   "Generate a synthetic regression dataset.
   `f` is a function from x to y (the ground truth).
   Returns a dataset with columns `:x` and `:y`."
-  [f n noise-sd seed]
+  [{:keys [f n noise-sd seed]}]
   (let [rng (java.util.Random. (long seed))
         xs (vec (repeatedly n #(* 10.0 (.nextDouble rng))))
         ys (mapv (fn [x] (+ (double (f x))
@@ -99,7 +99,7 @@
 
 (defn split-dataset
   "Split a dataset into train/test using holdout."
-  [ds seed]
+  [ds {:keys [seed]}]
   (first (tc/split->seq ds :holdout {:seed seed})))
 
 ;; **Feature engineering**: `prepare-features` transforms raw data
@@ -216,14 +216,15 @@
 ;; ### Generate data
 
 (def data-c
-  (pocket/cached #'make-regression-data #'nonlinear-fn 500 0.5 42))
+  (pocket/cached #'make-regression-data
+                 {:f #'nonlinear-fn :n 500 :noise-sd 0.5 :seed 42}))
 
 (tc/head (deref data-c))
 
 ;; ### Split into train and test
 
 (def split-c
-  (pocket/cached #'split-dataset data-c 42))
+  (pocket/cached #'split-dataset data-c {:seed 42}))
 
 ;; Extract train and test sets — using keywords as cached functions.
 ;; The DAG now traces from numerical parameters through data
@@ -337,8 +338,8 @@ feature-results
   (vec
    (for [noise-sd noise-levels]
      (let [data-c (pocket/cached #'make-regression-data
-                                 #'nonlinear-fn 500 noise-sd 42)
-           split-c (pocket/cached #'split-dataset data-c 42)
+                                 {:f #'nonlinear-fn :n 500 :noise-sd noise-sd :seed 42})
+           split-c (pocket/cached #'split-dataset data-c {:seed 42})
            train-c (pocket/cached :train split-c)
            test-c (pocket/cached :test split-c)
            cart-train (pocket/cached #'prepare-features train-c :raw)
@@ -522,10 +523,11 @@ noise-results
 ;; Generate fresh data for this demo:
 
 (def dag-data-c
-  (pocket/cached #'make-regression-data #'nonlinear-fn 200 0.3 99))
+  (pocket/cached #'make-regression-data
+                 {:f #'nonlinear-fn :n 200 :noise-sd 0.3 :seed 99}))
 
 (def dag-split-c
-  (pocket/cached #'split-dataset dag-data-c 99))
+  (pocket/cached #'split-dataset dag-data-c {:seed 99}))
 
 (def dag-train-c (pocket/cached :train dag-split-c))
 (def dag-test-c (pocket/cached :test dag-split-c))
@@ -599,8 +601,8 @@ noise-results
 (defn run-pipeline
   "Run a complete pipeline with given hyperparameters."
   [{:keys [noise-sd feature-set max-depth]}]
-  (let [ds (make-regression-data nonlinear-fn 200 noise-sd 42)
-        sp (first (tc/split->seq ds :holdout {:seed 42}))
+  (let [ds (make-regression-data {:f nonlinear-fn :n 200 :noise-sd noise-sd :seed 42})
+        sp (split-dataset ds {:seed 42})
         train-prep (prepare-features (:train sp) feature-set)
         test-prep (prepare-features (:test sp) feature-set)
         spec {:model-type :scicloj.ml.tribuo/regression

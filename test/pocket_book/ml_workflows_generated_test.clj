@@ -28,7 +28,7 @@
  (defn
   make-regression-data
   "Generate a synthetic regression dataset.\n  `f` is a function from x to y (the ground truth).\n  Returns a dataset with columns `:x` and `:y`."
-  [f n noise-sd seed]
+  [{:keys [f n noise-sd seed]}]
   (let
    [rng
     (java.util.Random. (long seed))
@@ -44,7 +44,16 @@
 
 
 (def
- v8_l101
+ v8_l100
+ (defn
+  split-dataset
+  "Split a dataset into train/test using holdout."
+  [ds {:keys [seed]}]
+  (first (tc/split->seq ds :holdout {:seed seed}))))
+
+
+(def
+ v10_l111
  (defn
   prepare-features
   "Add derived columns to a dataset according to `feature-set`.\n  Supported feature sets:\n  - `:raw`       — no extra columns\n  - `:quadratic` — add x²\n  - `:trig`      — add sin(x) and cos(x)\n  - `:poly+trig` — add x², sin(x), and cos(x)"
@@ -73,7 +82,7 @@
 
 
 (def
- v10_l129
+ v12_l139
  (defn
   train-model
   "Train a model on a dataset."
@@ -82,7 +91,7 @@
 
 
 (def
- v11_l134
+ v13_l144
  (defn
   predict-and-rmse
   "Predict on test data and return RMSE."
@@ -93,12 +102,12 @@
 
 
 (def
- v13_l150
+ v15_l160
  (defn nonlinear-fn "y = sin(x) · x" [x] (* (Math/sin x) x)))
 
 
 (def
- v15_l170
+ v17_l180
  (def
   linear-sgd-spec
   {:model-type :scicloj.ml.tribuo/regression,
@@ -113,7 +122,7 @@
 
 
 (def
- v16_l181
+ v18_l191
  (def
   cart-spec
   {:model-type :scicloj.ml.tribuo/regression,
@@ -125,36 +134,44 @@
 
 
 (def
- v18_l208
+ v20_l218
  (def
-  data
-  @(pocket/cached #'make-regression-data #'nonlinear-fn 500 0.5 42)))
+  data-c
+  (pocket/cached
+   #'make-regression-data
+   {:f #'nonlinear-fn, :n 500, :noise-sd 0.5, :seed 42})))
 
 
-(def v19_l211 (tc/head data))
-
-
-(def
- v21_l215
- (def split (first (tc/split->seq data :holdout {:seed 42}))))
-
-
-(def v23_l220 (def feature-sets [:raw :quadratic :trig :poly+trig]))
+(def v21_l222 (tc/head (deref data-c)))
 
 
 (def
- v25_l227
+ v23_l226
+ (def split-c (pocket/cached #'split-dataset data-c {:seed 42})))
+
+
+(def v25_l233 (def train-c (pocket/cached :train split-c)))
+
+
+(def v26_l234 (def test-c (pocket/cached :test split-c)))
+
+
+(def v28_l238 (def feature-sets [:raw :quadratic :trig :poly+trig]))
+
+
+(def
+ v30_l245
  (def
   prepared
   (into
    {}
    (for
-    [fs feature-sets role [:train :test]]
-    [[fs role] @(pocket/cached #'prepare-features (role split) fs)]))))
+    [fs feature-sets [role ds-c] [[:train train-c] [:test test-c]]]
+    [[fs role] (pocket/cached #'prepare-features ds-c fs)]))))
 
 
 (def
- v27_l238
+ v32_l256
  (def
   models
   (into
@@ -165,11 +182,11 @@
      [model-name spec]
      [[:sgd linear-sgd-spec] [:cart cart-spec]]]
     [[fs model-name]
-     @(pocket/cached #'train-model (prepared [fs :train]) spec)]))))
+     (pocket/cached #'train-model (prepared [fs :train]) spec)]))))
 
 
 (def
- v29_l250
+ v34_l268
  (def
   feature-results
   (vec
@@ -182,15 +199,15 @@
      :model (name model-name),
      :rmse
      (predict-and-rmse
-      (prepared [fs :test])
-      (models [fs model-name]))}))))
+      @(prepared [fs :test])
+      @(models [fs model-name]))}))))
 
 
-(def v30_l259 feature-results)
+(def v35_l277 feature-results)
 
 
 (deftest
- t31_l261
+ t36_l279
  (is
   ((fn
     [rows]
@@ -200,21 +217,21 @@
       (> (m [:raw "sgd"]) 3.0)
       (< (m [:poly+trig "sgd"]) 2.0)
       (< (Math/abs (- (m [:raw "cart"]) (m [:trig "cart"]))) 0.5))))
-   v30_l259)))
+   v35_l277)))
 
 
 (def
- v33_l286
+ v38_l304
  (let
   [test-ds
-   (prepared [:raw :test])
+   @(prepared [:raw :test])
    sgd-pred
    (:y
     (ml/predict
-     (prepared [:poly+trig :test])
-     (models [:poly+trig :sgd])))
+     @(prepared [:poly+trig :test])
+     @(models [:poly+trig :sgd])))
    cart-pred
-   (:y (ml/predict test-ds (models [:raw :cart])))
+   (:y (ml/predict test-ds @(models [:raw :cart])))
    xs
    (vec (:x test-ds))
    actuals
@@ -243,68 +260,69 @@
     :layout {:xaxis {:title "x"}, :yaxis {:title "y"}}})))
 
 
-(def v35_l317 (def noise-levels [0.1 0.5 1.0 2.0 5.0]))
+(def v40_l335 (def noise-levels [0.1 0.5 1.0 2.0 5.0]))
 
 
 (def
- v36_l319
+ v41_l337
  (def
   noise-results
   (vec
    (for
     [noise-sd noise-levels]
     (let
-     [ds
-      @(pocket/cached
-        #'make-regression-data
-        #'nonlinear-fn
-        500
-        noise-sd
-        42)
-      sp
-      (first (tc/split->seq ds :holdout {:seed 42}))
+     [data-c
+      (pocket/cached
+       #'make-regression-data
+       {:f #'nonlinear-fn, :n 500, :noise-sd noise-sd, :seed 42})
+      split-c
+      (pocket/cached #'split-dataset data-c {:seed 42})
+      train-c
+      (pocket/cached :train split-c)
+      test-c
+      (pocket/cached :test split-c)
       cart-train
-      @(pocket/cached #'prepare-features (:train sp) :raw)
+      (pocket/cached #'prepare-features train-c :raw)
       cart-test
-      @(pocket/cached #'prepare-features (:test sp) :raw)
+      (pocket/cached #'prepare-features test-c :raw)
       sgd-train
-      @(pocket/cached #'prepare-features (:train sp) :poly+trig)
+      (pocket/cached #'prepare-features train-c :poly+trig)
       sgd-test
-      @(pocket/cached #'prepare-features (:test sp) :poly+trig)
+      (pocket/cached #'prepare-features test-c :poly+trig)
       cart-model
-      @(pocket/cached #'train-model cart-train cart-spec)
+      (pocket/cached #'train-model cart-train cart-spec)
       sgd-model
-      @(pocket/cached #'train-model sgd-train linear-sgd-spec)]
+      (pocket/cached #'train-model sgd-train linear-sgd-spec)]
      {:noise-sd noise-sd,
-      :cart-rmse (predict-and-rmse cart-test cart-model),
-      :sgd-rmse (predict-and-rmse sgd-test sgd-model)})))))
+      :cart-rmse (predict-and-rmse @cart-test @cart-model),
+      :sgd-rmse (predict-and-rmse @sgd-test @sgd-model)})))))
 
 
-(def v37_l335 noise-results)
+(def v42_l355 noise-results)
 
 
 (deftest
- t38_l337
+ t43_l357
  (is
   ((fn
     [rows]
     (let
      [low
       (first
-       (filter (fn* [p1__69870#] (= 0.1 (:noise-sd p1__69870#))) rows))
+       (filter (fn* [p1__72349#] (= 0.1 (:noise-sd p1__72349#))) rows))
       high
       (first
        (filter
-        (fn* [p1__69871#] (= 5.0 (:noise-sd p1__69871#)))
+        (fn* [p1__72350#] (= 5.0 (:noise-sd p1__72350#)))
         rows))]
      (and
       (< (:cart-rmse low) (:sgd-rmse low))
       (> (:cart-rmse high) (:sgd-rmse high)))))
-   v37_l335)))
+   v42_l355)))
 
 
 (def
- v40_l359
+ v45_l379
  (let
   [noise-sds
    (vec (map :noise-sd noise-results))
@@ -322,20 +340,20 @@
     :layout {:xaxis {:title "noise-sd"}, :yaxis {:title "rmse"}}})))
 
 
-(def v42_l375 (:total-entries (pocket/cache-stats)))
+(def v47_l395 (:total-entries (pocket/cache-stats)))
 
 
-(deftest t43_l377 (is ((fn [n] (> n 30)) v42_l375)))
+(deftest t48_l397 (is ((fn [n] (> n 30)) v47_l395)))
 
 
-(def v44_l380 (pocket/cache-entries))
+(def v49_l400 (pocket/cache-entries))
 
 
-(def v46_l398 (pocket/cleanup!))
+(def v51_l418 (pocket/cleanup!))
 
 
 (def
- v48_l444
+ v53_l466
  (defn
   compute-stats
   "Compute normalization statistics from training data.\n   Returns mean and std for each numeric column."
@@ -351,16 +369,16 @@
        +
        (map
         (fn*
-         [p1__69872#]
+         [p1__72351#]
          (*
-          (- p1__69872# (/ (reduce + x-vals) (count x-vals)))
-          (- p1__69872# (/ (reduce + x-vals) (count x-vals)))))
+          (- p1__72351# (/ (reduce + x-vals) (count x-vals)))
+          (- p1__72351# (/ (reduce + x-vals) (count x-vals)))))
         x-vals))
       (count x-vals)))})))
 
 
 (def
- v49_l456
+ v54_l478
  (defn
   normalize-with-stats
   "Normalize a dataset using pre-computed statistics."
@@ -372,7 +390,7 @@
 
 
 (def
- v50_l464
+ v55_l486
  (defn
   train-normalized-model
   "Train a model on normalized data."
@@ -382,7 +400,7 @@
 
 
 (def
- v51_l470
+ v56_l492
  (defn
   evaluate-model
   "Evaluate a model on test data."
@@ -394,86 +412,95 @@
 
 
 (def
- v53_l489
+ v58_l511
  (def
   c-compute-stats
   (pocket/caching-fn #'compute-stats {:storage :mem})))
 
 
 (def
- v54_l492
+ v59_l514
  (def
   c-normalize
   (pocket/caching-fn #'normalize-with-stats {:storage :mem})))
 
 
 (def
- v55_l495
+ v60_l517
  (def c-train (pocket/caching-fn #'train-normalized-model)))
 
 
 (def
- v56_l498
+ v61_l520
  (def c-evaluate (pocket/caching-fn #'evaluate-model {:storage :none})))
 
 
 (def
- v58_l503
+ v63_l525
  (def
-  dag-data
-  @(pocket/cached #'make-regression-data #'nonlinear-fn 200 0.3 99)))
+  dag-data-c
+  (pocket/cached
+   #'make-regression-data
+   {:f #'nonlinear-fn, :n 200, :noise-sd 0.3, :seed 99})))
 
 
 (def
- v59_l506
- (def dag-split (first (tc/split->seq dag-data :holdout {:seed 99}))))
+ v64_l529
+ (def
+  dag-split-c
+  (pocket/cached #'split-dataset dag-data-c {:seed 99})))
 
 
-(def v61_l513 (def stats-c (c-compute-stats (:train dag-split))))
+(def v65_l532 (def dag-train-c (pocket/cached :train dag-split-c)))
 
 
-(def
- v62_l516
- (def train-norm-c (c-normalize (:train dag-split) stats-c)))
+(def v66_l533 (def dag-test-c (pocket/cached :test dag-split-c)))
 
 
-(def v63_l519 (def test-norm-c (c-normalize (:test dag-split) stats-c)))
+(def v68_l539 (def stats-c (c-compute-stats dag-train-c)))
 
 
-(def v64_l522 (def model-c (c-train train-norm-c cart-spec)))
+(def v69_l542 (def train-norm-c (c-normalize dag-train-c stats-c)))
 
 
-(def v65_l525 (def metrics-c (c-evaluate test-norm-c model-c)))
+(def v70_l545 (def test-norm-c (c-normalize dag-test-c stats-c)))
 
 
-(def v67_l539 (pocket/origin-story metrics-c))
+(def v71_l548 (def model-c (c-train train-norm-c cart-spec)))
 
 
-(def v69_l547 (pocket/origin-story-graph metrics-c))
+(def v72_l551 (def metrics-c (c-evaluate test-norm-c model-c)))
 
 
-(def v71_l554 (pocket/origin-story-mermaid metrics-c))
+(def v74_l565 (pocket/origin-story metrics-c))
 
 
-(def v73_l558 (deref metrics-c))
+(def v76_l573 (pocket/origin-story-graph metrics-c))
+
+
+(def v78_l580 (pocket/origin-story-mermaid metrics-c))
+
+
+(def v80_l584 (deref metrics-c))
 
 
 (deftest
- t74_l560
- (is ((fn [m] (and (map? m) (contains? m :rmse))) v73_l558)))
+ t81_l586
+ (is ((fn [m] (and (map? m) (contains? m :rmse))) v80_l584)))
 
 
 (def
- v76_l575
+ v83_l601
  (defn
   run-pipeline
   "Run a complete pipeline with given hyperparameters."
   [{:keys [noise-sd feature-set max-depth]}]
   (let
    [ds
-    (make-regression-data nonlinear-fn 200 noise-sd 42)
+    (make-regression-data
+     {:f nonlinear-fn, :n 200, :noise-sd noise-sd, :seed 42})
     sp
-    (first (tc/split->seq ds :holdout {:seed 42}))
+    (split-dataset ds {:seed 42})
     train-prep
     (prepare-features (:train sp) feature-set)
     test-prep
@@ -493,7 +520,7 @@
 
 
 (def
- v78_l593
+ v85_l619
  (def
   experiments
   (for
@@ -505,14 +532,14 @@
      :max-depth max-depth}))))
 
 
-(def v80_l604 (def comparison (pocket/compare-experiments experiments)))
+(def v87_l630 (def comparison (pocket/compare-experiments experiments)))
 
 
-(def v81_l607 (tc/dataset comparison))
+(def v88_l633 (tc/dataset comparison))
 
 
 (deftest
- t82_l609
+ t89_l635
  (is
   ((fn
     [ds]
@@ -521,11 +548,11 @@
      (some #{:noise-sd} (tc/column-names ds))
      (some #{:feature-set} (tc/column-names ds))
      (some #{:max-depth} (tc/column-names ds))))
-   v81_l607)))
+   v88_l633)))
 
 
 (def
- v84_l622
+ v91_l648
  (let
   [rows
    (map
@@ -558,4 +585,4 @@
     :layout {:xaxis {:title "max-depth"}, :yaxis {:title "rmse"}}})))
 
 
-(def v86_l675 (pocket/cleanup!))
+(def v93_l701 (pocket/cleanup!))
