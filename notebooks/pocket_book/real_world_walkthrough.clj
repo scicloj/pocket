@@ -1,15 +1,4 @@
 ;; # Real-World Walkthrough: Weather Analysis Pipeline
-^{:clay {:quarto {:format {:html {:toc-location :left}}}}}
-(ns pocket-book.real-world-walkthrough
-  (:require
-   ;; Logging setup for this chapter (see Logging chapter):
-   [pocket-book.logging]
-   ;; Pocket API:
-   [scicloj.pocket :as pocket]
-   ;; Annotating kinds of visualizations:
-   [scicloj.kindly.v4.kind :as kind]
-   ;; Filesystem utilities:
-   [babashka.fs :as fs]))
 
 ;; ## Overview
 
@@ -29,16 +18,27 @@
 ;; The dependency graph: `fetch-readings` → `clean-data` →
 ;; both `temperature-trends` and `rainfall-totals` → `summary`.
 
-^:kindly/hide-code
-(kind/mermaid
- "flowchart TD
+^{:kindly/hide-code true
+  :kindly/kind :kind/mermaid}
+["flowchart TD
     FR[fetch-readings] --> CD[clean-data]
     CD --> TT[temperature-trends]
     CD --> RT[rainfall-totals]
     TT --> S[summary]
-    RT --> S")
+    RT --> S"]
 
 ;; ## Setup
+
+(ns pocket-book.real-world-walkthrough
+  (:require
+   ;; Logging setup for this chapter (see Logging chapter):
+   [pocket-book.logging]
+   ;; Pocket API:
+   [scicloj.pocket :as pocket]
+   ;; Annotating kinds of visualizations:
+   [scicloj.kindly.v4.kind :as kind]
+   ;; Filesystem utilities:
+   [babashka.fs :as fs]))
 
 (def cache-dir "/tmp/pocket-walkthrough")
 
