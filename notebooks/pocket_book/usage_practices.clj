@@ -16,6 +16,31 @@
 (def test-dir "/tmp/pocket-dev-practices")
 (pocket/set-base-cache-dir! test-dir)
 
+;; ## When to Use Pocket
+
+;; ### Good use cases
+
+;; - **Data science pipelines** with expensive intermediate steps
+;;   (data loading, preprocessing, feature engineering, model training)
+;; - **Reproducible research** where cached intermediate results let you
+;;   iterate on downstream steps without re-running upstream computations
+;; - **Long-running computations** (minutes to hours) that need to survive
+;;   JVM restarts, crashes, or machine reboots
+;; - **Multi-threaded workflows** where multiple threads may request the
+;;   same expensive computation — Pocket ensures it runs only once
+
+;; ### Comparison to alternatives
+
+;; | Feature | Pocket | `clojure.core/memoize` | `core.memoize` |
+;; |---------|--------|------------------------|----------------|
+;; | Persistence | Disk + memory | Memory only | Memory only |
+;; | Cross-session | Yes | No | No |
+;; | Lazy evaluation | `IDeref` | Eager | Eager |
+;; | Eviction policies | LRU, FIFO, TTL, etc. | None | LRU, TTL, etc. |
+;; | Thread-safe (single computation) | Yes | No | Yes |
+;; | Pipeline caching | Yes (recursive) | No | No |
+
+
 ;; ## Function Identity: Always Use Vars
 
 ;; Pocket requires functions to be passed as **vars** (`#'fn-name`),
