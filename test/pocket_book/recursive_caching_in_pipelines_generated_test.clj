@@ -43,7 +43,7 @@
   (update
    data
    :data
-   (fn* [p1__29030#] (map (fn [x] (* x (:scale opts))) p1__29030#)))))
+   (fn* [p1__27953#] (map (fn [x] (* x (:scale opts))) p1__27953#)))))
 
 
 (def
@@ -112,16 +112,16 @@
 (def v27_l138 (def model-c (train-model* preprocessed-c {:epochs 100})))
 
 
-(def v29_l142 (pocket/origin-story model-c))
+(def v29_l148 (pocket/origin-story model-c))
 
 
-(def v31_l148 (deref model-c))
+(def v31_l156 (pocket/origin-story model-c))
 
 
-(def v33_l152 (pocket/origin-story model-c))
+(def v33_l166 (pocket/origin-story-graph model-c))
 
 
-(def v35_l157 (kind/mermaid (pocket/origin-story-mermaid model-c)))
+(def v35_l173 (kind/mermaid (pocket/origin-story-mermaid model-c)))
 
 
-(def v37_l161 (pocket/cleanup!))
+(def v37_l177 (pocket/cleanup!))

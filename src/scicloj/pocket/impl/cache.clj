@@ -414,7 +414,7 @@
                   (swap! lines conj (str "  " mermaid-id "[\"" (mermaid-escape label) "\"]"))
                   (doseq [arg (:args node)]
                     (let [child-id (walk arg)]
-                      (swap! lines conj (str "  " mermaid-id " --> " child-id))))
+                      (swap! lines conj (str "  " child-id " --> " mermaid-id))))
                   mermaid-id)
 
                 ;; Value leaf node

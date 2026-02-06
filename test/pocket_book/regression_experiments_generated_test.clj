@@ -61,28 +61,28 @@
       ds
       (tc/add-column
        :x2
-       (mapv (fn* [p1__29972#] (* p1__29972# p1__29972#)) xv)))
+       (mapv (fn* [p1__65992#] (* p1__65992# p1__65992#)) xv)))
      :trig
      (->
       ds
       (tc/add-column
        :sin-x
-       (mapv (fn* [p1__29973#] (Math/sin p1__29973#)) xv))
+       (mapv (fn* [p1__65993#] (Math/sin p1__65993#)) xv))
       (tc/add-column
        :cos-x
-       (mapv (fn* [p1__29974#] (Math/cos p1__29974#)) xv)))
+       (mapv (fn* [p1__65994#] (Math/cos p1__65994#)) xv)))
      :poly+trig
      (->
       ds
       (tc/add-column
        :x2
-       (mapv (fn* [p1__29975#] (* p1__29975# p1__29975#)) xv))
+       (mapv (fn* [p1__65995#] (* p1__65995# p1__65995#)) xv))
       (tc/add-column
        :sin-x
-       (mapv (fn* [p1__29976#] (Math/sin p1__29976#)) xv))
+       (mapv (fn* [p1__65996#] (Math/sin p1__65996#)) xv))
       (tc/add-column
        :cos-x
-       (mapv (fn* [p1__29977#] (Math/cos p1__29977#)) xv))))
+       (mapv (fn* [p1__65997#] (Math/cos p1__65997#)) xv))))
     (ds-mod/set-inference-target :y)))))
 
 
@@ -303,11 +303,11 @@
     (let
      [low
       (first
-       (filter (fn* [p1__29978#] (= 0.1 (:noise-sd p1__29978#))) rows))
+       (filter (fn* [p1__65998#] (= 0.1 (:noise-sd p1__65998#))) rows))
       high
       (first
        (filter
-        (fn* [p1__29979#] (= 5.0 (:noise-sd p1__29979#)))
+        (fn* [p1__65999#] (= 5.0 (:noise-sd p1__65999#)))
         rows))]
      (and
       (< (:cart-rmse low) (:sgd-rmse low))
@@ -360,10 +360,10 @@
        +
        (map
         (fn*
-         [p1__29980#]
+         [p1__66000#]
          (*
-          (- p1__29980# (/ (reduce + x-vals) (count x-vals)))
-          (- p1__29980# (/ (reduce + x-vals) (count x-vals)))))
+          (- p1__66000# (/ (reduce + x-vals) (count x-vals)))
+          (- p1__66000# (/ (reduce + x-vals) (count x-vals)))))
         x-vals))
       (count x-vals)))})))
 
@@ -381,7 +381,7 @@
     ds
     :x-norm
     (mapv
-     (fn* [p1__29981#] (/ (- p1__29981# x-mean) x-std))
+     (fn* [p1__66001#] (/ (- p1__66001# x-mean) x-std))
      (:x ds))))))
 
 
@@ -456,19 +456,19 @@
 (def v62_l421 (pocket/origin-story-graph metrics-c))
 
 
-(def v64_l427 (kind/mermaid (pocket/origin-story-mermaid metrics-c)))
+(def v64_l428 (kind/mermaid (pocket/origin-story-mermaid metrics-c)))
 
 
-(def v66_l431 (deref metrics-c))
+(def v66_l432 (deref metrics-c))
 
 
 (deftest
- t67_l433
- (is ((fn [m] (and (map? m) (contains? m :rmse))) v66_l431)))
+ t67_l434
+ (is ((fn [m] (and (map? m) (contains? m :rmse))) v66_l432)))
 
 
 (def
- v69_l443
+ v69_l444
  (defn
   run-pipeline
   "Run a complete pipeline with given hyperparameters."
@@ -497,7 +497,7 @@
 
 
 (def
- v71_l461
+ v71_l462
  (def
   experiments
   (for
@@ -509,14 +509,14 @@
      :max-depth max-depth}))))
 
 
-(def v73_l472 (def comparison (pocket/compare-experiments experiments)))
+(def v73_l473 (def comparison (pocket/compare-experiments experiments)))
 
 
-(def v74_l475 (tc/dataset comparison))
+(def v74_l476 (tc/dataset comparison))
 
 
 (deftest
- t75_l477
+ t75_l478
  (is
   ((fn
     [ds]
@@ -525,11 +525,11 @@
      (some #{:noise-sd} (tc/column-names ds))
      (some #{:feature-set} (tc/column-names ds))
      (some #{:max-depth} (tc/column-names ds))))
-   v74_l475)))
+   v74_l476)))
 
 
 (def
- v77_l490
+ v77_l491
  (let
   [rows
    (map
@@ -548,4 +548,4 @@
      :=size :noise-sd}))))
 
 
-(def v79_l501 (pocket/cleanup!))
+(def v79_l502 (pocket/cleanup!))

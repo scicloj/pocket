@@ -420,7 +420,8 @@ noise-results
 
 (pocket/origin-story-graph metrics-c)
 
-;; **`origin-story-mermaid`** renders the DAG as a Mermaid flowchart.
+;; **`origin-story-mermaid`** renders the DAG as a Mermaid flowchart, with
+;; arrows showing data flow direction (from inputs toward the final result).
 ;; The diamond dependency is clearly visible — `stats-c` feeds both
 ;; preprocessing steps:
 

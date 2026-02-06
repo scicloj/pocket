@@ -124,12 +124,12 @@
 ;; [Real-World Walkthrough](pocket_book.real_world_walkthrough.html).
 
 ;; ## Inspecting the DAG
+
+;; Pocket provides three functions for DAG introspection:
 ;;
-;; `origin-story` reconstructs the computation graph from a `Cached` value.
-;; It walks the argument tree recursively, returning a nested map where
-;; each cached step is `{:fn <var> :args [...]}` and plain arguments
-;; are `{:value ...}` leaves. If a step has already been computed,
-;; `:value` is included in the node.
+;; - `origin-story` — nested tree with `:ref` pointers for shared nodes
+;; - `origin-story-graph` — flat `{:nodes ... :edges ...}` for graph algorithms
+;; - `origin-story-mermaid` — Mermaid flowchart string for visualization
 
 ;; Build the pipeline keeping the intermediate `Cached` objects:
 
@@ -137,22 +137,38 @@
 (def preprocessed-c (preprocess* data-c {:scale 2}))
 (def model-c (train-model* preprocessed-c {:epochs 100}))
 
-;; Inspect the DAG before forcing any computation:
+;; ### `origin-story` — tree structure
+
+;; Returns a nested map where each cached step is `{:fn <var> :args [...] :id <string>}`.
+;; Plain arguments become `{:value ...}` leaves. If a step has been computed,
+;; `:value` is included.
+
+;; Before any computation:
 
 (pocket/origin-story model-c)
 
-;; No `:value` keys — nothing has been computed yet (in this
-;; pipeline instance). Now deref to trigger computation:
+;; No `:value` keys yet. Now trigger computation:
 
-;; Deref the final step — this cascades through the pipeline:
-(deref model-c)
+@model-c
 
 ;; After deref, every node includes its `:value`:
 
 (pocket/origin-story model-c)
 
-;; `origin-story-mermaid` renders the same tree as a
-;; [Mermaid](https://mermaid.js.org/) flowchart:
+;; When the same `Cached` instance appears multiple times (diamond pattern),
+;; subsequent occurrences are `{:ref <id>}` pointing to the first.
+
+;; ### `origin-story-graph` — flat graph
+
+;; Returns `{:nodes {<id> <node-map>} :edges [[<from> <to>] ...]}`.
+;; Useful for graph algorithms or custom rendering.
+
+(pocket/origin-story-graph model-c)
+
+;; ### `origin-story-mermaid` — visualization
+
+;; Returns a Mermaid flowchart string. Arrows show data flow direction
+;; (from inputs toward the final result). Wrap with `kind/mermaid` to render.
 
 (kind/mermaid (pocket/origin-story-mermaid model-c))
 
