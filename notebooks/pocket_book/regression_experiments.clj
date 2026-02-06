@@ -30,6 +30,18 @@
 ;; These are not Pocket dependencies — they illustrate a realistic ML
 ;; workflow. All output is shown inline; to reproduce it, add
 ;; [noj](https://scicloj.github.io/noj/) to your project dependencies.
+;;
+;; **Why synthetic data?** Working with synthetic data is a standard
+;; practice in machine learning. Because we define the true relationship
+;; ($y = \sin(x) \cdot x$), we can measure exactly how well each model
+;; recovers it — something impossible with real-world data where the
+;; ground truth is unknown. Synthetic experiments let us isolate one
+;; variable at a time: does feature engineering help? How does noise
+;; affect each algorithm? These controlled comparisons build intuition
+;; that transfers to real problems. In our case, we'll see that a linear
+;; model is helpless against a nonlinear target *unless* we give it the
+;; right features, while a decision tree handles the shape on its own
+;; but pays a different price when noise increases.
 
 ;; ## Setup
 
@@ -57,10 +69,15 @@
 
 (pocket/cleanup!)
 
-;; ## Helper functions
+;; ## Pipeline functions
 
-;; These are the building blocks — plain Clojure functions that know
-;; nothing about caching. Pocket will wrap them later.
+;; These are the steps of our ML pipeline — plain Clojure functions
+;; that know nothing about caching. Pocket will wrap them later.
+
+;; **Data generation**: `make-regression-data` creates a synthetic
+;; dataset from a ground-truth function. We control the sample size,
+;; noise level, and random seed — all of which become part of the
+;; cache key, so changing any parameter triggers recomputation.
 
 (defn make-regression-data
   "Generate a synthetic regression dataset.
@@ -74,6 +91,12 @@
                  xs)]
     (-> (tc/dataset {:x xs :y ys})
         (ds-mod/set-inference-target :y))))
+
+;; **Feature engineering**: `prepare-features` transforms raw data
+;; by adding derived columns. The choice of feature set is a key
+;; hyperparameter — a linear model with only `:raw` features can't
+;; learn nonlinear patterns, but `:trig` or `:poly+trig` features
+;; give it the building blocks it needs.
 
 (defn prepare-features
   "Add derived columns to a dataset according to `feature-set`.
@@ -96,6 +119,12 @@
                          (tc/add-column :sin-x (tcc/sin x))
                          (tc/add-column :cos-x (tcc/cos x))))
         (ds-mod/set-inference-target :y))))
+
+;; **Training and evaluation**: `train-model` fits a model to
+;; prepared data, and `predict-and-rmse` measures how well it
+;; generalizes to unseen test data. These are thin wrappers
+;; around metamorph.ml — the caching value comes from avoiding
+;; redundant retraining when only downstream parameters change.
 
 (defn train-model
   "Train a model on a dataset."
@@ -364,6 +393,36 @@ noise-results
 ;; | Change the noise level        | That data + its features + its models |
 ;; | Re-run the whole notebook     | Nothing — all cached     |
 
+;; ## What we learned
+;;
+;; This experiment revealed a clear story about the interplay between
+;; models, features, and noise:
+;;
+;; - **Feature engineering is decisive for linear models.** With raw
+;;   features, the linear model couldn't capture the nonlinear target
+;;   at all. Adding trigonometric features (sin, cos) — which match
+;;   the structure of the true function — dramatically improved it.
+;;   The model didn't get smarter; we gave it the right vocabulary.
+;;
+;; - **Decision trees are self-sufficient but fragile.** The CART model
+;;   achieved low error regardless of feature set, because it can
+;;   learn nonlinear splits on its own. But as noise increased, it
+;;   began fitting the noise rather than the signal — a classic
+;;   overfitting pattern.
+;;
+;; - **The crossover point matters.** At low noise, the tree wins. At
+;;   high noise, the well-featured linear model degrades more
+;;   gracefully. Knowing where this crossover happens is exactly the
+;;   kind of insight you get from systematic experimentation.
+;;
+;; - **Caching structures the workflow.** In this small example, each
+;;   step runs in milliseconds — caching isn't needed for speed. But
+;;   the pattern scales: with real datasets and expensive training,
+;;   the same pipeline structure ensures that only changed steps
+;;   recompute. Meanwhile, `compare-experiments` extracted the varying
+;;   parameters automatically, turning cached results into a
+;;   comparison table — useful at any scale.
+
 ;; ## Cleanup
 
 (pocket/cleanup!)
@@ -445,7 +504,29 @@ noise-results
   (let [pred (ml/predict test-ds model)]
     {:rmse (loss/rmse (:y test-ds) (:y pred))}))
 
-;; ### Build the DAG
+;; ### Build the DAG with mixed storage policies
+;;
+;; Not every step needs disk persistence. We use `caching-fn` with
+;; per-function storage policies:
+;;
+;; - **`:mem`** for cheap shared computations (stats, normalization) —
+;;   no disk I/O, but in-memory dedup ensures each runs only once
+;; - **`:mem+disk`** (default) for expensive steps (model training) —
+;;   persists across JVM sessions
+;; - **`:none`** for trivial steps (evaluation) — just tracks identity
+;;   in the DAG without any shared caching
+
+(def c-compute-stats
+  (pocket/caching-fn #'compute-stats {:storage :mem}))
+
+(def c-normalize
+  (pocket/caching-fn #'normalize-with-stats {:storage :mem}))
+
+(def c-train
+  (pocket/caching-fn #'train-normalized-model))
+
+(def c-evaluate
+  (pocket/caching-fn #'evaluate-model {:storage :none}))
 
 ;; Generate fresh data for this demo:
 
@@ -455,23 +536,24 @@ noise-results
 (def dag-split
   (first (tc/split->seq dag-data :holdout {:seed 99})))
 
-;; The key insight: `stats-c` is a cached computation derived from
-;; training data only. Both preprocessing steps depend on it.
+;; Now wire the pipeline. The `stats-c` node is computed once
+;; (in memory) and feeds both preprocessing steps — a diamond
+;; dependency handled naturally.
 
 (def stats-c
-  (pocket/cached #'compute-stats (:train dag-split)))
+  (c-compute-stats (:train dag-split)))
 
 (def train-norm-c
-  (pocket/cached #'normalize-with-stats (:train dag-split) stats-c))
+  (c-normalize (:train dag-split) stats-c))
 
 (def test-norm-c
-  (pocket/cached #'normalize-with-stats (:test dag-split) stats-c))
+  (c-normalize (:test dag-split) stats-c))
 
 (def model-c
-  (pocket/cached #'train-normalized-model train-norm-c cart-spec))
+  (c-train train-norm-c cart-spec))
 
 (def metrics-c
-  (pocket/cached #'evaluate-model test-norm-c model-c))
+  (c-evaluate test-norm-c model-c))
 
 ;; ### Visualize the DAG
 
@@ -586,6 +668,36 @@ noise-results
              :marker {:size (+ 8 (* 15 noise-sd))
                       :color (feature-colors feature-set)}})
     :layout {:xaxis {:title "max-depth"} :yaxis {:title "rmse"}}}))
+
+;; ## What we learned
+;;
+;; This experiment revealed a clear story about the interplay between
+;; models, features, and noise:
+;;
+;; - **Feature engineering is decisive for linear models.** With raw
+;;   features, the linear model couldn't capture the nonlinear target
+;;   at all. Adding trigonometric features (sin, cos) — which match
+;;   the structure of the true function — dramatically improved it.
+;;   The model didn't get smarter; we gave it the right vocabulary.
+;;
+;; - **Decision trees are self-sufficient but fragile.** The CART model
+;;   achieved low error regardless of feature set, because it can
+;;   learn nonlinear splits on its own. But as noise increased, it
+;;   began fitting the noise rather than the signal — a classic
+;;   overfitting pattern.
+;;
+;; - **The crossover point matters.** At low noise, the tree wins. At
+;;   high noise, the well-featured linear model degrades more
+;;   gracefully. Knowing where this crossover happens is exactly the
+;;   kind of insight you get from systematic experimentation.
+;;
+;; - **Caching structures the workflow.** In this small example, each
+;;   step runs in milliseconds — caching isn't needed for speed. But
+;;   the pattern scales: with real datasets and expensive training,
+;;   the same pipeline structure ensures that only changed steps
+;;   recompute. Meanwhile, `compare-experiments` extracted the varying
+;;   parameters automatically, turning cached results into a
+;;   comparison table — useful at any scale.
 
 ;; ## Cleanup
 

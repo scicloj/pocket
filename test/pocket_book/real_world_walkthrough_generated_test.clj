@@ -71,13 +71,13 @@
       rs
       (filter
        (fn*
-        [p1__102116#]
-        (and (:temp-c p1__102116#) (:rain-mm p1__102116#))))
+        [p1__69699#]
+        (and (:temp-c p1__69699#) (:rain-mm p1__69699#))))
       (mapv
        (fn*
-        [p1__102117#]
+        [p1__69700#]
         (->
-         p1__102117#
+         p1__69700#
          (update
           :temp-c
           (fn [t] (Math/round (* t (double precision)))))
@@ -265,7 +265,7 @@
  (is ((fn [stats] (= 10 (:total-entries stats))) v31_l214)))
 
 
-(def v34_l224 (kind/code (pocket/dir-tree)))
+(def v34_l230 (pocket/dir-tree))
 
 
-(def v36_l230 (pocket/cleanup!))
+(def v36_l236 (pocket/cleanup!))

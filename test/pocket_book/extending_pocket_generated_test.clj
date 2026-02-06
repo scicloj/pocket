@@ -119,7 +119,7 @@
    {:method :regression})))
 
 
-(def v40_l129 (kind/code (pocket/dir-tree)))
+(def v40_l129 (pocket/dir-tree))
 
 
 (def v42_l203 (pocket/cleanup!))
