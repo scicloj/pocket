@@ -55,4 +55,4 @@ The best places to discuss this project are:
 
 Copyright © 2025-2026 Scicloj
 
-Distributed under the MIT License — see [LICENSE](LICENSE).
+Distributed under the MIT License — see [LICENSE](https://github.com/scicloj/pocket/blob/master/LICENSE).
