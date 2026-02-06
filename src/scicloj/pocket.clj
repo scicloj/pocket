@@ -166,13 +166,15 @@
    Optionally accepts an options map to override configuration per-function:
    - `:storage`   — `:mem+disk`, `:mem`, or `:none` (overrides `*storage*`)
    - `:cache-dir` — base cache directory (overrides `*base-cache-dir*`)
-   - `:mem-cache` — in-memory cache options (overrides `*mem-cache-options*`)"
+   - `:mem-cache` — in-memory cache options (overrides `*mem-cache-options*`)
+   - `:filename-length-limit` — max filename length before SHA-1 fallback (overrides `*filename-length-limit*`)"
   ([f] (caching-fn f nil))
   ([f opts]
    (fn [& args]
      (binding [*storage* (or (:storage opts) *storage*)
                *base-cache-dir* (or (:cache-dir opts) *base-cache-dir*)
-               *mem-cache-options* (or (:mem-cache opts) *mem-cache-options*)]
+               *mem-cache-options* (or (:mem-cache opts) *mem-cache-options*)
+               *filename-length-limit* (or (:filename-length-limit opts) *filename-length-limit*)]
        (apply cached f args)))))
 
 (defn maybe-deref

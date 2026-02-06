@@ -257,6 +257,48 @@
 
 (pocket/set-filename-length-limit! nil)
 
+
+;; ## Per-function configuration with `caching-fn`
+
+;; The `caching-fn` wrapper accepts an optional options map. When provided,
+;; the wrapper binds the corresponding dynamic vars before calling `cached`.
+;; This is equivalent to wrapping the call in `binding` yourself:
+
+;; ```clojure
+;; ;; These two are equivalent:
+;; (def c-fn (pocket/caching-fn #'my-fn {:storage :mem}))
+;;
+;; (defn c-fn [& args]
+;;   (binding [pocket/*storage* :mem]
+;;     (apply pocket/cached #'my-fn args)))
+;; ```
+
+;; ### Available options
+
+;; | Option | Binds |
+;; |--------|-------|
+;; | `:storage` | `*storage*` |
+;; | `:cache-dir` | `*base-cache-dir*` |
+;; | `:mem-cache` | `*mem-cache-options*` |
+;; | `:filename-length-limit` | `*filename-length-limit*` |
+
+;; ### Example: Mixed storage policies
+
+;; A data science pipeline might use different storage for different steps:
+
+(defn load-data [path] (slurp path))
+(defn compute-stats [data] {:lines (count (clojure.string/split-lines data))})
+(defn train-model [data stats] {:model "trained" :stats stats})
+
+;; Expensive data loading — default (disk + memory):
+(def c-load (pocket/caching-fn #'load-data))
+
+;; Cheap stats — memory only, no disk I/O:
+(def c-stats (pocket/caching-fn #'compute-stats {:storage :mem}))
+
+;; Expensive training — shorter filenames for Windows compatibility:
+(def c-train (pocket/caching-fn #'train-model {:filename-length-limit 80}))
+
 ;; ## Cleanup
 
 ;; To delete all cached values (both disk and in-memory), use `cleanup!`:

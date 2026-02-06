@@ -89,4 +89,35 @@
 (def v33_l258 (pocket/set-filename-length-limit! nil))
 
 
-(def v35_l264 (pocket/cleanup!))
+(def v35_l289 (defn load-data [path] (slurp path)))
+
+
+(def
+ v36_l290
+ (defn
+  compute-stats
+  [data]
+  {:lines (count (clojure.string/split-lines data))}))
+
+
+(def
+ v37_l291
+ (defn train-model [data stats] {:model "trained", :stats stats}))
+
+
+(def v39_l294 (def c-load (pocket/caching-fn #'load-data)))
+
+
+(def
+ v41_l297
+ (def c-stats (pocket/caching-fn #'compute-stats {:storage :mem})))
+
+
+(def
+ v43_l300
+ (def
+  c-train
+  (pocket/caching-fn #'train-model {:filename-length-limit 80})))
+
+
+(def v45_l306 (pocket/cleanup!))
