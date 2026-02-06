@@ -48,7 +48,6 @@
 ;; only once at class-load time. The following forces the output to stdout
 ;; on the already-initialized configuration singleton:
 
-^:kindly/hide-code
 (try
   (let [cp-field (.getDeclaredField org.slf4j.simple.SimpleLogger "CONFIG_PARAMS")]
     (.setAccessible cp-field true)

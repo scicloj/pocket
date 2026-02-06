@@ -271,7 +271,7 @@
 (def v112_l244 (kind/doc #'pocket/origin-story-mermaid))
 
 
-(def v114_l248 (kind/mermaid (pocket/origin-story-mermaid b-c)))
+(def v114_l248 (pocket/origin-story-mermaid b-c))
 
 
 (def v115_l250 (kind/doc #'pocket/origin-story-graph))
@@ -306,9 +306,9 @@
     [rows]
     (and
      (= 2 (count rows))
-     (every? (fn* [p1__88077#] (contains? p1__88077# :lr)) rows)
+     (every? (fn* [p1__75538#] (contains? p1__75538# :lr)) rows)
      (not-any?
-      (fn* [p1__88078#] (contains? p1__88078# :epochs))
+      (fn* [p1__75539#] (contains? p1__75539# :epochs))
       rows)))
    v123_l269)))
 
