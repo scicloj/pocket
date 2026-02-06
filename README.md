@@ -13,7 +13,7 @@ Under the hood, Pocket derives cache keys from the function identity and its arg
 - **Lazy evaluation** — `cached` returns a deref-able value; computation runs only when needed
 - **Pipeline caching** — chain cached steps into pipelines with automatic provenance tracking
 - **Storage policies** — `:mem+disk` (default), `:mem` (no disk I/O), or `:none` (identity tracking only)
-- **DAG introspection** — `origin-story` reconstructs the full computation graph; `origin-story-mermaid` renders it as a flowchart
+- **DAG introspection** — reconstruct the full computation graph and render it as a flowchart
 - **Thread-safe** — concurrent uses of the same computation run it exactly once
 - **Configurable** — cache directory, eviction policy, and storage mode via `pocket.edn`, environment variables, or code
 
