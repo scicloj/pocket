@@ -2,8 +2,8 @@
   "Filesystem-based caching for expensive computations.
    
    Primary API: `cached`, `caching-fn`, `maybe-deref`.
-   Configuration: `*base-cache-dir*`, `*mem-cache-options*`, `*storage*`,
-     `set-base-cache-dir!`, `set-mem-cache-options!`, `reset-mem-cache-options!`, `set-storage!`.
+   Configuration: `*base-cache-dir*`, `*mem-cache-options*`, `*storage*`, `*filename-length-limit*`,
+     `set-base-cache-dir!`, `set-mem-cache-options!`, `reset-mem-cache-options!`, `set-storage!`, `set-filename-length-limit!`.
    Invalidation: `invalidate!`, `invalidate-fn!`, `cleanup!`, `clear-mem-cache!`.
    Introspection: `cache-entries`, `cache-stats`, `dir-tree`, `origin-story`, `origin-story-mermaid`.
    
@@ -45,6 +45,18 @@
    `pocket-defaults.edn` (library default: `:mem+disk`)."
   nil)
 
+(def ^:dynamic *filename-length-limit*
+  "Maximum cache key filename length before switching to SHA-1 hash.
+   
+   Default 240 is safe for Linux/macOS (255-char filename limit).
+   Windows has a 260-char full path limit, so users with deep base
+   directories may need lower values (e.g., 60-100).
+   
+   Resolved with precedence: binding > `set-filename-length-limit!` >
+   `POCKET_FILENAME_LENGTH_LIMIT` env var > `pocket.edn` `:filename-length-limit` >
+   `pocket-defaults.edn` (library default: 240)."
+  nil)
+
 (defn- resolve-base-cache-dir
   "Resolve the base cache directory using the precedence chain."
   []
@@ -52,6 +64,7 @@
       (System/getenv "POCKET_BASE_CACHE_DIR")
       (:base-cache-dir (impl/pocket-edn))
       (:base-cache-dir @impl/pocket-defaults-edn)))
+
 
 (defn- resolve-mem-cache-options
   "Resolve mem-cache options using the precedence chain."
@@ -61,6 +74,7 @@
       (:mem-cache (impl/pocket-edn))
       (:mem-cache @impl/pocket-defaults-edn)))
 
+
 (defn- resolve-storage
   "Resolve the storage policy using the precedence chain."
   []
@@ -69,14 +83,26 @@
       (:storage (impl/pocket-edn))
       (:storage @impl/pocket-defaults-edn)))
 
+
+
+(defn- resolve-filename-length-limit
+  "Resolve the filename length limit using the precedence chain."
+  []
+  (or *filename-length-limit*
+      (some-> (System/getenv "POCKET_FILENAME_LENGTH_LIMIT") parse-long)
+      (:filename-length-limit (impl/pocket-edn))
+      (:filename-length-limit @impl/pocket-defaults-edn)))
+
 (defn config
   "Return the effective resolved configuration as a map.
    Useful for inspecting which cache directory, mem-cache policy,
-   and storage policy are in effect after applying the precedence chain."
+   storage policy, and filename length limit are in effect after applying the precedence chain."
   []
   {:base-cache-dir (resolve-base-cache-dir)
    :mem-cache (resolve-mem-cache-options)
-   :storage (resolve-storage)})
+   :storage (resolve-storage)
+   :filename-length-limit (resolve-filename-length-limit)})
+
 
 (defn set-base-cache-dir!
   "Set the base cache directory by altering `*base-cache-dir*`.
@@ -95,6 +121,15 @@
   (log/info "Storage policy set to:" storage)
   storage)
 
+
+(defn set-filename-length-limit!
+  "Set the filename length limit by altering `*filename-length-limit*`.
+   Values around 60-100 are recommended for Windows with deep base directories.
+   Returns the limit."
+  [limit]
+  (alter-var-root #'*filename-length-limit* (constantly limit))
+  (log/info "Filename length limit set to:" limit)
+  limit)
 (def PIdentifiable
   "Protocol for computing cache key identity from values.
    Extend this protocol to customize how your types contribute to cache keys.
@@ -119,7 +154,7 @@
    Use `caching-fn` with an opts map for per-function overrides."
   [func & args]
   (impl/ensure-mem-cache! (resolve-mem-cache-options))
-  (apply impl/cached (resolve-base-cache-dir) (resolve-storage) func args))
+  (apply impl/cached (resolve-base-cache-dir) (resolve-storage) (resolve-filename-length-limit) func args))
 
 (defn caching-fn
   "Wrap a function to automatically cache its results.
@@ -174,7 +209,7 @@
    Returns a map with `:path` and `:existed`."
   [func & args]
   (impl/ensure-mem-cache! (resolve-mem-cache-options))
-  (impl/invalidate! (resolve-base-cache-dir) func args))
+  (impl/invalidate! (resolve-base-cache-dir) (resolve-filename-length-limit) func args))
 
 (defn invalidate-fn!
   "Invalidate all cached entries for a given function var, regardless of arguments.

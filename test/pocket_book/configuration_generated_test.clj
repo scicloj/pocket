@@ -80,4 +80,13 @@
  (is ((fn [_] (= :mem+disk (:storage (pocket/config)))) v26_l219)))
 
 
-(def v29_l227 (pocket/cleanup!))
+(def v29_l244 (pocket/set-filename-length-limit! 80))
+
+
+(def v31_l254 (:filename-length-limit (pocket/config)))
+
+
+(def v33_l258 (pocket/set-filename-length-limit! nil))
+
+
+(def v35_l264 (pocket/cleanup!))

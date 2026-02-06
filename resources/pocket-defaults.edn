@@ -2,4 +2,9 @@
 ;; Users can override by creating pocket.edn on their classpath
 {:base-cache-dir ".cache/pocket"
  :mem-cache {:policy :lru :threshold 256}
- :storage :mem+disk}
+ :storage :mem+disk
+ ;; Maximum filename length before switching to SHA-1 hash.
+ ;; Default 240 is safe for Linux/macOS (255 char limit).
+ ;; Windows users with deep base directories may need lower values
+ ;; (e.g., 60-100) to stay under the 260-char full path limit.
+ :filename-length-limit 240}

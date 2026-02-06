@@ -220,6 +220,43 @@
 
 (kind/test-last [(fn [_] (= :mem+disk (:storage (pocket/config))))])
 
+
+;; ## Filename length limit (Windows)
+
+;; Most operating systems have a **255-character filename limit**, which
+;; Pocket handles with its default threshold of 240. However, Windows has
+;; a **260-character full path limit** (unless long path support is enabled).
+;; If your base cache directory is deep, the combined path may exceed this.
+
+;; When a cache key exceeds the configured limit, Pocket falls back to
+;; a SHA-1 hash as the directory name. The default (240) is safe for
+;; Linux and macOS, but Windows users with deep base directories may
+;; need to lower it.
+
+;; **Configure in `pocket.edn`:**
+
+;; ```clojure
+;; {:filename-length-limit 80}  ; for Windows with deep paths
+;; ```
+
+;; **Or at runtime:**
+
+(pocket/set-filename-length-limit! 80)
+
+;; **Or via environment variable:**
+
+;; ```bash
+;; export POCKET_FILENAME_LENGTH_LIMIT=80
+;; ```
+
+;; The current limit is included in `config`:
+
+(:filename-length-limit (pocket/config))
+
+;; Reset to default (240):
+
+(pocket/set-filename-length-limit! nil)
+
 ;; ## Cleanup
 
 ;; To delete all cached values (both disk and in-memory), use `cleanup!`:

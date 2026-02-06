@@ -126,21 +126,25 @@
   (when (and opts (not= opts @current-mem-cache-options))
     (reset-mem-cache! opts)))
 
-(defn ->path [base-dir id]
-  (when-not base-dir
-    (throw (ex-info "No cache directory configured. Set it via pocket/set-base-cache-dir!, the POCKET_BASE_CACHE_DIR env var, or pocket.edn."
-                    {})))
-  (let [h (-> id hash str)]
-    (str base-dir
-         "/.cache/"
-         (-> h sha (subs 0 2))
-         "/"
-         (let [idstr (-> (str id)
-                         (str/replace "/" "⁄"))]
-           (if (-> idstr count (> 240))
-             (sha h)
-             idstr)))))
-
+(defn ->path
+  "Generate cache path from base-dir and id.
+   filename-length-limit controls when to switch to SHA-1 hash (default 240)."
+  ([base-dir id]
+   (->path base-dir id 240))
+  ([base-dir id filename-length-limit]
+   (when-not base-dir
+     (throw (ex-info "No cache directory configured. Set it via pocket/set-base-cache-dir!, the POCKET_BASE_CACHE_DIR env var, or pocket.edn."
+                     {})))
+   (let [h (-> id hash str)]
+     (str base-dir
+          "/.cache/"
+          (-> h sha (subs 0 2))
+          "/"
+          (let [idstr (-> (str id)
+                          (str/replace "/" "⁄"))]
+            (if (-> idstr count (> filename-length-limit))
+              (sha h)
+              idstr))))))
 (defn canonical-id
   "Deep-sort all maps and sets in an id structure for canonical string representation.
    Walks the structure recursively: sorts map keys, recurses into sequential
@@ -170,7 +174,7 @@
     @x
     x))
 
-(deftype Cached [base-dir f args storage local-delay]
+(deftype Cached [base-dir f args storage local-delay filename-length-limit]
   IDeref
   (deref [this]
     (case (or storage :mem+disk)
@@ -180,7 +184,7 @@
       :mem
       (let [id (canonical-id (->id this))
             fn-name (->id f)
-            path (->path base-dir id)]
+            path (->path base-dir id filename-length-limit)]
         (cw/lookup-or-miss
          mem-cache path
          (fn [_]
@@ -201,7 +205,7 @@
       :mem+disk
       (let [id (canonical-id (->id this))
             fn-name (->id f)
-            path (->path base-dir id)]
+            path (->path base-dir id filename-length-limit)]
         (cw/lookup-or-miss
          mem-cache path
          (fn [_]
@@ -258,14 +262,14 @@
 
       :mem
       (if-let [base-dir (.base-dir c)]
-        (let [path (->path base-dir (canonical-id id))
+        (let [path (->path base-dir (canonical-id id) (or (.filename-length-limit c) 240))
               status (if (contains? @mem-cache path) :cached :pending)]
           (.write w (str "#<Cached " (pr-str id) " " status ">")))
         (.write w (str "#<Cached " (pr-str id) ">")))
 
       :mem+disk
       (if-let [base-dir (.base-dir c)]
-        (let [path (->path base-dir (canonical-id id))
+        (let [path (->path base-dir (canonical-id id) (or (.filename-length-limit c) 240))
               status (cond
                        (contains? @mem-cache path) :cached
                        (fs/exists? path) :disk
@@ -287,7 +291,7 @@
       (:mem :mem+disk)
       (if-let [base-dir (.base-dir c)]
         (let [id (canonical-id (->id c))
-              path (->path base-dir id)]
+              path (->path base-dir id (or (.filename-length-limit c) 240))]
           (cond
             (contains? @mem-cache path)
             (get @mem-cache path)
@@ -428,22 +432,24 @@
 
 (defn cached
   "Create a cached computation"
-  [base-dir storage func & args]
+  [base-dir storage filename-length-limit func & args]
   (when-not (var? func)
     (throw (ex-info (str "pocket/cached requires a var (e.g., #'my-fn), got: " (type func))
                     {:func func})))
   (let [storage (or storage :mem+disk)
+        limit (or filename-length-limit 240)
         local-delay (when (= storage :none)
                       (delay (clojure.core/apply func (mapv maybe-deref args))))]
-    (->Cached base-dir func args storage local-delay)))
+    (->Cached base-dir func args storage local-delay limit)))
 
 (defn invalidate!
   "Invalidate a specific cached computation by deleting its disk and memory entries.
    Returns a map with `:path` and `:existed`."
-  [base-dir func args]
-  (let [c (->Cached base-dir func args nil nil)
+  [base-dir filename-length-limit func args]
+  (let [c (->Cached base-dir func args nil nil nil)
         id (canonical-id (->id c))
-        path (->path base-dir id)
+        limit (or filename-length-limit 240)
+        path (->path base-dir id limit)
         existed? (boolean (fs/exists? path))]
     (when existed?
       (fs/delete-tree path))

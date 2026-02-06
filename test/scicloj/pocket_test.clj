@@ -448,7 +448,7 @@
 (deftest test-nil-base-dir-validation
   (testing "deref throws when base-dir is nil"
     (let [;; Construct Cached directly with nil base-dir to bypass resolve chain
-          cached-val (impl/cached nil nil #'expensive-add 1 2)]
+          cached-val (impl/cached nil nil nil #'expensive-add 1 2)]
       (is (thrown-with-msg? clojure.lang.ExceptionInfo
                             #"No cache directory configured"
                             @cached-val)))))
