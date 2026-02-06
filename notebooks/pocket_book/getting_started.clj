@@ -1,5 +1,13 @@
 ;; # Getting Started
 
+;; [Pocket](https://github.com/scicloj/pocket) is a Clojure library for
+;; filesystem-based caching of expensive computations. It persists results
+;; to disk so they survive JVM restarts. Cache keys are derived from the
+;; function identity and its arguments, so the same computation always
+;; maps to the same cache entry.
+
+;; ## Setup
+
 (ns pocket-book.getting-started
   (:require
    ;; Pocket API
@@ -8,14 +16,6 @@
    [scicloj.kindly.v4.kind :as kind]
    ;; Logging setup for this chapter (see Logging chapter)
    [pocket-book.logging]))
-
-;; [Pocket](https://github.com/scicloj/pocket) is a Clojure library for
-;; filesystem-based caching of expensive computations. It persists results
-;; to disk so they survive JVM restarts. Cache keys are derived from the
-;; function identity and its arguments, so the same computation always
-;; maps to the same cache entry.
-
-;; ## Setup
 
 ;; First, we set up a cache directory and define an expensive computation:
 
