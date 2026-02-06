@@ -1,10 +1,15 @@
 ;; # Real-World Walkthrough: Weather Analysis Pipeline
 ^{:clay {:quarto {:format {:html {:toc-location :left}}}}}
 (ns pocket-book.real-world-walkthrough
-  (:require [pocket-book.logging]
-            [scicloj.pocket :as pocket]
-            [scicloj.kindly.v4.kind :as kind]
-            [babashka.fs :as fs]))
+  (:require
+   ;; Logging setup for this chapter (see Logging chapter):
+   [pocket-book.logging]
+   ;; Pocket API:
+   [scicloj.pocket :as pocket]
+   ;; Annotating kinds of visualizations:
+   [scicloj.kindly.v4.kind :as kind]
+   ;; Filesystem utilities:
+   [babashka.fs :as fs]))
 
 ;; ## Overview
 

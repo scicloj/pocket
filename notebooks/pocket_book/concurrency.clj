@@ -2,10 +2,15 @@
 
 
 (ns pocket-book.concurrency
-  (:require [pocket-book.logging]
-            [scicloj.pocket :as pocket]
-            [scicloj.kindly.v4.kind :as kind]
-            [clojure.core.cache.wrapped :as cw]))
+  (:require
+   ;; Logging setup for this chapter (see Logging chapter):
+   [pocket-book.logging]
+   ;; Pocket API:
+   [scicloj.pocket :as pocket]
+   ;; Annotating kinds of visualizations:
+   [scicloj.kindly.v4.kind :as kind]
+   ;; Cache implementation for comparisons:
+   [clojure.core.cache.wrapped :as cw]))
 
 ;; Pocket guarantees that when multiple threads deref the same `Cached` value
 ;; concurrently, the underlying computation executes **exactly once**.

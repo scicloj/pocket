@@ -1,7 +1,9 @@
 ;; # Logging
 
 (ns pocket-book.logging
-  (:require [scicloj.kindly.v4.kind :as kind]))
+  (:require
+   ;; Annotating kinds of visualizations:
+   [scicloj.kindly.v4.kind :as kind]))
 
 ;; Pocket uses [`clojure.tools.logging`](https://github.com/clojure/tools.logging)
 ;; for cache lifecycle messages. It does **not** bundle a logging backend —

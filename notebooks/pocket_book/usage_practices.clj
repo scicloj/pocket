@@ -9,9 +9,13 @@
 ;; ## Setup
 
 (ns pocket-book.usage-practices
-  (:require [pocket-book.logging]
-            [scicloj.pocket :as pocket]
-            [scicloj.kindly.v4.kind :as kind]))
+  (:require
+   ;; Logging setup for this chapter (see Logging chapter):
+   [pocket-book.logging]
+   ;; Pocket API:
+   [scicloj.pocket :as pocket]
+   ;; Annotating kinds of visualizations:
+   [scicloj.kindly.v4.kind :as kind]))
 
 (def test-dir "/tmp/pocket-dev-practices")
 (pocket/set-base-cache-dir! test-dir)

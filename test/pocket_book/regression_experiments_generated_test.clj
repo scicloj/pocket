@@ -61,28 +61,28 @@
       ds
       (tc/add-column
        :x2
-       (mapv (fn* [p1__65992#] (* p1__65992# p1__65992#)) xv)))
+       (mapv (fn* [p1__30758#] (* p1__30758# p1__30758#)) xv)))
      :trig
      (->
       ds
       (tc/add-column
        :sin-x
-       (mapv (fn* [p1__65993#] (Math/sin p1__65993#)) xv))
+       (mapv (fn* [p1__30759#] (Math/sin p1__30759#)) xv))
       (tc/add-column
        :cos-x
-       (mapv (fn* [p1__65994#] (Math/cos p1__65994#)) xv)))
+       (mapv (fn* [p1__30760#] (Math/cos p1__30760#)) xv)))
      :poly+trig
      (->
       ds
       (tc/add-column
        :x2
-       (mapv (fn* [p1__65995#] (* p1__65995# p1__65995#)) xv))
+       (mapv (fn* [p1__30761#] (* p1__30761# p1__30761#)) xv))
       (tc/add-column
        :sin-x
-       (mapv (fn* [p1__65996#] (Math/sin p1__65996#)) xv))
+       (mapv (fn* [p1__30762#] (Math/sin p1__30762#)) xv))
       (tc/add-column
        :cos-x
-       (mapv (fn* [p1__65997#] (Math/cos p1__65997#)) xv))))
+       (mapv (fn* [p1__30763#] (Math/cos p1__30763#)) xv))))
     (ds-mod/set-inference-target :y)))))
 
 
@@ -303,11 +303,11 @@
     (let
      [low
       (first
-       (filter (fn* [p1__65998#] (= 0.1 (:noise-sd p1__65998#))) rows))
+       (filter (fn* [p1__30764#] (= 0.1 (:noise-sd p1__30764#))) rows))
       high
       (first
        (filter
-        (fn* [p1__65999#] (= 5.0 (:noise-sd p1__65999#)))
+        (fn* [p1__30765#] (= 5.0 (:noise-sd p1__30765#)))
         rows))]
      (and
       (< (:cart-rmse low) (:sgd-rmse low))
@@ -360,10 +360,10 @@
        +
        (map
         (fn*
-         [p1__66000#]
+         [p1__30766#]
          (*
-          (- p1__66000# (/ (reduce + x-vals) (count x-vals)))
-          (- p1__66000# (/ (reduce + x-vals) (count x-vals)))))
+          (- p1__30766# (/ (reduce + x-vals) (count x-vals)))
+          (- p1__30766# (/ (reduce + x-vals) (count x-vals)))))
         x-vals))
       (count x-vals)))})))
 
@@ -381,7 +381,7 @@
     ds
     :x-norm
     (mapv
-     (fn* [p1__66001#] (/ (- p1__66001# x-mean) x-std))
+     (fn* [p1__30767#] (/ (- p1__30767# x-mean) x-std))
      (:x ds))))))
 
 

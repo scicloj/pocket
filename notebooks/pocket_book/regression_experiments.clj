@@ -23,16 +23,23 @@
 ;; ## Setup
 
 (ns pocket-book.regression-experiments
-  (:require [pocket-book.logging]
-            [scicloj.pocket :as pocket]
-            [scicloj.kindly.v4.kind :as kind]
-            [tablecloth.api :as tc]
-            [tech.v3.dataset :as ds]
-            [tech.v3.dataset.modelling :as ds-mod]
-            [scicloj.metamorph.ml :as ml]
-            [scicloj.metamorph.ml.loss :as loss]
-            [scicloj.ml.tribuo]
-            [scicloj.tableplot.v1.plotly :as plotly]))
+  (:require
+   ;; Logging setup for this chapter (see Logging chapter):
+   [pocket-book.logging]
+   ;; Pocket API:
+   [scicloj.pocket :as pocket]
+   ;; Annotating kinds of visualizations:
+   [scicloj.kindly.v4.kind :as kind]
+   ;; Data processing:
+   [tablecloth.api :as tc]
+   [tech.v3.dataset :as ds]
+   [tech.v3.dataset.modelling :as ds-mod]
+   ;; Machine learning:
+   [scicloj.metamorph.ml :as ml]
+   [scicloj.metamorph.ml.loss :as loss]
+   [scicloj.ml.tribuo]
+   ;; Visualization:
+   [scicloj.tableplot.v1.plotly :as plotly]))
 
 (def cache-dir "/tmp/pocket-regression")
 

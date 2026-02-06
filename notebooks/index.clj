@@ -2,8 +2,11 @@
 
 ^{:clay {:hide-code true}}
 (ns index
-  (:require [clojure.string :as str]
-            [scicloj.kindly.v4.kind :as kind]))
+  (:require
+   ;; String utilities:
+   [clojure.string :as str]
+   ;; Annotating kinds of visualizations:
+   [scicloj.kindly.v4.kind :as kind]))
 
 ^{:kindly/hide-code true
   :kind/md true}

@@ -13,10 +13,15 @@
 ;; ## Setup
 
 (ns pocket-book.recursive-caching-in-pipelines
-  (:require [pocket-book.logging]
-            [scicloj.pocket :as pocket]
-            [scicloj.kindly.v4.kind :as kind]
-            [clojure.string :as str]))
+  (:require
+   ;; Logging setup for this chapter (see Logging chapter):
+   [pocket-book.logging]
+   ;; Pocket API:
+   [scicloj.pocket :as pocket]
+   ;; Annotating kinds of visualizations:
+   [scicloj.kindly.v4.kind :as kind]
+   ;; String utilities:
+   [clojure.string :as str]))
 
 (def cache-dir "/tmp/pocket-demo-pipelines")
 

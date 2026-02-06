@@ -10,11 +10,11 @@
 
 (ns pocket-book.getting-started
   (:require
-   ;; Pocket API
+   ;; Pocket API:
    [scicloj.pocket :as pocket]
-   ;; Annotating kinds of visualizations
+   ;; Annotating kinds of visualizations:
    [scicloj.kindly.v4.kind :as kind]
-   ;; Logging setup for this chapter (see Logging chapter)
+   ;; Logging setup for this chapter (see Logging chapter):
    [pocket-book.logging]))
 
 ;; First, we set up a cache directory and define an expensive computation:
