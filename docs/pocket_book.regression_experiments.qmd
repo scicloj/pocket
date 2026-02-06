@@ -44,12 +44,26 @@ independently, so only the parts you changed get recomputed.
 - Part 4: DAG workflows — when preprocessing steps share dependencies
 - Part 5: Hyperparameter sweeps — comparing many experiments at once
 
-**Prerequisites**: This notebook uses libraries from the `:dev` alias:
+**Note**: This notebook uses
 [tablecloth](https://scicloj.github.io/tablecloth/) for data manipulation,
-[metamorph.ml](https://github.com/scicloj/metamorph.ml) for ML pipelines,
-[tribuo](https://github.com/scicloj/scicloj.ml.tribuo) for algorithms, and
+[metamorph.ml](https://github.com/scicloj/metamorph.ml) and
+[tribuo](https://github.com/scicloj/scicloj.ml.tribuo) for ML, and
 [Plotly.js](https://plotly.com/javascript/) for visualization.
-Start your REPL with `clojure -M:dev` to have them available.
+These are not Pocket dependencies — they illustrate a realistic ML
+workflow. All output is shown inline; to reproduce it, add
+[noj](https://scicloj.github.io/noj/) to your project dependencies.
+
+**Why synthetic data?** Working with synthetic data is a standard
+practice in machine learning. Because we define the true relationship
+($y = \sin(x) \cdot x$), we can measure exactly how well each model
+recovers it — something impossible with real-world data where the
+ground truth is unknown. Synthetic experiments let us isolate one
+variable at a time: does feature engineering help? How does noise
+affect each algorithm? These controlled comparisons build intuition
+that transfers to real problems. In our case, we'll see that a linear
+model is helpless against a nonlinear target *unless* we give it the
+right features, while a decision tree handles the shape on its own
+but pays a different price when noise increases.
 
 
 ## Setup
@@ -98,7 +112,7 @@ Start your REPL with `clojure -M:dev` to have them available.
 ::: {.callout-note}
 ## OUT
 ```
-16:50:50.839 INFO scicloj.pocket - Cache dir set to: /tmp/pocket-regression
+18:40:57.535 INFO scicloj.pocket - Cache dir set to: /tmp/pocket-regression
 
 ```
 :::
@@ -125,7 +139,7 @@ Start your REPL with `clojure -M:dev` to have them available.
 ::: {.callout-note}
 ## OUT
 ```
-16:50:50.840 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-regression
+18:40:57.536 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-regression
 
 ```
 :::
@@ -141,10 +155,15 @@ Start your REPL with `clojure -M:dev` to have them available.
 
 
 
-## Helper functions
+## Pipeline functions
 
-These are the building blocks — plain Clojure functions that know
-nothing about caching. Pocket will wrap them later.
+These are the steps of our ML pipeline — plain Clojure functions
+that know nothing about caching. Pocket will wrap them later.
+
+**Data generation**: `make-regression-data` creates a synthetic
+dataset from a ground-truth function. We control the sample size,
+noise level, and random seed — all of which become part of the
+cache key, so changing any parameter triggers recomputation.
 
 
 ::: {.sourceClojure}
@@ -164,6 +183,12 @@ nothing about caching. Pocket will wrap them later.
 ```
 :::
 
+
+**Feature engineering**: `prepare-features` transforms raw data
+by adding derived columns. The choice of feature set is a key
+hyperparameter — a linear model with only `:raw` features can't
+learn nonlinear patterns, but `:trig` or `:poly+trig` features
+give it the building blocks it needs.
 
 
 ::: {.sourceClojure}
@@ -193,6 +218,12 @@ nothing about caching. Pocket will wrap them later.
 ```
 :::
 
+
+**Training and evaluation**: `train-model` fits a model to
+prepared data, and `predict-and-rmse` measures how well it
+generalizes to unseen test data. These are thin wrappers
+around metamorph.ml — the caching value comes from avoiding
+redundant retraining when only downstream parameters change.
 
 
 ::: {.sourceClojure}
@@ -321,8 +352,8 @@ step is cached, so re-running is instant.
 ::: {.callout-note}
 ## OUT
 ```
-16:50:50.843 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/make-regression-data
-16:50:50.845 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/d5/(pocket-book.regression-experiments⁄make-regression-data pocket-book.regression-experiments⁄nonlinear-fn 500 0.5 42)
+18:40:57.539 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/make-regression-data
+18:40:57.540 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/d5/(pocket-book.regression-experiments⁄make-regression-data pocket-book.regression-experiments⁄nonlinear-fn 500 0.5 42)
 
 ```
 :::
@@ -397,22 +428,22 @@ cached computation — eight in total.
 ::: {.callout-note}
 ## OUT
 ```
-16:50:50.849 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/prepare-features
-16:50:50.851 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/1e/1e1b045b8f7e244dc4577808f6b5ab9860480623
-16:50:50.851 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/prepare-features
-16:50:50.852 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/81/814b7f92cbeeca39e2a0705bbf5da263b9cd4080
-16:50:50.852 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/prepare-features
-16:50:50.853 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/0f/0f037ad9777237d9f8ea3b7d636a06b1ba40603a
-16:50:50.854 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/prepare-features
-16:50:50.855 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/45/45db293312763e6da12aff149fa18b5d52a9ee3d
-16:50:50.855 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/prepare-features
-16:50:50.856 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/d2/d26263306f48e1dec8c7e95caaa12c11a74ef554
-16:50:50.856 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/prepare-features
-16:50:50.858 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/cf/cf315b923cbd15715fcaf9285a62cbf321d48f0d
-16:50:50.859 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/prepare-features
-16:50:50.861 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/2f/2f802f333c7f35eaf20a3eea3829d9969114aba8
-16:50:50.861 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/prepare-features
-16:50:50.862 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/1f/1f3c32bf1e66edb76d62b7e35fd360090d9ea228
+18:40:57.544 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/prepare-features
+18:40:57.546 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/1e/1e1b045b8f7e244dc4577808f6b5ab9860480623
+18:40:57.546 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/prepare-features
+18:40:57.548 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/81/814b7f92cbeeca39e2a0705bbf5da263b9cd4080
+18:40:57.548 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/prepare-features
+18:40:57.550 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/0f/0f037ad9777237d9f8ea3b7d636a06b1ba40603a
+18:40:57.550 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/prepare-features
+18:40:57.552 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/45/45db293312763e6da12aff149fa18b5d52a9ee3d
+18:40:57.552 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/prepare-features
+18:40:57.554 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/d2/d26263306f48e1dec8c7e95caaa12c11a74ef554
+18:40:57.554 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/prepare-features
+18:40:57.555 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/cf/cf315b923cbd15715fcaf9285a62cbf321d48f0d
+18:40:57.555 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/prepare-features
+18:40:57.557 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/2f/2f802f333c7f35eaf20a3eea3829d9969114aba8
+18:40:57.557 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/prepare-features
+18:40:57.558 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/1f/1f3c32bf1e66edb76d62b7e35fd360090d9ea228
 
 ```
 :::
@@ -443,29 +474,29 @@ Two models per feature set — eight cached training runs.
 ::: {.callout-note}
 ## ERR
 ```
-Feb 06, 2026 4:50:50 PM org.tribuo.common.sgd.AbstractSGDTrainer train
+Feb 06, 2026 6:40:57 PM org.tribuo.common.sgd.AbstractSGDTrainer train
 INFO: Training SGD model with 333 examples
-Feb 06, 2026 4:50:50 PM org.tribuo.common.sgd.AbstractSGDTrainer train
+Feb 06, 2026 6:40:57 PM org.tribuo.common.sgd.AbstractSGDTrainer train
 INFO: Outputs - RegressionInfo({name=y,id=0,count=333,max=8.866764,min=-5.501972,mean=0.840206,variance=15.440717})
-Feb 06, 2026 4:50:50 PM org.tribuo.common.sgd.AbstractSGDTrainer train
+Feb 06, 2026 6:40:57 PM org.tribuo.common.sgd.AbstractSGDTrainer train
 INFO: At iteration 10000, average loss = 7.061050130878382
-Feb 06, 2026 4:50:50 PM org.tribuo.common.sgd.AbstractSGDTrainer train
+Feb 06, 2026 6:40:57 PM org.tribuo.common.sgd.AbstractSGDTrainer train
 INFO: Training SGD model with 333 examples
-Feb 06, 2026 4:50:50 PM org.tribuo.common.sgd.AbstractSGDTrainer train
+Feb 06, 2026 6:40:57 PM org.tribuo.common.sgd.AbstractSGDTrainer train
 INFO: Outputs - RegressionInfo({name=y,id=0,count=333,max=8.866764,min=-5.501972,mean=0.840206,variance=15.440717})
-Feb 06, 2026 4:50:50 PM org.tribuo.common.sgd.AbstractSGDTrainer train
+Feb 06, 2026 6:40:57 PM org.tribuo.common.sgd.AbstractSGDTrainer train
 INFO: At iteration 10000, average loss = 7.746488252108407
-Feb 06, 2026 4:50:50 PM org.tribuo.common.sgd.AbstractSGDTrainer train
+Feb 06, 2026 6:40:57 PM org.tribuo.common.sgd.AbstractSGDTrainer train
 INFO: Training SGD model with 333 examples
-Feb 06, 2026 4:50:50 PM org.tribuo.common.sgd.AbstractSGDTrainer train
+Feb 06, 2026 6:40:57 PM org.tribuo.common.sgd.AbstractSGDTrainer train
 INFO: Outputs - RegressionInfo({name=y,id=0,count=333,max=8.866764,min=-5.501972,mean=0.840206,variance=15.440717})
-Feb 06, 2026 4:50:50 PM org.tribuo.common.sgd.AbstractSGDTrainer train
+Feb 06, 2026 6:40:57 PM org.tribuo.common.sgd.AbstractSGDTrainer train
 INFO: At iteration 10000, average loss = 0.9717267353378612
-Feb 06, 2026 4:50:50 PM org.tribuo.common.sgd.AbstractSGDTrainer train
+Feb 06, 2026 6:40:57 PM org.tribuo.common.sgd.AbstractSGDTrainer train
 INFO: Training SGD model with 333 examples
-Feb 06, 2026 4:50:50 PM org.tribuo.common.sgd.AbstractSGDTrainer train
+Feb 06, 2026 6:40:57 PM org.tribuo.common.sgd.AbstractSGDTrainer train
 INFO: Outputs - RegressionInfo({name=y,id=0,count=333,max=8.866764,min=-5.501972,mean=0.840206,variance=15.440717})
-Feb 06, 2026 4:50:50 PM org.tribuo.common.sgd.AbstractSGDTrainer train
+Feb 06, 2026 6:40:57 PM org.tribuo.common.sgd.AbstractSGDTrainer train
 INFO: At iteration 10000, average loss = 1.5031022528715852
 
 ```
@@ -476,22 +507,22 @@ INFO: At iteration 10000, average loss = 1.5031022528715852
 ::: {.callout-note}
 ## OUT
 ```
-16:50:50.865 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/train-model
-16:50:50.871 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/a5/a5a9068b3932a757b86ef9d07718b2a6b9fbc12b
-16:50:50.871 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/train-model
-16:50:50.888 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/b5/b5b61cae3a24b450305c624b6506714fe5b334a6
-16:50:50.889 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/train-model
-16:50:50.895 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/b4/b466d21072b66d7d9907560dcf92d44dcc953178
-16:50:50.895 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/train-model
-16:50:50.901 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/b9/b9b8fdba861a647300c0cb0f18f877843a3f1f40
-16:50:50.902 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/train-model
-16:50:50.908 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/b4/b495281c2fec89ac83b74bdccf90ca43fe58b53c
-16:50:50.908 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/train-model
-16:50:50.922 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/2e/2e359e762a12120cb8ac57c93359aeb2fffa5fd7
-16:50:50.923 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/train-model
-16:50:50.978 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/7f/7faa5d618775c557cff6930fbe2ad75dea886578
-16:50:50.979 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/train-model
-16:50:50.989 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/2b/2b096ea735b936b51d8aeedcb2b49152035db1f5
+18:40:57.561 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/train-model
+18:40:57.566 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/a5/a5a9068b3932a757b86ef9d07718b2a6b9fbc12b
+18:40:57.566 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/train-model
+18:40:57.570 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/b5/b5b61cae3a24b450305c624b6506714fe5b334a6
+18:40:57.571 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/train-model
+18:40:57.575 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/b4/b466d21072b66d7d9907560dcf92d44dcc953178
+18:40:57.575 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/train-model
+18:40:57.580 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/b9/b9b8fdba861a647300c0cb0f18f877843a3f1f40
+18:40:57.581 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/train-model
+18:40:57.585 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/b4/b495281c2fec89ac83b74bdccf90ca43fe58b53c
+18:40:57.585 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/train-model
+18:40:57.591 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/2e/2e359e762a12120cb8ac57c93359aeb2fffa5fd7
+18:40:57.592 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/train-model
+18:40:57.597 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/7f/7faa5d618775c557cff6930fbe2ad75dea886578
+18:40:57.597 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/train-model
+18:40:57.604 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/2b/2b096ea735b936b51d8aeedcb2b49152035db1f5
 
 ```
 :::
@@ -636,29 +667,29 @@ Pocket recognizes the same function and arguments.
 ::: {.callout-note}
 ## ERR
 ```
-Feb 06, 2026 4:50:51 PM org.tribuo.common.sgd.AbstractSGDTrainer train
+Feb 06, 2026 6:40:57 PM org.tribuo.common.sgd.AbstractSGDTrainer train
 INFO: Training SGD model with 333 examples
-Feb 06, 2026 4:50:51 PM org.tribuo.common.sgd.AbstractSGDTrainer train
+Feb 06, 2026 6:40:57 PM org.tribuo.common.sgd.AbstractSGDTrainer train
 INFO: Outputs - RegressionInfo({name=y,id=0,count=333,max=8.106624,min=-5.332393,mean=0.805881,variance=15.304966})
-Feb 06, 2026 4:50:51 PM org.tribuo.common.sgd.AbstractSGDTrainer train
+Feb 06, 2026 6:40:57 PM org.tribuo.common.sgd.AbstractSGDTrainer train
 INFO: At iteration 10000, average loss = 1.4235088958624642
-Feb 06, 2026 4:50:51 PM org.tribuo.common.sgd.AbstractSGDTrainer train
+Feb 06, 2026 6:40:57 PM org.tribuo.common.sgd.AbstractSGDTrainer train
 INFO: Training SGD model with 333 examples
-Feb 06, 2026 4:50:51 PM org.tribuo.common.sgd.AbstractSGDTrainer train
+Feb 06, 2026 6:40:57 PM org.tribuo.common.sgd.AbstractSGDTrainer train
 INFO: Outputs - RegressionInfo({name=y,id=0,count=333,max=9.816940,min=-6.625413,mean=0.883112,variance=15.979208})
-Feb 06, 2026 4:50:51 PM org.tribuo.common.sgd.AbstractSGDTrainer train
+Feb 06, 2026 6:40:57 PM org.tribuo.common.sgd.AbstractSGDTrainer train
 INFO: At iteration 10000, average loss = 1.8153008504655874
-Feb 06, 2026 4:50:51 PM org.tribuo.common.sgd.AbstractSGDTrainer train
+Feb 06, 2026 6:40:57 PM org.tribuo.common.sgd.AbstractSGDTrainer train
 INFO: Training SGD model with 333 examples
-Feb 06, 2026 4:50:51 PM org.tribuo.common.sgd.AbstractSGDTrainer train
+Feb 06, 2026 6:40:57 PM org.tribuo.common.sgd.AbstractSGDTrainer train
 INFO: Outputs - RegressionInfo({name=y,id=0,count=333,max=11.717291,min=-8.958664,mean=0.968924,variance=18.285525})
-Feb 06, 2026 4:50:51 PM org.tribuo.common.sgd.AbstractSGDTrainer train
+Feb 06, 2026 6:40:57 PM org.tribuo.common.sgd.AbstractSGDTrainer train
 INFO: At iteration 10000, average loss = 3.123027977933463
-Feb 06, 2026 4:50:51 PM org.tribuo.common.sgd.AbstractSGDTrainer train
+Feb 06, 2026 6:40:57 PM org.tribuo.common.sgd.AbstractSGDTrainer train
 INFO: Training SGD model with 333 examples
-Feb 06, 2026 4:50:51 PM org.tribuo.common.sgd.AbstractSGDTrainer train
+Feb 06, 2026 6:40:57 PM org.tribuo.common.sgd.AbstractSGDTrainer train
 INFO: Outputs - RegressionInfo({name=y,id=0,count=333,max=17.418345,min=-15.958416,mean=1.226360,variance=35.039175})
-Feb 06, 2026 4:50:51 PM org.tribuo.common.sgd.AbstractSGDTrainer train
+Feb 06, 2026 6:40:57 PM org.tribuo.common.sgd.AbstractSGDTrainer train
 INFO: At iteration 10000, average loss = 12.1030268449752
 
 ```
@@ -669,62 +700,62 @@ INFO: At iteration 10000, average loss = 12.1030268449752
 ::: {.callout-note}
 ## OUT
 ```
-16:50:51.009 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/make-regression-data
-16:50:51.011 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/85/(pocket-book.regression-experiments⁄make-regression-data pocket-book.regression-experiments⁄nonlinear-fn 500 0.1 42)
-16:50:51.012 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/prepare-features
-16:50:51.013 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/4f/4f8f1e5f8041b5ebc798018ca2643c87747df1e2
-16:50:51.013 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/prepare-features
-16:50:51.014 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/b2/b2a95d5ee59bf3de415cb26fa3d21df3af4f73af
-16:50:51.015 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/prepare-features
-16:50:51.016 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/48/48b07d8c628b8d4b507dcb5744beb603a47f69cc
-16:50:51.016 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/prepare-features
-16:50:51.017 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/19/193b1280a1e0e7274565423483d85ca043292773
-16:50:51.018 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/train-model
-16:50:51.022 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/24/24e0bd48657758548dbcbd193f981253c828330d
-16:50:51.023 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/train-model
-16:50:51.029 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/d1/d19edf25116cf5b5d50d45c75b38dba063020850
-16:50:51.034 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/make-regression-data
-16:50:51.035 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/9d/(pocket-book.regression-experiments⁄make-regression-data pocket-book.regression-experiments⁄nonlinear-fn 500 1.0 42)
-16:50:51.036 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/prepare-features
-16:50:51.037 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/e2/e2a8ec25195e0f20af9f5cd4e45e6e761097ccb9
-16:50:51.037 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/prepare-features
-16:50:51.038 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/81/8123a8081b55db9a44d4af2ba2a12356d96f4ad2
-16:50:51.038 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/prepare-features
-16:50:51.039 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/2e/2e07b8116092fcbe2031f24312ff9a27079005dc
-16:50:51.039 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/prepare-features
-16:50:51.040 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/19/19909f7ca027d7ae09a0cd5973835d1bf22ff6dd
-16:50:51.040 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/train-model
-16:50:51.045 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/d3/d316d52a6b67cf473e3f12ecd02d9fa06af1581a
-16:50:51.045 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/train-model
-16:50:51.050 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/5a/5a174d67506657a04fe5d51ea1857f2e14fd9aa0
-16:50:51.052 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/make-regression-data
-16:50:51.053 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/fe/(pocket-book.regression-experiments⁄make-regression-data pocket-book.regression-experiments⁄nonlinear-fn 500 2.0 42)
-16:50:51.053 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/prepare-features
-16:50:51.054 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/b3/b34e159c0d337ebe112baf1948ad588f5f70b9c3
-16:50:51.055 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/prepare-features
-16:50:51.055 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/84/841f83eedde49d82b34ab2a1b3d90924c7920e42
-16:50:51.056 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/prepare-features
-16:50:51.058 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/70/70b4b870d8d3c2870558dcf2bee4bcf3ec586847
-16:50:51.058 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/prepare-features
-16:50:51.060 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/24/24c482184d187968ee61aff282308525acf3cf97
-16:50:51.060 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/train-model
-16:50:51.064 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/38/38261ff3df410b20754f11ecb85c81024d2bee4a
-16:50:51.065 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/train-model
-16:50:51.070 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/58/58d335e0ba77f84a4a6f5118133493a343b11f5d
-16:50:51.072 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/make-regression-data
-16:50:51.072 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/fc/(pocket-book.regression-experiments⁄make-regression-data pocket-book.regression-experiments⁄nonlinear-fn 500 5.0 42)
-16:50:51.073 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/prepare-features
-16:50:51.074 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/a2/a2a4c71f2466bf0b2ee01fd4f832b01f7dedcd20
-16:50:51.074 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/prepare-features
-16:50:51.075 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/1a/1a7954ea0b541c4206bfb2448fb7a375d8ed5307
-16:50:51.075 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/prepare-features
-16:50:51.077 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/8e/8ea377116cca54cf8b7dced7502b71818077751b
-16:50:51.078 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/prepare-features
-16:50:51.079 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/b0/b09ac36f5dd63602af082209483336591128f3a0
-16:50:51.079 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/train-model
-16:50:51.083 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/c5/c55516a9a5c61af0f4d6ac08114ba869e6c448b8
-16:50:51.083 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/train-model
-16:50:51.090 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/ef/eff80c18b2f361f440f47485e2a8f8751dde7f69
+18:40:57.620 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/make-regression-data
+18:40:57.622 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/85/(pocket-book.regression-experiments⁄make-regression-data pocket-book.regression-experiments⁄nonlinear-fn 500 0.1 42)
+18:40:57.623 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/prepare-features
+18:40:57.624 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/4f/4f8f1e5f8041b5ebc798018ca2643c87747df1e2
+18:40:57.625 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/prepare-features
+18:40:57.626 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/b2/b2a95d5ee59bf3de415cb26fa3d21df3af4f73af
+18:40:57.626 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/prepare-features
+18:40:57.628 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/48/48b07d8c628b8d4b507dcb5744beb603a47f69cc
+18:40:57.628 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/prepare-features
+18:40:57.629 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/19/193b1280a1e0e7274565423483d85ca043292773
+18:40:57.630 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/train-model
+18:40:57.634 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/24/24e0bd48657758548dbcbd193f981253c828330d
+18:40:57.634 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/train-model
+18:40:57.640 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/d1/d19edf25116cf5b5d50d45c75b38dba063020850
+18:40:57.645 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/make-regression-data
+18:40:57.646 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/9d/(pocket-book.regression-experiments⁄make-regression-data pocket-book.regression-experiments⁄nonlinear-fn 500 1.0 42)
+18:40:57.647 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/prepare-features
+18:40:57.648 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/e2/e2a8ec25195e0f20af9f5cd4e45e6e761097ccb9
+18:40:57.648 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/prepare-features
+18:40:57.649 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/81/8123a8081b55db9a44d4af2ba2a12356d96f4ad2
+18:40:57.649 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/prepare-features
+18:40:57.651 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/2e/2e07b8116092fcbe2031f24312ff9a27079005dc
+18:40:57.651 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/prepare-features
+18:40:57.652 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/19/19909f7ca027d7ae09a0cd5973835d1bf22ff6dd
+18:40:57.652 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/train-model
+18:40:57.656 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/d3/d316d52a6b67cf473e3f12ecd02d9fa06af1581a
+18:40:57.656 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/train-model
+18:40:57.661 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/5a/5a174d67506657a04fe5d51ea1857f2e14fd9aa0
+18:40:57.663 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/make-regression-data
+18:40:57.664 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/fe/(pocket-book.regression-experiments⁄make-regression-data pocket-book.regression-experiments⁄nonlinear-fn 500 2.0 42)
+18:40:57.665 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/prepare-features
+18:40:57.666 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/b3/b34e159c0d337ebe112baf1948ad588f5f70b9c3
+18:40:57.666 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/prepare-features
+18:40:57.667 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/84/841f83eedde49d82b34ab2a1b3d90924c7920e42
+18:40:57.667 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/prepare-features
+18:40:57.669 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/70/70b4b870d8d3c2870558dcf2bee4bcf3ec586847
+18:40:57.669 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/prepare-features
+18:40:57.670 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/24/24c482184d187968ee61aff282308525acf3cf97
+18:40:57.670 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/train-model
+18:40:57.674 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/38/38261ff3df410b20754f11ecb85c81024d2bee4a
+18:40:57.674 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/train-model
+18:40:57.679 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/58/58d335e0ba77f84a4a6f5118133493a343b11f5d
+18:40:57.681 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/make-regression-data
+18:40:57.682 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/fc/(pocket-book.regression-experiments⁄make-regression-data pocket-book.regression-experiments⁄nonlinear-fn 500 5.0 42)
+18:40:57.683 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/prepare-features
+18:40:57.684 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/a2/a2a4c71f2466bf0b2ee01fd4f832b01f7dedcd20
+18:40:57.684 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/prepare-features
+18:40:57.685 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/1a/1a7954ea0b541c4206bfb2448fb7a375d8ed5307
+18:40:57.685 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/prepare-features
+18:40:57.686 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/8e/8ea377116cca54cf8b7dced7502b71818077751b
+18:40:57.686 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/prepare-features
+18:40:57.687 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/b0/b09ac36f5dd63602af082209483336591128f3a0
+18:40:57.687 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/train-model
+18:40:57.692 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/c5/c55516a9a5c61af0f4d6ac08114ba869e6c448b8
+18:40:57.692 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/train-model
+18:40:57.697 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/ef/eff80c18b2f361f440f47485e2a8f8751dde7f69
 
 ```
 :::
@@ -841,7 +872,7 @@ Let's see what we accumulated:
   :fn-name "pocket-book.regression-experiments/prepare-features",
   :args-str
   "[Group: 0 [167 2]:\n\n|         :x |          :y |\n|-----------:|------------:|\n| 9.16293775 |  2.26602135 |\n| 2.88190176 |  0.07191211 |\n| 2.80291741 |  0.90892505 |\n| 3.03686968 |  0.89333245 |\n| 5.62533957 | -2.30782265 |\n| 1.26257823 |  0.54238171 |\n| 0.31418239 |  0.37588834 |\n| 0.58603584 |  0.33877661 |\n| 4.95769400 | -4.61138419 |\n| 8.37403433 |  7.73857800 |\n|        ... |         ... |\n| 6.99858645 |  4.77370474 |\n| 0.85035907 |  1.07808762 |\n| 7.09263718 |  5.78615070 |\n| 5.76735419 | -2.56416279 |\n| 5.38718689 | -5.63900951 |\n| 5.37393928 | -4.23617224 |\n| 3.08719455 |  0.22904859 |\n| 9.88548992 | -4.33606446 |\n| 4.23201682 | -3.58304830 |\n| 5.87427382 | -1.84676450 |\n| 3.39747109 | -0.31987249 |\n :quadratic]",
-  :created-at "2026-02-06T14:50:50.854523138Z"}
+  :created-at "2026-02-06T16:40:57.551035691Z"}
  {:path
   "/tmp/pocket-regression/.cache/d5/(pocket-book.regression-experiments⁄make-regression-data pocket-book.regression-experiments⁄nonlinear-fn 500 0.5 42)",
   :id
@@ -849,7 +880,7 @@ Let's see what we accumulated:
   :fn-name "pocket-book.regression-experiments/make-regression-data",
   :args-str
   "[pocket-book.regression-experiments/nonlinear-fn 500 0.5 42]",
-  :created-at "2026-02-06T14:50:50.844991320Z"}
+  :created-at "2026-02-06T16:40:57.540078487Z"}
  {:path
   "/tmp/pocket-regression/.cache/cf/cf315b923cbd15715fcaf9285a62cbf321d48f0d",
   :id
@@ -857,7 +888,7 @@ Let's see what we accumulated:
   :fn-name "pocket-book.regression-experiments/prepare-features",
   :args-str
   "[Group: 0 [167 2]:\n\n|         :x |          :y |\n|-----------:|------------:|\n| 9.16293775 |  2.26602135 |\n| 2.88190176 |  0.07191211 |\n| 2.80291741 |  0.90892505 |\n| 3.03686968 |  0.89333245 |\n| 5.62533957 | -2.30782265 |\n| 1.26257823 |  0.54238171 |\n| 0.31418239 |  0.37588834 |\n| 0.58603584 |  0.33877661 |\n| 4.95769400 | -4.61138419 |\n| 8.37403433 |  7.73857800 |\n|        ... |         ... |\n| 6.99858645 |  4.77370474 |\n| 0.85035907 |  1.07808762 |\n| 7.09263718 |  5.78615070 |\n| 5.76735419 | -2.56416279 |\n| 5.38718689 | -5.63900951 |\n| 5.37393928 | -4.23617224 |\n| 3.08719455 |  0.22904859 |\n| 9.88548992 | -4.33606446 |\n| 4.23201682 | -3.58304830 |\n| 5.87427382 | -1.84676450 |\n| 3.39747109 | -0.31987249 |\n :trig]",
-  :created-at "2026-02-06T14:50:50.857345556Z"}
+  :created-at "2026-02-06T16:40:57.554828129Z"}
  {:path
   "/tmp/pocket-regression/.cache/ef/eff80c18b2f361f440f47485e2a8f8751dde7f69",
   :id
@@ -865,7 +896,7 @@ Let's see what we accumulated:
   :fn-name "pocket-book.regression-experiments/train-model",
   :args-str
   "[Group: 0 [333 5]:\n\n|         :x |          :y |         :x2 |      :sin-x |      :cos-x |\n|-----------:|------------:|------------:|------------:|------------:|\n| 0.62212252 |  5.36695519 |  0.38703643 |  0.58276133 |  0.81264336 |\n| 5.63922880 | -2.71213657 | 31.80090150 | -0.60036425 |  0.79972668 |\n| 1.24912415 | -2.21520786 |  1.56031114 |  0.94870808 |  0.31615341 |\n| 1.52711743 |  1.24832387 |  2.33208765 |  0.99904623 |  0.04366501 |\n| 4.82231721 | -7.99768489 | 23.25474331 | -0.99396397 |  0.10970697 |\n| 5.16624213 | -7.40036049 | 26.69005775 | -0.89876443 |  0.43843185 |\n| 1.47898709 | 10.71022933 |  2.18740283 |  0.99578849 |  0.09168031 |\n| 7.20124675 |  7.04495523 | 51.85795481 |  0.79442571 |  0.60736133 |\n| 0.34521076 |  4.07655595 |  0.11917047 |  0.33839501 |  0.94100415 |\n| 7.94559627 | 12.52231425 | 63.13250002 |  0.99580631 | -0.09148653 |\n|        ... |         ... |         ... |         ... |         ... |\n| 3.79175484 | -5.93761595 | 14.37740478 | -0.60531551 | -0.79598563 |\n| 0.36484517 |  5.37041934 |  0.13311200 |  0.35680466 |  0.93417902 |\n| 5.49169112 | -0.46272098 | 30.15867130 | -0.71140416 |  0.70278313 |\n| 5.27903869 | -5.08266830 | 27.86824953 | -0.84370417 |  0.53680842 |\n| 7.64151660 |  5.03708502 | 58.39277600 |  0.97751408 |  0.21087014 |\n| 5.89869906 | -3.80448907 | 34.79465062 | -0.37508294 |  0.92699126 |\n| 9.76876450 |  0.82657496 | 95.42875978 | -0.33724276 | -0.94141772 |\n| 5.67942172 |  3.17105750 | 32.25583106 | -0.56774469 |  0.82320469 |\n| 8.09594125 | 10.79942447 | 65.54426469 |  0.97087030 | -0.23960562 |\n| 4.36540394 | -3.93144023 | 19.05675156 | -0.94040226 | -0.34006408 |\n| 1.52754849 |  2.83210931 |  2.33340440 |  0.99906496 |  0.04323435 |\n {:model-type :scicloj.ml.tribuo/regression, :tribuo-components [{:name \"squared\", :type \"org.tribuo.regression.sgd.objectives.SquaredLoss\"} {:name \"trainer\", :type \"org.tribuo.regression.sgd.linear.LinearSGDTrainer\", :properties {:objective \"squared\", :epochs \"50\", :loggingInterval \"10000\"}}], :tribuo-trainer-name \"trainer\"}]",
-  :created-at "2026-02-06T14:50:51.088592436Z"}
+  :created-at "2026-02-06T16:40:57.695558474Z"}
  {:path
   "/tmp/pocket-regression/.cache/8e/8ea377116cca54cf8b7dced7502b71818077751b",
   :id
@@ -873,7 +904,7 @@ Let's see what we accumulated:
   :fn-name "pocket-book.regression-experiments/prepare-features",
   :args-str
   "[Group: 0 [333 2]:\n\n|         :x |          :y |\n|-----------:|------------:|\n| 0.62212252 |  5.36695519 |\n| 5.63922880 | -2.71213657 |\n| 1.24912415 | -2.21520786 |\n| 1.52711743 |  1.24832387 |\n| 4.82231721 | -7.99768489 |\n| 5.16624213 | -7.40036049 |\n| 1.47898709 | 10.71022933 |\n| 7.20124675 |  7.04495523 |\n| 0.34521076 |  4.07655595 |\n| 7.94559627 | 12.52231425 |\n|        ... |         ... |\n| 3.79175484 | -5.93761595 |\n| 0.36484517 |  5.37041934 |\n| 5.49169112 | -0.46272098 |\n| 5.27903869 | -5.08266830 |\n| 7.64151660 |  5.03708502 |\n| 5.89869906 | -3.80448907 |\n| 9.76876450 |  0.82657496 |\n| 5.67942172 |  3.17105750 |\n| 8.09594125 | 10.79942447 |\n| 4.36540394 | -3.93144023 |\n| 1.52754849 |  2.83210931 |\n :poly+trig]",
-  :created-at "2026-02-06T14:50:51.076762695Z"}
+  :created-at "2026-02-06T16:40:57.685873552Z"}
  {:path
   "/tmp/pocket-regression/.cache/d1/d19edf25116cf5b5d50d45c75b38dba063020850",
   :id
@@ -881,7 +912,7 @@ Let's see what we accumulated:
   :fn-name "pocket-book.regression-experiments/train-model",
   :args-str
   "[Group: 0 [333 5]:\n\n|         :x |          :y |         :x2 |      :sin-x |      :cos-x |\n|-----------:|------------:|------------:|------------:|------------:|\n| 0.62212252 |  0.46263707 |  0.38703643 |  0.58276133 |  0.81264336 |\n| 5.63922880 | -3.37212229 | 31.80090150 | -0.60036425 |  0.79972668 |\n| 1.24912415 |  1.11704893 |  1.56031114 |  0.94870808 |  0.31615341 |\n| 1.52711743 |  1.52011417 |  2.33208765 |  0.99904623 |  0.04366501 |\n| 4.82231721 | -4.85729909 | 23.25474331 | -0.99396397 |  0.10970697 |\n| 5.16624213 | -4.69837720 | 26.69005775 | -0.89876443 |  0.43843185 |\n| 1.47898709 |  1.65750775 |  2.18740283 |  0.99578849 |  0.09168031 |\n| 7.20124675 |  5.74733757 | 51.85795481 |  0.79442571 |  0.60736133 |\n| 0.34521076 |  0.19601237 |  0.11917047 |  0.33839501 |  0.94100415 |\n| 7.94559627 |  8.00447572 | 63.13250002 |  0.99580631 | -0.09148653 |\n|        ... |         ... |         ... |         ... |         ... |\n| 3.79175484 | -2.36805619 | 14.37740478 | -0.60531551 | -0.79598563 |\n| 0.36484517 |  0.23498327 |  0.13311200 |  0.35680466 |  0.93417902 |\n| 5.49169112 | -3.83793008 | 30.15867130 | -0.71140416 |  0.70278313 |\n| 5.27903869 | -4.46652138 | 27.86824953 | -0.84370417 |  0.53680842 |\n| 7.64151660 |  7.42103800 | 58.39277600 |  0.97751408 |  0.21087014 |\n| 5.89869906 | -2.24434114 | 34.79465062 | -0.37508294 |  0.92699126 |\n| 9.76876450 | -3.21202467 | 95.42875978 | -0.33724276 | -0.94141772 |\n| 5.67942172 | -3.09655115 | 32.25583106 | -0.56774469 |  0.82320469 |\n| 8.09594125 |  7.91889526 | 65.54426469 |  0.97087030 | -0.23960562 |\n| 4.36540394 | -4.10175984 | 19.05675156 | -0.94040226 | -0.34006408 |\n| 1.52754849 |  1.55223996 |  2.33340440 |  0.99906496 |  0.04323435 |\n {:model-type :scicloj.ml.tribuo/regression, :tribuo-components [{:name \"squared\", :type \"org.tribuo.regression.sgd.objectives.SquaredLoss\"} {:name \"trainer\", :type \"org.tribuo.regression.sgd.linear.LinearSGDTrainer\", :properties {:objective \"squared\", :epochs \"50\", :loggingInterval \"10000\"}}], :tribuo-trainer-name \"trainer\"}]",
-  :created-at "2026-02-06T14:50:51.027697412Z"}
+  :created-at "2026-02-06T16:40:57.638094702Z"}
  {:path
   "/tmp/pocket-regression/.cache/c5/c55516a9a5c61af0f4d6ac08114ba869e6c448b8",
   :id
@@ -889,7 +920,7 @@ Let's see what we accumulated:
   :fn-name "pocket-book.regression-experiments/train-model",
   :args-str
   "[Group: 0 [333 2]:\n\n|         :x |          :y |\n|-----------:|------------:|\n| 0.62212252 |  5.36695519 |\n| 5.63922880 | -2.71213657 |\n| 1.24912415 | -2.21520786 |\n| 1.52711743 |  1.24832387 |\n| 4.82231721 | -7.99768489 |\n| 5.16624213 | -7.40036049 |\n| 1.47898709 | 10.71022933 |\n| 7.20124675 |  7.04495523 |\n| 0.34521076 |  4.07655595 |\n| 7.94559627 | 12.52231425 |\n|        ... |         ... |\n| 3.79175484 | -5.93761595 |\n| 0.36484517 |  5.37041934 |\n| 5.49169112 | -0.46272098 |\n| 5.27903869 | -5.08266830 |\n| 7.64151660 |  5.03708502 |\n| 5.89869906 | -3.80448907 |\n| 9.76876450 |  0.82657496 |\n| 5.67942172 |  3.17105750 |\n| 8.09594125 | 10.79942447 |\n| 4.36540394 | -3.93144023 |\n| 1.52754849 |  2.83210931 |\n {:model-type :scicloj.ml.tribuo/regression, :tribuo-components [{:name \"cart\", :type \"org.tribuo.regression.rtree.CARTRegressionTrainer\", :properties {:maxDepth \"8\"}}], :tribuo-trainer-name \"cart\"}]",
-  :created-at "2026-02-06T14:50:51.082346851Z"}
+  :created-at "2026-02-06T16:40:57.690919478Z"}
  {:path
   "/tmp/pocket-regression/.cache/58/58d335e0ba77f84a4a6f5118133493a343b11f5d",
   :id
@@ -897,7 +928,7 @@ Let's see what we accumulated:
   :fn-name "pocket-book.regression-experiments/train-model",
   :args-str
   "[Group: 0 [333 5]:\n\n|         :x |          :y |         :x2 |      :sin-x |      :cos-x |\n|-----------:|------------:|------------:|------------:|------------:|\n| 0.62212252 |  2.36431145 |  0.38703643 |  0.58276133 |  0.81264336 |\n| 5.63922880 | -3.11620946 | 31.80090150 | -0.60036425 |  0.79972668 |\n| 1.24912415 | -0.17505064 |  1.56031114 |  0.94870808 |  0.31615341 |\n| 1.52711743 |  1.41472609 |  2.33208765 |  0.99904623 |  0.04366501 |\n| 4.82231721 | -6.07499970 | 23.25474331 | -0.99396397 |  0.10970697 |\n| 5.16624213 | -5.74608501 | 26.69005775 | -0.89876443 |  0.43843185 |\n| 1.47898709 |  5.16774673 |  2.18740283 |  0.99578849 |  0.09168031 |\n| 7.20124675 |  6.25049544 | 51.85795481 |  0.79442571 |  0.60736133 |\n| 0.34521076 |  1.70071294 |  0.11917047 |  0.33839501 |  0.94100415 |\n| 7.94559627 |  9.75629066 | 63.13250002 |  0.99580631 | -0.09148653 |\n|        ... |         ... |         ... |         ... |         ... |\n| 3.79175484 | -3.75217120 | 14.37740478 | -0.60531551 | -0.79598563 |\n| 0.36484517 |  2.22627481 |  0.13311200 |  0.35680466 |  0.93417902 |\n| 5.49169112 | -2.52917553 | 30.15867130 | -0.71140416 |  0.70278313 |\n| 5.27903869 | -4.70543549 | 27.86824953 | -0.84370417 |  0.53680842 |\n| 7.64151660 |  6.49664807 | 58.39277600 |  0.97751408 |  0.21087014 |\n| 5.89869906 | -2.84929646 | 34.79465062 | -0.37508294 |  0.92699126 |\n| 9.76876450 | -1.64603706 | 95.42875978 | -0.33724276 | -0.94141772 |\n| 5.67942172 | -0.66625392 | 32.25583106 | -0.56774469 |  0.82320469 |\n| 8.09594125 |  9.03583515 | 65.54426469 |  0.97087030 | -0.23960562 |\n| 4.36540394 | -4.03571754 | 19.05675156 | -0.94040226 | -0.34006408 |\n| 1.52754849 |  2.04851583 |  2.33340440 |  0.99906496 |  0.04323435 |\n {:model-type :scicloj.ml.tribuo/regression, :tribuo-components [{:name \"squared\", :type \"org.tribuo.regression.sgd.objectives.SquaredLoss\"} {:name \"trainer\", :type \"org.tribuo.regression.sgd.linear.LinearSGDTrainer\", :properties {:objective \"squared\", :epochs \"50\", :loggingInterval \"10000\"}}], :tribuo-trainer-name \"trainer\"}]",
-  :created-at "2026-02-06T14:50:51.068694554Z"}
+  :created-at "2026-02-06T16:40:57.678074218Z"}
  {:path
   "/tmp/pocket-regression/.cache/1f/1f3c32bf1e66edb76d62b7e35fd360090d9ea228",
   :id
@@ -905,7 +936,7 @@ Let's see what we accumulated:
   :fn-name "pocket-book.regression-experiments/prepare-features",
   :args-str
   "[Group: 0 [167 2]:\n\n|         :x |          :y |\n|-----------:|------------:|\n| 9.16293775 |  2.26602135 |\n| 2.88190176 |  0.07191211 |\n| 2.80291741 |  0.90892505 |\n| 3.03686968 |  0.89333245 |\n| 5.62533957 | -2.30782265 |\n| 1.26257823 |  0.54238171 |\n| 0.31418239 |  0.37588834 |\n| 0.58603584 |  0.33877661 |\n| 4.95769400 | -4.61138419 |\n| 8.37403433 |  7.73857800 |\n|        ... |         ... |\n| 6.99858645 |  4.77370474 |\n| 0.85035907 |  1.07808762 |\n| 7.09263718 |  5.78615070 |\n| 5.76735419 | -2.56416279 |\n| 5.38718689 | -5.63900951 |\n| 5.37393928 | -4.23617224 |\n| 3.08719455 |  0.22904859 |\n| 9.88548992 | -4.33606446 |\n| 4.23201682 | -3.58304830 |\n| 5.87427382 | -1.84676450 |\n| 3.39747109 | -0.31987249 |\n :poly+trig]",
-  :created-at "2026-02-06T14:50:50.861710477Z"}
+  :created-at "2026-02-06T16:40:57.558103914Z"}
  {:path
   "/tmp/pocket-regression/.cache/48/48b07d8c628b8d4b507dcb5744beb603a47f69cc",
   :id
@@ -913,7 +944,7 @@ Let's see what we accumulated:
   :fn-name "pocket-book.regression-experiments/prepare-features",
   :args-str
   "[Group: 0 [333 2]:\n\n|         :x |          :y |\n|-----------:|------------:|\n| 0.62212252 |  0.46263707 |\n| 5.63922880 | -3.37212229 |\n| 1.24912415 |  1.11704893 |\n| 1.52711743 |  1.52011417 |\n| 4.82231721 | -4.85729909 |\n| 5.16624213 | -4.69837720 |\n| 1.47898709 |  1.65750775 |\n| 7.20124675 |  5.74733757 |\n| 0.34521076 |  0.19601237 |\n| 7.94559627 |  8.00447572 |\n|        ... |         ... |\n| 3.79175484 | -2.36805619 |\n| 0.36484517 |  0.23498327 |\n| 5.49169112 | -3.83793008 |\n| 5.27903869 | -4.46652138 |\n| 7.64151660 |  7.42103800 |\n| 5.89869906 | -2.24434114 |\n| 9.76876450 | -3.21202467 |\n| 5.67942172 | -3.09655115 |\n| 8.09594125 |  7.91889526 |\n| 4.36540394 | -4.10175984 |\n| 1.52754849 |  1.55223996 |\n :poly+trig]",
-  :created-at "2026-02-06T14:50:51.015686282Z"}
+  :created-at "2026-02-06T16:40:57.627327839Z"}
  {:path
   "/tmp/pocket-regression/.cache/d2/d26263306f48e1dec8c7e95caaa12c11a74ef554",
   :id
@@ -921,7 +952,7 @@ Let's see what we accumulated:
   :fn-name "pocket-book.regression-experiments/prepare-features",
   :args-str
   "[Group: 0 [333 2]:\n\n|         :x |          :y |\n|-----------:|------------:|\n| 0.62212252 |  0.86298957 |\n| 5.63922880 | -3.31824591 |\n| 1.24912415 |  0.84502797 |\n| 1.52711743 |  1.49792721 |\n| 4.82231721 | -5.11365711 |\n| 5.16624213 | -4.91894727 |\n| 1.47898709 |  2.39650543 |\n| 7.20124675 |  5.85326554 |\n| 0.34521076 |  0.51279144 |\n| 7.94559627 |  8.37327886 |\n|        ... |         ... |\n| 3.79175484 | -2.65944882 |\n| 0.36484517 |  0.65420254 |\n| 5.49169112 | -3.56240281 |\n| 5.27903869 | -4.51681909 |\n| 7.64151660 |  7.22642959 |\n| 5.89869906 | -2.37170016 |\n| 9.76876450 | -2.88234307 |\n| 5.67942172 | -2.58490962 |\n| 8.09594125 |  8.15404050 |\n| 4.36540394 | -4.08785620 |\n| 1.52754849 |  1.65671909 |\n :trig]",
-  :created-at "2026-02-06T14:50:50.855841797Z"}
+  :created-at "2026-02-06T16:40:57.553056161Z"}
  {:path
   "/tmp/pocket-regression/.cache/7f/7faa5d618775c557cff6930fbe2ad75dea886578",
   :id
@@ -929,7 +960,7 @@ Let's see what we accumulated:
   :fn-name "pocket-book.regression-experiments/train-model",
   :args-str
   "[Group: 0 [333 5]:\n\n|         :x |          :y |         :x2 |      :sin-x |      :cos-x |\n|-----------:|------------:|------------:|------------:|------------:|\n| 0.62212252 |  0.86298957 |  0.38703643 |  0.58276133 |  0.81264336 |\n| 5.63922880 | -3.31824591 | 31.80090150 | -0.60036425 |  0.79972668 |\n| 1.24912415 |  0.84502797 |  1.56031114 |  0.94870808 |  0.31615341 |\n| 1.52711743 |  1.49792721 |  2.33208765 |  0.99904623 |  0.04366501 |\n| 4.82231721 | -5.11365711 | 23.25474331 | -0.99396397 |  0.10970697 |\n| 5.16624213 | -4.91894727 | 26.69005775 | -0.89876443 |  0.43843185 |\n| 1.47898709 |  2.39650543 |  2.18740283 |  0.99578849 |  0.09168031 |\n| 7.20124675 |  5.85326554 | 51.85795481 |  0.79442571 |  0.60736133 |\n| 0.34521076 |  0.51279144 |  0.11917047 |  0.33839501 |  0.94100415 |\n| 7.94559627 |  8.37327886 | 63.13250002 |  0.99580631 | -0.09148653 |\n|        ... |         ... |         ... |         ... |         ... |\n| 3.79175484 | -2.65944882 | 14.37740478 | -0.60531551 | -0.79598563 |\n| 0.36484517 |  0.65420254 |  0.13311200 |  0.35680466 |  0.93417902 |\n| 5.49169112 | -3.56240281 | 30.15867130 | -0.71140416 |  0.70278313 |\n| 5.27903869 | -4.51681909 | 27.86824953 | -0.84370417 |  0.53680842 |\n| 7.64151660 |  7.22642959 | 58.39277600 |  0.97751408 |  0.21087014 |\n| 5.89869906 | -2.37170016 | 34.79465062 | -0.37508294 |  0.92699126 |\n| 9.76876450 | -2.88234307 | 95.42875978 | -0.33724276 | -0.94141772 |\n| 5.67942172 | -2.58490962 | 32.25583106 | -0.56774469 |  0.82320469 |\n| 8.09594125 |  8.15404050 | 65.54426469 |  0.97087030 | -0.23960562 |\n| 4.36540394 | -4.08785620 | 19.05675156 | -0.94040226 | -0.34006408 |\n| 1.52754849 |  1.65671909 |  2.33340440 |  0.99906496 |  0.04323435 |\n {:model-type :scicloj.ml.tribuo/regression, :tribuo-components [{:name \"squared\", :type \"org.tribuo.regression.sgd.objectives.SquaredLoss\"} {:name \"trainer\", :type \"org.tribuo.regression.sgd.linear.LinearSGDTrainer\", :properties {:objective \"squared\", :epochs \"50\", :loggingInterval \"10000\"}}], :tribuo-trainer-name \"trainer\"}]",
-  :created-at "2026-02-06T14:50:50.974137023Z"}
+  :created-at "2026-02-06T16:40:57.595300312Z"}
  {:path
   "/tmp/pocket-regression/.cache/24/24c482184d187968ee61aff282308525acf3cf97",
   :id
@@ -937,7 +968,7 @@ Let's see what we accumulated:
   :fn-name "pocket-book.regression-experiments/prepare-features",
   :args-str
   "[Group: 0 [167 2]:\n\n|         :x |          :y |\n|-----------:|------------:|\n| 9.16293775 |  1.94837313 |\n| 2.88190176 | -1.93241152 |\n| 2.80291741 |  0.84199416 |\n| 3.03686968 |  2.62098268 |\n| 5.62533957 |  1.08693638 |\n| 1.26257823 | -1.43971330 |\n| 0.31418239 |  1.21226953 |\n| 0.58603584 |  0.38276279 |\n| 4.95769400 | -4.01770582 |\n| 8.37403433 |  9.15352697 |\n|        ... |         ... |\n| 6.99858645 |  5.32327492 |\n| 0.85035907 |  2.39517172 |\n| 7.09263718 |  7.74132838 |\n| 5.76735419 | -1.72227052 |\n| 5.38718689 | -9.93655453 |\n| 5.37393928 | -4.22391743 |\n| 3.08719455 |  0.41263025 |\n| 9.88548992 | -4.15940802 |\n| 4.23201682 | -3.07304359 |\n| 5.87427382 | -0.38003394 |\n| 3.39747109 |  1.30016232 |\n :poly+trig]",
-  :created-at "2026-02-06T14:50:51.059468008Z"}
+  :created-at "2026-02-06T16:40:57.669748260Z"}
  {:path
   "/tmp/pocket-regression/.cache/24/24e0bd48657758548dbcbd193f981253c828330d",
   :id
@@ -945,7 +976,7 @@ Let's see what we accumulated:
   :fn-name "pocket-book.regression-experiments/train-model",
   :args-str
   "[Group: 0 [333 2]:\n\n|         :x |          :y |\n|-----------:|------------:|\n| 0.62212252 |  0.46263707 |\n| 5.63922880 | -3.37212229 |\n| 1.24912415 |  1.11704893 |\n| 1.52711743 |  1.52011417 |\n| 4.82231721 | -4.85729909 |\n| 5.16624213 | -4.69837720 |\n| 1.47898709 |  1.65750775 |\n| 7.20124675 |  5.74733757 |\n| 0.34521076 |  0.19601237 |\n| 7.94559627 |  8.00447572 |\n|        ... |         ... |\n| 3.79175484 | -2.36805619 |\n| 0.36484517 |  0.23498327 |\n| 5.49169112 | -3.83793008 |\n| 5.27903869 | -4.46652138 |\n| 7.64151660 |  7.42103800 |\n| 5.89869906 | -2.24434114 |\n| 9.76876450 | -3.21202467 |\n| 5.67942172 | -3.09655115 |\n| 8.09594125 |  7.91889526 |\n| 4.36540394 | -4.10175984 |\n| 1.52754849 |  1.55223996 |\n {:model-type :scicloj.ml.tribuo/regression, :tribuo-components [{:name \"cart\", :type \"org.tribuo.regression.rtree.CARTRegressionTrainer\", :properties {:maxDepth \"8\"}}], :tribuo-trainer-name \"cart\"}]",
-  :created-at "2026-02-06T14:50:51.021750533Z"}
+  :created-at "2026-02-06T16:40:57.633255098Z"}
  {:path
   "/tmp/pocket-regression/.cache/9d/(pocket-book.regression-experiments⁄make-regression-data pocket-book.regression-experiments⁄nonlinear-fn 500 1.0 42)",
   :id
@@ -953,7 +984,7 @@ Let's see what we accumulated:
   :fn-name "pocket-book.regression-experiments/make-regression-data",
   :args-str
   "[pocket-book.regression-experiments/nonlinear-fn 500 1.0 42]",
-  :created-at "2026-02-06T14:50:51.034949577Z"}
+  :created-at "2026-02-06T16:40:57.646179718Z"}
  {:path
   "/tmp/pocket-regression/.cache/81/8123a8081b55db9a44d4af2ba2a12356d96f4ad2",
   :id
@@ -961,7 +992,7 @@ Let's see what we accumulated:
   :fn-name "pocket-book.regression-experiments/prepare-features",
   :args-str
   "[Group: 0 [167 2]:\n\n|         :x |          :y |\n|-----------:|------------:|\n| 9.16293775 |  2.16013861 |\n| 2.88190176 | -0.59619577 |\n| 2.80291741 |  0.88661475 |\n| 3.03686968 |  1.46921586 |\n| 5.62533957 | -1.17623631 |\n| 1.26257823 | -0.11831663 |\n| 0.31418239 |  0.65468207 |\n| 0.58603584 |  0.35343867 |\n| 4.95769400 | -4.41349140 |\n| 8.37403433 |  8.21022766 |\n|        ... |         ... |\n| 6.99858645 |  4.95689480 |\n| 0.85035907 |  1.51711566 |\n| 7.09263718 |  6.43787659 |\n| 5.76735419 | -2.28353203 |\n| 5.38718689 | -7.07152452 |\n| 5.37393928 | -4.23208731 |\n| 3.08719455 |  0.29024248 |\n| 9.88548992 | -4.27717898 |\n| 4.23201682 | -3.41304673 |\n| 5.87427382 | -1.35785431 |\n| 3.39747109 |  0.22013912 |\n :raw]",
-  :created-at "2026-02-06T14:50:51.037613622Z"}
+  :created-at "2026-02-06T16:40:57.649140119Z"}
  {:path
   "/tmp/pocket-regression/.cache/81/814b7f92cbeeca39e2a0705bbf5da263b9cd4080",
   :id
@@ -969,7 +1000,7 @@ Let's see what we accumulated:
   :fn-name "pocket-book.regression-experiments/prepare-features",
   :args-str
   "[Group: 0 [167 2]:\n\n|         :x |          :y |\n|-----------:|------------:|\n| 9.16293775 |  2.26602135 |\n| 2.88190176 |  0.07191211 |\n| 2.80291741 |  0.90892505 |\n| 3.03686968 |  0.89333245 |\n| 5.62533957 | -2.30782265 |\n| 1.26257823 |  0.54238171 |\n| 0.31418239 |  0.37588834 |\n| 0.58603584 |  0.33877661 |\n| 4.95769400 | -4.61138419 |\n| 8.37403433 |  7.73857800 |\n|        ... |         ... |\n| 6.99858645 |  4.77370474 |\n| 0.85035907 |  1.07808762 |\n| 7.09263718 |  5.78615070 |\n| 5.76735419 | -2.56416279 |\n| 5.38718689 | -5.63900951 |\n| 5.37393928 | -4.23617224 |\n| 3.08719455 |  0.22904859 |\n| 9.88548992 | -4.33606446 |\n| 4.23201682 | -3.58304830 |\n| 5.87427382 | -1.84676450 |\n| 3.39747109 | -0.31987249 |\n :raw]",
-  :created-at "2026-02-06T14:50:50.851831203Z"}
+  :created-at "2026-02-06T16:40:57.547125198Z"}
  {:path
   "/tmp/pocket-regression/.cache/0f/0f037ad9777237d9f8ea3b7d636a06b1ba40603a",
   :id
@@ -977,7 +1008,7 @@ Let's see what we accumulated:
   :fn-name "pocket-book.regression-experiments/prepare-features",
   :args-str
   "[Group: 0 [333 2]:\n\n|         :x |          :y |\n|-----------:|------------:|\n| 0.62212252 |  0.86298957 |\n| 5.63922880 | -3.31824591 |\n| 1.24912415 |  0.84502797 |\n| 1.52711743 |  1.49792721 |\n| 4.82231721 | -5.11365711 |\n| 5.16624213 | -4.91894727 |\n| 1.47898709 |  2.39650543 |\n| 7.20124675 |  5.85326554 |\n| 0.34521076 |  0.51279144 |\n| 7.94559627 |  8.37327886 |\n|        ... |         ... |\n| 3.79175484 | -2.65944882 |\n| 0.36484517 |  0.65420254 |\n| 5.49169112 | -3.56240281 |\n| 5.27903869 | -4.51681909 |\n| 7.64151660 |  7.22642959 |\n| 5.89869906 | -2.37170016 |\n| 9.76876450 | -2.88234307 |\n| 5.67942172 | -2.58490962 |\n| 8.09594125 |  8.15404050 |\n| 4.36540394 | -4.08785620 |\n| 1.52754849 |  1.65671909 |\n :quadratic]",
-  :created-at "2026-02-06T14:50:50.853043127Z"}
+  :created-at "2026-02-06T16:40:57.549003431Z"}
  {:path
   "/tmp/pocket-regression/.cache/1a/1a7954ea0b541c4206bfb2448fb7a375d8ed5307",
   :id
@@ -985,7 +1016,7 @@ Let's see what we accumulated:
   :fn-name "pocket-book.regression-experiments/prepare-features",
   :args-str
   "[Group: 0 [167 2]:\n\n|         :x |           :y |\n|-----------:|-------------:|\n| 9.16293775 |   1.31307669 |\n| 2.88190176 |  -5.94105877 |\n| 2.80291741 |   0.70813239 |\n| 3.03686968 |   6.07628314 |\n| 5.62533957 |   7.87645443 |\n| 1.26257823 |  -5.40390333 |\n| 0.31418239 |   2.88503191 |\n| 0.58603584 |   0.47073515 |\n| 4.95769400 |  -2.83034908 |\n| 8.37403433 |  11.98342493 |\n|        ... |          ... |\n| 6.99858645 |   6.42241529 |\n| 0.85035907 |   5.02933992 |\n| 7.09263718 |  11.65168374 |\n| 5.76735419 |  -0.03848598 |\n| 5.38718689 | -18.53164458 |\n| 5.37393928 |  -4.19940781 |\n| 3.08719455 |   0.77979356 |\n| 9.88548992 |  -3.80609514 |\n| 4.23201682 |  -2.05303415 |\n| 5.87427382 |   2.55342719 |\n| 3.39747109 |   4.54023195 |\n :raw]",
-  :created-at "2026-02-06T14:50:51.074847327Z"}
+  :created-at "2026-02-06T16:40:57.684746603Z"}
  {:path
   "/tmp/pocket-regression/.cache/b4/b466d21072b66d7d9907560dcf92d44dcc953178",
   :id
@@ -993,7 +1024,7 @@ Let's see what we accumulated:
   :fn-name "pocket-book.regression-experiments/train-model",
   :args-str
   "[Group: 0 [333 3]:\n\n|         :x |          :y |         :x2 |\n|-----------:|------------:|------------:|\n| 0.62212252 |  0.86298957 |  0.38703643 |\n| 5.63922880 | -3.31824591 | 31.80090150 |\n| 1.24912415 |  0.84502797 |  1.56031114 |\n| 1.52711743 |  1.49792721 |  2.33208765 |\n| 4.82231721 | -5.11365711 | 23.25474331 |\n| 5.16624213 | -4.91894727 | 26.69005775 |\n| 1.47898709 |  2.39650543 |  2.18740283 |\n| 7.20124675 |  5.85326554 | 51.85795481 |\n| 0.34521076 |  0.51279144 |  0.11917047 |\n| 7.94559627 |  8.37327886 | 63.13250002 |\n|        ... |         ... |         ... |\n| 3.79175484 | -2.65944882 | 14.37740478 |\n| 0.36484517 |  0.65420254 |  0.13311200 |\n| 5.49169112 | -3.56240281 | 30.15867130 |\n| 5.27903869 | -4.51681909 | 27.86824953 |\n| 7.64151660 |  7.22642959 | 58.39277600 |\n| 5.89869906 | -2.37170016 | 34.79465062 |\n| 9.76876450 | -2.88234307 | 95.42875978 |\n| 5.67942172 | -2.58490962 | 32.25583106 |\n| 8.09594125 |  8.15404050 | 65.54426469 |\n| 4.36540394 | -4.08785620 | 19.05675156 |\n| 1.52754849 |  1.65671909 |  2.33340440 |\n {:model-type :scicloj.ml.tribuo/regression, :tribuo-components [{:name \"squared\", :type \"org.tribuo.regression.sgd.objectives.SquaredLoss\"} {:name \"trainer\", :type \"org.tribuo.regression.sgd.linear.LinearSGDTrainer\", :properties {:objective \"squared\", :epochs \"50\", :loggingInterval \"10000\"}}], :tribuo-trainer-name \"trainer\"}]",
-  :created-at "2026-02-06T14:50:50.893902913Z"}
+  :created-at "2026-02-06T16:40:57.574074954Z"}
  {:path
   "/tmp/pocket-regression/.cache/b4/b495281c2fec89ac83b74bdccf90ca43fe58b53c",
   :id
@@ -1001,7 +1032,7 @@ Let's see what we accumulated:
   :fn-name "pocket-book.regression-experiments/train-model",
   :args-str
   "[Group: 0 [333 4]:\n\n|         :x |          :y |      :sin-x |      :cos-x |\n|-----------:|------------:|------------:|------------:|\n| 0.62212252 |  0.86298957 |  0.58276133 |  0.81264336 |\n| 5.63922880 | -3.31824591 | -0.60036425 |  0.79972668 |\n| 1.24912415 |  0.84502797 |  0.94870808 |  0.31615341 |\n| 1.52711743 |  1.49792721 |  0.99904623 |  0.04366501 |\n| 4.82231721 | -5.11365711 | -0.99396397 |  0.10970697 |\n| 5.16624213 | -4.91894727 | -0.89876443 |  0.43843185 |\n| 1.47898709 |  2.39650543 |  0.99578849 |  0.09168031 |\n| 7.20124675 |  5.85326554 |  0.79442571 |  0.60736133 |\n| 0.34521076 |  0.51279144 |  0.33839501 |  0.94100415 |\n| 7.94559627 |  8.37327886 |  0.99580631 | -0.09148653 |\n|        ... |         ... |         ... |         ... |\n| 3.79175484 | -2.65944882 | -0.60531551 | -0.79598563 |\n| 0.36484517 |  0.65420254 |  0.35680466 |  0.93417902 |\n| 5.49169112 | -3.56240281 | -0.71140416 |  0.70278313 |\n| 5.27903869 | -4.51681909 | -0.84370417 |  0.53680842 |\n| 7.64151660 |  7.22642959 |  0.97751408 |  0.21087014 |\n| 5.89869906 | -2.37170016 | -0.37508294 |  0.92699126 |\n| 9.76876450 | -2.88234307 | -0.33724276 | -0.94141772 |\n| 5.67942172 | -2.58490962 | -0.56774469 |  0.82320469 |\n| 8.09594125 |  8.15404050 |  0.97087030 | -0.23960562 |\n| 4.36540394 | -4.08785620 | -0.94040226 | -0.34006408 |\n| 1.52754849 |  1.65671909 |  0.99906496 |  0.04323435 |\n {:model-type :scicloj.ml.tribuo/regression, :tribuo-components [{:name \"squared\", :type \"org.tribuo.regression.sgd.objectives.SquaredLoss\"} {:name \"trainer\", :type \"org.tribuo.regression.sgd.linear.LinearSGDTrainer\", :properties {:objective \"squared\", :epochs \"50\", :loggingInterval \"10000\"}}], :tribuo-trainer-name \"trainer\"}]",
-  :created-at "2026-02-06T14:50:50.906479067Z"}
+  :created-at "2026-02-06T16:40:57.584079524Z"}
  {:path
   "/tmp/pocket-regression/.cache/b9/b9b8fdba861a647300c0cb0f18f877843a3f1f40",
   :id
@@ -1009,7 +1040,7 @@ Let's see what we accumulated:
   :fn-name "pocket-book.regression-experiments/train-model",
   :args-str
   "[Group: 0 [333 3]:\n\n|         :x |          :y |         :x2 |\n|-----------:|------------:|------------:|\n| 0.62212252 |  0.86298957 |  0.38703643 |\n| 5.63922880 | -3.31824591 | 31.80090150 |\n| 1.24912415 |  0.84502797 |  1.56031114 |\n| 1.52711743 |  1.49792721 |  2.33208765 |\n| 4.82231721 | -5.11365711 | 23.25474331 |\n| 5.16624213 | -4.91894727 | 26.69005775 |\n| 1.47898709 |  2.39650543 |  2.18740283 |\n| 7.20124675 |  5.85326554 | 51.85795481 |\n| 0.34521076 |  0.51279144 |  0.11917047 |\n| 7.94559627 |  8.37327886 | 63.13250002 |\n|        ... |         ... |         ... |\n| 3.79175484 | -2.65944882 | 14.37740478 |\n| 0.36484517 |  0.65420254 |  0.13311200 |\n| 5.49169112 | -3.56240281 | 30.15867130 |\n| 5.27903869 | -4.51681909 | 27.86824953 |\n| 7.64151660 |  7.22642959 | 58.39277600 |\n| 5.89869906 | -2.37170016 | 34.79465062 |\n| 9.76876450 | -2.88234307 | 95.42875978 |\n| 5.67942172 | -2.58490962 | 32.25583106 |\n| 8.09594125 |  8.15404050 | 65.54426469 |\n| 4.36540394 | -4.08785620 | 19.05675156 |\n| 1.52754849 |  1.65671909 |  2.33340440 |\n {:model-type :scicloj.ml.tribuo/regression, :tribuo-components [{:name \"cart\", :type \"org.tribuo.regression.rtree.CARTRegressionTrainer\", :properties {:maxDepth \"8\"}}], :tribuo-trainer-name \"cart\"}]",
-  :created-at "2026-02-06T14:50:50.900338243Z"}
+  :created-at "2026-02-06T16:40:57.579530097Z"}
  {:path
   "/tmp/pocket-regression/.cache/fe/(pocket-book.regression-experiments⁄make-regression-data pocket-book.regression-experiments⁄nonlinear-fn 500 2.0 42)",
   :id
@@ -1017,7 +1048,7 @@ Let's see what we accumulated:
   :fn-name "pocket-book.regression-experiments/make-regression-data",
   :args-str
   "[pocket-book.regression-experiments/nonlinear-fn 500 2.0 42]",
-  :created-at "2026-02-06T14:50:51.052764257Z"}
+  :created-at "2026-02-06T16:40:57.663996009Z"}
  {:path
   "/tmp/pocket-regression/.cache/5a/5a174d67506657a04fe5d51ea1857f2e14fd9aa0",
   :id
@@ -1025,7 +1056,7 @@ Let's see what we accumulated:
   :fn-name "pocket-book.regression-experiments/train-model",
   :args-str
   "[Group: 0 [333 5]:\n\n|         :x |          :y |         :x2 |      :sin-x |      :cos-x |\n|-----------:|------------:|------------:|------------:|------------:|\n| 0.62212252 |  1.36343020 |  0.38703643 |  0.58276133 |  0.81264336 |\n| 5.63922880 | -3.25090043 | 31.80090150 | -0.60036425 |  0.79972668 |\n| 1.24912415 |  0.50500177 |  1.56031114 |  0.94870808 |  0.31615341 |\n| 1.52711743 |  1.47019350 |  2.33208765 |  0.99904623 |  0.04366501 |\n| 4.82231721 | -5.43410464 | 23.25474331 | -0.99396397 |  0.10970697 |\n| 5.16624213 | -5.19465985 | 26.69005775 | -0.89876443 |  0.43843185 |\n| 1.47898709 |  3.32025253 |  2.18740283 |  0.99578849 |  0.09168031 |\n| 7.20124675 |  5.98567551 | 51.85795481 |  0.79442571 |  0.60736133 |\n| 0.34521076 |  0.90876527 |  0.11917047 |  0.33839501 |  0.94100415 |\n| 7.94559627 |  8.83428279 | 63.13250002 |  0.99580631 | -0.09148653 |\n|        ... |         ... |         ... |         ... |         ... |\n| 3.79175484 | -3.02368961 | 14.37740478 | -0.60531551 | -0.79598563 |\n| 0.36484517 |  1.17822663 |  0.13311200 |  0.35680466 |  0.93417902 |\n| 5.49169112 | -3.21799372 | 30.15867130 | -0.71140416 |  0.70278313 |\n| 5.27903869 | -4.57969122 | 27.86824953 | -0.84370417 |  0.53680842 |\n| 7.64151660 |  6.98316909 | 58.39277600 |  0.97751408 |  0.21087014 |\n| 5.89869906 | -2.53089892 | 34.79465062 | -0.37508294 |  0.92699126 |\n| 9.76876450 | -2.47024106 | 95.42875978 | -0.33724276 | -0.94141772 |\n| 5.67942172 | -1.94535772 | 32.25583106 | -0.56774469 |  0.82320469 |\n| 8.09594125 |  8.44797205 | 65.54426469 |  0.97087030 | -0.23960562 |\n| 4.36540394 | -4.07047665 | 19.05675156 | -0.94040226 | -0.34006408 |\n| 1.52754849 |  1.78731800 |  2.33340440 |  0.99906496 |  0.04323435 |\n {:model-type :scicloj.ml.tribuo/regression, :tribuo-components [{:name \"squared\", :type \"org.tribuo.regression.sgd.objectives.SquaredLoss\"} {:name \"trainer\", :type \"org.tribuo.regression.sgd.linear.LinearSGDTrainer\", :properties {:objective \"squared\", :epochs \"50\", :loggingInterval \"10000\"}}], :tribuo-trainer-name \"trainer\"}]",
-  :created-at "2026-02-06T14:50:51.049052498Z"}
+  :created-at "2026-02-06T16:40:57.659981604Z"}
  {:path
   "/tmp/pocket-regression/.cache/fc/(pocket-book.regression-experiments⁄make-regression-data pocket-book.regression-experiments⁄nonlinear-fn 500 5.0 42)",
   :id
@@ -1033,7 +1064,7 @@ Let's see what we accumulated:
   :fn-name "pocket-book.regression-experiments/make-regression-data",
   :args-str
   "[pocket-book.regression-experiments/nonlinear-fn 500 5.0 42]",
-  :created-at "2026-02-06T14:50:51.072353620Z"}
+  :created-at "2026-02-06T16:40:57.682095902Z"}
  {:path
   "/tmp/pocket-regression/.cache/70/70b4b870d8d3c2870558dcf2bee4bcf3ec586847",
   :id
@@ -1041,7 +1072,7 @@ Let's see what we accumulated:
   :fn-name "pocket-book.regression-experiments/prepare-features",
   :args-str
   "[Group: 0 [333 2]:\n\n|         :x |          :y |\n|-----------:|------------:|\n| 0.62212252 |  2.36431145 |\n| 5.63922880 | -3.11620946 |\n| 1.24912415 | -0.17505064 |\n| 1.52711743 |  1.41472609 |\n| 4.82231721 | -6.07499970 |\n| 5.16624213 | -5.74608501 |\n| 1.47898709 |  5.16774673 |\n| 7.20124675 |  6.25049544 |\n| 0.34521076 |  1.70071294 |\n| 7.94559627 |  9.75629066 |\n|        ... |         ... |\n| 3.79175484 | -3.75217120 |\n| 0.36484517 |  2.22627481 |\n| 5.49169112 | -2.52917553 |\n| 5.27903869 | -4.70543549 |\n| 7.64151660 |  6.49664807 |\n| 5.89869906 | -2.84929646 |\n| 9.76876450 | -1.64603706 |\n| 5.67942172 | -0.66625392 |\n| 8.09594125 |  9.03583515 |\n| 4.36540394 | -4.03571754 |\n| 1.52754849 |  2.04851583 |\n :poly+trig]",
-  :created-at "2026-02-06T14:50:51.056487550Z"}
+  :created-at "2026-02-06T16:40:57.668329044Z"}
  {:path
   "/tmp/pocket-regression/.cache/a2/a2a4c71f2466bf0b2ee01fd4f832b01f7dedcd20",
   :id
@@ -1049,7 +1080,7 @@ Let's see what we accumulated:
   :fn-name "pocket-book.regression-experiments/prepare-features",
   :args-str
   "[Group: 0 [333 2]:\n\n|         :x |          :y |\n|-----------:|------------:|\n| 0.62212252 |  5.36695519 |\n| 5.63922880 | -2.71213657 |\n| 1.24912415 | -2.21520786 |\n| 1.52711743 |  1.24832387 |\n| 4.82231721 | -7.99768489 |\n| 5.16624213 | -7.40036049 |\n| 1.47898709 | 10.71022933 |\n| 7.20124675 |  7.04495523 |\n| 0.34521076 |  4.07655595 |\n| 7.94559627 | 12.52231425 |\n|        ... |         ... |\n| 3.79175484 | -5.93761595 |\n| 0.36484517 |  5.37041934 |\n| 5.49169112 | -0.46272098 |\n| 5.27903869 | -5.08266830 |\n| 7.64151660 |  5.03708502 |\n| 5.89869906 | -3.80448907 |\n| 9.76876450 |  0.82657496 |\n| 5.67942172 |  3.17105750 |\n| 8.09594125 | 10.79942447 |\n| 4.36540394 | -3.93144023 |\n| 1.52754849 |  2.83210931 |\n :raw]",
-  :created-at "2026-02-06T14:50:51.073638221Z"}
+  :created-at "2026-02-06T16:40:57.683560231Z"}
  {:path
   "/tmp/pocket-regression/.cache/2e/2e07b8116092fcbe2031f24312ff9a27079005dc",
   :id
@@ -1057,7 +1088,7 @@ Let's see what we accumulated:
   :fn-name "pocket-book.regression-experiments/prepare-features",
   :args-str
   "[Group: 0 [333 2]:\n\n|         :x |          :y |\n|-----------:|------------:|\n| 0.62212252 |  1.36343020 |\n| 5.63922880 | -3.25090043 |\n| 1.24912415 |  0.50500177 |\n| 1.52711743 |  1.47019350 |\n| 4.82231721 | -5.43410464 |\n| 5.16624213 | -5.19465985 |\n| 1.47898709 |  3.32025253 |\n| 7.20124675 |  5.98567551 |\n| 0.34521076 |  0.90876527 |\n| 7.94559627 |  8.83428279 |\n|        ... |         ... |\n| 3.79175484 | -3.02368961 |\n| 0.36484517 |  1.17822663 |\n| 5.49169112 | -3.21799372 |\n| 5.27903869 | -4.57969122 |\n| 7.64151660 |  6.98316909 |\n| 5.89869906 | -2.53089892 |\n| 9.76876450 | -2.47024106 |\n| 5.67942172 | -1.94535772 |\n| 8.09594125 |  8.44797205 |\n| 4.36540394 | -4.07047665 |\n| 1.52754849 |  1.78731800 |\n :poly+trig]",
-  :created-at "2026-02-06T14:50:51.038758668Z"}
+  :created-at "2026-02-06T16:40:57.650509817Z"}
  {:path
   "/tmp/pocket-regression/.cache/2e/2e359e762a12120cb8ac57c93359aeb2fffa5fd7",
   :id
@@ -1065,7 +1096,7 @@ Let's see what we accumulated:
   :fn-name "pocket-book.regression-experiments/train-model",
   :args-str
   "[Group: 0 [333 4]:\n\n|         :x |          :y |      :sin-x |      :cos-x |\n|-----------:|------------:|------------:|------------:|\n| 0.62212252 |  0.86298957 |  0.58276133 |  0.81264336 |\n| 5.63922880 | -3.31824591 | -0.60036425 |  0.79972668 |\n| 1.24912415 |  0.84502797 |  0.94870808 |  0.31615341 |\n| 1.52711743 |  1.49792721 |  0.99904623 |  0.04366501 |\n| 4.82231721 | -5.11365711 | -0.99396397 |  0.10970697 |\n| 5.16624213 | -4.91894727 | -0.89876443 |  0.43843185 |\n| 1.47898709 |  2.39650543 |  0.99578849 |  0.09168031 |\n| 7.20124675 |  5.85326554 |  0.79442571 |  0.60736133 |\n| 0.34521076 |  0.51279144 |  0.33839501 |  0.94100415 |\n| 7.94559627 |  8.37327886 |  0.99580631 | -0.09148653 |\n|        ... |         ... |         ... |         ... |\n| 3.79175484 | -2.65944882 | -0.60531551 | -0.79598563 |\n| 0.36484517 |  0.65420254 |  0.35680466 |  0.93417902 |\n| 5.49169112 | -3.56240281 | -0.71140416 |  0.70278313 |\n| 5.27903869 | -4.51681909 | -0.84370417 |  0.53680842 |\n| 7.64151660 |  7.22642959 |  0.97751408 |  0.21087014 |\n| 5.89869906 | -2.37170016 | -0.37508294 |  0.92699126 |\n| 9.76876450 | -2.88234307 | -0.33724276 | -0.94141772 |\n| 5.67942172 | -2.58490962 | -0.56774469 |  0.82320469 |\n| 8.09594125 |  8.15404050 |  0.97087030 | -0.23960562 |\n| 4.36540394 | -4.08785620 | -0.94040226 | -0.34006408 |\n| 1.52754849 |  1.65671909 |  0.99906496 |  0.04323435 |\n {:model-type :scicloj.ml.tribuo/regression, :tribuo-components [{:name \"cart\", :type \"org.tribuo.regression.rtree.CARTRegressionTrainer\", :properties {:maxDepth \"8\"}}], :tribuo-trainer-name \"cart\"}]",
-  :created-at "2026-02-06T14:50:50.919282264Z"}
+  :created-at "2026-02-06T16:40:57.590220327Z"}
  {:path
   "/tmp/pocket-regression/.cache/85/(pocket-book.regression-experiments⁄make-regression-data pocket-book.regression-experiments⁄nonlinear-fn 500 0.1 42)",
   :id
@@ -1073,7 +1104,7 @@ Let's see what we accumulated:
   :fn-name "pocket-book.regression-experiments/make-regression-data",
   :args-str
   "[pocket-book.regression-experiments/nonlinear-fn 500 0.1 42]",
-  :created-at "2026-02-06T14:50:51.010458087Z"}
+  :created-at "2026-02-06T16:40:57.621368587Z"}
  {:path
   "/tmp/pocket-regression/.cache/84/841f83eedde49d82b34ab2a1b3d90924c7920e42",
   :id
@@ -1081,7 +1112,7 @@ Let's see what we accumulated:
   :fn-name "pocket-book.regression-experiments/prepare-features",
   :args-str
   "[Group: 0 [167 2]:\n\n|         :x |          :y |\n|-----------:|------------:|\n| 9.16293775 |  1.94837313 |\n| 2.88190176 | -1.93241152 |\n| 2.80291741 |  0.84199416 |\n| 3.03686968 |  2.62098268 |\n| 5.62533957 |  1.08693638 |\n| 1.26257823 | -1.43971330 |\n| 0.31418239 |  1.21226953 |\n| 0.58603584 |  0.38276279 |\n| 4.95769400 | -4.01770582 |\n| 8.37403433 |  9.15352697 |\n|        ... |         ... |\n| 6.99858645 |  5.32327492 |\n| 0.85035907 |  2.39517172 |\n| 7.09263718 |  7.74132838 |\n| 5.76735419 | -1.72227052 |\n| 5.38718689 | -9.93655453 |\n| 5.37393928 | -4.22391743 |\n| 3.08719455 |  0.41263025 |\n| 9.88548992 | -4.15940802 |\n| 4.23201682 | -3.07304359 |\n| 5.87427382 | -0.38003394 |\n| 3.39747109 |  1.30016232 |\n :raw]",
-  :created-at "2026-02-06T14:50:51.055310904Z"}
+  :created-at "2026-02-06T16:40:57.667104062Z"}
  {:path
   "/tmp/pocket-regression/.cache/2b/2b096ea735b936b51d8aeedcb2b49152035db1f5",
   :id
@@ -1089,7 +1120,7 @@ Let's see what we accumulated:
   :fn-name "pocket-book.regression-experiments/train-model",
   :args-str
   "[Group: 0 [333 5]:\n\n|         :x |          :y |         :x2 |      :sin-x |      :cos-x |\n|-----------:|------------:|------------:|------------:|------------:|\n| 0.62212252 |  0.86298957 |  0.38703643 |  0.58276133 |  0.81264336 |\n| 5.63922880 | -3.31824591 | 31.80090150 | -0.60036425 |  0.79972668 |\n| 1.24912415 |  0.84502797 |  1.56031114 |  0.94870808 |  0.31615341 |\n| 1.52711743 |  1.49792721 |  2.33208765 |  0.99904623 |  0.04366501 |\n| 4.82231721 | -5.11365711 | 23.25474331 | -0.99396397 |  0.10970697 |\n| 5.16624213 | -4.91894727 | 26.69005775 | -0.89876443 |  0.43843185 |\n| 1.47898709 |  2.39650543 |  2.18740283 |  0.99578849 |  0.09168031 |\n| 7.20124675 |  5.85326554 | 51.85795481 |  0.79442571 |  0.60736133 |\n| 0.34521076 |  0.51279144 |  0.11917047 |  0.33839501 |  0.94100415 |\n| 7.94559627 |  8.37327886 | 63.13250002 |  0.99580631 | -0.09148653 |\n|        ... |         ... |         ... |         ... |         ... |\n| 3.79175484 | -2.65944882 | 14.37740478 | -0.60531551 | -0.79598563 |\n| 0.36484517 |  0.65420254 |  0.13311200 |  0.35680466 |  0.93417902 |\n| 5.49169112 | -3.56240281 | 30.15867130 | -0.71140416 |  0.70278313 |\n| 5.27903869 | -4.51681909 | 27.86824953 | -0.84370417 |  0.53680842 |\n| 7.64151660 |  7.22642959 | 58.39277600 |  0.97751408 |  0.21087014 |\n| 5.89869906 | -2.37170016 | 34.79465062 | -0.37508294 |  0.92699126 |\n| 9.76876450 | -2.88234307 | 95.42875978 | -0.33724276 | -0.94141772 |\n| 5.67942172 | -2.58490962 | 32.25583106 | -0.56774469 |  0.82320469 |\n| 8.09594125 |  8.15404050 | 65.54426469 |  0.97087030 | -0.23960562 |\n| 4.36540394 | -4.08785620 | 19.05675156 | -0.94040226 | -0.34006408 |\n| 1.52754849 |  1.65671909 |  2.33340440 |  0.99906496 |  0.04323435 |\n {:model-type :scicloj.ml.tribuo/regression, :tribuo-components [{:name \"cart\", :type \"org.tribuo.regression.rtree.CARTRegressionTrainer\", :properties {:maxDepth \"8\"}}], :tribuo-trainer-name \"cart\"}]",
-  :created-at "2026-02-06T14:50:50.987197809Z"}
+  :created-at "2026-02-06T16:40:57.602721558Z"}
  {:path
   "/tmp/pocket-regression/.cache/4f/4f8f1e5f8041b5ebc798018ca2643c87747df1e2",
   :id
@@ -1097,7 +1128,7 @@ Let's see what we accumulated:
   :fn-name "pocket-book.regression-experiments/prepare-features",
   :args-str
   "[Group: 0 [333 2]:\n\n|         :x |          :y |\n|-----------:|------------:|\n| 0.62212252 |  0.46263707 |\n| 5.63922880 | -3.37212229 |\n| 1.24912415 |  1.11704893 |\n| 1.52711743 |  1.52011417 |\n| 4.82231721 | -4.85729909 |\n| 5.16624213 | -4.69837720 |\n| 1.47898709 |  1.65750775 |\n| 7.20124675 |  5.74733757 |\n| 0.34521076 |  0.19601237 |\n| 7.94559627 |  8.00447572 |\n|        ... |         ... |\n| 3.79175484 | -2.36805619 |\n| 0.36484517 |  0.23498327 |\n| 5.49169112 | -3.83793008 |\n| 5.27903869 | -4.46652138 |\n| 7.64151660 |  7.42103800 |\n| 5.89869906 | -2.24434114 |\n| 9.76876450 | -3.21202467 |\n| 5.67942172 | -3.09655115 |\n| 8.09594125 |  7.91889526 |\n| 4.36540394 | -4.10175984 |\n| 1.52754849 |  1.55223996 |\n :raw]",
-  :created-at "2026-02-06T14:50:51.012799948Z"}
+  :created-at "2026-02-06T16:40:57.623646181Z"}
  {:path
   "/tmp/pocket-regression/.cache/a5/a5a9068b3932a757b86ef9d07718b2a6b9fbc12b",
   :id
@@ -1105,7 +1136,7 @@ Let's see what we accumulated:
   :fn-name "pocket-book.regression-experiments/train-model",
   :args-str
   "[Group: 0 [333 2]:\n\n|         :x |          :y |\n|-----------:|------------:|\n| 0.62212252 |  0.86298957 |\n| 5.63922880 | -3.31824591 |\n| 1.24912415 |  0.84502797 |\n| 1.52711743 |  1.49792721 |\n| 4.82231721 | -5.11365711 |\n| 5.16624213 | -4.91894727 |\n| 1.47898709 |  2.39650543 |\n| 7.20124675 |  5.85326554 |\n| 0.34521076 |  0.51279144 |\n| 7.94559627 |  8.37327886 |\n|        ... |         ... |\n| 3.79175484 | -2.65944882 |\n| 0.36484517 |  0.65420254 |\n| 5.49169112 | -3.56240281 |\n| 5.27903869 | -4.51681909 |\n| 7.64151660 |  7.22642959 |\n| 5.89869906 | -2.37170016 |\n| 9.76876450 | -2.88234307 |\n| 5.67942172 | -2.58490962 |\n| 8.09594125 |  8.15404050 |\n| 4.36540394 | -4.08785620 |\n| 1.52754849 |  1.65671909 |\n {:model-type :scicloj.ml.tribuo/regression, :tribuo-components [{:name \"squared\", :type \"org.tribuo.regression.sgd.objectives.SquaredLoss\"} {:name \"trainer\", :type \"org.tribuo.regression.sgd.linear.LinearSGDTrainer\", :properties {:objective \"squared\", :epochs \"50\", :loggingInterval \"10000\"}}], :tribuo-trainer-name \"trainer\"}]",
-  :created-at "2026-02-06T14:50:50.869757548Z"}
+  :created-at "2026-02-06T16:40:57.565253031Z"}
  {:path
   "/tmp/pocket-regression/.cache/b5/b5b61cae3a24b450305c624b6506714fe5b334a6",
   :id
@@ -1113,7 +1144,7 @@ Let's see what we accumulated:
   :fn-name "pocket-book.regression-experiments/train-model",
   :args-str
   "[Group: 0 [333 2]:\n\n|         :x |          :y |\n|-----------:|------------:|\n| 0.62212252 |  0.86298957 |\n| 5.63922880 | -3.31824591 |\n| 1.24912415 |  0.84502797 |\n| 1.52711743 |  1.49792721 |\n| 4.82231721 | -5.11365711 |\n| 5.16624213 | -4.91894727 |\n| 1.47898709 |  2.39650543 |\n| 7.20124675 |  5.85326554 |\n| 0.34521076 |  0.51279144 |\n| 7.94559627 |  8.37327886 |\n|        ... |         ... |\n| 3.79175484 | -2.65944882 |\n| 0.36484517 |  0.65420254 |\n| 5.49169112 | -3.56240281 |\n| 5.27903869 | -4.51681909 |\n| 7.64151660 |  7.22642959 |\n| 5.89869906 | -2.37170016 |\n| 9.76876450 | -2.88234307 |\n| 5.67942172 | -2.58490962 |\n| 8.09594125 |  8.15404050 |\n| 4.36540394 | -4.08785620 |\n| 1.52754849 |  1.65671909 |\n {:model-type :scicloj.ml.tribuo/regression, :tribuo-components [{:name \"cart\", :type \"org.tribuo.regression.rtree.CARTRegressionTrainer\", :properties {:maxDepth \"8\"}}], :tribuo-trainer-name \"cart\"}]",
-  :created-at "2026-02-06T14:50:50.886059213Z"}
+  :created-at "2026-02-06T16:40:57.569723356Z"}
  {:path
   "/tmp/pocket-regression/.cache/b3/b34e159c0d337ebe112baf1948ad588f5f70b9c3",
   :id
@@ -1121,7 +1152,7 @@ Let's see what we accumulated:
   :fn-name "pocket-book.regression-experiments/prepare-features",
   :args-str
   "[Group: 0 [333 2]:\n\n|         :x |          :y |\n|-----------:|------------:|\n| 0.62212252 |  2.36431145 |\n| 5.63922880 | -3.11620946 |\n| 1.24912415 | -0.17505064 |\n| 1.52711743 |  1.41472609 |\n| 4.82231721 | -6.07499970 |\n| 5.16624213 | -5.74608501 |\n| 1.47898709 |  5.16774673 |\n| 7.20124675 |  6.25049544 |\n| 0.34521076 |  1.70071294 |\n| 7.94559627 |  9.75629066 |\n|        ... |         ... |\n| 3.79175484 | -3.75217120 |\n| 0.36484517 |  2.22627481 |\n| 5.49169112 | -2.52917553 |\n| 5.27903869 | -4.70543549 |\n| 7.64151660 |  6.49664807 |\n| 5.89869906 | -2.84929646 |\n| 9.76876450 | -1.64603706 |\n| 5.67942172 | -0.66625392 |\n| 8.09594125 |  9.03583515 |\n| 4.36540394 | -4.03571754 |\n| 1.52754849 |  2.04851583 |\n :raw]",
-  :created-at "2026-02-06T14:50:51.054109535Z"}
+  :created-at "2026-02-06T16:40:57.665680177Z"}
  {:path
   "/tmp/pocket-regression/.cache/d3/d316d52a6b67cf473e3f12ecd02d9fa06af1581a",
   :id
@@ -1129,7 +1160,7 @@ Let's see what we accumulated:
   :fn-name "pocket-book.regression-experiments/train-model",
   :args-str
   "[Group: 0 [333 2]:\n\n|         :x |          :y |\n|-----------:|------------:|\n| 0.62212252 |  1.36343020 |\n| 5.63922880 | -3.25090043 |\n| 1.24912415 |  0.50500177 |\n| 1.52711743 |  1.47019350 |\n| 4.82231721 | -5.43410464 |\n| 5.16624213 | -5.19465985 |\n| 1.47898709 |  3.32025253 |\n| 7.20124675 |  5.98567551 |\n| 0.34521076 |  0.90876527 |\n| 7.94559627 |  8.83428279 |\n|        ... |         ... |\n| 3.79175484 | -3.02368961 |\n| 0.36484517 |  1.17822663 |\n| 5.49169112 | -3.21799372 |\n| 5.27903869 | -4.57969122 |\n| 7.64151660 |  6.98316909 |\n| 5.89869906 | -2.53089892 |\n| 9.76876450 | -2.47024106 |\n| 5.67942172 | -1.94535772 |\n| 8.09594125 |  8.44797205 |\n| 4.36540394 | -4.07047665 |\n| 1.52754849 |  1.78731800 |\n {:model-type :scicloj.ml.tribuo/regression, :tribuo-components [{:name \"cart\", :type \"org.tribuo.regression.rtree.CARTRegressionTrainer\", :properties {:maxDepth \"8\"}}], :tribuo-trainer-name \"cart\"}]",
-  :created-at "2026-02-06T14:50:51.044236686Z"}
+  :created-at "2026-02-06T16:40:57.655515681Z"}
  {:path
   "/tmp/pocket-regression/.cache/19/193b1280a1e0e7274565423483d85ca043292773",
   :id
@@ -1137,7 +1168,7 @@ Let's see what we accumulated:
   :fn-name "pocket-book.regression-experiments/prepare-features",
   :args-str
   "[Group: 0 [167 2]:\n\n|         :x |          :y |\n|-----------:|------------:|\n| 9.16293775 |  2.35072755 |\n| 2.88190176 |  0.60639841 |\n| 2.80291741 |  0.92677328 |\n| 3.03686968 |  0.43262572 |\n| 5.62533957 | -3.21309172 |\n| 1.26257823 |  1.07094038 |\n| 0.31418239 |  0.15285335 |\n| 0.58603584 |  0.32704697 |\n| 4.95769400 | -4.76969842 |\n| 8.37403433 |  7.36125827 |\n|        ... |         ... |\n| 6.99858645 |  4.62715269 |\n| 0.85035907 |  0.72686520 |\n| 7.09263718 |  5.26476999 |\n| 5.76735419 | -2.78866739 |\n| 5.38718689 | -4.49299750 |\n| 5.37393928 | -4.23944019 |\n| 3.08719455 |  0.18009348 |\n| 9.88548992 | -4.38317284 |\n| 4.23201682 | -3.71904956 |\n| 5.87427382 | -2.23789265 |\n| 3.39747109 | -0.75188177 |\n :poly+trig]",
-  :created-at "2026-02-06T14:50:51.017257341Z"}
+  :created-at "2026-02-06T16:40:57.629246415Z"}
  {:path
   "/tmp/pocket-regression/.cache/19/19909f7ca027d7ae09a0cd5973835d1bf22ff6dd",
   :id
@@ -1145,7 +1176,7 @@ Let's see what we accumulated:
   :fn-name "pocket-book.regression-experiments/prepare-features",
   :args-str
   "[Group: 0 [167 2]:\n\n|         :x |          :y |\n|-----------:|------------:|\n| 9.16293775 |  2.16013861 |\n| 2.88190176 | -0.59619577 |\n| 2.80291741 |  0.88661475 |\n| 3.03686968 |  1.46921586 |\n| 5.62533957 | -1.17623631 |\n| 1.26257823 | -0.11831663 |\n| 0.31418239 |  0.65468207 |\n| 0.58603584 |  0.35343867 |\n| 4.95769400 | -4.41349140 |\n| 8.37403433 |  8.21022766 |\n|        ... |         ... |\n| 6.99858645 |  4.95689480 |\n| 0.85035907 |  1.51711566 |\n| 7.09263718 |  6.43787659 |\n| 5.76735419 | -2.28353203 |\n| 5.38718689 | -7.07152452 |\n| 5.37393928 | -4.23208731 |\n| 3.08719455 |  0.29024248 |\n| 9.88548992 | -4.27717898 |\n| 4.23201682 | -3.41304673 |\n| 5.87427382 | -1.35785431 |\n| 3.39747109 |  0.22013912 |\n :poly+trig]",
-  :created-at "2026-02-06T14:50:51.040153673Z"}
+  :created-at "2026-02-06T16:40:57.652004453Z"}
  {:path
   "/tmp/pocket-regression/.cache/1e/1e1b045b8f7e244dc4577808f6b5ab9860480623",
   :id
@@ -1153,7 +1184,7 @@ Let's see what we accumulated:
   :fn-name "pocket-book.regression-experiments/prepare-features",
   :args-str
   "[Group: 0 [333 2]:\n\n|         :x |          :y |\n|-----------:|------------:|\n| 0.62212252 |  0.86298957 |\n| 5.63922880 | -3.31824591 |\n| 1.24912415 |  0.84502797 |\n| 1.52711743 |  1.49792721 |\n| 4.82231721 | -5.11365711 |\n| 5.16624213 | -4.91894727 |\n| 1.47898709 |  2.39650543 |\n| 7.20124675 |  5.85326554 |\n| 0.34521076 |  0.51279144 |\n| 7.94559627 |  8.37327886 |\n|        ... |         ... |\n| 3.79175484 | -2.65944882 |\n| 0.36484517 |  0.65420254 |\n| 5.49169112 | -3.56240281 |\n| 5.27903869 | -4.51681909 |\n| 7.64151660 |  7.22642959 |\n| 5.89869906 | -2.37170016 |\n| 9.76876450 | -2.88234307 |\n| 5.67942172 | -2.58490962 |\n| 8.09594125 |  8.15404050 |\n| 4.36540394 | -4.08785620 |\n| 1.52754849 |  1.65671909 |\n :raw]",
-  :created-at "2026-02-06T14:50:50.850414092Z"}
+  :created-at "2026-02-06T16:40:57.545316499Z"}
  {:path
   "/tmp/pocket-regression/.cache/2f/2f802f333c7f35eaf20a3eea3829d9969114aba8",
   :id
@@ -1161,7 +1192,7 @@ Let's see what we accumulated:
   :fn-name "pocket-book.regression-experiments/prepare-features",
   :args-str
   "[Group: 0 [333 2]:\n\n|         :x |          :y |\n|-----------:|------------:|\n| 0.62212252 |  0.86298957 |\n| 5.63922880 | -3.31824591 |\n| 1.24912415 |  0.84502797 |\n| 1.52711743 |  1.49792721 |\n| 4.82231721 | -5.11365711 |\n| 5.16624213 | -4.91894727 |\n| 1.47898709 |  2.39650543 |\n| 7.20124675 |  5.85326554 |\n| 0.34521076 |  0.51279144 |\n| 7.94559627 |  8.37327886 |\n|        ... |         ... |\n| 3.79175484 | -2.65944882 |\n| 0.36484517 |  0.65420254 |\n| 5.49169112 | -3.56240281 |\n| 5.27903869 | -4.51681909 |\n| 7.64151660 |  7.22642959 |\n| 5.89869906 | -2.37170016 |\n| 9.76876450 | -2.88234307 |\n| 5.67942172 | -2.58490962 |\n| 8.09594125 |  8.15404050 |\n| 4.36540394 | -4.08785620 |\n| 1.52754849 |  1.65671909 |\n :poly+trig]",
-  :created-at "2026-02-06T14:50:50.859931842Z"}
+  :created-at "2026-02-06T16:40:57.556512182Z"}
  {:path
   "/tmp/pocket-regression/.cache/38/38261ff3df410b20754f11ecb85c81024d2bee4a",
   :id
@@ -1169,7 +1200,7 @@ Let's see what we accumulated:
   :fn-name "pocket-book.regression-experiments/train-model",
   :args-str
   "[Group: 0 [333 2]:\n\n|         :x |          :y |\n|-----------:|------------:|\n| 0.62212252 |  2.36431145 |\n| 5.63922880 | -3.11620946 |\n| 1.24912415 | -0.17505064 |\n| 1.52711743 |  1.41472609 |\n| 4.82231721 | -6.07499970 |\n| 5.16624213 | -5.74608501 |\n| 1.47898709 |  5.16774673 |\n| 7.20124675 |  6.25049544 |\n| 0.34521076 |  1.70071294 |\n| 7.94559627 |  9.75629066 |\n|        ... |         ... |\n| 3.79175484 | -3.75217120 |\n| 0.36484517 |  2.22627481 |\n| 5.49169112 | -2.52917553 |\n| 5.27903869 | -4.70543549 |\n| 7.64151660 |  6.49664807 |\n| 5.89869906 | -2.84929646 |\n| 9.76876450 | -1.64603706 |\n| 5.67942172 | -0.66625392 |\n| 8.09594125 |  9.03583515 |\n| 4.36540394 | -4.03571754 |\n| 1.52754849 |  2.04851583 |\n {:model-type :scicloj.ml.tribuo/regression, :tribuo-components [{:name \"cart\", :type \"org.tribuo.regression.rtree.CARTRegressionTrainer\", :properties {:maxDepth \"8\"}}], :tribuo-trainer-name \"cart\"}]",
-  :created-at "2026-02-06T14:50:51.063307006Z"}
+  :created-at "2026-02-06T16:40:57.673365148Z"}
  {:path
   "/tmp/pocket-regression/.cache/b0/b09ac36f5dd63602af082209483336591128f3a0",
   :id
@@ -1177,7 +1208,7 @@ Let's see what we accumulated:
   :fn-name "pocket-book.regression-experiments/prepare-features",
   :args-str
   "[Group: 0 [167 2]:\n\n|         :x |           :y |\n|-----------:|-------------:|\n| 9.16293775 |   1.31307669 |\n| 2.88190176 |  -5.94105877 |\n| 2.80291741 |   0.70813239 |\n| 3.03686968 |   6.07628314 |\n| 5.62533957 |   7.87645443 |\n| 1.26257823 |  -5.40390333 |\n| 0.31418239 |   2.88503191 |\n| 0.58603584 |   0.47073515 |\n| 4.95769400 |  -2.83034908 |\n| 8.37403433 |  11.98342493 |\n|        ... |          ... |\n| 6.99858645 |   6.42241529 |\n| 0.85035907 |   5.02933992 |\n| 7.09263718 |  11.65168374 |\n| 5.76735419 |  -0.03848598 |\n| 5.38718689 | -18.53164458 |\n| 5.37393928 |  -4.19940781 |\n| 3.08719455 |   0.77979356 |\n| 9.88548992 |  -3.80609514 |\n| 4.23201682 |  -2.05303415 |\n| 5.87427382 |   2.55342719 |\n| 3.39747109 |   4.54023195 |\n :poly+trig]",
-  :created-at "2026-02-06T14:50:51.078807059Z"}
+  :created-at "2026-02-06T16:40:57.687148460Z"}
  {:path
   "/tmp/pocket-regression/.cache/b2/b2a95d5ee59bf3de415cb26fa3d21df3af4f73af",
   :id
@@ -1185,7 +1216,7 @@ Let's see what we accumulated:
   :fn-name "pocket-book.regression-experiments/prepare-features",
   :args-str
   "[Group: 0 [167 2]:\n\n|         :x |          :y |\n|-----------:|------------:|\n| 9.16293775 |  2.35072755 |\n| 2.88190176 |  0.60639841 |\n| 2.80291741 |  0.92677328 |\n| 3.03686968 |  0.43262572 |\n| 5.62533957 | -3.21309172 |\n| 1.26257823 |  1.07094038 |\n| 0.31418239 |  0.15285335 |\n| 0.58603584 |  0.32704697 |\n| 4.95769400 | -4.76969842 |\n| 8.37403433 |  7.36125827 |\n|        ... |         ... |\n| 6.99858645 |  4.62715269 |\n| 0.85035907 |  0.72686520 |\n| 7.09263718 |  5.26476999 |\n| 5.76735419 | -2.78866739 |\n| 5.38718689 | -4.49299750 |\n| 5.37393928 | -4.23944019 |\n| 3.08719455 |  0.18009348 |\n| 9.88548992 | -4.38317284 |\n| 4.23201682 | -3.71904956 |\n| 5.87427382 | -2.23789265 |\n| 3.39747109 | -0.75188177 |\n :raw]",
-  :created-at "2026-02-06T14:50:51.014256993Z"}
+  :created-at "2026-02-06T16:40:57.625396611Z"}
  {:path
   "/tmp/pocket-regression/.cache/e2/e2a8ec25195e0f20af9f5cd4e45e6e761097ccb9",
   :id
@@ -1193,7 +1224,7 @@ Let's see what we accumulated:
   :fn-name "pocket-book.regression-experiments/prepare-features",
   :args-str
   "[Group: 0 [333 2]:\n\n|         :x |          :y |\n|-----------:|------------:|\n| 0.62212252 |  1.36343020 |\n| 5.63922880 | -3.25090043 |\n| 1.24912415 |  0.50500177 |\n| 1.52711743 |  1.47019350 |\n| 4.82231721 | -5.43410464 |\n| 5.16624213 | -5.19465985 |\n| 1.47898709 |  3.32025253 |\n| 7.20124675 |  5.98567551 |\n| 0.34521076 |  0.90876527 |\n| 7.94559627 |  8.83428279 |\n|        ... |         ... |\n| 3.79175484 | -3.02368961 |\n| 0.36484517 |  1.17822663 |\n| 5.49169112 | -3.21799372 |\n| 5.27903869 | -4.57969122 |\n| 7.64151660 |  6.98316909 |\n| 5.89869906 | -2.53089892 |\n| 9.76876450 | -2.47024106 |\n| 5.67942172 | -1.94535772 |\n| 8.09594125 |  8.44797205 |\n| 4.36540394 | -4.07047665 |\n| 1.52754849 |  1.78731800 |\n :raw]",
-  :created-at "2026-02-06T14:50:51.036368544Z"}]
+  :created-at "2026-02-06T16:40:57.647756566Z"}]
 
 ```
 :::
@@ -1214,6 +1245,41 @@ Here's what happens when you change something:
 | Re-run the whole notebook     | Nothing — all cached     |
 
 
+## What we learned
+
+This experiment revealed a clear story about the interplay between
+models, features, and noise:
+
+
+- **Feature engineering is decisive for linear models.** With raw
+  features, the linear model couldn't capture the nonlinear target
+  at all. Adding trigonometric features (sin, cos) — which match
+  the structure of the true function — dramatically improved it.
+  The model didn't get smarter; we gave it the right vocabulary.
+
+
+- **Decision trees are self-sufficient but fragile.** The CART model
+  achieved low error regardless of feature set, because it can
+  learn nonlinear splits on its own. But as noise increased, it
+  began fitting the noise rather than the signal — a classic
+  overfitting pattern.
+
+
+- **The crossover point matters.** At low noise, the tree wins. At
+  high noise, the well-featured linear model degrades more
+  gracefully. Knowing where this crossover happens is exactly the
+  kind of insight you get from systematic experimentation.
+
+
+- **Caching structures the workflow.** In this small example, each
+  step runs in milliseconds — caching isn't needed for speed. But
+  the pattern scales: with real datasets and expensive training,
+  the same pipeline structure ensures that only changed steps
+  recompute. Meanwhile, `compare-experiments` extracted the varying
+  parameters automatically, turning cached results into a
+  comparison table — useful at any scale.
+
+
 ## Cleanup
 
 
@@ -1228,7 +1294,7 @@ Here's what happens when you change something:
 ::: {.callout-note}
 ## OUT
 ```
-16:50:51.131 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-regression
+18:40:57.736 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-regression
 
 ```
 :::
@@ -1347,7 +1413,56 @@ normalize data, train, or evaluate. Pocket will wire them together.
 
 
 
-### Build the DAG
+### Build the DAG with mixed storage policies
+
+Not every step needs disk persistence. We use `caching-fn` with
+per-function storage policies:
+
+
+- **`:mem`** for cheap shared computations (stats, normalization) —
+  no disk I/O, but in-memory dedup ensures each runs only once
+
+- **`:mem+disk`** (default) for expensive steps (model training) —
+  persists across JVM sessions
+
+- **`:none`** for trivial steps (evaluation) — just tracks identity
+  in the DAG without any shared caching
+
+
+::: {.sourceClojure}
+```clojure
+(def c-compute-stats
+  (pocket/caching-fn #'compute-stats {:storage :mem}))
+```
+:::
+
+
+
+::: {.sourceClojure}
+```clojure
+(def c-normalize
+  (pocket/caching-fn #'normalize-with-stats {:storage :mem}))
+```
+:::
+
+
+
+::: {.sourceClojure}
+```clojure
+(def c-train
+  (pocket/caching-fn #'train-normalized-model))
+```
+:::
+
+
+
+::: {.sourceClojure}
+```clojure
+(def c-evaluate
+  (pocket/caching-fn #'evaluate-model {:storage :none}))
+```
+:::
+
 
 Generate fresh data for this demo:
 
@@ -1364,8 +1479,8 @@ Generate fresh data for this demo:
 ::: {.callout-note}
 ## OUT
 ```
-16:50:51.134 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/make-regression-data
-16:50:51.135 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/b3/(pocket-book.regression-experiments⁄make-regression-data pocket-book.regression-experiments⁄nonlinear-fn 200 0.3 99)
+18:40:57.739 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/make-regression-data
+18:40:57.740 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/b3/(pocket-book.regression-experiments⁄make-regression-data pocket-book.regression-experiments⁄nonlinear-fn 200 0.3 99)
 
 ```
 :::
@@ -1380,14 +1495,15 @@ Generate fresh data for this demo:
 :::
 
 
-The key insight: `stats-c` is a cached computation derived from
-training data only. Both preprocessing steps depend on it.
+Now wire the pipeline. The `stats-c` node is computed once
+(in memory) and feeds both preprocessing steps — a diamond
+dependency handled naturally.
 
 
 ::: {.sourceClojure}
 ```clojure
 (def stats-c
-  (pocket/cached #'compute-stats (:train dag-split)))
+  (c-compute-stats (:train dag-split)))
 ```
 :::
 
@@ -1396,7 +1512,7 @@ training data only. Both preprocessing steps depend on it.
 ::: {.sourceClojure}
 ```clojure
 (def train-norm-c
-  (pocket/cached #'normalize-with-stats (:train dag-split) stats-c))
+  (c-normalize (:train dag-split) stats-c))
 ```
 :::
 
@@ -1405,7 +1521,7 @@ training data only. Both preprocessing steps depend on it.
 ::: {.sourceClojure}
 ```clojure
 (def test-norm-c
-  (pocket/cached #'normalize-with-stats (:test dag-split) stats-c))
+  (c-normalize (:test dag-split) stats-c))
 ```
 :::
 
@@ -1414,7 +1530,7 @@ training data only. Both preprocessing steps depend on it.
 ::: {.sourceClojure}
 ```clojure
 (def model-c
-  (pocket/cached #'train-normalized-model train-norm-c cart-spec))
+  (c-train train-norm-c cart-spec))
 ```
 :::
 
@@ -1423,7 +1539,7 @@ training data only. Both preprocessing steps depend on it.
 ::: {.sourceClojure}
 ```clojure
 (def metrics-c
-  (pocket/cached #'evaluate-model test-norm-c model-c))
+  (c-evaluate test-norm-c model-c))
 ```
 :::
 
@@ -1740,21 +1856,16 @@ preprocessing steps:
 ::: {.callout-note}
 ## OUT
 ```
-16:50:51.141 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/evaluate-model
-16:50:51.141 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/normalize-with-stats
-16:50:51.141 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/compute-stats
+18:40:57.744 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.regression-experiments/normalize-with-stats
+18:40:57.745 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.regression-experiments/compute-stats
   Computing stats from training data...
-16:50:51.142 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/73/73ff8dec4eaa39c679e4cc5dde2c513e8de6511d
   Normalizing with stats: {:x-mean 5.1854666568361765, :x-std 2.7971350690806847}
-16:50:51.144 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/e1/e1777e205590010bd87a68e6f03ef86d6763792a
-16:50:51.144 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/train-normalized-model
-16:50:51.145 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/normalize-with-stats
+18:40:57.745 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/train-normalized-model
+18:40:57.746 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.regression-experiments/normalize-with-stats
   Normalizing with stats: {:x-mean 5.1854666568361765, :x-std 2.7971350690806847}
-16:50:51.147 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/d4/d451bf3a4a9cd2aa4dedc82224146af5e8ae7e0a
   Training model on normalized data...
-16:50:51.150 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/5b/5bb3dfe75d58a31e80fc1898122bddcc238c8dbe
+18:40:57.751 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/5b/5bb3dfe75d58a31e80fc1898122bddcc238c8dbe
   Evaluating model...
-16:50:51.153 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/8c/8c38a1372989da5a03485ee05d9b6842a706ef6b
 
 ```
 :::
@@ -1836,22 +1947,22 @@ Compare all experiments — only varying parameters are shown:
 ::: {.callout-note}
 ## OUT
 ```
-16:50:51.158 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/run-pipeline
-16:50:51.163 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/1a/(pocket-book.regression-experiments⁄run-pipeline {:feature-set :raw, :max-depth 4, :noise-sd 0.3})
-16:50:51.163 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/run-pipeline
-16:50:51.167 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/aa/(pocket-book.regression-experiments⁄run-pipeline {:feature-set :raw, :max-depth 8, :noise-sd 0.3})
-16:50:51.167 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/run-pipeline
-16:50:51.171 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/7f/(pocket-book.regression-experiments⁄run-pipeline {:feature-set :poly+trig, :max-depth 4, :noise-sd 0.3})
-16:50:51.171 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/run-pipeline
-16:50:51.176 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/0b/(pocket-book.regression-experiments⁄run-pipeline {:feature-set :poly+trig, :max-depth 8, :noise-sd 0.3})
-16:50:51.177 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/run-pipeline
-16:50:51.180 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/63/(pocket-book.regression-experiments⁄run-pipeline {:feature-set :raw, :max-depth 4, :noise-sd 0.5})
-16:50:51.180 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/run-pipeline
-16:50:51.183 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/1b/(pocket-book.regression-experiments⁄run-pipeline {:feature-set :raw, :max-depth 8, :noise-sd 0.5})
-16:50:51.183 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/run-pipeline
-16:50:51.188 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/f3/(pocket-book.regression-experiments⁄run-pipeline {:feature-set :poly+trig, :max-depth 4, :noise-sd 0.5})
-16:50:51.188 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/run-pipeline
-16:50:51.192 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/09/(pocket-book.regression-experiments⁄run-pipeline {:feature-set :poly+trig, :max-depth 8, :noise-sd 0.5})
+18:40:57.757 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/run-pipeline
+18:40:57.761 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/1a/(pocket-book.regression-experiments⁄run-pipeline {:feature-set :raw, :max-depth 4, :noise-sd 0.3})
+18:40:57.762 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/run-pipeline
+18:40:57.765 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/aa/(pocket-book.regression-experiments⁄run-pipeline {:feature-set :raw, :max-depth 8, :noise-sd 0.3})
+18:40:57.765 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/run-pipeline
+18:40:57.772 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/7f/(pocket-book.regression-experiments⁄run-pipeline {:feature-set :poly+trig, :max-depth 4, :noise-sd 0.3})
+18:40:57.772 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/run-pipeline
+18:40:57.780 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/0b/(pocket-book.regression-experiments⁄run-pipeline {:feature-set :poly+trig, :max-depth 8, :noise-sd 0.3})
+18:40:57.780 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/run-pipeline
+18:40:57.783 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/63/(pocket-book.regression-experiments⁄run-pipeline {:feature-set :raw, :max-depth 4, :noise-sd 0.5})
+18:40:57.783 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/run-pipeline
+18:40:57.787 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/1b/(pocket-book.regression-experiments⁄run-pipeline {:feature-set :raw, :max-depth 8, :noise-sd 0.5})
+18:40:57.787 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/run-pipeline
+18:40:57.790 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/f3/(pocket-book.regression-experiments⁄run-pipeline {:feature-set :poly+trig, :max-depth 4, :noise-sd 0.5})
+18:40:57.791 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.regression-experiments/run-pipeline
+18:40:57.795 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/.cache/09/(pocket-book.regression-experiments⁄run-pipeline {:feature-set :poly+trig, :max-depth 8, :noise-sd 0.5})
 
 ```
 :::
@@ -1901,16 +2012,17 @@ you see only what differs.
       grouped (group-by (juxt :feature-set :noise-sd) rows)
       feature-colors {:raw "steelblue" :poly "tomato" :poly+trig "green"}]
   (kind/plotly
-   {:data (for [[[feature-set noise-sd] pts] (sort-by first grouped)
-                :let [max-depths (mapv :max-depth pts)
-                      rmses (mapv :rmse pts)]]
-            {:x max-depths
-             :y rmses
-             :mode "markers"
-             :name (str (name feature-set) " (noise=" noise-sd ")")
-             :legendgroup (name feature-set)
-             :marker {:size (+ 8 (* 15 noise-sd))
-                      :color (feature-colors feature-set)}})
+   {:data (vec (for [[[feature-set noise-sd] pts] (sort-by first grouped)
+                     :let [max-depths (mapv :max-depth pts)
+                           rmses (mapv :rmse pts)]]
+                 {:x max-depths
+                  :y rmses
+                  :mode "markers"
+                  :name (str (name feature-set) " (noise=" noise-sd ")")
+                  :legendgroup (name feature-set)
+                  :marker {:size (+ 8 (* 15 noise-sd))
+                           :color (feature-colors feature-set)}}))
+
     :layout {:xaxis {:title "max-depth"} :yaxis {:title "rmse"}}}))
 ```
 :::
@@ -1921,6 +2033,41 @@ you see only what differs.
 <div style="height:auto;width:100%;"><script>Plotly.newPlot(document.currentScript.parentElement, [{"x":[4,8],"y":[0.5297031491020386,0.4530388384300822],"mode":"markers","name":"poly+trig (noise=0.3)","legendgroup":"poly+trig","marker":{"size":12.5,"color":"green"}},{"x":[4,8],"y":[0.7728233864192875,0.6785270538736407],"mode":"markers","name":"poly+trig (noise=0.5)","legendgroup":"poly+trig","marker":{"size":15.5,"color":"green"}},{"x":[4,8],"y":[0.7189521159338053,0.41024324994778005],"mode":"markers","name":"raw (noise=0.3)","legendgroup":"raw","marker":{"size":12.5,"color":"steelblue"}},{"x":[4,8],"y":[0.8815492449083825,0.6467985374993637],"mode":"markers","name":"raw (noise=0.5)","legendgroup":"raw","marker":{"size":15.5,"color":"steelblue"}}], {"xaxis":{"title":"max-depth"},"yaxis":{"title":"rmse"}}, {});</script></div>
 ```
 
+
+
+## What we learned
+
+This experiment revealed a clear story about the interplay between
+models, features, and noise:
+
+
+- **Feature engineering is decisive for linear models.** With raw
+  features, the linear model couldn't capture the nonlinear target
+  at all. Adding trigonometric features (sin, cos) — which match
+  the structure of the true function — dramatically improved it.
+  The model didn't get smarter; we gave it the right vocabulary.
+
+
+- **Decision trees are self-sufficient but fragile.** The CART model
+  achieved low error regardless of feature set, because it can
+  learn nonlinear splits on its own. But as noise increased, it
+  began fitting the noise rather than the signal — a classic
+  overfitting pattern.
+
+
+- **The crossover point matters.** At low noise, the tree wins. At
+  high noise, the well-featured linear model degrades more
+  gracefully. Knowing where this crossover happens is exactly the
+  kind of insight you get from systematic experimentation.
+
+
+- **Caching structures the workflow.** In this small example, each
+  step runs in milliseconds — caching isn't needed for speed. But
+  the pattern scales: with real datasets and expensive training,
+  the same pipeline structure ensures that only changed steps
+  recompute. Meanwhile, `compare-experiments` extracted the varying
+  parameters automatically, turning cached results into a
+  comparison table — useful at any scale.
 
 
 ## Cleanup
@@ -1937,7 +2084,7 @@ you see only what differs.
 ::: {.callout-note}
 ## OUT
 ```
-16:50:51.198 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-regression
+18:40:57.800 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-regression
 
 ```
 :::

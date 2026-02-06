@@ -133,7 +133,7 @@ export POCKET_BASE_CACHE_DIR=/path/to/cache
 ::: {.callout-note}
 ## OUT
 ```
-16:50:39.485 INFO scicloj.pocket - Cache dir set to: /tmp/pocket-demo-config
+18:40:46.180 INFO scicloj.pocket - Cache dir set to: /tmp/pocket-demo-config
 
 ```
 :::
@@ -160,7 +160,7 @@ export POCKET_BASE_CACHE_DIR=/path/to/cache
 ::: {.callout-note}
 ## OUT
 ```
-16:50:39.485 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo-config
+18:40:46.180 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo-config
 
 ```
 :::
@@ -265,8 +265,8 @@ Configure via `set-mem-cache-options!`:
 ::: {.callout-note}
 ## OUT
 ```
-16:50:39.487 INFO scicloj.pocket - Mem-cache options set: {:policy :fifo, :threshold 100}
-16:50:39.487 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :fifo, :threshold 100}
+18:40:46.181 INFO scicloj.pocket - Mem-cache options set: {:policy :fifo, :threshold 100}
+18:40:46.182 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :fifo, :threshold 100}
 
 ```
 :::
@@ -295,8 +295,8 @@ Or a TTL policy where entries expire after 60 seconds:
 ::: {.callout-note}
 ## OUT
 ```
-16:50:39.488 INFO scicloj.pocket - Mem-cache options set: {:policy :ttl, :ttl 60000}
-16:50:39.488 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :ttl, :ttl 60000}
+18:40:46.183 INFO scicloj.pocket - Mem-cache options set: {:policy :ttl, :ttl 60000}
+18:40:46.183 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :ttl, :ttl 60000}
 
 ```
 :::
@@ -325,8 +325,8 @@ Reset to the default LRU policy:
 ::: {.callout-note}
 ## OUT
 ```
-16:50:39.488 INFO scicloj.pocket - Mem-cache options set: {:policy :lru, :threshold 256}
-16:50:39.489 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :lru, :threshold 256}
+18:40:46.184 INFO scicloj.pocket - Mem-cache options set: {:policy :lru, :threshold 256}
+18:40:46.184 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :lru, :threshold 256}
 
 ```
 :::
@@ -393,7 +393,7 @@ result (like a `delay`), but separate instances recompute.
 ::: {.callout-note}
 ## OUT
 ```
-16:50:39.489 INFO scicloj.pocket - Storage policy set to: :mem
+18:40:46.184 INFO scicloj.pocket - Storage policy set to: :mem
 
 ```
 :::
@@ -474,7 +474,7 @@ Reset to default:
 ::: {.callout-note}
 ## OUT
 ```
-16:50:39.490 INFO scicloj.pocket - Storage policy set to: nil
+18:40:46.185 INFO scicloj.pocket - Storage policy set to: nil
 
 ```
 :::
@@ -522,7 +522,7 @@ need to lower it.
 ::: {.callout-note}
 ## OUT
 ```
-16:50:39.491 INFO scicloj.pocket - Filename length limit set to: 80
+18:40:46.186 INFO scicloj.pocket - Filename length limit set to: 80
 
 ```
 :::
@@ -576,7 +576,7 @@ Reset to default (240):
 ::: {.callout-note}
 ## OUT
 ```
-16:50:39.492 INFO scicloj.pocket - Filename length limit set to: nil
+18:40:46.187 INFO scicloj.pocket - Filename length limit set to: nil
 
 ```
 :::
@@ -693,7 +693,7 @@ To delete all cached values (both disk and in-memory), use `cleanup!`:
 ::: {.callout-note}
 ## OUT
 ```
-16:50:39.493 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo-config
+18:40:46.188 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo-config
 
 ```
 :::

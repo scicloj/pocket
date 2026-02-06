@@ -58,6 +58,17 @@
    `pocket-defaults.edn` (library default: 240)."
   nil)
 
+(defn- parse-env
+  "Parse an environment variable with `parse-fn`, wrapping errors with a helpful message."
+  [env-name parse-fn]
+  (when-let [s (System/getenv env-name)]
+    (try
+      (parse-fn s)
+      (catch Exception e
+        (throw (ex-info (str "Invalid value in " env-name " environment variable: " (pr-str s))
+                        {:env-name env-name :value s}
+                        e))))))
+
 (defn- resolve-base-cache-dir
   "Resolve the base cache directory using the precedence chain."
   []
@@ -70,7 +81,7 @@
   "Resolve mem-cache options using the precedence chain."
   []
   (or *mem-cache-options*
-      (some-> (System/getenv "POCKET_MEM_CACHE") edn/read-string)
+      (parse-env "POCKET_MEM_CACHE" edn/read-string)
       (:mem-cache (impl/pocket-edn))
       (:mem-cache @impl/pocket-defaults-edn)))
 
@@ -78,7 +89,7 @@
   "Resolve the storage policy using the precedence chain."
   []
   (or *storage*
-      (some-> (System/getenv "POCKET_STORAGE") keyword)
+      (parse-env "POCKET_STORAGE" keyword)
       (:storage (impl/pocket-edn))
       (:storage @impl/pocket-defaults-edn)))
 
@@ -86,7 +97,7 @@
   "Resolve the filename length limit using the precedence chain."
   []
   (or *filename-length-limit*
-      (some-> (System/getenv "POCKET_FILENAME_LENGTH_LIMIT") parse-long)
+      (parse-env "POCKET_FILENAME_LENGTH_LIMIT" parse-long)
       (:filename-length-limit (impl/pocket-edn))
       (:filename-length-limit @impl/pocket-defaults-edn)))
 

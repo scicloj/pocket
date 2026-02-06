@@ -59,7 +59,7 @@ format:
 ::: {.callout-note}
 ## OUT
 ```
-16:50:50.401 INFO scicloj.pocket - Cache dir set to: /tmp/pocket-extending
+18:40:57.094 INFO scicloj.pocket - Cache dir set to: /tmp/pocket-extending
 
 ```
 :::
@@ -86,7 +86,7 @@ format:
 ::: {.callout-note}
 ## OUT
 ```
-16:50:50.401 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-extending
+18:40:57.094 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-extending
 
 ```
 :::
@@ -332,9 +332,9 @@ First deref computes:
 ::: {.callout-note}
 ## OUT
 ```
-16:50:50.411 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.extending-pocket/analyze-dataset
+18:40:57.104 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.extending-pocket/analyze-dataset
   Analyzing census v 3 ...
-16:50:50.613 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-extending/.cache/a8/(pocket-book.extending-pocket⁄analyze-dataset census-v3 {:method :regression})
+18:40:57.305 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-extending/.cache/a8/(pocket-book.extending-pocket⁄analyze-dataset census-v3 {:method :regression})
 
 ```
 :::
@@ -384,9 +384,9 @@ A different version creates a different cache entry:
 ::: {.callout-note}
 ## OUT
 ```
-16:50:50.617 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.extending-pocket/analyze-dataset
+18:40:57.309 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.extending-pocket/analyze-dataset
   Analyzing census v 4 ...
-16:50:50.817 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-extending/.cache/6f/(pocket-book.extending-pocket⁄analyze-dataset census-v4 {:method :regression})
+18:40:57.511 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-extending/.cache/6f/(pocket-book.extending-pocket⁄analyze-dataset census-v4 {:method :regression})
 
 ```
 :::
@@ -409,7 +409,7 @@ The cache directory names reflect our custom identities:
 
 ::: {.sourceClojure}
 ```clojure
-(kind/code (pocket/dir-tree))
+(pocket/dir-tree)
 ```
 :::
 
@@ -526,7 +526,7 @@ for more details.
 ::: {.callout-note}
 ## OUT
 ```
-16:50:50.821 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-extending
+18:40:57.515 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-extending
 
 ```
 :::

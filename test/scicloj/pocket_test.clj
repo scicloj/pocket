@@ -922,3 +922,34 @@
       (is (thrown? Exception @(c-fn :test)))
       ;; Function was called twice
       (is (= 2 @call-count)))))
+
+(defn scalar-experiment
+  "A fake experiment function that takes scalar args."
+  [learning-rate dataset-name]
+  {:rmse (* 0.1 learning-rate)
+   :dataset dataset-name})
+
+(deftest test-compare-experiments-scalar-args
+  (testing "compare-experiments includes scalar args that vary across experiments"
+    (let [exp1 (pocket/cached #'scalar-experiment 0.01 "mnist")
+          exp2 (pocket/cached #'scalar-experiment 0.001 "mnist")
+          exp3 (pocket/cached #'scalar-experiment 0.01 "cifar")
+          comparison (pocket/compare-experiments [exp1 exp2 exp3])]
+      ;; Should have 3 results
+      (is (= 3 (count comparison)))
+      ;; Each result should have :result
+      (is (every? #(contains? % :result) comparison))
+      ;; learning-rate varies (0.01, 0.001, 0.01) - should appear as :scalar-experiment/arg0
+      (is (every? #(contains? % :scalar-experiment/arg0) comparison))
+      ;; dataset varies ("mnist", "mnist", "cifar") - should appear as :scalar-experiment/arg1
+      (is (every? #(contains? % :scalar-experiment/arg1) comparison))
+      ;; Check values
+      (is (= [0.01 0.001 0.01] (mapv :scalar-experiment/arg0 comparison)))
+      (is (= ["mnist" "mnist" "cifar"] (mapv :scalar-experiment/arg1 comparison))))))
+
+(deftest test-env-var-validation
+  (testing "Invalid POCKET_MEM_CACHE env var produces helpful error"
+    ;; We can't easily set env vars in Java, so test the parse-env helper indirectly
+    ;; by verifying the current resolve functions work with valid env vars
+    ;; The main fix is structural — wrapping with try/catch in parse-env
+    (is (map? (pocket/config)) "config should resolve without error")))

@@ -558,17 +558,30 @@
     (str sb)))
 
 (defn- collect-params
-  "Walk an origin-story tree and collect all {:value ...} leaves that are maps.
-   Returns a flat seq of maps."
-  [tree]
-  (cond
-    ;; Reference - skip (we'll find the original)
-    (:ref tree) []
-    ;; Cached node - recurse into args
-    (:fn tree) (mapcat collect-params (:args tree))
-    ;; Value leaf
-    :else (let [v (:value tree)]
-            (if (map? v) [v] []))))
+  "Walk an origin-story tree and collect parameter maps from value leaves.
+   Map values are returned as-is. Scalar values (numbers, strings, keywords,
+   etc.) are wrapped as `{:<fn-name>/<arg-position> value}` using the parent
+   function name and argument position for the key."
+  ([tree] (collect-params tree nil nil))
+  ([tree parent-fn-name arg-idx]
+   (cond
+     ;; Reference - skip (we'll find the original)
+     (:ref tree) []
+     ;; Cached node - recurse into args with position info
+     (:fn tree) (let [fn-name (some-> (:fn tree) ->id name)]
+                  (into []
+                        (mapcat (fn [i arg]
+                                  (collect-params arg fn-name i))
+                                (range)
+                                (:args tree))))
+     ;; Value leaf
+     :else (let [v (:value tree)]
+             (cond
+               (map? v) [v]
+               (some? v) (if (and parent-fn-name arg-idx)
+                           [{(keyword parent-fn-name (str "arg" arg-idx)) v}]
+                           [{:_arg v}])
+               :else [])))))
 
 (defn- find-varying-keys
   "Given a seq of param maps, find keys whose values differ across maps."
