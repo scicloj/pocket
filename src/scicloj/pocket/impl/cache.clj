@@ -10,7 +10,8 @@
             [scicloj.pocket.protocols :as protocols :refer [PIdentifiable ->id]]
             [scicloj.kindly.v4.kind :as kind])
   (:import (org.apache.commons.codec.digest DigestUtils)
-           (clojure.lang IPersistentMap IDeref Var)))
+           (clojure.lang IPersistentMap IDeref Var)
+           (java.util IdentityHashMap)))
 
 (defn read-cached [path]
   (cond
@@ -129,6 +130,7 @@
 
 (defn ->path
   "Generate cache path from base-dir and id.
+   The id is expected to be canonicalized (via `canonical-id`) before calling.
    filename-length-limit controls when to switch to SHA-1 hash (default 240)."
   ([base-dir id]
    (->path base-dir id 240))
@@ -136,16 +138,15 @@
    (when-not base-dir
      (throw (ex-info "No cache directory configured. Set it via pocket/set-base-cache-dir!, the POCKET_BASE_CACHE_DIR env var, or pocket.edn."
                      {})))
-   (let [h (-> id hash str)]
+   (let [idstr (-> (str id)
+                   (str/replace "/" "⁄"))]
      (str base-dir
           "/.cache/"
-          (-> h sha (subs 0 2))
+          (subs (sha idstr) 0 2)
           "/"
-          (let [idstr (-> (str id)
-                          (str/replace "/" "⁄"))]
-            (if (-> idstr count (> filename-length-limit))
-              (sha h)
-              idstr))))))
+          (if (> (count idstr) filename-length-limit)
+            (sha idstr)
+            idstr)))))
 (defn canonical-id
   "Deep-sort all maps and sets in an id structure for canonical string representation.
    Walks the structure recursively: sorts map keys, recurses into sequential
@@ -176,6 +177,44 @@
     @x
     x))
 
+(defn- deref-with-cache
+  "Shared deref logic for :mem and :mem+disk storage policies.
+   `cached-obj` is the Cached instance (needed for ->id).
+   `disk-read-fn` checks disk and returns a [found? value] pair, or nil to skip disk.
+   `disk-write-fn` writes a computed value to disk, or nil to skip."
+  [cached-obj disk-read-fn disk-write-fn]
+  (let [base-dir (.base-dir cached-obj)
+        f (.f cached-obj)
+        args (.args cached-obj)
+        filename-length-limit (.filename-length-limit cached-obj)
+        id (canonical-id (->id cached-obj))
+        fn-name (->id f)
+        path (->path base-dir id filename-length-limit)]
+    (cw/lookup-or-miss
+     mem-cache path
+     (fn [_]
+       (let [d (.computeIfAbsent
+                in-flight path
+                (reify java.util.function.Function
+                  (apply [_ _]
+                    (delay
+                      (try
+                        (if-let [[_ disk-val] (when disk-read-fn
+                                                (disk-read-fn path fn-name))]
+                          disk-val
+                          (do (log/info (if disk-read-fn
+                                          "Cache miss, computing:"
+                                          "Cache miss (mem), computing:")
+                                        fn-name)
+                              (let [resolved-args (mapv maybe-deref args)
+                                    v (clojure.core/apply f resolved-args)]
+                                (when disk-write-fn
+                                  (disk-write-fn v path id fn-name args))
+                                v)))
+                        (finally
+                          (.remove in-flight path)))))))]
+         @d)))))
+
 (deftype Cached [base-dir f args storage local-delay filename-length-limit]
   IDeref
   (deref [this]
@@ -184,54 +223,21 @@
       @local-delay
 
       :mem
-      (let [id (canonical-id (->id this))
-            fn-name (->id f)
-            path (->path base-dir id filename-length-limit)]
-        (cw/lookup-or-miss
-         mem-cache path
-         (fn [_]
-           (let [d (.computeIfAbsent
-                    in-flight path
-                    (reify java.util.function.Function
-                      (apply [_ _]
-                        (delay
-                          (try
-                            (log/info "Cache miss (mem), computing:" fn-name)
-                            (let [resolved-args (mapv maybe-deref args)
-                                  v (clojure.core/apply f resolved-args)]
-                              v)
-                            (finally
-                              (.remove in-flight path)))))))]
-             @d))))
+      (deref-with-cache this nil nil)
 
       :mem+disk
-      (let [id (canonical-id (->id this))
-            fn-name (->id f)
-            path (->path base-dir id filename-length-limit)]
-        (cw/lookup-or-miss
-         mem-cache path
-         (fn [_]
-           (let [d (.computeIfAbsent
-                    in-flight path
-                    (reify java.util.function.Function
-                      (apply [_ _]
-                        (delay
-                          (try
-                            (if (fs/exists? path)
-                              (do (log/debug "Cache hit (disk):" fn-name path)
-                                  (read-cached path))
-                              (do (log/info "Cache miss, computing:" fn-name)
-                                  (let [resolved-args (mapv maybe-deref args)
-                                        v (clojure.core/apply f resolved-args)
-                                        meta-map {:id (pr-str id)
-                                                  :fn-name (str fn-name)
-                                                  :args-str (pr-str (mapv ->id args))
-                                                  :created-at (str (java.time.Instant/now))}]
-                                    (write-cached! v path meta-map)
-                                    v)))
-                            (finally
-                              (.remove in-flight path)))))))]
-             @d)))))))
+      (deref-with-cache
+       this
+       (fn [path fn-name]
+         (when (fs/exists? path)
+           (log/debug "Cache hit (disk):" fn-name path)
+           [true (read-cached path)]))
+       (fn [v path id fn-name args]
+         (let [meta-map {:id (pr-str id)
+                         :fn-name (str fn-name)
+                         :args-str (pr-str (mapv ->id args))
+                         :created-at (str (java.time.Instant/now))}]
+           (write-cached! v path meta-map)))))))
 
 (extend-protocol PIdentifiable
   Cached
@@ -306,23 +312,23 @@
         ::unrealized))))
 
 (defn- origin-story*
-  "Internal recursive walk with seen tracking."
-  [x seen counter]
+  "Internal recursive walk with seen tracking.
+   `seen` is an IdentityHashMap mapping Cached instances to their node IDs."
+  [x ^IdentityHashMap seen counter]
   (if (instance? Cached x)
-    (let [cached-id (System/identityHashCode x)]
-      (if-let [existing-id (get @seen cached-id)]
-        ;; Already seen this exact Cached instance — emit reference
-        {:ref existing-id}
-        ;; First encounter — assign ID and recurse
-        (let [node-id (str "c" (swap! counter inc))
-              _ (swap! seen assoc cached-id node-id)
-              node {:fn (.f x)
-                    :args (mapv #(origin-story* % seen counter) (.args x))
-                    :id node-id}
-              v (peek-value x)]
-          (if (= v ::unrealized)
-            node
-            (assoc node :value v)))))
+    (if-let [existing-id (.get seen x)]
+      ;; Already seen this exact Cached instance — emit reference
+      {:ref existing-id}
+      ;; First encounter — assign ID and recurse
+      (let [node-id (str "c" (swap! counter inc))
+            _ (.put seen x node-id)
+            node {:fn (.f x)
+                  :args (mapv #(origin-story* % seen counter) (.args x))
+                  :id node-id}
+            v (peek-value x)]
+        (if (= v ::unrealized)
+          node
+          (assoc node :value v))))
     {:value x}))
 
 (defn origin-story
@@ -342,7 +348,7 @@
    Does not trigger computation — only peeks at already-realized values.
    Works with all storage policies (`:mem+disk`, `:mem`, `:none`)."
   [x]
-  (kind/pprint (origin-story* x (atom {}) (atom 0))))
+  (kind/pprint (origin-story* x (IdentityHashMap.) (atom 0))))
 
 (defn origin-story-graph
   "Walk a Cached value's argument tree and return a normalized graph.
@@ -358,25 +364,24 @@
   (let [nodes (atom {})
         edges (atom [])
         counter (atom 0)
-        seen (atom {})]
+        ^IdentityHashMap seen (IdentityHashMap.)]
     (letfn [(walk [node parent-id]
               (if (instance? Cached node)
-                (let [cached-id (System/identityHashCode node)]
-                  (if-let [existing-id (get @seen cached-id)]
-                    ;; Already seen — just add edge
+                (if-let [existing-id (.get seen node)]
+                  ;; Already seen — just add edge
+                  (when parent-id
+                    (swap! edges conj [parent-id existing-id]))
+                  ;; First encounter
+                  (let [node-id (str "c" (swap! counter inc))
+                        _ (.put seen node node-id)
+                        v (peek-value node)
+                        node-map (cond-> {:fn (.f node)}
+                                   (not= v ::unrealized) (assoc :value v))]
+                    (swap! nodes assoc node-id node-map)
                     (when parent-id
-                      (swap! edges conj [parent-id existing-id]))
-                    ;; First encounter
-                    (let [node-id (str "c" (swap! counter inc))
-                          _ (swap! seen assoc cached-id node-id)
-                          v (peek-value node)
-                          node-map (cond-> {:fn (.f node)}
-                                     (not= v ::unrealized) (assoc :value v))]
-                      (swap! nodes assoc node-id node-map)
-                      (when parent-id
-                        (swap! edges conj [parent-id node-id]))
-                      (doseq [arg (.args node)]
-                        (walk arg node-id)))))
+                      (swap! edges conj [parent-id node-id]))
+                    (doseq [arg (.args node)]
+                      (walk arg node-id))))
                 ;; Plain value leaf
                 (let [leaf-id (str "v" (swap! counter inc))]
                   (swap! nodes assoc leaf-id {:value node})
