@@ -119,15 +119,12 @@
   (let [x (:x ds)]
     (-> (case feature-set
           :raw ds
-          :quadratic (-> ds
-                         (tc/add-column :x2 (tcc/sq x)))
-          :trig (-> ds
-                    (tc/add-column :sin-x (tcc/sin x))
-                    (tc/add-column :cos-x (tcc/cos x)))
-          :poly+trig (-> ds
-                         (tc/add-column :x2 (tcc/sq x))
-                         (tc/add-column :sin-x (tcc/sin x))
-                         (tc/add-column :cos-x (tcc/cos x))))
+          :quadratic (tc/add-columns ds {:x2 (tcc/sq x)})
+          :trig (tc/add-columns ds {:sin-x (tcc/sin x)
+                                    :cos-x (tcc/cos x)})
+          :poly+trig (tc/add-columns ds {:x2 (tcc/sq x)
+                                         :sin-x (tcc/sin x)
+                                         :cos-x (tcc/cos x)}))
         (ds-mod/set-inference-target :y))))
 
 ;; **Training and evaluation**: `train-model` fits a model to
