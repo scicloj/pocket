@@ -7,7 +7,10 @@
    ;; Pocket API:
    [scicloj.pocket :as pocket]
    ;; Annotating kinds of visualizations:
-   [scicloj.kindly.v4.kind :as kind]))
+   [scicloj.kindly.v4.kind :as kind]
+   ;; For the dataset identity example:
+   [tablecloth.api :as tc]
+   [tech.v3.dataset.modelling :as ds-mod]))
 
 ;; ## Setup
 
@@ -52,6 +55,48 @@
 (pocket/->id nil)
 
 (kind/test-last [nil?])
+
+
+;; ## Built-in dataset support
+;;
+;; Pocket recognizes
+;; [tech.ml.dataset](https://github.com/techascent/tech.ml.dataset)
+;; datasets (the type behind tablecloth) and derives their identity
+;; from the actual column data and metadata — including annotations
+;; like inference targets.
+
+;; A dataset's identity is a map of column names to
+;; `{:data [...] :meta {...}}`:
+
+(def example-ds
+  (-> (tc/dataset {:x (range 30) :y (range 30)})
+      (ds-mod/set-inference-target :y)))
+
+(pocket/->id example-ds)
+
+;; Two datasets with identical content produce the same identity,
+;; even when the default `toString` representation would truncate
+;; rows:
+
+(def ds-a (tc/dataset {:x (range 30) :y (range 30)}))
+(def ds-b (tc/dataset {:x (range 30) :y (range 30)}))
+
+(= (pocket/->id ds-a) (pocket/->id ds-b))
+
+(kind/test-last [true?])
+
+;; Datasets with different content produce different identities,
+;; even when the difference falls in rows that `toString` would elide:
+
+(def ds-c (tc/dataset {:x (range 30)
+                       :y (concat (range 15) [999] (range 16 30))}))
+
+(= (pocket/->id ds-a) (pocket/->id ds-c))
+
+(kind/test-last [false?])
+
+;; This means caching functions that take datasets as arguments
+;; (like `ml/train`) works correctly regardless of dataset size.
 
 ;; ## Extending for custom types
 ;;
@@ -109,8 +154,8 @@
 (deref analysis)
 
 (kind/test-last [(fn [result] (and (= "census" (:source result))
-                                     (= 3 (:version result))
-                                     (= :regression (:method result))))])
+                                   (= 3 (:version result))
+                                   (= :regression (:method result))))])
 
 ;; Second deref loads from cache:
 

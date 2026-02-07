@@ -239,6 +239,19 @@
                          :created-at (str (java.time.Instant/now))}]
            (write-cached! v path meta-map)))))))
 
+(defn- dataset-type? [x]
+  (= (pr-str (type x)) "tech.v3.dataset.impl.dataset.Dataset"))
+
+(defn- dataset->id
+  "Derive a content-based identity for a dataset.
+   Converts each column to a plain vector with its metadata,
+   so the identity captures data, datatypes, and annotations
+   like inference-target."
+  [ds]
+  (update-vals ds (fn [col]
+                    {:data (vec col)
+                     :meta (meta col)})))
+
 (extend-protocol PIdentifiable
   Cached
   (->id [v]
@@ -255,7 +268,9 @@
 
   Object
   (->id [this]
-    this)
+    (if (dataset-type? this)
+      (dataset->id this)
+      this))
 
   nil
   (->id [_] nil))
