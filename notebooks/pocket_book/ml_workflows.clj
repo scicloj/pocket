@@ -82,14 +82,24 @@
 (defn make-regression-data
   "Generate a synthetic regression dataset.
   `f` is a function from x to y (the ground truth).
-  Returns a dataset with columns `:x` and `:y`."
-  [{:keys [f n noise-sd seed]}]
+  Optional `outlier-fraction` (0–1) and `outlier-scale` inject
+  corrupted y values to simulate measurement errors."
+  [{:keys [f n noise-sd seed outlier-fraction outlier-scale]
+    :or {outlier-fraction 0 outlier-scale 10}}]
   (let [rng (java.util.Random. (long seed))
         xs (vec (repeatedly n #(* 10.0 (.nextDouble rng))))
         ys (mapv (fn [x] (+ (double (f x))
                             (* (double noise-sd) (.nextGaussian rng))))
-                 xs)]
-    (-> (tc/dataset {:x xs :y ys})
+                 xs)
+        ys-final (if (pos? outlier-fraction)
+                   (let [out-rng (java.util.Random. (+ (long seed) 7919))]
+                     (mapv (fn [y]
+                             (if (< (.nextDouble out-rng) outlier-fraction)
+                               (+ y (* (double outlier-scale) (.nextGaussian out-rng)))
+                               y))
+                           ys))
+                   ys)]
+    (-> (tc/dataset {:x xs :y ys-final})
         (ds-mod/set-inference-target :y))))
 
 ;; **Splitting**: `split-dataset` divides data into training and test
@@ -418,17 +428,20 @@ noise-results
 
 ;; ## Part 4 — Sharing computations across branches
 
-;; Real preprocessing often requires computing something from the
-;; training data and applying it to both train and test sets.
-;; For example, *normalization*: you compute the mean and standard
-;; deviation from training data, then use those same values to
-;; scale both sets. (Using test statistics would leak information.)
+;; Real data is messy — sensors glitch, entries get corrupted, outliers
+;; creep in. Before training a model, you often need to detect what's
+;; "normal" and remove extreme values. This is *outlier clipping*:
+;; compute a threshold from the training data, then clip both train
+;; and test sets to those bounds.
 ;;
-;; This creates a *diamond dependency* — one computation feeds
-;; into multiple downstream steps:
+;; The threshold **must** come from training data alone. Using test
+;; data would leak future information — a subtle but serious mistake.
+;;
+;; This creates a *diamond dependency* — one computation (the
+;; threshold) feeds into multiple downstream steps:
 ;;
 ;; ```
-;;  make-regression-data
+;;  make-regression-data (with outliers)
 ;;          |
 ;;     split-dataset
 ;;          |
@@ -437,54 +450,49 @@ noise-results
 ;;  (:train)  (:test)
 ;;     |         |
 ;;     v         |
-;;  compute-stats|
+;; fit-threshold |
 ;;     |         |
-;;     +-------------+
-;;     v              v
-;; normalize(train) normalize(test)
-;;     |              |
-;;     v              |
-;; train-model        |
-;;     |              |
-;;     +--------------+
+;;     +----+----+
+;;     v         v
+;; clip(train) clip(test)
+;;     |         |
+;;     v         |
+;; train-model   |
+;;     |         |
+;;     +----+----+
 ;;     v
 ;;   evaluate
 ;; ```
 ;;
-;; Pocket handles this naturally. The `stats-c` node is computed
-;; once and feeds both preprocessing steps. When you change the
-;; training data, stats recompute, and both branches update.
+;; Pocket handles this naturally. The threshold node is computed once
+;; and feeds both clipping steps. When you change the training data,
+;; the threshold recomputes, and both branches update.
 
 ;; ### Pipeline functions
 ;;
-;; These are plain functions. Each does one thing: compute stats,
-;; normalize data, train, or evaluate. Pocket will wire them together.
+;; These are plain functions. Each does one thing: fit a threshold,
+;; clip outliers, or evaluate. Pocket will wire them together.
 
-(defn compute-stats
-  "Compute normalization statistics from training data.
-   Returns mean and std for each numeric column."
+(defn fit-outlier-threshold
+  "Compute IQR-based clipping bounds for :y from training data.
+  Returns {:lower <bound> :upper <bound>}."
   [train-ds]
-  (println "  Computing stats from training data...")
-  (let [x-vals (vec (:x train-ds))]
-    {:x-mean (/ (reduce + x-vals) (count x-vals))
-     :x-std (Math/sqrt (/ (reduce + (map #(* (- % (/ (reduce + x-vals) (count x-vals)))
-                                             (- % (/ (reduce + x-vals) (count x-vals))))
-                                         x-vals))
-                          (count x-vals)))}))
+  (println "  Fitting outlier threshold from training data...")
+  (let [ys (sort (vec (:y train-ds)))
+        n (count ys)
+        q1 (nth ys (int (* 0.25 n)))
+        q3 (nth ys (int (* 0.75 n)))
+        iqr (- q3 q1)]
+    {:lower (- q1 (* 1.5 iqr))
+     :upper (+ q3 (* 1.5 iqr))}))
 
-(defn normalize-with-stats
-  "Normalize a dataset using pre-computed statistics."
-  [ds stats]
-  (println "  Normalizing with stats:" stats)
-  (let [{:keys [x-mean x-std]} stats]
-    (tc/add-column ds :x-norm
-                   (tcc// (tcc/- (:x ds) x-mean) x-std))))
-
-(defn train-normalized-model
-  "Train a model on normalized data."
-  [train-ds model-spec]
-  (println "  Training model on normalized data...")
-  (ml/train train-ds model-spec))
+(defn clip-outliers
+  "Clip :y values using pre-computed threshold bounds."
+  [ds threshold]
+  (println "  Clipping outliers with bounds:" (select-keys threshold [:lower :upper]))
+  (let [{:keys [lower upper]} threshold]
+    (-> (tc/add-column ds :y (-> (:y ds) (tcc/max lower) (tcc/min upper)))
+        (ds-mod/set-inference-target :y))))
 
 (defn evaluate-model
   "Evaluate a model on test data."
@@ -498,30 +506,33 @@ noise-results
 ;; Not every step needs disk persistence. We use `caching-fn` with
 ;; per-function storage policies:
 ;;
-;; - **`:mem`** for cheap shared computations (stats, normalization) —
+;; - **`:mem`** for cheap shared computations (threshold, clipping) —
 ;;   no disk I/O, but in-memory dedup ensures each runs only once
 ;; - **`:mem+disk`** (default) for expensive steps (model training) —
 ;;   persists across JVM sessions
 ;; - **`:none`** for trivial steps (evaluation) — just tracks identity
 ;;   in the DAG without any shared caching
 
-(def c-compute-stats
-  (pocket/caching-fn #'compute-stats {:storage :mem}))
+(def c-fit-threshold
+  (pocket/caching-fn #'fit-outlier-threshold {:storage :mem}))
 
-(def c-normalize
-  (pocket/caching-fn #'normalize-with-stats {:storage :mem}))
+(def c-clip
+  (pocket/caching-fn #'clip-outliers {:storage :mem}))
 
 (def c-train
-  (pocket/caching-fn #'train-normalized-model))
+  (pocket/caching-fn #'train-model))
 
 (def c-evaluate
   (pocket/caching-fn #'evaluate-model {:storage :none}))
 
-;; Generate fresh data for this demo:
+;; Generate data *with outliers* for this demo — 10% of the y values
+;; are corrupted by large random spikes. This simulates the kind of
+;; measurement errors you'd encounter in real sensor data.
 
 (def dag-data-c
   (pocket/cached #'make-regression-data
-                 {:f #'nonlinear-fn :n 200 :noise-sd 0.3 :seed 99}))
+                 {:f #'nonlinear-fn :n 200 :noise-sd 0.3 :seed 99
+                  :outlier-fraction 0.1 :outlier-scale 15}))
 
 (def dag-split-c
   (pocket/cached #'split-dataset dag-data-c {:seed 99}))
@@ -529,24 +540,24 @@ noise-results
 (def dag-train-c (pocket/cached :train dag-split-c))
 (def dag-test-c (pocket/cached :test dag-split-c))
 
-;; Now wire the pipeline. The `stats-c` node is computed once
-;; (in memory) and feeds both preprocessing steps — a diamond
+;; Now wire the pipeline. The threshold is fitted once from training
+;; data (in memory) and feeds both clipping steps — a diamond
 ;; dependency handled naturally.
 
-(def stats-c
-  (c-compute-stats dag-train-c))
+(def threshold-c
+  (c-fit-threshold dag-train-c))
 
-(def train-norm-c
-  (c-normalize dag-train-c stats-c))
+(def train-clipped-c
+  (c-clip dag-train-c threshold-c))
 
-(def test-norm-c
-  (c-normalize dag-test-c stats-c))
+(def test-clipped-c
+  (c-clip dag-test-c threshold-c))
 
 (def model-c
-  (c-train train-norm-c cart-spec))
+  (c-train train-clipped-c cart-spec))
 
 (def metrics-c
-  (c-evaluate test-norm-c model-c))
+  (c-evaluate test-clipped-c model-c))
 
 ;; ### Visualize the DAG
 
@@ -561,8 +572,8 @@ noise-results
 
 (pocket/origin-story metrics-c)
 
-;; Notice how `stats-c` appears as a `:ref` in one branch — it's the
-;; same computation feeding both train and test normalization.
+;; Notice how the threshold node appears as a `:ref` in one branch —
+;; it's the same computation feeding both train and test clipping.
 
 ;; **`origin-story-graph`** normalizes the tree into a flat
 ;; `{:nodes ... :edges ...}` structure suitable for graph algorithms:
@@ -571,8 +582,8 @@ noise-results
 
 ;; **`origin-story-mermaid`** renders the DAG as a Mermaid flowchart, with
 ;; arrows showing data flow direction (from inputs toward the final result).
-;; The diamond dependency is clearly visible — `stats-c` feeds both
-;; preprocessing steps:
+;; The diamond dependency is clearly visible — the threshold feeds both
+;; clipping steps:
 
 (pocket/origin-story-mermaid metrics-c)
 
