@@ -135,7 +135,30 @@
  [(fn [m] (< (:rmse m) 2.0))])
 
 ;; With 500 data points and a CART tree, RMSE is well under 2.
-;; Now let's see how metamorph.ml pipelines can formalize this.
+
+;; ### Adding Pocket caching
+
+;; Pocket can cache the training step directly — wrap `ml/train`
+;; with `pocket/cached` and the trained model is persisted to disk:
+
+(pocket/cleanup!)
+
+(let [train-prep (prepare-features (:train splits) :poly+trig)
+      test-prep (prepare-features (:test splits) :poly+trig)
+      model @(pocket/cached #'ml/train train-prep cart-spec)]
+  {:rmse (loss/rmse (:y test-prep) (:y (ml/predict test-prep model)))})
+
+(kind/test-last
+ [(fn [m] (< (:rmse m) 2.0))])
+
+;; Same result. Call it again and the model loads from cache — no
+;; retraining. This is the approach shown in the
+;; [ML Workflows](ml_workflows.html) chapter.
+;;
+;; But what if you want **cross-validation** over many splits, or a
+;; **hyperparameter search** over many configurations? Writing those
+;; loops by hand gets tedious. That's where metamorph.ml pipelines
+;; come in.
 
 ;; ---
 
