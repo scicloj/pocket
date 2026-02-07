@@ -17,9 +17,10 @@
 ;; 3. **Metamorph.ml's built-in cache** — what it offers
 ;; 4. **Pocket-caching models** — a `pocket-model` step that caches
 ;;    training through Pocket
-;; 5. **Cross-validation and hyperparameter search** — where caching
+;; 5. **Caching pipelines** — full provenance with Pocket
+;; 6. **Cross-validation and hyperparameter search** — where caching
 ;;    pays off: many pipelines × many splits, all cached
-;; 6. **Scaling comparison** — how caching time changes with data size
+;; 7. **Scaling comparison** — how caching time changes with data size
 ;;
 ;; **Who this is for**: Clojure developers exploring ML pipelines.
 ;; Some familiarity with ML concepts (train/test splits, cross-validation,
@@ -98,6 +99,42 @@
                                          :cos-x (tcc/cos x)}))
         (ds-mod/set-inference-target :y))))
 
+;; ### Normalization
+;;
+;; Real preprocessing often includes *normalization* — scaling features
+;; to have zero mean and unit variance. This is a **stateful transform**:
+;; you compute the statistics from training data, then apply them to
+;; any data (train or test). Using test statistics would leak information.
+;;
+;; We split this into two functions: one to *fit* (compute stats) and
+;; one to *apply* (transform data using those stats).
+
+(defn fit-normalizer
+  "Compute per-column mean and std from feature columns."
+  [ds]
+  (let [feature-cols (tc/column-names (cf/feature ds))]
+    (into {}
+          (for [col feature-cols
+                :let [vals (vec (ds col))
+                      n (count vals)
+                      mean (/ (reduce + vals) n)
+                      variance (/ (reduce + (map #(let [d (- % mean)] (* d d)) vals)) n)]]
+            [col {:mean mean :std (Math/sqrt (double variance))}]))))
+
+(defn apply-normalizer
+  "Normalize feature columns using pre-computed statistics."
+  [ds stats]
+  (tc/add-columns ds
+                  (into {}
+                        (for [[col {:keys [mean std]}] stats
+                              :when (pos? std)]
+                          [col (tcc// (tcc/- (ds col) mean) std)]))))
+
+(defn split-dataset
+  "Split a dataset into train/test using holdout."
+  [ds {:keys [seed]}]
+  (first (tc/split->seq ds :holdout {:seed seed})))
+
 ;; ### Model specifications
 
 (def linear-sgd-spec
@@ -126,10 +163,18 @@
 
 (def splits (first (tc/split->seq ds-500 :holdout {:seed 42})))
 
+;; The normalization step is *stateful*: `fit-normalizer` computes
+;; statistics from the training set, and `apply-normalizer` uses
+;; those same statistics for both train and test. This prevents
+;; information leaking from test into training.
+
 (let [train-prep (prepare-features (:train splits) :poly+trig)
+      stats (fit-normalizer train-prep)
+      train-normed (apply-normalizer train-prep stats)
       test-prep (prepare-features (:test splits) :poly+trig)
-      model (ml/train train-prep cart-spec)]
-  {:rmse (loss/rmse (:y test-prep) (:y (ml/predict test-prep model)))})
+      test-normed (apply-normalizer test-prep stats)
+      model (ml/train train-normed cart-spec)]
+  {:rmse (loss/rmse (:y test-normed) (:y (ml/predict test-normed model)))})
 
 (kind/test-last
  [(fn [m] (< (:rmse m) 2.0))])
@@ -144,9 +189,12 @@
 (pocket/cleanup!)
 
 (let [train-prep (prepare-features (:train splits) :poly+trig)
+      stats (fit-normalizer train-prep)
+      train-normed (apply-normalizer train-prep stats)
       test-prep (prepare-features (:test splits) :poly+trig)
-      model @(pocket/cached #'ml/train train-prep cart-spec)]
-  {:rmse (loss/rmse (:y test-prep) (:y (ml/predict test-prep model)))})
+      test-normed (apply-normalizer test-prep stats)
+      model @(pocket/cached #'ml/train train-normed cart-spec)]
+  {:rmse (loss/rmse (:y test-normed) (:y (ml/predict test-normed model)))})
 
 (kind/test-last
  [(fn [m] (< (:rmse m) 2.0))])
@@ -186,15 +234,31 @@
 ;; `mm/lift` turns a plain `(dataset, args...) → dataset` function
 ;; into a pipeline step that operates on `:metamorph/data`.
 ;; `ml/model` is the step that trains in `:fit` and predicts in `:transform`.
+;;
+;; For normalization, we need a **stateful step** — one that computes
+;; stats in `:fit` mode and reuses them in `:transform` mode.
+;; The context map carries state between modes: the step stores its
+;; fitted stats under its `:metamorph/id` key.
+
+(defn normalize-step
+  "Pipeline step: fit normalizer in :fit mode, apply stored stats in :transform."
+  []
+  (fn [{:metamorph/keys [data mode id] :as ctx}]
+    (case mode
+      :fit (let [stats (fit-normalizer data)]
+             (assoc ctx id stats :metamorph/data (apply-normalizer data stats)))
+      :transform (assoc ctx :metamorph/data (apply-normalizer data (get ctx id))))))
 
 (def cart-pipeline
   (mm/pipeline
    (mm/lift prepare-features :poly+trig)
+   {:metamorph/id :normalizer} (normalize-step)
    {:metamorph/id :model} (ml/model cart-spec)))
 
-;; The `{:metamorph/id :model}` tag gives the model step a fixed name.
-;; This is required so `evaluate-pipelines` (Section 5) can find the
-;; trained model in the context.
+;; The `{:metamorph/id ...}` tags give steps fixed names.
+;; `:model` is required so `evaluate-pipelines` (Section 6) can find the
+;; trained model. `:normalizer` ensures the fitted stats are stored
+;; under a stable key.
 
 ;; ### Fit and transform
 
@@ -224,12 +288,15 @@
 (def pipe-fns
   {:cart-raw (mm/pipeline
               (mm/lift prepare-features :raw)
+              {:metamorph/id :normalizer} (normalize-step)
               {:metamorph/id :model} (ml/model cart-spec))
    :cart-poly (mm/pipeline
                (mm/lift prepare-features :poly+trig)
+               {:metamorph/id :normalizer} (normalize-step)
                {:metamorph/id :model} (ml/model cart-spec))
    :sgd-poly (mm/pipeline
               (mm/lift prepare-features :poly+trig)
+              {:metamorph/id :normalizer} (normalize-step)
               {:metamorph/id :model} (ml/model linear-sgd-spec))})
 
 (def manual-results
@@ -309,13 +376,14 @@ ml/train-predict-cache
 
 ;; Now `ml/train` checks this cache before training:
 
-(let [train-prep (prepare-features (:train splits) :poly+trig)]
+(let [train-prep (prepare-features (:train splits) :poly+trig)
+      train-normed (apply-normalizer train-prep (fit-normalizer train-prep))]
   (let [start (System/nanoTime)
-        _ (ml/train train-prep cart-spec)
+        _ (ml/train train-normed cart-spec)
         first-ms (/ (- (System/nanoTime) start) 1e6)
 
         start2 (System/nanoTime)
-        _ (ml/train train-prep cart-spec)
+        _ (ml/train train-normed cart-spec)
         second-ms (/ (- (System/nanoTime) start2) 1e6)]
     {:first-ms (Math/round first-ms)
      :second-ms (Math/round second-ms)
@@ -394,6 +462,7 @@ ml/train-predict-cache
 (def pocket-cart-pipe
   (mm/pipeline
    (mm/lift prepare-features :poly+trig)
+   {:metamorph/id :normalizer} (normalize-step)
    {:metamorph/id :model} (pocket-model cart-spec)))
 
 ;; First run — trains and caches:
@@ -449,7 +518,80 @@ ml/train-predict-cache
 
 ;; ---
 
-;; ## Section 5 — The payoff: cross-validation and hyperparameter search
+;; ## Section 5 — Caching pipelines: full provenance with Pocket
+
+;; The metamorph pipeline above is concise — three steps in one object.
+;; But the cache key for the model depends on the dataset's content
+;; (hashed), not on *how* the data was produced. If you want to trace
+;; a cached model back to the original parameters that generated the
+;; data, you need a different approach.
+;;
+;; In the [ML Workflows](ml_workflows.html) chapter, we built a DAG
+;; of `pocket/cached` calls — each step's identity derives from the
+;; previous step's `Cached` ref, not from the dataset itself.
+;; We can do the same thing here. The result is a **caching pipeline**:
+;; the same computation as the metamorph pipeline, but with full
+;; provenance from scalar parameters to trained model.
+
+;; ### Building the pipeline as Cached refs
+;;
+;; Every step is a `pocket/cached` call. The normalization creates
+;; a diamond dependency — `stats-c` feeds both the training
+;; normalization and (later) the test normalization.
+
+(pocket/cleanup!)
+
+(def data-c
+  (pocket/cached #'make-regression-data
+                 {:f #'nonlinear-fn :n 500 :noise-sd 0.5 :seed 42}))
+
+(def split-c (pocket/cached #'split-dataset data-c {:seed 42}))
+(def train-c (pocket/cached :train split-c))
+(def test-c  (pocket/cached :test split-c))
+
+(def train-prepped-c (pocket/cached #'prepare-features train-c :poly+trig))
+(def stats-c         (pocket/cached #'fit-normalizer train-prepped-c))
+(def train-normed-c  (pocket/cached #'apply-normalizer train-prepped-c stats-c))
+(def model-c         (pocket/cached #'ml/train train-normed-c cart-spec))
+
+;; ### Provenance
+;;
+;; Every node is a `Cached` ref. `origin-story-mermaid` shows the
+;; full DAG — from the scalar seed and row count, through data
+;; generation, splitting, feature engineering, normalization, to the
+;; trained model:
+
+(pocket/origin-story-mermaid model-c)
+
+;; The diamond dependency is visible: `fit-normalizer` and
+;; `apply-normalizer` both trace back to `prepare-features` on the
+;; training split. Change the seed or noise level, and only the
+;; affected steps recompute.
+
+;; ### Prediction on test data
+;;
+;; For prediction, we deref the cached stats and model, and apply
+;; the same preprocessing to the test set:
+
+(let [test-prepped (prepare-features @test-c :poly+trig)
+      test-normed (apply-normalizer test-prepped @stats-c)]
+  {:rmse (loss/rmse (:y test-normed)
+                    (:y (ml/predict test-normed @model-c)))})
+
+(kind/test-last
+ [(fn [m] (< (:rmse m) 2.0))])
+
+;; This is the same computation as the metamorph pipeline, expressed
+;; as explicit cached steps. The trade-off: more verbose, but every
+;; intermediate result is cached and traceable. For exploratory work
+;; where you want to understand exactly what changed and why, this
+;; can be valuable.
+
+(pocket/cleanup!)
+
+;; ---
+
+;; ## Section 6 — The payoff: cross-validation and hyperparameter search
 
 ;; The real benefit of caching inside `evaluate-pipelines` appears when
 ;; you run **many pipelines** over **many splits**. Each unique
@@ -476,6 +618,7 @@ ml/train-predict-cache
                      :tribuo-trainer-name "cart"}]
            (mm/pipeline
             (mm/lift prepare-features :poly+trig)
+            {:metamorph/id :normalizer} (normalize-step)
             {:metamorph/id :model} (pocket-model spec))))))
 
 ;; ### 3-fold cross-validation
@@ -568,12 +711,14 @@ depth-summary
                   :tribuo-trainer-name "cart"}]
         (mm/pipeline
          (mm/lift prepare-features fs)
+         {:metamorph/id :normalizer} (normalize-step)
          {:metamorph/id :model} (pocket-model spec))))
      ;; Linear SGD × depths (only with poly+trig — raw features can't
      ;; capture the nonlinear target)
     (for [_depth [4 6 8]]
       (mm/pipeline
        (mm/lift prepare-features :poly+trig)
+       {:metamorph/id :normalizer} (normalize-step)
        {:metamorph/id :model} (pocket-model linear-sgd-spec))))))
 
 (def search-results
@@ -604,7 +749,7 @@ depth-summary
 
 ;; ---
 
-;; ## Section 6 — Does caching matter? Scaling to realistic sizes
+;; ## Section 7 — Does caching matter? Scaling to realistic sizes
 
 ;; With 500 data points, training is fast and caching overhead is
 ;; comparable to the training time itself. But real datasets are bigger.
@@ -636,9 +781,11 @@ depth-summary
                  {:f nonlinear-fn :n n :noise-sd 0.5 :seed 42})
            uncached-pipe (mm/pipeline
                           (mm/lift prepare-features :poly+trig)
+                          {:metamorph/id :normalizer} (normalize-step)
                           {:metamorph/id :model} (ml/model cart-spec))
            cached-pipe (mm/pipeline
                         (mm/lift prepare-features :poly+trig)
+                        {:metamorph/id :normalizer} (normalize-step)
                         {:metamorph/id :model} (pocket-model cart-spec))]
        ;; Uncached
        (pocket/cleanup!)
@@ -704,16 +851,22 @@ depth-summary
 
 ;; ## Summary
 
-;; This chapter showed how to bring Pocket caching into metamorph.ml
-;; pipelines:
+;; This chapter showed several ways to cache an ML pipeline that
+;; includes a **stateful normalization** step (fit stats on training
+;; data, apply to both train and test):
 ;;
-;; - **metamorph.ml pipelines** bundle preprocessing and model into a
-;;   single callable, with `:fit` and `:transform` modes
-;; - **`evaluate-pipelines`** runs pipelines through cross-validation
-;;   splits and reports metrics — the standard way to compare models
-;; - **`pocket-model`** is a drop-in replacement for `ml/model` that
+;; - **Plain ML**: `fit-normalizer` / `apply-normalizer` called
+;;   manually — the fit/transform pattern is explicit in the code
+;; - **Metamorph.ml pipelines**: `normalize-step` stores fitted stats
+;;   in the context map under `:fit` mode and retrieves them under
+;;   `:transform` — the standard way to express stateful transforms
+;; - **`pocket-model`**: a drop-in replacement for `ml/model` that
 ;;   caches `ml/train` through Pocket — same pipeline structure, but
 ;;   training results persist to disk and survive JVM restarts
+;; - **Caching pipelines**: building the pipeline as explicit
+;;   `pocket/cached` chains gives full provenance —
+;;   `origin-story` traces from the model back to the original
+;;   scalar parameters (seed, row count, noise level)
 ;; - **Concurrency**: when multiple threads train the same model,
 ;;   Pocket runs it once and shares the result
 ;; - **Hyperparameter search** benefits most: many pipelines × many
@@ -729,3 +882,6 @@ depth-summary
 ;; ## Cleanup
 
 (pocket/cleanup!)
+
+
+
