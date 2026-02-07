@@ -243,7 +243,7 @@
  (is
   ((fn
     [rows]
-    (every? (fn* [p1__92243#] (number? (:rmse p1__92243#))) rows))
+    (every? (fn* [p1__92735#] (number? (:rmse p1__92735#))) rows))
    v35_l253)))
 
 
@@ -294,14 +294,14 @@
 
 
 (def
- v46_l319
+ v46_l313
  (reset!
   ml/train-predict-cache
   {:use-cache false, :get-fn (fn [k] nil), :set-fn (fn [k v] nil)}))
 
 
 (def
- v48_l339
+ v48_l336
  (defn
   pocket-model
   "Like `ml/model`, but caches `ml/train` calls through Pocket.\n   Drop-in replacement for `ml/model` in metamorph pipelines.\n\n   In `:fit` mode, wraps `ml/train` with `pocket/cached` — the trained\n   model is persisted to disk, keyed by the dataset content and options.\n   In `:transform` mode, calls `ml/predict` directly (predictions are\n   cheap and dataset-dependent, so caching them is usually not worth it)."
@@ -330,11 +330,11 @@
      (assoc :metamorph/data (ml/predict data (get ctx id))))))))
 
 
-(def v50_l372 (pocket/cleanup!))
+(def v50_l369 (pocket/cleanup!))
 
 
 (def
- v51_l374
+ v51_l371
  (def
   pocket-cart-pipe
   (mm/pipeline
@@ -344,25 +344,25 @@
 
 
 (def
- v53_l381
+ v53_l378
  (def pocket-fitted (mm/fit-pipe (:train splits) pocket-cart-pipe)))
 
 
-(def v55_l385 (pocket/cache-stats))
+(def v55_l382 (pocket/cache-stats))
 
 
 (deftest
- t56_l387
- (is ((fn [stats] (= 1 (:total-entries stats))) v55_l385)))
+ t56_l384
+ (is ((fn [stats] (= 1 (:total-entries stats))) v55_l382)))
 
 
 (def
- v58_l392
+ v58_l389
  (def pocket-fitted-2 (mm/fit-pipe (:train splits) pocket-cart-pipe)))
 
 
 (def
- v60_l396
+ v60_l393
  (let
   [pred1
    (:metamorph/data
@@ -377,14 +377,14 @@
    :rmse-2 (loss/rmse (:y (:test splits)) (:y pred2))}))
 
 
-(deftest t61_l401 (is ((fn [m] (= (:rmse-1 m) (:rmse-2 m))) v60_l396)))
+(deftest t61_l398 (is ((fn [m] (= (:rmse-1 m) (:rmse-2 m))) v60_l393)))
 
 
-(def v63_l413 (pocket/cleanup!))
+(def v63_l410 (pocket/cleanup!))
 
 
 (def
- v64_l415
+ v64_l412
  (def
   pocket-eval
   (ml/evaluate-pipelines
@@ -397,23 +397,23 @@
 
 
 (def
- v65_l424
+ v65_l421
  (let
   [r (first (first pocket-eval))]
   {:test-rmse (get-in r [:test-transform :metric])}))
 
 
-(deftest t66_l427 (is ((fn [m] (< (:test-rmse m) 2.0)) v65_l424)))
+(deftest t66_l424 (is ((fn [m] (< (:test-rmse m) 2.0)) v65_l421)))
 
 
-(def v68_l446 (pocket/cleanup!))
+(def v68_l443 (pocket/cleanup!))
 
 
-(def v69_l448 (def depth-values [2 4 6 8 12]))
+(def v69_l445 (def depth-values [2 4 6 8 12]))
 
 
 (def
- v70_l450
+ v70_l447
  (def
   depth-pipe-fns
   (vec
@@ -434,12 +434,12 @@
 
 
 (def
- v72_l468
+ v72_l465
  (def kfold-splits (tc/split->seq ds-500 :kfold {:k 3, :seed 42})))
 
 
 (def
- v74_l473
+ v74_l470
  (defn
   run-depth-search
   []
@@ -453,7 +453,7 @@
 
 
 (def
- v75_l482
+ v75_l479
  (def
   first-run-ms
   (let
@@ -466,11 +466,11 @@
    (Math/round elapsed))))
 
 
-(def v76_l488 first-run-ms)
+(def v76_l485 first-run-ms)
 
 
 (def
- v78_l492
+ v78_l489
  (def
   second-run-ms
   (let
@@ -483,25 +483,25 @@
    (Math/round elapsed))))
 
 
-(def v79_l498 second-run-ms)
+(def v79_l495 second-run-ms)
 
 
-(deftest t80_l500 (is ((fn [ms] (< ms first-run-ms)) v79_l498)))
+(deftest t80_l497 (is ((fn [ms] (< ms first-run-ms)) v79_l495)))
 
 
-(def v82_l505 (pocket/cache-stats))
+(def v82_l502 (pocket/cache-stats))
 
 
 (deftest
- t83_l507
- (is ((fn [stats] (= 15 (:total-entries stats))) v82_l505)))
+ t83_l504
+ (is ((fn [stats] (= 15 (:total-entries stats))) v82_l502)))
 
 
-(def v85_l512 (def depth-results (run-depth-search)))
+(def v85_l509 (def depth-results (run-depth-search)))
 
 
 (def
- v86_l514
+ v86_l511
  (def
   depth-summary
   (mapv
@@ -514,19 +514,19 @@
    depth-values)))
 
 
-(def v87_l522 depth-summary)
+(def v87_l519 depth-summary)
 
 
 (deftest
- t88_l524
- (is ((fn [rows] (= (count rows) (count depth-values))) v87_l522)))
+ t88_l521
+ (is ((fn [rows] (= (count rows) (count depth-values))) v87_l519)))
 
 
-(def v90_l536 (pocket/cleanup!))
+(def v90_l533 (pocket/cleanup!))
 
 
 (def
- v91_l538
+ v91_l535
  (def
   search-pipe-fns
   (vec
@@ -554,7 +554,7 @@
 
 
 (def
- v92_l559
+ v92_l556
  (def
   search-results
   (ml/evaluate-pipelines
@@ -567,28 +567,28 @@
 
 
 (def
- v94_l570
+ v94_l567
  (let
   [best
    (first
     (first
      (sort-by
       (fn*
-       [p1__92244#]
-       (get-in (first p1__92244#) [:test-transform :metric]))
+       [p1__92736#]
+       (get-in (first p1__92736#) [:test-transform :metric]))
       search-results)))]
   {:best-rmse (get-in best [:test-transform :metric]),
    :best-fit-ms (:timing-fit best)}))
 
 
-(deftest t95_l576 (is ((fn [m] (< (:best-rmse m) 2.0)) v94_l570)))
+(deftest t95_l573 (is ((fn [m] (< (:best-rmse m) 2.0)) v94_l567)))
 
 
-(def v97_l583 (pocket/cache-stats))
+(def v97_l580 (pocket/cache-stats))
 
 
 (def
- v99_l599
+ v99_l596
  (defn
   time-pipeline
   "Time a 3-fold CV evaluation of a single pipeline.\n   Returns elapsed milliseconds."
@@ -609,7 +609,7 @@
 
 
 (def
- v100_l612
+ v100_l609
  (def
   scaling-results
   (vec
@@ -643,22 +643,22 @@
        :pocket-second-ms second-ms}))))))
 
 
-(def v101_l635 (tc/dataset scaling-results))
+(def v101_l632 (tc/dataset scaling-results))
 
 
 (deftest
- t102_l637
+ t102_l634
  (is
   ((fn
     [ds]
     (let
      [row-10k (last (tc/rows ds :as-maps))]
      (< (:pocket-second-ms row-10k) (:uncached-ms row-10k))))
-   v101_l635)))
+   v101_l632)))
 
 
 (def
- v104_l661
+ v104_l662
  (let
   [rows scaling-results]
   (kind/plotly
@@ -681,4 +681,4 @@
      :title "3-fold CV timing by data size"}})))
 
 
-(def v106_l705 (pocket/cleanup!))
+(def v106_l708 (pocket/cleanup!))

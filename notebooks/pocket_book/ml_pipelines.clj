@@ -14,7 +14,7 @@
 ;;
 ;; 1. **The regression problem** — a quick recap of the data and models
 ;; 2. **Metamorph.ml pipelines** — rewriting the workflow as a pipeline
-;; 3. **Metamorph.ml's built-in cache** — what it does, and its limits
+;; 3. **Metamorph.ml's built-in cache** — what it offers
 ;; 4. **Pocket-caching models** — a `pocket-model` step that caches
 ;;    training through Pocket
 ;; 5. **Cross-validation and hyperparameter search** — where caching
@@ -303,18 +303,12 @@ ml/train-predict-cache
                (> (:first-ms m) (:second-ms m))))])
 
 ;; The second call is nearly instant — it returns the cached model.
+;; This is handy for quick in-session iteration: zero configuration,
+;; and the cache sits right inside metamorph.ml.
 ;;
-;; But this cache has significant limitations:
-;;
-;; - **Session-local**: the cache is a plain atom, gone when the JVM
-;;   restarts. Run your notebook again? Everything retrains.
-;; - **Hash-based keys**: uses `clojure.core/hash` (32-bit integer).
-;;   Different datasets or options can collide to the same hash.
-;; - **No provenance**: the cache key is opaque — you can't tell what
-;;   function, data, or parameters produced a cached result.
-;; - **No disk persistence**: no way to save the cache for later.
-;;
-;; Let's turn it off and try something better.
+;; For longer-running workflows — where you restart the REPL between
+;; sessions, or want to inspect what's been cached — Pocket can add
+;; a few things on top. Let's see how.
 
 (reset! ml/train-predict-cache
         {:use-cache false
@@ -325,9 +319,12 @@ ml/train-predict-cache
 
 ;; ## Section 4 — Pocket-caching models
 
-;; Pocket provides what metamorph.ml's cache lacks: **disk persistence**,
-;; **identity-based keys** (SHA-1, not 32-bit hash), and **provenance**
-;; (you can inspect what each cache entry represents).
+;; Pocket adds a few capabilities on top of the built-in cache:
+;; **disk persistence** (cached models survive JVM restarts),
+;; **identity-based keys** (SHA-1 hashes for reliable lookups),
+;; **provenance** (you can inspect what each cache entry represents),
+;; and **concurrency deduplication** (concurrent calls to the same
+;; computation run it only once and share the result).
 ;;
 ;; The idea: create a pipeline step that behaves exactly like
 ;; `ml/model`, but wraps the `ml/train` call with `pocket/cached`.
@@ -401,9 +398,9 @@ ml/train-predict-cache
 (kind/test-last
  [(fn [m] (= (:rmse-1 m) (:rmse-2 m)))])
 
-;; Unlike metamorph.ml's built-in cache, Pocket's cache **survives
-;; JVM restarts**. Close the REPL, reopen it, and the cached model
-;; is still there — loaded from disk in milliseconds.
+;; Since Pocket persists to disk, this cache **survives JVM restarts**.
+;; Close the REPL, reopen it, and the cached model is still there —
+;; loaded from disk in milliseconds.
 
 ;; ### `pocket-model` works with `evaluate-pipelines`
 
@@ -653,8 +650,12 @@ depth-summary
 ;;    pipeline retrains. Every other combination in your search grid
 ;;    comes from cache.
 ;;
-;; And unlike metamorph.ml's built-in cache, Pocket's cache **survives
-;; JVM restarts** — close the REPL, reopen, and everything is still there.
+;; 3. **Concurrent pipelines**: When multiple threads train the
+;;    same model, Pocket runs the computation once and shares the
+;;    result — no duplicate work.
+;;
+;; And since Pocket persists to disk, all of this **survives JVM
+;; restarts** — close the REPL, reopen, and everything is still there.
 
 ;; ### Scaling visualization
 
@@ -689,7 +690,9 @@ depth-summary
 ;;   splits and reports metrics — the standard way to compare models
 ;; - **`pocket-model`** is a drop-in replacement for `ml/model` that
 ;;   caches `ml/train` through Pocket — same pipeline structure, but
-;;   training results persist to disk
+;;   training results persist to disk and survive JVM restarts
+;; - **Concurrency**: when multiple threads train the same model,
+;;   Pocket runs it once and shares the result
 ;; - **Hyperparameter search** benefits most: many pipelines × many
 ;;   splits create many cache entries, and re-running reuses them all
 ;; - **Scaling**: at realistic data sizes, cached runs are orders of
