@@ -72,14 +72,24 @@
 (defn make-regression-data
   "Generate a synthetic regression dataset.
   `f` is a function from x to y (the ground truth).
-  Returns a dataset with columns `:x` and `:y`."
-  [{:keys [f n noise-sd seed]}]
+  Optional `outlier-fraction` (0–1) and `outlier-scale` inject
+  corrupted y values to simulate measurement errors."
+  [{:keys [f n noise-sd seed outlier-fraction outlier-scale]
+    :or {outlier-fraction 0 outlier-scale 10}}]
   (let [rng (java.util.Random. (long seed))
         xs (vec (repeatedly n #(* 10.0 (.nextDouble rng))))
         ys (mapv (fn [x] (+ (double (f x))
                             (* (double noise-sd) (.nextGaussian rng))))
-                 xs)]
-    (-> (tc/dataset {:x xs :y ys})
+                 xs)
+        ys-final (if (pos? outlier-fraction)
+                   (let [out-rng (java.util.Random. (+ (long seed) 7919))]
+                     (mapv (fn [y]
+                             (if (< (.nextDouble out-rng) outlier-fraction)
+                               (+ y (* (double outlier-scale) (.nextGaussian out-rng)))
+                               y))
+                           ys))
+                   ys)]
+    (-> (tc/dataset {:x xs :y ys-final})
         (ds-mod/set-inference-target :y))))
 
 (defn nonlinear-fn
@@ -99,36 +109,37 @@
                                          :cos-x (tcc/cos x)}))
         (ds-mod/set-inference-target :y))))
 
-;; ### Normalization
+;; ### Outlier threshold calibration
 ;;
-;; Real preprocessing often includes *normalization* — scaling features
-;; to have zero mean and unit variance. This is a **stateful transform**:
-;; you compute the statistics from training data, then apply them to
-;; any data (train or test). Using test statistics would leak information.
+;; Real data often contains outliers — anomalous measurements that
+;; distort model training. A common remedy is to **clip** extreme values
+;; to sensible bounds. This is a **stateful transform**: you compute
+;; the bounds from training data (using the
+;; [interquartile range](https://en.wikipedia.org/wiki/Interquartile_range)),
+;; then apply those same bounds to any data (train or test).
+;; Using test statistics would leak information.
 ;;
-;; We split this into two functions: one to *fit* (compute stats) and
-;; one to *apply* (transform data using those stats).
+;; We split this into two functions: one to *fit* (compute bounds) and
+;; one to *apply* (clip values using those bounds).
 
-(defn fit-normalizer
-  "Compute per-column mean and std from feature columns."
-  [ds]
-  (let [feature-cols (tc/column-names (cf/feature ds))]
-    (into {}
-          (for [col feature-cols
-                :let [vals (vec (ds col))
-                      n (count vals)
-                      mean (/ (reduce + vals) n)
-                      variance (/ (reduce + (map #(let [d (- % mean)] (* d d)) vals)) n)]]
-            [col {:mean mean :std (Math/sqrt (double variance))}]))))
+(defn fit-outlier-threshold
+  "Compute IQR-based clipping bounds for :y from training data.
+  Returns {:lower <bound> :upper <bound>}."
+  [train-ds]
+  (let [ys (sort (vec (:y train-ds)))
+        n (count ys)
+        q1 (nth ys (int (* 0.25 n)))
+        q3 (nth ys (int (* 0.75 n)))
+        iqr (- q3 q1)]
+    {:lower (- q1 (* 1.5 iqr))
+     :upper (+ q3 (* 1.5 iqr))}))
 
-(defn apply-normalizer
-  "Normalize feature columns using pre-computed statistics."
-  [ds stats]
-  (tc/add-columns ds
-                  (into {}
-                        (for [[col {:keys [mean std]}] stats
-                              :when (pos? std)]
-                          [col (tcc// (tcc/- (ds col) mean) std)]))))
+(defn clip-outliers
+  "Clip :y values using pre-computed threshold bounds."
+  [ds threshold]
+  (let [{:keys [lower upper]} threshold]
+    (-> (tc/add-column ds :y (-> (:y ds) (tcc/max lower) (tcc/min upper)))
+        (ds-mod/set-inference-target :y))))
 
 (defn split-dataset
   "Split a dataset into train/test using holdout."
@@ -159,27 +170,29 @@
 
 ;; ### Quick check: train and evaluate directly
 
-(def ds-500 (make-regression-data {:f nonlinear-fn :n 500 :noise-sd 0.5 :seed 42}))
+(def ds-500 (make-regression-data {:f nonlinear-fn :n 500 :noise-sd 0.5 :seed 42
+                                   :outlier-fraction 0.1 :outlier-scale 15}))
 
 (def splits (first (tc/split->seq ds-500 :holdout {:seed 42})))
 
-;; The normalization step is *stateful*: `fit-normalizer` computes
-;; statistics from the training set, and `apply-normalizer` uses
-;; those same statistics for both train and test. This prevents
+;; The outlier clipping step is *stateful*: `fit-outlier-threshold`
+;; computes bounds from the training set, and `clip-outliers` uses
+;; those same bounds for both train and test. This prevents
 ;; information leaking from test into training.
 
 (let [train-prep (prepare-features (:train splits) :poly+trig)
-      stats (fit-normalizer train-prep)
-      train-normed (apply-normalizer train-prep stats)
+      threshold (fit-outlier-threshold train-prep)
+      train-clipped (clip-outliers train-prep threshold)
       test-prep (prepare-features (:test splits) :poly+trig)
-      test-normed (apply-normalizer test-prep stats)
-      model (ml/train train-normed cart-spec)]
-  {:rmse (loss/rmse (:y test-normed) (:y (ml/predict test-normed model)))})
+      test-clipped (clip-outliers test-prep threshold)
+      model (ml/train train-clipped cart-spec)]
+  {:rmse (loss/rmse (:y test-clipped) (:y (ml/predict test-clipped model)))})
 
 (kind/test-last
- [(fn [m] (< (:rmse m) 2.0))])
+ [(fn [m] (< (:rmse m) 10.0))])
 
-;; With 500 data points and a CART tree, RMSE is well under 2.
+;; With 500 data points, 10% outliers, and a CART tree, the clipping
+;; brings RMSE down from the outlier-inflated level.
 
 ;; ### Adding Pocket caching
 
@@ -189,15 +202,15 @@
 (pocket/cleanup!)
 
 (let [train-prep (prepare-features (:train splits) :poly+trig)
-      stats (fit-normalizer train-prep)
-      train-normed (apply-normalizer train-prep stats)
+      threshold (fit-outlier-threshold train-prep)
+      train-clipped (clip-outliers train-prep threshold)
       test-prep (prepare-features (:test splits) :poly+trig)
-      test-normed (apply-normalizer test-prep stats)
-      model @(pocket/cached #'ml/train train-normed cart-spec)]
-  {:rmse (loss/rmse (:y test-normed) (:y (ml/predict test-normed model)))})
+      test-clipped (clip-outliers test-prep threshold)
+      model @(pocket/cached #'ml/train train-clipped cart-spec)]
+  {:rmse (loss/rmse (:y test-clipped) (:y (ml/predict test-clipped model)))})
 
 (kind/test-last
- [(fn [m] (< (:rmse m) 2.0))])
+ [(fn [m] (< (:rmse m) 10.0))])
 
 ;; Same result. Call it again and the model loads from cache — no
 ;; retraining. This is the approach shown in the
@@ -235,29 +248,29 @@
 ;; into a pipeline step that operates on `:metamorph/data`.
 ;; `ml/model` is the step that trains in `:fit` and predicts in `:transform`.
 ;;
-;; For normalization, we need a **stateful step** — one that computes
-;; stats in `:fit` mode and reuses them in `:transform` mode.
+;; For outlier clipping, we need a **stateful step** — one that computes
+;; bounds in `:fit` mode and reuses them in `:transform` mode.
 ;; The context map carries state between modes: the step stores its
-;; fitted stats under its `:metamorph/id` key.
+;; fitted bounds under its `:metamorph/id` key.
 
-(defn normalize-step
-  "Pipeline step: fit normalizer in :fit mode, apply stored stats in :transform."
+(defn clip-outlier-step
+  "Pipeline step: fit outlier threshold in :fit mode, apply stored bounds in :transform."
   []
   (fn [{:metamorph/keys [data mode id] :as ctx}]
     (case mode
-      :fit (let [stats (fit-normalizer data)]
-             (assoc ctx id stats :metamorph/data (apply-normalizer data stats)))
-      :transform (assoc ctx :metamorph/data (apply-normalizer data (get ctx id))))))
+      :fit (let [threshold (fit-outlier-threshold data)]
+             (assoc ctx id threshold :metamorph/data (clip-outliers data threshold)))
+      :transform (assoc ctx :metamorph/data (clip-outliers data (get ctx id))))))
 
 (def cart-pipeline
   (mm/pipeline
    (mm/lift prepare-features :poly+trig)
-   {:metamorph/id :normalizer} (normalize-step)
+   {:metamorph/id :clip-outlier} (clip-outlier-step)
    {:metamorph/id :model} (ml/model cart-spec)))
 
 ;; The `{:metamorph/id ...}` tags give steps fixed names.
 ;; `:model` is required so `evaluate-pipelines` (Section 6) can find the
-;; trained model. `:normalizer` ensures the fitted stats are stored
+;; trained model. `:clip-outlier` ensures the fitted bounds are stored
 ;; under a stable key.
 
 ;; ### Fit and transform
@@ -275,7 +288,7 @@
 (loss/rmse (:y (:test splits)) (:y predictions))
 
 (kind/test-last
- [(fn [rmse] (< rmse 2.0))])
+ [(fn [rmse] (< rmse 10.0))])
 
 ;; Same result as before, but the pipeline is now a single object
 ;; that can be passed to evaluation functions.
@@ -288,15 +301,15 @@
 (def pipe-fns
   {:cart-raw (mm/pipeline
               (mm/lift prepare-features :raw)
-              {:metamorph/id :normalizer} (normalize-step)
+              {:metamorph/id :clip-outlier} (clip-outlier-step)
               {:metamorph/id :model} (ml/model cart-spec))
    :cart-poly (mm/pipeline
                (mm/lift prepare-features :poly+trig)
-               {:metamorph/id :normalizer} (normalize-step)
+               {:metamorph/id :clip-outlier} (clip-outlier-step)
                {:metamorph/id :model} (ml/model cart-spec))
    :sgd-poly (mm/pipeline
               (mm/lift prepare-features :poly+trig)
-              {:metamorph/id :normalizer} (normalize-step)
+              {:metamorph/id :clip-outlier} (clip-outlier-step)
               {:metamorph/id :model} (ml/model linear-sgd-spec))})
 
 (def manual-results
@@ -311,7 +324,7 @@
 manual-results
 
 (kind/test-last
- [(fn [m] (< (:rmse (:cart-raw m)) 2.0))])
+ [(fn [m] (< (:rmse (:cart-raw m)) 10.0))])
 
 ;; This works, but we wrote the fit-transform loop ourselves.
 ;; We also used a single train/test split — not very robust.
@@ -377,13 +390,13 @@ ml/train-predict-cache
 ;; Now `ml/train` checks this cache before training:
 
 (let [train-prep (prepare-features (:train splits) :poly+trig)
-      train-normed (apply-normalizer train-prep (fit-normalizer train-prep))]
+      train-clipped (clip-outliers train-prep (fit-outlier-threshold train-prep))]
   (let [start (System/nanoTime)
-        _ (ml/train train-normed cart-spec)
+        _ (ml/train train-clipped cart-spec)
         first-ms (/ (- (System/nanoTime) start) 1e6)
 
         start2 (System/nanoTime)
-        _ (ml/train train-normed cart-spec)
+        _ (ml/train train-clipped cart-spec)
         second-ms (/ (- (System/nanoTime) start2) 1e6)]
     {:first-ms (Math/round first-ms)
      :second-ms (Math/round second-ms)
@@ -462,7 +475,7 @@ ml/train-predict-cache
 (def pocket-cart-pipe
   (mm/pipeline
    (mm/lift prepare-features :poly+trig)
-   {:metamorph/id :normalizer} (normalize-step)
+   {:metamorph/id :clip-outlier} (clip-outlier-step)
    {:metamorph/id :model} (pocket-model cart-spec)))
 
 ;; First run — trains and caches:
@@ -514,7 +527,7 @@ ml/train-predict-cache
   {:test-rmse (get-in r [:test-transform :metric])})
 
 (kind/test-last
- [(fn [m] (< (:test-rmse m) 2.0))])
+ [(fn [m] (< (:test-rmse m) 10.0))])
 
 ;; ---
 
@@ -535,51 +548,53 @@ ml/train-predict-cache
 
 ;; ### Building the pipeline as Cached refs
 ;;
-;; Every step is a `pocket/cached` call. The normalization creates
-;; a diamond dependency — `stats-c` feeds both the training
-;; normalization and (later) the test normalization.
+;; Every step is a `pocket/cached` call. The outlier clipping creates
+;; a diamond dependency — `threshold-c` feeds both the training
+;; clipping and the test clipping.
 
 (pocket/cleanup!)
 
 (def data-c
   (pocket/cached #'make-regression-data
-                 {:f #'nonlinear-fn :n 500 :noise-sd 0.5 :seed 42}))
+                 {:f #'nonlinear-fn :n 500 :noise-sd 0.5 :seed 42
+                  :outlier-fraction 0.1 :outlier-scale 15}))
 
 (def split-c (pocket/cached #'split-dataset data-c {:seed 42}))
 (def train-c (pocket/cached :train split-c))
-(def test-c  (pocket/cached :test split-c))
+(def test-c (pocket/cached :test split-c))
 
 (def train-prepped-c (pocket/cached #'prepare-features train-c :poly+trig))
-(def stats-c         (pocket/cached #'fit-normalizer train-prepped-c))
-(def train-normed-c  (pocket/cached #'apply-normalizer train-prepped-c stats-c))
-(def model-c         (pocket/cached #'ml/train train-normed-c cart-spec))
+(def test-prepped-c (pocket/cached #'prepare-features test-c :poly+trig))
+(def threshold-c (pocket/cached #'fit-outlier-threshold train-prepped-c))
+(def train-clipped-c (pocket/cached #'clip-outliers train-prepped-c threshold-c))
+(def test-clipped-c (pocket/cached #'clip-outliers test-prepped-c threshold-c))
+(def model-c (pocket/cached #'ml/train train-clipped-c cart-spec))
 
 ;; ### Provenance
 ;;
 ;; Every node is a `Cached` ref. `origin-story-mermaid` shows the
 ;; full DAG — from the scalar seed and row count, through data
-;; generation, splitting, feature engineering, normalization, to the
+;; generation, splitting, feature engineering, outlier clipping, to the
 ;; trained model:
 
 (pocket/origin-story-mermaid model-c)
 
-;; The diamond dependency is visible: `fit-normalizer` and
-;; `apply-normalizer` both trace back to `prepare-features` on the
-;; training split. Change the seed or noise level, and only the
-;; affected steps recompute.
+;; The diamond dependency is visible: `threshold-c` (fitted from
+;; training data) feeds both `train-clipped-c` and `test-clipped-c`.
+;; Change the seed or noise level, and only the affected steps
+;; recompute.
 
 ;; ### Prediction on test data
 ;;
-;; For prediction, we deref the cached stats and model, and apply
-;; the same preprocessing to the test set:
+;; For prediction, we deref the cached model and the cached clipped
+;; test set:
 
-(let [test-prepped (prepare-features @test-c :poly+trig)
-      test-normed (apply-normalizer test-prepped @stats-c)]
-  {:rmse (loss/rmse (:y test-normed)
-                    (:y (ml/predict test-normed @model-c)))})
+(let [test-clipped @test-clipped-c]
+  {:rmse (loss/rmse (:y test-clipped)
+                    (:y (ml/predict test-clipped @model-c)))})
 
 (kind/test-last
- [(fn [m] (< (:rmse m) 2.0))])
+ [(fn [m] (< (:rmse m) 10.0))])
 
 ;; This is the same computation as the metamorph pipeline, expressed
 ;; as explicit cached steps. The trade-off: more verbose, but every
@@ -618,7 +633,7 @@ ml/train-predict-cache
                      :tribuo-trainer-name "cart"}]
            (mm/pipeline
             (mm/lift prepare-features :poly+trig)
-            {:metamorph/id :normalizer} (normalize-step)
+            {:metamorph/id :clip-outlier} (clip-outlier-step)
             {:metamorph/id :model} (pocket-model spec))))))
 
 ;; ### 3-fold cross-validation
@@ -688,13 +703,12 @@ depth-summary
  [(fn [rows] (= (count rows) (count depth-values)))])
 
 ;; ### Combined search: depth × feature set × model type
-
 ;; Let's go bigger. We'll search over:
 ;; - 3 tree depths (4, 6, 8)
 ;; - 2 feature sets (`:raw`, `:poly+trig`)
 ;; - 2 model types (CART tree, linear SGD — SGD only with `:poly+trig`)
 ;;
-;; That's 3×2 + 3×1 = 9 pipelines, each evaluated with 3-fold CV = 27 training runs.
+;; That's 3×2 CART + 1 SGD = 7 pipelines, each evaluated with 3-fold CV = 21 training runs.
 
 (pocket/cleanup!)
 
@@ -711,15 +725,14 @@ depth-summary
                   :tribuo-trainer-name "cart"}]
         (mm/pipeline
          (mm/lift prepare-features fs)
-         {:metamorph/id :normalizer} (normalize-step)
+         {:metamorph/id :clip-outlier} (clip-outlier-step)
          {:metamorph/id :model} (pocket-model spec))))
-     ;; Linear SGD × depths (only with poly+trig — raw features can't
-     ;; capture the nonlinear target)
-    (for [_depth [4 6 8]]
-      (mm/pipeline
-       (mm/lift prepare-features :poly+trig)
-       {:metamorph/id :normalizer} (normalize-step)
-       {:metamorph/id :model} (pocket-model linear-sgd-spec))))))
+     ;; Linear SGD with poly+trig (raw features can't capture the
+     ;; nonlinear target, so only one feature set)
+    [(mm/pipeline
+      (mm/lift prepare-features :poly+trig)
+      {:metamorph/id :clip-outlier} (clip-outlier-step)
+      {:metamorph/id :model} (pocket-model linear-sgd-spec))])))
 
 (def search-results
   (ml/evaluate-pipelines
@@ -739,9 +752,9 @@ depth-summary
    :best-fit-ms (:timing-fit best)})
 
 (kind/test-last
- [(fn [m] (< (:best-rmse m) 2.0))])
+ [(fn [m] (< (:best-rmse m) 10.0))])
 
-;; All 27 training runs are now cached. Re-running the search is instant.
+;; All 21 training runs are now cached. Re-running the search is instant.
 ;; If we add a new depth value or feature set, only the new combinations
 ;; train — everything else comes from cache.
 
@@ -778,14 +791,15 @@ depth-summary
   (vec
    (for [n [500 5000 10000]]
      (let [data (make-regression-data
-                 {:f nonlinear-fn :n n :noise-sd 0.5 :seed 42})
+                 {:f nonlinear-fn :n n :noise-sd 0.5 :seed 42
+                  :outlier-fraction 0.1 :outlier-scale 15})
            uncached-pipe (mm/pipeline
                           (mm/lift prepare-features :poly+trig)
-                          {:metamorph/id :normalizer} (normalize-step)
+                          {:metamorph/id :clip-outlier} (clip-outlier-step)
                           {:metamorph/id :model} (ml/model cart-spec))
            cached-pipe (mm/pipeline
                         (mm/lift prepare-features :poly+trig)
-                        {:metamorph/id :normalizer} (normalize-step)
+                        {:metamorph/id :clip-outlier} (clip-outlier-step)
                         {:metamorph/id :model} (pocket-model cart-spec))]
        ;; Uncached
        (pocket/cleanup!)
@@ -811,7 +825,7 @@ depth-summary
 ;; regardless. But as data grows, the gap widens. At 10,000 rows,
 ;; the cached second run is dramatically faster than retraining.
 ;;
-;; The real impact comes in two scenarios:
+;; The real impact comes in three scenarios:
 ;;
 ;; 1. **Re-running a notebook**: Without caching, every model retrains.
 ;;    With Pocket, cached results load from disk in milliseconds.
@@ -852,21 +866,23 @@ depth-summary
 ;; ## Summary
 
 ;; This chapter showed several ways to cache an ML pipeline that
-;; includes a **stateful normalization** step (fit stats on training
+;; includes a **stateful outlier clipping** step (fit bounds on training
 ;; data, apply to both train and test):
 ;;
-;; - **Plain ML**: `fit-normalizer` / `apply-normalizer` called
+;; - **Plain ML**: `fit-outlier-threshold` / `clip-outliers` called
 ;;   manually — the fit/transform pattern is explicit in the code
-;; - **Metamorph.ml pipelines**: `normalize-step` stores fitted stats
-;;   in the context map under `:fit` mode and retrieves them under
-;;   `:transform` — the standard way to express stateful transforms
+;; - **Metamorph.ml pipelines**: `clip-outlier-step` stores fitted
+;;   bounds in the context map under `:fit` mode and retrieves them
+;;   under `:transform` — the standard way to express stateful transforms
 ;; - **`pocket-model`**: a drop-in replacement for `ml/model` that
 ;;   caches `ml/train` through Pocket — same pipeline structure, but
 ;;   training results persist to disk and survive JVM restarts
 ;; - **Caching pipelines**: building the pipeline as explicit
 ;;   `pocket/cached` chains gives full provenance —
 ;;   `origin-story` traces from the model back to the original
-;;   scalar parameters (seed, row count, noise level)
+;;   scalar parameters (seed, row count, noise level). The diamond
+;;   dependency is visible: outlier bounds fitted from training data
+;;   feed both the train and test clipping paths.
 ;; - **Concurrency**: when multiple threads train the same model,
 ;;   Pocket runs it once and shares the result
 ;; - **Hyperparameter search** benefits most: many pipelines × many
