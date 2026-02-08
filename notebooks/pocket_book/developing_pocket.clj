@@ -8,7 +8,9 @@
 
 (ns pocket-book.developing-pocket
   (:require
+   ;; Annotating kinds of visualizations:
    [scicloj.kindly.v4.kind :as kind]
+   ;; String utilities:
    [clojure.string :as str]))
 
 ;; ## Rendering notebooks

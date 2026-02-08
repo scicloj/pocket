@@ -5,10 +5,13 @@
 ^{:kindly/hide-code true
   :kindly/options {:kinds-that-hide-code #{:kind/doc}}}
 (ns pocket-book.api-reference
-  (:require [pocket-book.logging]
-            [scicloj.pocket :as pocket]
-            [scicloj.kindly.v4.kind :as kind]))
-
+  (:require
+   ;; Logging setup for this chapter (see Logging chapter):
+   [pocket-book.logging]
+   ;; Pocket API:
+   [scicloj.pocket :as pocket]
+   ;; Annotating kinds of visualizations:
+   [scicloj.kindly.v4.kind :as kind]))
 
 ;; ## Setup
 
@@ -51,7 +54,6 @@ pocket/*base-cache-dir*
 ;; Inspect the current effective configuration:
 
 (pocket/config)
-
 
 (kind/doc #'pocket/cached)
 
@@ -278,7 +280,6 @@ pocket/*base-cache-dir*
 
 ;; Note: `:epochs` is not shown because it's the same (100) in both experiments.
 ;; Only varying parameters appear in the comparison.
-
 
 (pocket/cleanup!)
 ;; ## Extending `PIdentifiable`

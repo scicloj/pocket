@@ -32,7 +32,7 @@
 ;; Scicloj library for machine learning pipelines. It builds on
 ;; [metamorph](https://github.com/scicloj/metamorph), a
 ;; data-transformation framework where each step is a function that
-;; takes a context map and returns an updated one. metamorph.ml
+;; takes a context map and returns an updated one. Metamorph
 ;; distinguishes two modes — `:fit` (learn from training data) and
 ;; `:transform` (apply to new data) — so a pipeline can be trained
 ;; once and reused for prediction.
@@ -67,13 +67,19 @@
 
 (ns pocket-book.pocket-pipeline
   (:require
+   ;; Logging setup for this chapter (see Logging chapter):
    [pocket-book.logging]
+   ;; Pocket API:
    [scicloj.pocket :as pocket]
+   ;; Annotating kinds of visualizations:
    [scicloj.kindly.v4.kind :as kind]
+   ;; Metamorph pipeline tools:
    [scicloj.metamorph.core :as mm]
+   ;; Data processing:
    [tablecloth.api :as tc]
    [tablecloth.column.api :as tcc]
    [tech.v3.dataset.modelling :as ds-mod]
+   ;; Machine learning:
    [scicloj.metamorph.ml :as ml]
    [scicloj.metamorph.ml.loss :as loss]
    [scicloj.ml.tribuo]))
@@ -82,20 +88,7 @@
 ;; has many cached steps and debug output (cache hits, writes) would
 ;; overwhelm the rendered output. Info level shows cache misses,
 ;; invalidation, and cleanup — enough to see when computation happens.
-(try
-  (let [level-field (.getDeclaredField org.slf4j.simple.SimpleLogger "currentLogLevel")
-        config-field (.getDeclaredField org.slf4j.simple.SimpleLogger "CONFIG_PARAMS")]
-    (.setAccessible level-field true)
-    (.setAccessible config-field true)
-    ;; Set default for any not-yet-created loggers:
-    (let [config (.get config-field nil)
-          dl (.getDeclaredField (class config) "defaultLogLevel")]
-      (.setAccessible dl true)
-      (.setInt dl config 20))
-    ;; Set level on existing logger instances (warm JVM / REPL):
-    (doseq [name ["scicloj.pocket" "scicloj.pocket.impl.cache"]]
-      (.setInt level-field (org.slf4j.LoggerFactory/getLogger name) 20)))
-  (catch Exception _))
+(pocket-book.logging/set-slf4j-level! :info)
 
 (def cache-dir "/tmp/pocket-metamorph")
 

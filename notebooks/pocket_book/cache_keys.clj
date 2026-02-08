@@ -10,10 +10,13 @@
 
 (ns pocket-book.cache-keys
   (:require
+   ;; Pocket API and internals:
    [scicloj.pocket :as pocket]
    [scicloj.pocket.impl.cache :as cache]
    [scicloj.pocket.protocols :as proto]
+   ;; Annotating kinds of visualizations:
    [scicloj.kindly.v4.kind :as kind]
+   ;; Data processing:
    [tablecloth.api :as tc]
    [tech.v3.dataset.modelling :as ds-mod]))
 
