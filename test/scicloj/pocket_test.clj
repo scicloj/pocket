@@ -971,3 +971,60 @@
     ;; by verifying the current resolve functions work with valid env vars
     ;; The main fix is structural — wrapping with try/catch in parse-env
     (is (map? (pocket/config)) "config should resolve without error")))
+
+(defn origin-add [a b] (+ a b))
+
+(defn origin-make-map [n]
+  (zipmap (range n) (range n)))
+
+(deftest test-origin-registry
+  (testing "Derefed IObj value carries origin identity"
+    (let [c (pocket/cached #'origin-make-map 5)
+          id-cached (pocket/->id c)
+          result @c
+          id-dereffed (pocket/->id result)]
+      (is (= id-cached id-dereffed)
+          "->id of derefed value should equal ->id of Cached ref")))
+
+  (testing "Downstream cache key stability"
+    (let [c (pocket/cached #'origin-make-map 3)
+          ;; Create downstream cached using Cached ref
+          downstream-ref (pocket/cached #'origin-make-map c)
+          id-ref (pocket/->id downstream-ref)
+          ;; Create downstream cached using derefed value
+          downstream-deref (pocket/cached #'origin-make-map @c)
+          id-deref (pocket/->id downstream-deref)]
+      (is (= id-ref id-deref)
+          "Cache key should be the same whether passing Cached or derefed value")))
+
+  (testing "Primitives are NOT registered (interned by JVM)"
+    (let [c (pocket/cached #'origin-add 10 20)
+          result @c]
+      (is (= 30 (pocket/->id result))
+          "Primitive derefed value should NOT carry origin")))
+
+  (testing "Transformation breaks origin"
+    (let [c (pocket/cached #'origin-make-map 5)
+          m @c
+          id-origin (pocket/->id m)
+          ;; Transform: assoc creates a new object
+          m2 (assoc m :extra 99)
+          id-transformed (pocket/->id m2)]
+      (is (not= id-origin id-transformed)
+          "Transformed value should NOT carry origin")))
+
+  (testing "Cleanup clears origins"
+    (let [c (pocket/cached #'origin-make-map 3)
+          result @c
+          id-before (pocket/->id result)]
+      (impl/clear-mem-cache!)
+      (let [id-after (pocket/->id result)]
+        (is (not= id-before id-after)
+            "Origin should be gone after clear-mem-cache!"))))
+
+  (testing "Nil values don't cause errors"
+    (let [c (pocket/cached #'returns-nil)
+          result @c]
+      (is (nil? result))
+      (is (nil? (pocket/->id result))
+          "->id of nil should be nil, not throw"))))

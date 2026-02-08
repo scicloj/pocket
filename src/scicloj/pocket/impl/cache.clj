@@ -11,7 +11,9 @@
             [scicloj.kindly.v4.kind :as kind])
   (:import (org.apache.commons.codec.digest DigestUtils)
            (clojure.lang IPersistentMap IDeref Var)
-           (java.util IdentityHashMap)))
+           (java.lang.ref WeakReference)
+           (java.util IdentityHashMap)
+           (java.util.concurrent ConcurrentHashMap)))
 
 (defn read-cached [path]
   (cond
@@ -88,8 +90,53 @@
   "Ensures concurrent derefs of the same path compute only once."
   (java.util.concurrent.ConcurrentHashMap.))
 
+(def ^ConcurrentHashMap origin-registry
+  "Maps derefed values back to their Cached identity.
+   Keys are System/identityHashCode, values are vectors of
+   {:ref WeakReference, :origin cached-id}.
+   Uses identity (not equality) to match objects."
+  (ConcurrentHashMap.))
+
+(defn register-origin!
+  "Register a derefed value's origin identity in the registry.
+   Uses WeakReference so the value can still be GC'd."
+  [value origin-id]
+  (let [hash-key (System/identityHashCode value)]
+    (.compute origin-registry hash-key
+              (reify java.util.function.BiFunction
+                (apply [_ _k existing]
+                  (let [entry {:ref (WeakReference. value)
+                               :origin origin-id}
+                        ;; Clean dead refs while we're here
+                        live (if existing
+                               (filterv #(.get ^WeakReference (:ref %)) existing)
+                               [])]
+                    (conj live entry)))))
+    nil))
+
+(defn lookup-origin
+  "Look up a value's origin identity by object identity.
+   Returns the origin id if found, nil otherwise.
+   Cleans dead WeakReferences lazily."
+  [value]
+  (let [hash-key (System/identityHashCode value)]
+    (when-let [entries (.get origin-registry hash-key)]
+      (let [result (volatile! nil)]
+        (run! (fn [{:keys [^WeakReference ref origin]}]
+                (let [referent (.get ref)]
+                  (when (identical? referent value)
+                    (vreset! result origin))))
+              entries)
+        @result))))
+
+(defn clear-origins!
+  "Clear the entire origin registry."
+  []
+  (.clear origin-registry))
+
 (defn clear-mem-cache! []
-  (swap! mem-cache empty))
+  (swap! mem-cache empty)
+  (clear-origins!))
 
 (defn reset-mem-cache!
   "Reset the in-memory cache with the given options.
@@ -218,26 +265,33 @@
 (deftype Cached [base-dir f args storage local-delay filename-length-limit]
   IDeref
   (deref [this]
-    (case (or storage :mem+disk)
-      :none
-      @local-delay
+    (let [result
+          (case (or storage :mem+disk)
+            :none
+            @local-delay
 
-      :mem
-      (deref-with-cache this nil nil)
+            :mem
+            (deref-with-cache this nil nil)
 
-      :mem+disk
-      (deref-with-cache
-       this
-       (fn [path fn-name]
-         (when (fs/exists? path)
-           (log/debug "Cache hit (disk):" fn-name path)
-           [true (read-cached path)]))
-       (fn [v path id fn-name args]
-         (let [meta-map {:id (pr-str id)
-                         :fn-name (str fn-name)
-                         :args-str (pr-str (mapv ->id args))
-                         :created-at (str (java.time.Instant/now))}]
-           (write-cached! v path meta-map)))))))
+            :mem+disk
+            (deref-with-cache
+             this
+             (fn [path fn-name]
+               (when (fs/exists? path)
+                 (log/debug "Cache hit (disk):" fn-name path)
+                 [true (read-cached path)]))
+             (fn [v path id fn-name args]
+               (let [meta-map {:id (pr-str id)
+                               :fn-name (str fn-name)
+                               :args-str (pr-str (mapv ->id args))
+                               :created-at (str (java.time.Instant/now))}]
+                 (write-cached! v path meta-map)))))]
+      ;; Register origin for objects with unique identity (IObj).
+      ;; Skip primitives, strings, keywords — these may be interned/shared
+      ;; by the JVM and would cause false origin matches.
+      (when (instance? clojure.lang.IObj result)
+        (register-origin! result (->id this)))
+      result)))
 
 (defn- dataset-type? [x]
   (= (pr-str (type x)) "tech.v3.dataset.impl.dataset.Dataset"))
@@ -268,9 +322,10 @@
 
   Object
   (->id [this]
-    (if (dataset-type? this)
-      (dataset->id this)
-      this))
+    (or (lookup-origin this)
+        (if (dataset-type? this)
+          (dataset->id this)
+          this)))
 
   nil
   (->id [_] nil))
