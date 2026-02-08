@@ -62,7 +62,7 @@ format:
 ::: {.callout-note}
 ## OUT
 ```
-[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket - Cache dir set to: /tmp/pocket-extending
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket - Cache dir set to: /tmp/pocket-extending
 
 ```
 :::
@@ -89,7 +89,7 @@ format:
 ::: {.callout-note}
 ## OUT
 ```
-[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket - Cache cleanup: /tmp/pocket-extending
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket - Cache cleanup: /tmp/pocket-extending
 
 ```
 :::
@@ -509,7 +509,7 @@ First deref computes:
 ::: {.callout-note}
 ## OUT
 ```
-[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.extending-pocket/analyze-dataset
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.extending-pocket/analyze-dataset
   Analyzing census v 3 ...
 
 ```
@@ -560,7 +560,7 @@ A different version creates a different cache entry:
 ::: {.callout-note}
 ## OUT
 ```
-[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.extending-pocket/analyze-dataset
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.extending-pocket/analyze-dataset
   Analyzing census v 4 ...
 
 ```
@@ -701,7 +701,7 @@ for more details.
 ::: {.callout-note}
 ## OUT
 ```
-[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket - Cache cleanup: /tmp/pocket-extending
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket - Cache cleanup: /tmp/pocket-extending
 
 ```
 :::

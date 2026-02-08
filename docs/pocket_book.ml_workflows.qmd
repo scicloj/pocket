@@ -112,7 +112,7 @@ but pays a different price when noise increases.
 ::: {.callout-note}
 ## OUT
 ```
-[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket - Cache dir set to: /tmp/pocket-regression
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket - Cache dir set to: /tmp/pocket-regression
 
 ```
 :::
@@ -139,7 +139,7 @@ but pays a different price when noise increases.
 ::: {.callout-note}
 ## OUT
 ```
-[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket - Cache cleanup: /tmp/pocket-regression
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket - Cache cleanup: /tmp/pocket-regression
 
 ```
 :::
@@ -384,7 +384,7 @@ step is cached, so re-running is instant.
 ::: {.callout-note}
 ## OUT
 ```
-[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/make-regression-data
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/make-regression-data
 
 ```
 :::
@@ -510,29 +510,29 @@ Two models per feature set — eight cached training runs.
 ::: {.callout-note}
 ## ERR
 ```
-Feb 08, 2026 2:27:35 AM org.tribuo.common.sgd.AbstractSGDTrainer train
+Feb 08, 2026 2:38:09 AM org.tribuo.common.sgd.AbstractSGDTrainer train
 INFO: Training SGD model with 333 examples
-Feb 08, 2026 2:27:35 AM org.tribuo.common.sgd.AbstractSGDTrainer train
+Feb 08, 2026 2:38:09 AM org.tribuo.common.sgd.AbstractSGDTrainer train
 INFO: Outputs - RegressionInfo({name=y,id=0,count=333,max=8.866764,min=-5.501972,mean=0.840206,variance=15.440717})
-Feb 08, 2026 2:27:35 AM org.tribuo.common.sgd.AbstractSGDTrainer train
+Feb 08, 2026 2:38:09 AM org.tribuo.common.sgd.AbstractSGDTrainer train
 INFO: At iteration 10000, average loss = 7.061050130878382
-Feb 08, 2026 2:27:35 AM org.tribuo.common.sgd.AbstractSGDTrainer train
+Feb 08, 2026 2:38:09 AM org.tribuo.common.sgd.AbstractSGDTrainer train
 INFO: Training SGD model with 333 examples
-Feb 08, 2026 2:27:35 AM org.tribuo.common.sgd.AbstractSGDTrainer train
+Feb 08, 2026 2:38:09 AM org.tribuo.common.sgd.AbstractSGDTrainer train
 INFO: Outputs - RegressionInfo({name=y,id=0,count=333,max=8.866764,min=-5.501972,mean=0.840206,variance=15.440717})
-Feb 08, 2026 2:27:35 AM org.tribuo.common.sgd.AbstractSGDTrainer train
+Feb 08, 2026 2:38:09 AM org.tribuo.common.sgd.AbstractSGDTrainer train
 INFO: At iteration 10000, average loss = 7.746488252108407
-Feb 08, 2026 2:27:35 AM org.tribuo.common.sgd.AbstractSGDTrainer train
+Feb 08, 2026 2:38:09 AM org.tribuo.common.sgd.AbstractSGDTrainer train
 INFO: Training SGD model with 333 examples
-Feb 08, 2026 2:27:35 AM org.tribuo.common.sgd.AbstractSGDTrainer train
+Feb 08, 2026 2:38:09 AM org.tribuo.common.sgd.AbstractSGDTrainer train
 INFO: Outputs - RegressionInfo({name=y,id=0,count=333,max=8.866764,min=-5.501972,mean=0.840206,variance=15.440717})
-Feb 08, 2026 2:27:35 AM org.tribuo.common.sgd.AbstractSGDTrainer train
+Feb 08, 2026 2:38:09 AM org.tribuo.common.sgd.AbstractSGDTrainer train
 INFO: At iteration 10000, average loss = 0.9717267353378612
-Feb 08, 2026 2:27:35 AM org.tribuo.common.sgd.AbstractSGDTrainer train
+Feb 08, 2026 2:38:09 AM org.tribuo.common.sgd.AbstractSGDTrainer train
 INFO: Training SGD model with 333 examples
-Feb 08, 2026 2:27:35 AM org.tribuo.common.sgd.AbstractSGDTrainer train
+Feb 08, 2026 2:38:09 AM org.tribuo.common.sgd.AbstractSGDTrainer train
 INFO: Outputs - RegressionInfo({name=y,id=0,count=333,max=8.866764,min=-5.501972,mean=0.840206,variance=15.440717})
-Feb 08, 2026 2:27:35 AM org.tribuo.common.sgd.AbstractSGDTrainer train
+Feb 08, 2026 2:38:09 AM org.tribuo.common.sgd.AbstractSGDTrainer train
 INFO: At iteration 10000, average loss = 1.5031022528715852
 
 ```
@@ -543,25 +543,25 @@ INFO: At iteration 10000, average loss = 1.5031022528715852
 ::: {.callout-note}
 ## OUT
 ```
-[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/prepare-features
-[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket.impl.cache - Cache miss, computing: :test
-[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/split-dataset
-[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/train-model
-[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/prepare-features
-[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket.impl.cache - Cache miss, computing: :train
-[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/train-model
-[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/prepare-features
-[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/train-model
-[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/prepare-features
-[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/train-model
-[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/prepare-features
-[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/train-model
-[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/prepare-features
-[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/train-model
-[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/prepare-features
-[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/train-model
-[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/prepare-features
-[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/train-model
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/prepare-features
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss, computing: :test
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/split-dataset
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/train-model
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/prepare-features
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss, computing: :train
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/train-model
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/prepare-features
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/train-model
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/prepare-features
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/train-model
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/prepare-features
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/train-model
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/prepare-features
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/train-model
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/prepare-features
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/train-model
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/prepare-features
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/train-model
 
 ```
 :::
@@ -690,29 +690,29 @@ Pocket recognizes the same function and arguments.
 ::: {.callout-note}
 ## ERR
 ```
-Feb 08, 2026 2:27:35 AM org.tribuo.common.sgd.AbstractSGDTrainer train
+Feb 08, 2026 2:38:09 AM org.tribuo.common.sgd.AbstractSGDTrainer train
 INFO: Training SGD model with 333 examples
-Feb 08, 2026 2:27:35 AM org.tribuo.common.sgd.AbstractSGDTrainer train
+Feb 08, 2026 2:38:09 AM org.tribuo.common.sgd.AbstractSGDTrainer train
 INFO: Outputs - RegressionInfo({name=y,id=0,count=333,max=8.106624,min=-5.332393,mean=0.805881,variance=15.304966})
-Feb 08, 2026 2:27:35 AM org.tribuo.common.sgd.AbstractSGDTrainer train
+Feb 08, 2026 2:38:09 AM org.tribuo.common.sgd.AbstractSGDTrainer train
 INFO: At iteration 10000, average loss = 1.4235088958624642
-Feb 08, 2026 2:27:35 AM org.tribuo.common.sgd.AbstractSGDTrainer train
+Feb 08, 2026 2:38:09 AM org.tribuo.common.sgd.AbstractSGDTrainer train
 INFO: Training SGD model with 333 examples
-Feb 08, 2026 2:27:35 AM org.tribuo.common.sgd.AbstractSGDTrainer train
+Feb 08, 2026 2:38:09 AM org.tribuo.common.sgd.AbstractSGDTrainer train
 INFO: Outputs - RegressionInfo({name=y,id=0,count=333,max=9.816940,min=-6.625413,mean=0.883112,variance=15.979208})
-Feb 08, 2026 2:27:35 AM org.tribuo.common.sgd.AbstractSGDTrainer train
+Feb 08, 2026 2:38:09 AM org.tribuo.common.sgd.AbstractSGDTrainer train
 INFO: At iteration 10000, average loss = 1.8153008504655874
-Feb 08, 2026 2:27:35 AM org.tribuo.common.sgd.AbstractSGDTrainer train
+Feb 08, 2026 2:38:09 AM org.tribuo.common.sgd.AbstractSGDTrainer train
 INFO: Training SGD model with 333 examples
-Feb 08, 2026 2:27:35 AM org.tribuo.common.sgd.AbstractSGDTrainer train
+Feb 08, 2026 2:38:09 AM org.tribuo.common.sgd.AbstractSGDTrainer train
 INFO: Outputs - RegressionInfo({name=y,id=0,count=333,max=11.717291,min=-8.958664,mean=0.968924,variance=18.285525})
-Feb 08, 2026 2:27:35 AM org.tribuo.common.sgd.AbstractSGDTrainer train
+Feb 08, 2026 2:38:09 AM org.tribuo.common.sgd.AbstractSGDTrainer train
 INFO: At iteration 10000, average loss = 3.123027977933463
-Feb 08, 2026 2:27:35 AM org.tribuo.common.sgd.AbstractSGDTrainer train
+Feb 08, 2026 2:38:09 AM org.tribuo.common.sgd.AbstractSGDTrainer train
 INFO: Training SGD model with 333 examples
-Feb 08, 2026 2:27:35 AM org.tribuo.common.sgd.AbstractSGDTrainer train
+Feb 08, 2026 2:38:09 AM org.tribuo.common.sgd.AbstractSGDTrainer train
 INFO: Outputs - RegressionInfo({name=y,id=0,count=333,max=17.418345,min=-15.958416,mean=1.226360,variance=35.039175})
-Feb 08, 2026 2:27:35 AM org.tribuo.common.sgd.AbstractSGDTrainer train
+Feb 08, 2026 2:38:09 AM org.tribuo.common.sgd.AbstractSGDTrainer train
 INFO: At iteration 10000, average loss = 12.1030268449752
 
 ```
@@ -723,46 +723,46 @@ INFO: At iteration 10000, average loss = 12.1030268449752
 ::: {.callout-note}
 ## OUT
 ```
-[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/prepare-features
-[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket.impl.cache - Cache miss, computing: :test
-[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/split-dataset
-[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/make-regression-data
-[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/train-model
-[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/prepare-features
-[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket.impl.cache - Cache miss, computing: :train
-[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/prepare-features
-[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/train-model
-[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/prepare-features
-[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/prepare-features
-[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket.impl.cache - Cache miss, computing: :test
-[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/split-dataset
-[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/make-regression-data
-[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/train-model
-[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/prepare-features
-[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket.impl.cache - Cache miss, computing: :train
-[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/prepare-features
-[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/train-model
-[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/prepare-features
-[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/prepare-features
-[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket.impl.cache - Cache miss, computing: :test
-[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/split-dataset
-[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/make-regression-data
-[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/train-model
-[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/prepare-features
-[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket.impl.cache - Cache miss, computing: :train
-[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/prepare-features
-[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/train-model
-[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/prepare-features
-[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/prepare-features
-[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket.impl.cache - Cache miss, computing: :test
-[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/split-dataset
-[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/make-regression-data
-[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/train-model
-[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/prepare-features
-[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket.impl.cache - Cache miss, computing: :train
-[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/prepare-features
-[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/train-model
-[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/prepare-features
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/prepare-features
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss, computing: :test
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/split-dataset
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/make-regression-data
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/train-model
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/prepare-features
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss, computing: :train
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/prepare-features
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/train-model
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/prepare-features
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/prepare-features
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss, computing: :test
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/split-dataset
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/make-regression-data
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/train-model
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/prepare-features
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss, computing: :train
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/prepare-features
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/train-model
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/prepare-features
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/prepare-features
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss, computing: :test
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/split-dataset
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/make-regression-data
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/train-model
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/prepare-features
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss, computing: :train
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/prepare-features
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/train-model
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/prepare-features
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/prepare-features
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss, computing: :test
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/split-dataset
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/make-regression-data
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/train-model
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/prepare-features
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss, computing: :train
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/prepare-features
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/train-model
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/prepare-features
 
 ```
 :::
@@ -912,7 +912,7 @@ Here's what happens when you change something:
 ::: {.callout-note}
 ## OUT
 ```
-[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket - Cache cleanup: /tmp/pocket-regression
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket - Cache cleanup: /tmp/pocket-regression
 
 ```
 :::
@@ -1413,18 +1413,18 @@ clipping steps:
 ::: {.callout-note}
 ## OUT
 ```
-[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.ml-workflows/prepare-features
-[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.ml-workflows/clip-outliers
-[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket.impl.cache - Cache miss, computing: :test
-[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/split-dataset
-[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/make-regression-data
-[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.ml-workflows/fit-outlier-threshold
-[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket.impl.cache - Cache miss, computing: :train
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.ml-workflows/prepare-features
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.ml-workflows/clip-outliers
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss, computing: :test
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/split-dataset
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/make-regression-data
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.ml-workflows/fit-outlier-threshold
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss, computing: :train
   Fitting outlier threshold from training data...
   Clipping outliers with bounds: {:lower -5.499694170624462, :upper 15.994051959902624}
-[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/train-model
-[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.ml-workflows/prepare-features
-[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.ml-workflows/clip-outliers
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/train-model
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.ml-workflows/prepare-features
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.ml-workflows/clip-outliers
   Clipping outliers with bounds: {:lower -5.499694170624462, :upper 15.994051959902624}
   Evaluating model...
 
@@ -1475,17 +1475,17 @@ shares steps with the clipped pipeline above.
 ::: {.callout-note}
 ## OUT
 ```
-[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.ml-workflows/prepare-features
-[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/train-model
-[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.ml-workflows/prepare-features
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.ml-workflows/prepare-features
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/train-model
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.ml-workflows/prepare-features
   Evaluating model...
-[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.ml-workflows/prepare-features
-[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket.impl.cache - Cache miss, computing: :test
-[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/split-dataset
-[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/make-regression-data
-[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/train-model
-[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.ml-workflows/prepare-features
-[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket.impl.cache - Cache miss, computing: :train
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.ml-workflows/prepare-features
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss, computing: :test
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/split-dataset
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/make-regression-data
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/train-model
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.ml-workflows/prepare-features
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss, computing: :train
   Evaluating model...
 
 ```
@@ -1573,14 +1573,14 @@ Compare all experiments — only varying parameters are shown:
 ::: {.callout-note}
 ## OUT
 ```
-[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/run-pipeline
-[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/run-pipeline
-[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/run-pipeline
-[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/run-pipeline
-[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/run-pipeline
-[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/run-pipeline
-[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/run-pipeline
-[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/run-pipeline
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/run-pipeline
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/run-pipeline
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/run-pipeline
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/run-pipeline
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/run-pipeline
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/run-pipeline
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/run-pipeline
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/run-pipeline
 
 ```
 :::
@@ -1709,7 +1709,7 @@ models, features, and noise:
 ::: {.callout-note}
 ## OUT
 ```
-[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket - Cache cleanup: /tmp/pocket-regression
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket - Cache cleanup: /tmp/pocket-regression
 
 ```
 :::

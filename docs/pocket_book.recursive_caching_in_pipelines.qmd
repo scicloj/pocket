@@ -71,7 +71,7 @@ any special handling.
 ::: {.callout-note}
 ## OUT
 ```
-[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket - Cache dir set to: /tmp/pocket-demo-pipelines
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket - Cache dir set to: /tmp/pocket-demo-pipelines
 
 ```
 :::
@@ -98,7 +98,7 @@ any special handling.
 ::: {.callout-note}
 ## OUT
 ```
-[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo-pipelines
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo-pipelines
 
 ```
 :::
@@ -217,13 +217,13 @@ First pipeline run:
 ::: {.callout-note}
 ## OUT
 ```
-[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.recursive-caching-in-pipelines/train-model
-[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.recursive-caching-in-pipelines/preprocess
-[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.recursive-caching-in-pipelines/load-dataset
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.recursive-caching-in-pipelines/train-model
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.recursive-caching-in-pipelines/preprocess
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.recursive-caching-in-pipelines/load-dataset
 Loading dataset from data/raw.csv ...
 Preprocessing with options: {:scale 2}
 Training model with params: {:epochs 100}
-"Elapsed time: 907.00642 msecs"
+"Elapsed time: 907.428139 msecs"
 
 ```
 :::
@@ -260,7 +260,7 @@ Second pipeline run (all cached):
 ::: {.callout-note}
 ## OUT
 ```
-"Elapsed time: 0.603593 msecs"
+"Elapsed time: 0.810974 msecs"
 
 ```
 :::
@@ -430,9 +430,9 @@ No `:value` keys yet. Now trigger computation:
 ::: {.callout-note}
 ## OUT
 ```
-[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.recursive-caching-in-pipelines/train-model
-[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.recursive-caching-in-pipelines/preprocess
-[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.recursive-caching-in-pipelines/load-dataset
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.recursive-caching-in-pipelines/train-model
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.recursive-caching-in-pipelines/preprocess
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.recursive-caching-in-pipelines/load-dataset
 Loading dataset from data/experiment.csv ...
 Preprocessing with options: {:scale 2}
 Training model with params: {:epochs 100}
@@ -575,7 +575,7 @@ Returns a Mermaid flowchart string. Arrows show data flow direction
 ::: {.callout-note}
 ## OUT
 ```
-[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo-pipelines
+[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo-pipelines
 
 ```
 :::

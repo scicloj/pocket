@@ -32,7 +32,7 @@
 (deftest
  t12_l100
  (is
-  ((fn* [p1__106212#] (str/starts-with? p1__106212# "result"))
+  ((fn* [p1__107660#] (str/starts-with? p1__107660# "result"))
    v11_l98)))
 
 
