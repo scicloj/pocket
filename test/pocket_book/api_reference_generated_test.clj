@@ -306,9 +306,9 @@
     [rows]
     (and
      (= 2 (count rows))
-     (every? (fn* [p1__73633#] (contains? p1__73633# :lr)) rows)
+     (every? (fn* [p1__100877#] (contains? p1__100877# :lr)) rows)
      (not-any?
-      (fn* [p1__73634#] (contains? p1__73634# :epochs))
+      (fn* [p1__100878#] (contains? p1__100878# :epochs))
       rows)))
    v123_l271)))
 

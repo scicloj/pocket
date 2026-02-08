@@ -56,7 +56,7 @@ A few preparations for the code examples below:
 ::: {.callout-note}
 ## OUT
 ```
-13:37:22.143 INFO scicloj.pocket - Cache dir set to: /tmp/pocket-demo-reference
+18:23:50.581 INFO scicloj.pocket - Cache dir set to: /tmp/pocket-demo-reference
 
 ```
 :::
@@ -83,7 +83,7 @@ A few preparations for the code examples below:
 ::: {.callout-note}
 ## OUT
 ```
-13:37:22.144 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo-reference
+18:23:50.581 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo-reference
 
 ```
 :::
@@ -157,7 +157,7 @@ Set the base cache directory by altering `*base-cache-dir*`.
 ::: {.callout-note}
 ## OUT
 ```
-13:37:22.146 INFO scicloj.pocket - Cache dir set to: /tmp/pocket-demo-2
+18:23:50.584 INFO scicloj.pocket - Cache dir set to: /tmp/pocket-demo-2
 
 ```
 :::
@@ -203,7 +203,7 @@ Restore it for the rest of the notebook:
 ::: {.callout-note}
 ## OUT
 ```
-13:37:22.147 INFO scicloj.pocket - Cache dir set to: /tmp/pocket-demo-reference
+18:23:50.584 INFO scicloj.pocket - Cache dir set to: /tmp/pocket-demo-reference
 
 ```
 :::
@@ -303,9 +303,8 @@ The computation runs when we deref:
 ::: {.callout-note}
 ## OUT
 ```
-13:37:22.150 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.api-reference/expensive-calculation
+18:23:50.587 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.api-reference/expensive-calculation
 Computing 100 + 200 (this is expensive!)
-13:37:22.552 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo-reference/89/(pocket-book.api-reference_expensive-calculation 100 200)
 
 ```
 :::
@@ -379,9 +378,8 @@ Wrap a function to automatically cache its results.
 ::: {.callout-note}
 ## OUT
 ```
-13:37:22.559 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.api-reference/expensive-calculation
+18:23:50.995 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.api-reference/expensive-calculation
 Computing 3 + 4 (this is expensive!)
-13:37:22.960 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo-reference/49/(pocket-book.api-reference_expensive-calculation 3 4)
 
 ```
 :::
@@ -582,8 +580,8 @@ Switch to a FIFO policy with 100 entries:
 ::: {.callout-note}
 ## OUT
 ```
-13:37:22.977 INFO scicloj.pocket - Mem-cache options set: {:policy :fifo, :threshold 100}
-13:37:22.977 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :fifo, :threshold 100}
+18:23:51.413 INFO scicloj.pocket - Mem-cache options set: {:policy :fifo, :threshold 100}
+18:23:51.413 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :fifo, :threshold 100}
 
 ```
 :::
@@ -612,8 +610,8 @@ Reset to default:
 ::: {.callout-note}
 ## OUT
 ```
-13:37:22.978 INFO scicloj.pocket - Mem-cache options set: {:policy :lru, :threshold 256}
-13:37:22.978 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :lru, :threshold 256}
+18:23:51.414 INFO scicloj.pocket - Mem-cache options set: {:policy :lru, :threshold 256}
+18:23:51.414 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :lru, :threshold 256}
 
 ```
 :::
@@ -650,8 +648,8 @@ Reset mem-cache configuration to library defaults:
 ::: {.callout-note}
 ## OUT
 ```
-13:37:22.979 INFO scicloj.pocket - Mem-cache options reset to defaults: {:policy :lru, :threshold 256}
-13:37:22.979 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :lru, :threshold 256}
+18:23:51.416 INFO scicloj.pocket - Mem-cache options reset to defaults: {:policy :lru, :threshold 256}
+18:23:51.416 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :lru, :threshold 256}
 
 ```
 :::
@@ -699,7 +697,7 @@ Switch to memory-only storage:
 ::: {.callout-note}
 ## OUT
 ```
-13:37:22.981 INFO scicloj.pocket - Storage policy set to: :mem
+18:23:51.417 INFO scicloj.pocket - Storage policy set to: :mem
 
 ```
 :::
@@ -728,7 +726,7 @@ Reset to default:
 ::: {.callout-note}
 ## OUT
 ```
-13:37:22.981 INFO scicloj.pocket - Storage policy set to: nil
+18:23:51.418 INFO scicloj.pocket - Storage policy set to: nil
 
 ```
 :::
@@ -762,7 +760,7 @@ Delete the cache directory, removing all cached values.
 ::: {.callout-note}
 ## OUT
 ```
-13:37:22.985 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo-reference
+18:23:51.421 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo-reference
 
 ```
 :::
@@ -798,9 +796,8 @@ Clear in-memory cache without touching disk:
 ::: {.callout-note}
 ## OUT
 ```
-13:37:22.986 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.api-reference/expensive-calculation
+18:23:51.423 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.api-reference/expensive-calculation
 Computing 10 + 20 (this is expensive!)
-13:37:23.389 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo-reference/a3/(pocket-book.api-reference_expensive-calculation 10 20)
 
 ```
 :::
@@ -850,16 +847,6 @@ Remove a specific cached entry:
 
 
 
-::: {.callout-note}
-## OUT
-```
-13:37:23.393 DEBUG scicloj.pocket.impl.cache - Cache hit (disk): pocket-book.api-reference/expensive-calculation /tmp/pocket-demo-reference/a3/(pocket-book.api-reference_expensive-calculation 10 20)
-
-```
-:::
-
-
-
 ::: {.printedClojure}
 ```clojure
 30
@@ -880,7 +867,7 @@ Remove a specific cached entry:
 ::: {.callout-note}
 ## OUT
 ```
-13:37:23.394 INFO scicloj.pocket.impl.cache - Invalidated: /tmp/pocket-demo-reference/a3/(pocket-book.api-reference_expensive-calculation 10 20) existed= true
+18:23:51.828 INFO scicloj.pocket.impl.cache - Invalidated: /tmp/pocket-demo-reference/a3/(pocket-book.api-reference_expensive-calculation 10 20) existed= true
 
 ```
 :::
@@ -911,9 +898,8 @@ Derefing again will recompute:
 ::: {.callout-note}
 ## OUT
 ```
-13:37:23.395 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.api-reference/expensive-calculation
+18:23:51.829 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.api-reference/expensive-calculation
 Computing 10 + 20 (this is expensive!)
-13:37:23.796 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo-reference/a3/(pocket-book.api-reference_expensive-calculation 10 20)
 
 ```
 :::
@@ -949,9 +935,8 @@ Cache a few entries, then invalidate them all:
 ::: {.callout-note}
 ## OUT
 ```
-13:37:23.800 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.api-reference/expensive-calculation
+18:23:52.233 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.api-reference/expensive-calculation
 Computing 1 + 2 (this is expensive!)
-13:37:24.202 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo-reference/d2/(pocket-book.api-reference_expensive-calculation 1 2)
 
 ```
 :::
@@ -978,9 +963,8 @@ Computing 1 + 2 (this is expensive!)
 ::: {.callout-note}
 ## OUT
 ```
-13:37:24.204 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.api-reference/expensive-calculation
+18:23:52.638 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.api-reference/expensive-calculation
 Computing 3 + 4 (this is expensive!)
-13:37:24.606 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo-reference/49/(pocket-book.api-reference_expensive-calculation 3 4)
 
 ```
 :::
@@ -1007,7 +991,7 @@ Computing 3 + 4 (this is expensive!)
 ::: {.callout-note}
 ## OUT
 ```
-13:37:24.610 INFO scicloj.pocket.impl.cache - Invalidated 3 entries for pocket-book.api-reference/expensive-calculation
+18:23:53.042 INFO scicloj.pocket.impl.cache - Invalidated 3 entries for pocket-book.api-reference/expensive-calculation
 
 ```
 :::
@@ -1039,7 +1023,7 @@ Computing 3 + 4 (this is expensive!)
 ::: {.callout-note}
 ## OUT
 ```
-13:37:24.611 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo-reference
+18:23:53.044 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo-reference
 
 ```
 :::
@@ -1079,9 +1063,8 @@ List all cached entries:
 ::: {.callout-note}
 ## OUT
 ```
-13:37:24.612 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.api-reference/expensive-calculation
+18:23:53.046 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.api-reference/expensive-calculation
 Computing 10 + 20 (this is expensive!)
-13:37:25.014 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo-reference/a3/(pocket-book.api-reference_expensive-calculation 10 20)
 
 ```
 :::
@@ -1108,9 +1091,8 @@ Computing 10 + 20 (this is expensive!)
 ::: {.callout-note}
 ## OUT
 ```
-13:37:25.016 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.api-reference/expensive-calculation
+18:23:53.450 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.api-reference/expensive-calculation
 Computing 3 + 4 (this is expensive!)
-13:37:25.418 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo-reference/49/(pocket-book.api-reference_expensive-calculation 3 4)
 
 ```
 :::
@@ -1141,13 +1123,13 @@ Computing 3 + 4 (this is expensive!)
   :id "(pocket-book.api-reference/expensive-calculation 10 20)",
   :fn-name "pocket-book.api-reference/expensive-calculation",
   :args-str "[10 20]",
-  :created-at "2026-02-08T11:37:25.012961287Z"}
+  :created-at "2026-02-08T16:23:53.447126317Z"}
  {:path
   "/tmp/pocket-demo-reference/49/(pocket-book.api-reference_expensive-calculation 3 4)",
   :id "(pocket-book.api-reference/expensive-calculation 3 4)",
   :fn-name "pocket-book.api-reference/expensive-calculation",
   :args-str "[3 4]",
-  :created-at "2026-02-08T11:37:25.417260072Z"}]
+  :created-at "2026-02-08T16:23:53.851183044Z"}]
 
 ```
 :::
@@ -1171,13 +1153,13 @@ Filter by function name:
   :id "(pocket-book.api-reference/expensive-calculation 10 20)",
   :fn-name "pocket-book.api-reference/expensive-calculation",
   :args-str "[10 20]",
-  :created-at "2026-02-08T11:37:25.012961287Z"}
+  :created-at "2026-02-08T16:23:53.447126317Z"}
  {:path
   "/tmp/pocket-demo-reference/49/(pocket-book.api-reference_expensive-calculation 3 4)",
   :id "(pocket-book.api-reference/expensive-calculation 3 4)",
   :fn-name "pocket-book.api-reference/expensive-calculation",
   :args-str "[3 4]",
-  :created-at "2026-02-08T11:37:25.417260072Z"}]
+  :created-at "2026-02-08T16:23:53.851183044Z"}]
 
 ```
 :::
@@ -1221,7 +1203,7 @@ Return aggregate statistics about the cache.
 ::: {.callout-note}
 ## OUT
 ```
-13:37:25.426 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo-reference
+18:23:53.860 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo-reference
 
 ```
 :::
@@ -1328,10 +1310,8 @@ Deref to trigger computation:
 ::: {.callout-note}
 ## OUT
 ```
-13:37:25.431 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.api-reference/step-b
-13:37:25.431 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.api-reference/step-a
-13:37:25.432 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo-reference/6a/(pocket-book.api-reference_step-a 5)
-13:37:25.433 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo-reference/1b/(pocket-book.api-reference_step-b (pocket-book.api-reference_step-a 5) 3)
+18:23:53.864 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.api-reference/step-b
+18:23:53.864 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.api-reference/step-a
 
 ```
 :::
@@ -1499,10 +1479,8 @@ parameters differ across experiments.
 ::: {.callout-note}
 ## OUT
 ```
-13:37:25.439 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.api-reference/run-exp
-13:37:25.440 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo-reference/18/(pocket-book.api-reference_run-exp {:epochs 100, :lr 0.01})
-13:37:25.440 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.api-reference/run-exp
-13:37:25.441 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo-reference/13/(pocket-book.api-reference_run-exp {:epochs 100, :lr 0.001})
+18:23:53.872 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.api-reference/run-exp
+18:23:53.873 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.api-reference/run-exp
 
 ```
 :::
@@ -1532,7 +1510,7 @@ Only varying parameters appear in the comparison.
 ::: {.callout-note}
 ## OUT
 ```
-13:37:25.445 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo-reference
+18:23:53.878 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo-reference
 
 ```
 :::

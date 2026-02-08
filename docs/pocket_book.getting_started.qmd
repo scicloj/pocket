@@ -69,7 +69,7 @@ First, we set up a cache directory and define an expensive computation:
 ::: {.callout-note}
 ## OUT
 ```
-13:37:07.750 INFO scicloj.pocket - Cache dir set to: /tmp/pocket-demo
+18:23:36.149 INFO scicloj.pocket - Cache dir set to: /tmp/pocket-demo
 
 ```
 :::
@@ -98,7 +98,7 @@ Start fresh so the examples below run from a clean slate:
 ::: {.callout-note}
 ## OUT
 ```
-13:37:07.751 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo
+18:23:36.150 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo
 
 ```
 :::
@@ -182,10 +182,9 @@ First deref (computes and caches):
 ::: {.callout-note}
 ## OUT
 ```
-13:37:07.755 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.getting-started/expensive-calculation
+18:23:36.154 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.getting-started/expensive-calculation
 Computing 10 + 20 (this is expensive!)
-13:37:08.157 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo/fb/(pocket-book.getting-started_expensive-calculation 10 20)
-"Elapsed time: 402.425137 msecs"
+"Elapsed time: 402.791765 msecs"
 
 ```
 :::
@@ -214,7 +213,7 @@ Second deref (loaded from cache, instant):
 ::: {.callout-note}
 ## OUT
 ```
-"Elapsed time: 0.266807 msecs"
+"Elapsed time: 0.238759 msecs"
 
 ```
 :::
@@ -258,10 +257,9 @@ First call:
 ::: {.callout-note}
 ## OUT
 ```
-13:37:08.163 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.getting-started/expensive-calculation
+18:23:36.563 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.getting-started/expensive-calculation
 Computing 5 + 15 (this is expensive!)
-13:37:08.566 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo/c4/(pocket-book.getting-started_expensive-calculation 5 15)
-"Elapsed time: 402.622979 msecs"
+"Elapsed time: 402.801079 msecs"
 
 ```
 :::
@@ -290,7 +288,7 @@ Same args — cache hit:
 ::: {.callout-note}
 ## OUT
 ```
-"Elapsed time: 0.408141 msecs"
+"Elapsed time: 0.43273 msecs"
 
 ```
 :::
@@ -319,10 +317,9 @@ Different args — new computation:
 ::: {.callout-note}
 ## OUT
 ```
-13:37:08.571 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.getting-started/expensive-calculation
+18:23:36.971 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.getting-started/expensive-calculation
 Computing 7 + 8 (this is expensive!)
-13:37:08.972 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo/a2/(pocket-book.getting-started_expensive-calculation 7 8)
-"Elapsed time: 402.520248 msecs"
+"Elapsed time: 402.277859 msecs"
 
 ```
 :::
@@ -374,8 +371,7 @@ Cached nil value:
 ::: {.callout-note}
 ## OUT
 ```
-13:37:08.976 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.getting-started/returns-nil
-13:37:08.977 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo/7a/(pocket-book.getting-started_returns-nil)
+18:23:37.377 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.getting-started/returns-nil
 
 ```
 :::
@@ -454,7 +450,7 @@ for a detailed explanation and more best practices.
 ::: {.callout-note}
 ## OUT
 ```
-13:37:08.981 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo
+18:23:37.381 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo
 
 ```
 :::

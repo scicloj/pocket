@@ -127,6 +127,10 @@ Distributed under the MIT License — see [LICENSE](https://github.com/scicloj/p
 
 
 
+- [Under the hood: cache keys](pocket_book.cache_keys.html)
+
+
+
 - [Developing Pocket](pocket_book.developing_pocket.html)
 
 
