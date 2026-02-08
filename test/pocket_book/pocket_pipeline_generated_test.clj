@@ -14,20 +14,20 @@
   [clojure.test :refer [deftest is]]))
 
 
-(def v3_l85 (pocket-book.logging/set-slf4j-level! :info))
+(def v3_l91 (pocket-book.logging/set-slf4j-level! :info))
 
 
-(def v4_l87 (def cache-dir "/tmp/pocket-metamorph"))
+(def v4_l93 (def cache-dir "/tmp/pocket-metamorph"))
 
 
-(def v5_l89 (pocket/set-base-cache-dir! cache-dir))
+(def v5_l95 (pocket/set-base-cache-dir! cache-dir))
 
 
-(def v6_l91 (pocket/cleanup!))
+(def v6_l97 (pocket/cleanup!))
 
 
 (def
- v8_l103
+ v8_l109
  (defn
   make-regression-data
   "Generate synthetic regression data: y = f(x) + noise.\n  Optional outlier injection on x values."
@@ -63,11 +63,11 @@
     (ds-mod/set-inference-target :y)))))
 
 
-(def v9_l124 (defn nonlinear-fn [x] (* (Math/sin x) x)))
+(def v9_l130 (defn nonlinear-fn [x] (* (Math/sin x) x)))
 
 
 (def
- v10_l126
+ v10_l132
  (defn
   split-dataset
   "Split into train/test using holdout."
@@ -76,7 +76,7 @@
 
 
 (def
- v11_l131
+ v11_l137
  (defn
   prepare-features
   "Add derived columns: :raw (none), :poly+trig (x², sin, cos)."
@@ -96,7 +96,7 @@
 
 
 (def
- v12_l142
+ v12_l148
  (defn
   fit-outlier-threshold
   "Compute IQR-based clipping bounds for :x from training data."
@@ -116,7 +116,7 @@
 
 
 (def
- v13_l153
+ v13_l159
  (defn
   clip-outliers
   "Clip :x values using pre-computed threshold bounds."
@@ -127,7 +127,7 @@
 
 
 (def
- v14_l159
+ v14_l165
  (defn
   train-model
   "Train a model on a prepared dataset."
@@ -136,7 +136,7 @@
 
 
 (def
- v15_l164
+ v15_l170
  (defn
   predict-model
   "Predict on test data using a trained model."
@@ -145,7 +145,7 @@
 
 
 (def
- v17_l171
+ v17_l177
  (def
   cart-spec
   {:model-type :scicloj.ml.tribuo/regression,
@@ -157,7 +157,7 @@
 
 
 (def
- v18_l178
+ v18_l184
  (def
   linear-sgd-spec
   {:model-type :scicloj.ml.tribuo/regression,
@@ -172,38 +172,38 @@
 
 
 (def
- v20_l204
+ v20_l210
  (def
   c-fit-outlier-threshold
   (pocket/caching-fn #'fit-outlier-threshold {:storage :mem})))
 
 
 (def
- v21_l207
+ v21_l213
  (def
   c-clip-outliers
   (pocket/caching-fn #'clip-outliers {:storage :mem})))
 
 
 (def
- v22_l210
+ v22_l216
  (def
   c-prepare-features
   (pocket/caching-fn #'prepare-features {:storage :mem})))
 
 
-(def v23_l213 (def c-train-model (pocket/caching-fn #'train-model)))
+(def v23_l219 (def c-train-model (pocket/caching-fn #'train-model)))
 
 
 (def
- v24_l216
+ v24_l222
  (def
   c-predict-model
   (pocket/caching-fn #'predict-model {:storage :mem})))
 
 
 (def
- v26_l243
+ v26_l249
  (defn
   pocket-fitted
   "Create a stateful pipeline step from fit and apply functions.\n  In :fit mode, fits parameters from data and applies them.\n  In :transform mode, applies previously fitted parameters."
@@ -224,7 +224,7 @@
 
 
 (def
- v28_l262
+ v28_l268
  (defn
   pocket-model
   "Create a model pipeline step. Trains in :fit mode,\n  predicts in :transform mode. Like ml/model."
@@ -247,7 +247,7 @@
 
 
 (def
- v30_l280
+ v30_l286
  (def
   data-c
   (pocket/cached
@@ -261,18 +261,18 @@
 
 
 (def
- v31_l285
+ v31_l291
  (def split-c (pocket/cached #'split-dataset data-c {:seed 42})))
 
 
-(def v32_l286 (def train-c (pocket/cached :train split-c)))
+(def v32_l292 (def train-c (pocket/cached :train split-c)))
 
 
-(def v33_l287 (def test-c (pocket/cached :test split-c)))
+(def v33_l293 (def test-c (pocket/cached :test split-c)))
 
 
 (def
- v34_l289
+ v34_l295
  (def
   pipe-cart
   (mm/pipeline
@@ -284,41 +284,111 @@
    (pocket-model cart-spec))))
 
 
-(def v36_l297 (def fit-ctx (mm/fit-pipe train-c pipe-cart)))
+(def v36_l303 (def fit-ctx (mm/fit-pipe train-c pipe-cart)))
 
 
 (def
- v38_l301
+ v38_l307
  (def transform-ctx (mm/transform-pipe test-c pipe-cart fit-ctx)))
 
 
-(def v40_l305 (kind/pprint @(:model fit-ctx)))
+(def v40_l311 (kind/pprint @(:model fit-ctx)))
 
 
-(deftest t41_l307 (is ((fn [model] (map? model)) v40_l305)))
+(deftest t41_l313 (is ((fn [model] (map? model)) v40_l311)))
 
 
-(def v43_l312 (tc/head (deref (:metamorph/data transform-ctx))))
+(def v43_l318 (tc/head (deref (:metamorph/data transform-ctx))))
 
 
 (def
- v45_l316
+ v45_l322
  (loss/rmse
   (:y @(:target transform-ctx))
   (:y @(:metamorph/data transform-ctx))))
 
 
-(deftest t46_l319 (is ((fn [rmse] (< rmse 5.0)) v45_l316)))
-
-
-(def v48_l328 (pocket/origin-story-mermaid (:model fit-ctx)))
-
-
-(def v49_l330 (pocket/cleanup!))
+(deftest t46_l325 (is ((fn [rmse] (< rmse 5.0)) v45_l322)))
 
 
 (def
- v51_l339
+ v48_l335
+ (defn
+  compute-loss
+  "Compute RMSE between actual and predicted :y columns."
+  [actual-ds predicted-ds]
+  (loss/rmse (:y actual-ds) (:y predicted-ds))))
+
+
+(def
+ v49_l340
+ (def
+  c-compute-loss
+  (pocket/caching-fn #'compute-loss {:storage :mem})))
+
+
+(def
+ v51_l346
+ (def
+  train-transform-ctx
+  (mm/transform-pipe train-c pipe-cart fit-ctx)))
+
+
+(def
+ v53_l350
+ (def
+  train-loss-c
+  (c-compute-loss
+   (:target train-transform-ctx)
+   (:metamorph/data train-transform-ctx))))
+
+
+(def
+ v54_l354
+ (def
+  test-loss-c
+  (c-compute-loss
+   (:target transform-ctx)
+   (:metamorph/data transform-ctx))))
+
+
+(def
+ v56_l360
+ (defn
+  report
+  "Gather train and test loss into a summary map."
+  [train-loss test-loss]
+  {:train-rmse train-loss, :test-rmse test-loss}))
+
+
+(def
+ v57_l366
+ (def c-report (pocket/caching-fn #'report {:storage :mem})))
+
+
+(def v58_l368 (def summary-c (c-report train-loss-c test-loss-c)))
+
+
+(def v59_l370 (deref summary-c))
+
+
+(deftest
+ t60_l372
+ (is
+  ((fn
+    [{:keys [train-rmse test-rmse]}]
+    (and (< train-rmse test-rmse) (< test-rmse 5.0)))
+   v59_l370)))
+
+
+(def v62_l381 (pocket/origin-story-mermaid summary-c))
+
+
+(def v63_l382 (pocket/cleanup!))
+
+
+(def
+ v65_l391
  (defn
   nth-split-train
   "Extract the train set of the nth split."
@@ -327,7 +397,7 @@
 
 
 (def
- v52_l344
+ v66_l396
  (defn
   nth-split-test
   "Extract the test set of the nth split."
@@ -336,7 +406,7 @@
 
 
 (def
- v53_l349
+ v67_l401
  (defn-
   n-splits
   "Derive the number of splits from the method and params,\n  without materializing the dataset."
@@ -357,7 +427,7 @@
 
 
 (def
- v54_l359
+ v68_l411
  (defn
   pocket-splits
   "Create k-fold splits as Cached references.\n  Returns [{:train Cached, :test Cached, :idx int} ...]."
@@ -383,7 +453,7 @@
 
 
 (def
- v56_l378
+ v70_l430
  (defn
   pocket-evaluate-pipelines
   "Evaluate pipelines across k-fold splits.\n  Like ml/evaluate-pipelines, but built on Cached references.\n  \n  `pipelines` is a seq of pipeline functions (from mm/pipeline).\n  `metric-fn` takes (test-ds, prediction-ds) and returns a number."
@@ -406,7 +476,7 @@
 
 
 (def
- v58_l402
+ v72_l454
  (defn
   rmse-metric
   "Compute RMSE between actual and predicted :y columns."
@@ -415,7 +485,7 @@
 
 
 (def
- v59_l407
+ v73_l459
  (defn
   make-pipe
   [{:keys [feature-set model-spec]}]
@@ -429,7 +499,7 @@
 
 
 (def
- v60_l413
+ v74_l465
  (def
   configs
   [{:feature-set :poly+trig, :model-spec cart-spec}
@@ -438,7 +508,7 @@
 
 
 (def
- v61_l418
+ v75_l470
  (def
   results
   (pocket-evaluate-pipelines
@@ -449,14 +519,14 @@
    rmse-metric)))
 
 
-(def v63_l425 (count results))
+(def v77_l477 (count results))
 
 
-(deftest t64_l427 (is ((fn [n] (= n 9)) v63_l425)))
+(deftest t78_l479 (is ((fn [n] (= n 9)) v77_l477)))
 
 
 (def
- v66_l432
+ v80_l484
  (def
   summary
   (let
@@ -471,14 +541,14 @@
     grouped))))
 
 
-(def v67_l440 (tc/dataset summary))
+(def v81_l492 (tc/dataset summary))
 
 
-(deftest t68_l442 (is ((fn [ds] (= 3 (tc/row-count ds))) v67_l440)))
+(deftest t82_l494 (is ((fn [ds] (= 3 (tc/row-count ds))) v81_l492)))
 
 
 (def
- v70_l447
+ v84_l499
  (def
   results-2
   (pocket-evaluate-pipelines
@@ -489,17 +559,17 @@
    rmse-metric)))
 
 
-(def v71_l452 (= (mapv :metric results) (mapv :metric results-2)))
+(def v85_l504 (= (mapv :metric results) (mapv :metric results-2)))
 
 
-(deftest t72_l454 (is ((fn [eq] (true? eq)) v71_l452)))
+(deftest t86_l506 (is ((fn [eq] (true? eq)) v85_l504)))
 
 
-(def v74_l464 (pocket/cleanup!))
+(def v88_l516 (pocket/cleanup!))
 
 
 (def
- v75_l466
+ v89_l518
  (def
   sweep-configs
   (vec
@@ -516,7 +586,7 @@
 
 
 (def
- v76_l476
+ v90_l528
  (def
   sweep-results
   (pocket-evaluate-pipelines
@@ -527,14 +597,14 @@
    rmse-metric)))
 
 
-(def v78_l483 (count sweep-results))
+(def v92_l535 (count sweep-results))
 
 
-(deftest t79_l485 (is ((fn [n] (= n 24)) v78_l483)))
+(deftest t93_l537 (is ((fn [n] (= n 24)) v92_l535)))
 
 
 (def
- v81_l490
+ v95_l542
  (def
   sweep-summary
   (let
@@ -558,15 +628,15 @@
     (sort-by :mean-rmse)))))
 
 
-(def v82_l500 (tc/dataset sweep-summary))
+(def v96_l552 (tc/dataset sweep-summary))
 
 
-(deftest t83_l502 (is ((fn [ds] (= 8 (tc/row-count ds))) v82_l500)))
+(deftest t97_l554 (is ((fn [ds] (= 8 (tc/row-count ds))) v96_l552)))
 
 
 (def
- v85_l517
+ v99_l569
  (pocket/origin-story-mermaid (:model (first sweep-results))))
 
 
-(def v87_l583 (pocket/cleanup!))
+(def v101_l635 (pocket/cleanup!))

@@ -325,14 +325,60 @@
 (kind/test-last
  [(fn [rmse] (< rmse 5.0))])
 
-;; ### Provenance
+;; ### Train and test loss
 ;;
-;; The model `Cached` reference carries full provenance — from the trained
-;; model back through clipping, feature engineering, and data
-;; generation to the original scalar parameters:
+;; A single metric on test data tells us how well the model generalizes,
+;; but comparing train and test loss reveals whether the model is
+;; overfitting. We compute the loss separately for each, then gather
+;; both into a summary.
 
-(pocket/origin-story-mermaid (:model fit-ctx))
+(defn compute-loss
+  "Compute RMSE between actual and predicted :y columns."
+  [actual-ds predicted-ds]
+  (loss/rmse (:y actual-ds) (:y predicted-ds)))
 
+(def c-compute-loss (pocket/caching-fn #'compute-loss {:storage :mem}))
+
+;; We already have the test predictions from `transform-ctx`. For
+;; training loss, we also transform the training data through the
+;; fitted pipeline:
+
+(def train-transform-ctx (mm/transform-pipe train-c pipe-cart fit-ctx))
+
+;; Now we compute loss on each split independently:
+
+(def train-loss-c
+  (c-compute-loss (:target train-transform-ctx)
+                  (:metamorph/data train-transform-ctx)))
+
+(def test-loss-c
+  (c-compute-loss (:target transform-ctx)
+                  (:metamorph/data transform-ctx)))
+
+;; A report function gathers both into one summary:
+
+(defn report
+  "Gather train and test loss into a summary map."
+  [train-loss test-loss]
+  {:train-rmse train-loss
+   :test-rmse test-loss})
+
+(def c-report (pocket/caching-fn #'report {:storage :mem}))
+
+(def summary-c (c-report train-loss-c test-loss-c))
+
+(deref summary-c)
+
+(kind/test-last
+ [(fn [{:keys [train-rmse test-rmse]}]
+    (and (< train-rmse test-rmse)
+         (< test-rmse 5.0)))])
+
+;; The summary reference carries full provenance. The DAG branches
+;; into train and test paths that share the same model node — a
+;; diamond dependency that Pocket traces naturally:
+
+(pocket/origin-story-mermaid summary-c)
 (pocket/cleanup!)
 
 ;; ---
