@@ -12,7 +12,9 @@
    [scicloj.kindly.v4.kind :as kind]
    ;; For the dataset identity example:
    [tablecloth.api :as tc]
-   [tech.v3.dataset.modelling :as ds-mod]))
+   [tech.v3.dataset.modelling :as ds-mod]
+   ;; For the Nippy serialization example:
+   [taoensso.nippy :as nippy]))
 
 ;; ## Setup
 
@@ -57,7 +59,6 @@
 (pocket/->id nil)
 
 (kind/test-last [nil?])
-
 
 ;; ## Built-in dataset support
 ;;
@@ -204,8 +205,8 @@
 ;;
 ;; Pocket uses [Nippy](https://github.com/taoensso/nippy) for fast
 ;; binary serialization. Most Clojure data structures and many Java
-;; objects serialize automatically. However, if you cache values
-;; containing custom types, you may need to extend Nippy.
+;; objects serialize automatically. However, if we cache values
+;; containing custom types, we may need to extend Nippy.
 ;;
 ;; Common types that work out of the box:
 ;;
@@ -220,28 +221,50 @@
 ;;
 ;; - Objects with unserializable fields (e.g., open file handles,
 ;;   database connections, thread pools)
-;; - Custom Java classes from external libraries (unless they
-;;   implement `Serializable`)
+;; - Custom Java classes from external libraries — even if they
+;;   implement `Serializable`, Nippy 3 checks a
+;;   [thaw allowlist](https://cljdoc.org/d/com.taoensso/nippy/3.6.0/api/taoensso.nippy#*thaw-serializable-allowlist*)
+;;   and will quarantine classes not on it.
+;;   Extending Nippy directly (as shown below) avoids this issue entirely.
+
+;; ### Example: a custom model type
 ;;
-;; To extend Nippy for a custom type, use `nippy/extend-freeze` and
-;; `nippy/extend-thaw`:
-;;
-;; ```clojure
-;; (require '[taoensso.nippy :as nippy])
-;;
-;; (defrecord MyModel [weights bias])
-;;
-;; (nippy/extend-freeze MyModel :my-model
-;;   [x data-output]
-;;   (nippy/freeze-to-out! data-output (:weights x))
-;;   (nippy/freeze-to-out! data-output (:bias x)))
-;;
-;; (nippy/extend-thaw :my-model
-;;   [data-input]
-;;   (->MyModel (nippy/thaw-from-in! data-input)
-;;              (nippy/thaw-from-in! data-input)))
-;; ```
-;;
+;; Suppose we have a record that wraps model weights. Out of the box,
+;; Nippy can freeze records whose fields are all serializable — but
+;; let's say our record contains a Java array or another type that
+;; Nippy doesn't handle natively. We extend freeze and thaw explicitly:
+
+(defrecord MyModel [weights bias])
+
+(nippy/extend-freeze MyModel :my-model
+                     [x data-output]
+                     (nippy/freeze-to-out! data-output (:weights x))
+                     (nippy/freeze-to-out! data-output (:bias x)))
+
+(nippy/extend-thaw :my-model
+                   [data-input]
+                   (->MyModel (nippy/thaw-from-in! data-input)
+                              (nippy/thaw-from-in! data-input)))
+
+;; We can verify the round-trip works:
+
+(def original (->MyModel [0.5 -0.3 1.2] 0.1))
+
+(= original (nippy/thaw (nippy/freeze original)))
+
+(kind/test-last [true?])
+
+;; Now caching a function that returns a `MyModel` works seamlessly:
+
+(defn train-my-model [data]
+  (->MyModel (mapv #(* % 0.01) data) 0.42))
+
+(let [result (deref (pocket/cached #'train-my-model [10 20 30]))]
+  result)
+
+(kind/test-last [(fn [m] (and (instance? MyModel m)
+                              (= 0.42 (:bias m))))])
+
 ;; See the [Nippy documentation](https://github.com/taoensso/nippy#custom-types)
 ;; for more details.
 

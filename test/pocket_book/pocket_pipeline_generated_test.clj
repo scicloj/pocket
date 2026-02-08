@@ -380,7 +380,7 @@
  v54_l372
  (defn
   pocket-splits
-  "Create k-fold splits as Cached refs.\n  Returns [{:train Cached, :test Cached, :idx int} ...]."
+  "Create k-fold splits as Cached references.\n  Returns [{:train Cached, :test Cached, :idx int} ...]."
   [data-c split-method split-params]
   (vec
    (for
@@ -406,7 +406,7 @@
  v56_l391
  (defn
   pocket-evaluate-pipelines
-  "Evaluate pipelines across k-fold splits.\n  Like ml/evaluate-pipelines, but built on Cached refs.\n  \n  `pipelines` is a seq of pipeline functions (from mm/pipeline).\n  `metric-fn` takes (test-ds, prediction-ds) and returns a number."
+  "Evaluate pipelines across k-fold splits.\n  Like ml/evaluate-pipelines, but built on Cached references.\n  \n  `pipelines` is a seq of pipeline functions (from mm/pipeline).\n  `metric-fn` takes (test-ds, prediction-ds) and returns a number."
   [data-c split-method split-params pipelines metric-fn]
   (let
    [splits (pocket-splits data-c split-method split-params)]
