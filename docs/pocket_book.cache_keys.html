@@ -336,11 +336,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <div class="printedClojure">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>{<span class="at">:rows</span> <span class="dv">50000</span>,</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a> <span class="at">:string-length</span> <span class="dv">1541617</span>,</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a> <span class="at">:-</span>&gt;id-ms <span class="fl">3.463044</span>,</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a> <span class="at">:canonical-id-ms</span> <span class="fl">8.98263</span>,</span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a> <span class="at">:str-ms</span> <span class="fl">24.166543</span>,</span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a> <span class="at">:sha-ms</span> <span class="fl">1.48034</span>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a> <span class="at">:string-length</span> <span class="dv">1541270</span>,</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a> <span class="at">:-</span>&gt;id-ms <span class="fl">2.461174</span>,</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a> <span class="at">:canonical-id-ms</span> <span class="fl">6.700839</span>,</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a> <span class="at">:str-ms</span> <span class="fl">22.311826</span>,</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a> <span class="at">:sha-ms</span> <span class="fl">1.45779</span>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>The <code>str</code> serialization step dominates — it must walk the entire nested structure and produce a ~1.5 MB string. SHA-1 hashing that string is fast by comparison. Switching to a faster hash algorithm would not meaningfully help.</p>
 </section>
@@ -362,7 +362,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <div id="callout-1" class="callout-1-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>18:23:50.509 INFO scicloj.pocket - Cache dir set to: /tmp/pocket-cache-keys
+<pre><code>19:24:45.713 INFO scicloj.pocket - Cache dir set to: /tmp/pocket-cache-keys
 </code></pre>
 </div>
 </div>
@@ -385,7 +385,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <div id="callout-2" class="callout-2-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>18:23:50.509 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-cache-keys
+<pre><code>19:24:45.714 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-cache-keys
 </code></pre>
 </div>
 </div>
@@ -407,7 +407,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>  {<span class="at">:direct-ms</span> (<span class="kw">/</span> (<span class="kw">-</span> t1 t0) <span class="fl">1e6</span>)})</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="printedClojure">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>{<span class="at">:direct-ms</span> <span class="fl">21.915702</span>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>{<span class="at">:direct-ms</span> <span class="fl">18.390374</span>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p><code>Cached</code> reference — identity is just <code>(make-data 50000)</code>:</p>
 <div class="sourceClojure">
@@ -418,7 +418,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>  {<span class="at">:cached-reference-ms</span> (<span class="kw">/</span> (<span class="kw">-</span> t1 t0) <span class="fl">1e6</span>)})</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="printedClojure">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>{<span class="at">:cached-reference-ms</span> <span class="fl">0.263794</span>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>{<span class="at">:cached-reference-ms</span> <span class="fl">0.273621</span>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>The <code>Cached</code> reference is orders of magnitude faster because its identity is a small form like <code>(pocket-book.cache-keys/make-data 50000)</code>, regardless of how large the output dataset is.</p>
 <p>This is one of the key reasons to chain <code>pocket/cached</code> calls in a pipeline: each step’s cache key references its inputs by identity rather than by content, keeping key generation fast and enabling full provenance through the DAG.</p>
@@ -440,7 +440,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <div id="callout-3" class="callout-3-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>18:23:50.543 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-cache-keys
+<pre><code>19:24:45.744 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-cache-keys
 </code></pre>
 </div>
 </div>

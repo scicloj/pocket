@@ -250,7 +250,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#using-custom-types-in-cached-computations" id="toc-using-custom-types-in-cached-computations" class="nav-link" data-scroll-target="#using-custom-types-in-cached-computations">Using custom types in cached computations</a></li>
   <li><a href="#whats-on-disk" id="toc-whats-on-disk" class="nav-link" data-scroll-target="#whats-on-disk">What’s on disk?</a></li>
   <li><a href="#guidelines" id="toc-guidelines" class="nav-link" data-scroll-target="#guidelines">Guidelines</a></li>
-  <li><a href="#custom-nippy-serialization" id="toc-custom-nippy-serialization" class="nav-link" data-scroll-target="#custom-nippy-serialization">Custom Nippy serialization</a></li>
+  <li><a href="#custom-nippy-serialization" id="toc-custom-nippy-serialization" class="nav-link" data-scroll-target="#custom-nippy-serialization">Custom Nippy serialization</a>
+  <ul>
+  <li><a href="#example-a-custom-model-type" id="toc-example-a-custom-model-type" class="nav-link" data-scroll-target="#example-a-custom-model-type">Example: a custom model type</a></li>
+  </ul></li>
   <li><a href="#cleanup" id="toc-cleanup" class="nav-link" data-scroll-target="#cleanup">Cleanup</a></li>
   </ul>
 </nav>
@@ -301,7 +304,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>   [scicloj.kindly.v4.kind <span class="at">:as</span> kind]</span>
 <span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>   <span class="co">;; For the dataset identity example:</span></span>
 <span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>   [tablecloth.api <span class="at">:as</span> tc]</span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>   [tech.v3.dataset.modelling <span class="at">:as</span> ds-mod]))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>   [tech.v3.dataset.modelling <span class="at">:as</span> ds-mod]</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>   <span class="co">;; For the Nippy serialization example:</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>   [taoensso.nippy <span class="at">:as</span> nippy]))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <section id="setup" class="level2">
 <h2 class="anchored" data-anchor-id="setup">Setup</h2>
@@ -323,7 +328,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <div id="callout-1" class="callout-1-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>18:23:48.800 INFO scicloj.pocket - Cache dir set to: /tmp/pocket-extending
+<pre><code>19:24:44.051 INFO scicloj.pocket - Cache dir set to: /tmp/pocket-extending
 </code></pre>
 </div>
 </div>
@@ -346,7 +351,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <div id="callout-2" class="callout-2-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>18:23:48.801 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-extending
+<pre><code>19:24:44.052 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-extending
 </code></pre>
 </div>
 </div>
@@ -576,7 +581,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <div id="callout-3" class="callout-3-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>18:23:48.837 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.extending-pocket/analyze-dataset
+<pre><code>19:24:44.075 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.extending-pocket/analyze-dataset
   Analyzing census v 3 ...
 </code></pre>
 </div>
@@ -610,7 +615,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <div id="callout-4" class="callout-4-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>18:23:49.054 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.extending-pocket/analyze-dataset
+<pre><code>19:24:44.284 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.extending-pocket/analyze-dataset
   Analyzing census v 4 ...
 </code></pre>
 </div>
@@ -651,7 +656,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="custom-nippy-serialization" class="level2">
 <h2 class="anchored" data-anchor-id="custom-nippy-serialization">Custom Nippy serialization</h2>
-<p>Pocket uses <a href="https://github.com/taoensso/nippy">Nippy</a> for fast binary serialization. Most Clojure data structures and many Java objects serialize automatically. However, if you cache values containing custom types, you may need to extend Nippy.</p>
+<p>Pocket uses <a href="https://github.com/taoensso/nippy">Nippy</a> for fast binary serialization. Most Clojure data structures and many Java objects serialize automatically. However, if we cache values containing custom types, we may need to extend Nippy.</p>
 <p>Common types that work out of the box:</p>
 <ul>
 <li>All Clojure collections (vectors, maps, sets, lists)</li>
@@ -664,28 +669,28 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>Types that require extension:</p>
 <ul>
 <li><p>Objects with unserializable fields (e.g., open file handles, database connections, thread pools)</p></li>
-<li><p>Custom Java classes from external libraries (unless they implement <code>Serializable</code>)</p></li>
+<li><p>Custom Java classes from external libraries — even if they implement <code>Serializable</code>, Nippy 3 checks a <a href="https://cljdoc.org/d/com.taoensso/nippy/3.6.0/api/taoensso.nippy#*thaw-serializable-allowlist*">thaw allowlist</a> and will quarantine classes not on it. Extending Nippy directly (as shown below) avoids this issue entirely.</p></li>
 </ul>
-<p>To extend Nippy for a custom type, use <code>nippy/extend-freeze</code> and <code>nippy/extend-thaw</code>:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb47"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a>(<span class="kw">require</span> '[taoensso.nippy <span class="at">:as</span> nippy])</span>
-<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a>(<span class="bu">defrecord</span><span class="fu"> MyModel </span>[weights bias])</span>
-<span id="cb47-4"><a href="#cb47-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb47-5"><a href="#cb47-5" aria-hidden="true" tabindex="-1"></a>(nippy/extend-freeze MyModel <span class="at">:my-model</span></span>
-<span id="cb47-6"><a href="#cb47-6" aria-hidden="true" tabindex="-1"></a>  [x data-output]</span>
-<span id="cb47-7"><a href="#cb47-7" aria-hidden="true" tabindex="-1"></a>  (nippy/freeze-to-out! data-output (<span class="at">:weights</span> x))</span>
-<span id="cb47-8"><a href="#cb47-8" aria-hidden="true" tabindex="-1"></a>  (nippy/freeze-to-out! data-output (<span class="at">:bias</span> x)))</span>
-<span id="cb47-9"><a href="#cb47-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb47-10"><a href="#cb47-10" aria-hidden="true" tabindex="-1"></a>(nippy/extend-thaw <span class="at">:my-model</span></span>
-<span id="cb47-11"><a href="#cb47-11" aria-hidden="true" tabindex="-1"></a>  [data-input]</span>
-<span id="cb47-12"><a href="#cb47-12" aria-hidden="true" tabindex="-1"></a>  (-&gt;MyModel (nippy/thaw-from-in! data-input)</span>
-<span id="cb47-13"><a href="#cb47-13" aria-hidden="true" tabindex="-1"></a>             (nippy/thaw-from-in! data-input)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>See the <a href="https://github.com/taoensso/nippy#custom-types">Nippy documentation</a> for more details.</p>
-</section>
-<section id="cleanup" class="level2">
-<h2 class="anchored" data-anchor-id="cleanup">Cleanup</h2>
+<section id="example-a-custom-model-type" class="level3">
+<h3 class="anchored" data-anchor-id="example-a-custom-model-type">Example: a custom model type</h3>
+<p>Suppose we have a record that wraps model weights. Out of the box, Nippy can freeze records whose fields are all serializable — but let’s say our record contains a Java array or another type that Nippy doesn’t handle natively. We extend freeze and thaw explicitly:</p>
 <div class="sourceClojure">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb48"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a>(pocket/cleanup!)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb47"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a>(<span class="bu">defrecord</span><span class="fu"> MyModel </span>[weights bias])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb48"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a>(nippy/extend-freeze MyModel <span class="at">:my-model</span></span>
+<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a>                     [x data-output]</span>
+<span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a>                     (nippy/freeze-to-out! data-output (<span class="at">:weights</span> x))</span>
+<span id="cb48-4"><a href="#cb48-4" aria-hidden="true" tabindex="-1"></a>                     (nippy/freeze-to-out! data-output (<span class="at">:bias</span> x)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="printedClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb49"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a><span class="va">nil</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb50"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a>(nippy/extend-thaw <span class="at">:my-model</span></span>
+<span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a>                   [data-input]</span>
+<span id="cb50-3"><a href="#cb50-3" aria-hidden="true" tabindex="-1"></a>                   (-&gt;MyModel (nippy/thaw-from-in! data-input)</span>
+<span id="cb50-4"><a href="#cb50-4" aria-hidden="true" tabindex="-1"></a>                              (nippy/thaw-from-in! data-input)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-5-contents" aria-controls="callout-5" aria-expanded="false" aria-label="Toggle callout">
@@ -699,13 +704,88 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <div id="callout-5" class="callout-5-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>18:23:49.260 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-extending
+<pre><code>Warning: resetting Nippy thaw for custom type with id: :my-model
 </code></pre>
 </div>
 </div>
 </div>
 <div class="printedClojure">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb50"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a>{<span class="at">:dir</span> <span class="st">"/tmp/pocket-extending"</span>, <span class="at">:existed</span> <span class="va">true</span>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb52"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a>{<span class="dv">459</span> #function[tech.v3.datatype.nippy/eval32828/fn--<span class="dv">32829</span>/fn--<span class="dv">32830</span>],</span>
+<span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a> -<span class="dv">26414</span></span>
+<span id="cb52-3"><a href="#cb52-3" aria-hidden="true" tabindex="-1"></a> #function[tech.v3.datatype.nippy/eval32864/fn--<span class="dv">32865</span>/fn--<span class="dv">32866</span>],</span>
+<span id="cb52-4"><a href="#cb52-4" aria-hidden="true" tabindex="-1"></a> -<span class="dv">26665</span></span>
+<span id="cb52-5"><a href="#cb52-5" aria-hidden="true" tabindex="-1"></a> #function[tech.v3.dataset.io.nippy/eval32882/fn--<span class="dv">32883</span>/fn--<span class="dv">32884</span>],</span>
+<span id="cb52-6"><a href="#cb52-6" aria-hidden="true" tabindex="-1"></a> -<span class="dv">7792</span></span>
+<span id="cb52-7"><a href="#cb52-7" aria-hidden="true" tabindex="-1"></a> #function[tech.v3.dataset.io.nippy/eval32896/fn--<span class="dv">32897</span>/fn--<span class="dv">32898</span>],</span>
+<span id="cb52-8"><a href="#cb52-8" aria-hidden="true" tabindex="-1"></a> <span class="dv">16600</span></span>
+<span id="cb52-9"><a href="#cb52-9" aria-hidden="true" tabindex="-1"></a> #function[pocket-book.extending-pocket/eval102969/fn--<span class="dv">102970</span>/fn--<span class="dv">102971</span>]}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>We can verify the round-trip works:</p>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb53"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a>(<span class="bu">def</span><span class="fu"> original </span>(-&gt;MyModel [<span class="fl">0.5</span> -<span class="fl">0.3</span> <span class="fl">1.2</span>] <span class="fl">0.1</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb54"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a>(<span class="kw">=</span> original (nippy/thaw (nippy/freeze original)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="printedClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb55"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a><span class="va">true</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Now caching a function that returns a <code>MyModel</code> works seamlessly:</p>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb56"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a>(<span class="bu">defn</span><span class="fu"> train-my-model </span>[data]</span>
+<span id="cb56-2"><a href="#cb56-2" aria-hidden="true" tabindex="-1"></a>  (-&gt;MyModel (<span class="kw">mapv</span> #(<span class="kw">*</span> <span class="va">%</span> <span class="fl">0.01</span>) data) <span class="fl">0.42</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb57"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a>(<span class="kw">let</span> [result (<span class="kw">deref</span> (pocket/cached <span class="va">#'train-my-model</span> [<span class="dv">10</span> <span class="dv">20</span> <span class="dv">30</span>]))]</span>
+<span id="cb57-2"><a href="#cb57-2" aria-hidden="true" tabindex="-1"></a>  result)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-6-contents" aria-controls="callout-6" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>OUT
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-6" class="callout-6-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<pre><code>19:24:44.514 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.extending-pocket/train-my-model
+</code></pre>
+</div>
+</div>
+</div>
+<div class="printedClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb59"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb59-1"><a href="#cb59-1" aria-hidden="true" tabindex="-1"></a>{<span class="at">:weights</span> [<span class="fl">0.1</span> <span class="fl">0.2</span> <span class="fl">0.3</span>], <span class="at">:bias</span> <span class="fl">0.42</span>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>See the <a href="https://github.com/taoensso/nippy#custom-types">Nippy documentation</a> for more details.</p>
+</section>
+</section>
+<section id="cleanup" class="level2">
+<h2 class="anchored" data-anchor-id="cleanup">Cleanup</h2>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb60"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a>(pocket/cleanup!)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-7-contents" aria-controls="callout-7" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>OUT
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-7" class="callout-7-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<pre><code>19:24:44.518 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-extending
+</code></pre>
+</div>
+</div>
+</div>
+<div class="printedClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb62"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb62-1"><a href="#cb62-1" aria-hidden="true" tabindex="-1"></a>{<span class="at">:dir</span> <span class="st">"/tmp/pocket-extending"</span>, <span class="at">:existed</span> <span class="va">true</span>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div style="background-color:grey;height:2px;width:100%;"></div>
 <div><pre><small><small>source: <a href="https://github.com/scicloj/pocket/blob/master/notebooks/pocket_book/extending_pocket.clj">notebooks/pocket_book/extending_pocket.clj</a></small></small></pre></div>

@@ -234,7 +234,7 @@ with various timing patterns.
 ::: {.callout-note}
 ## OUT
 ```
-18:23:42.978 INFO scicloj.pocket - Cache dir set to: /tmp/pocket-concurrency-test
+19:24:38.249 INFO scicloj.pocket - Cache dir set to: /tmp/pocket-concurrency-test
 
 ```
 :::
@@ -322,9 +322,9 @@ Thread B:                  [─── request ───][ wait ]──→ result
 ::: {.callout-note}
 ## OUT
 ```
-18:23:42.984 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-concurrency-test
-18:23:42.985 INFO scicloj.pocket - Mem-cache options set: {:policy :lru, :threshold 3}
-18:23:42.985 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :lru, :threshold 3}
+19:24:38.253 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-concurrency-test
+19:24:38.253 INFO scicloj.pocket - Mem-cache options set: {:policy :lru, :threshold 3}
+19:24:38.253 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :lru, :threshold 3}
 
 ```
 :::
@@ -334,7 +334,7 @@ Thread B:                  [─── request ───][ wait ]──→ result
 ::: {.printedClojure}
 ```clojure
 {:started-at
- #object[java.time.LocalTime 0xae9dc3f "18:23:42.985244610"],
+ #object[java.time.LocalTime 0x3558389f "19:24:38.253989410"],
  :mem-cache {:policy :lru, :threshold 3}}
 
 ```
@@ -360,7 +360,7 @@ Launch 5 threads that all deref the same cached value:
 ::: {.callout-note}
 ## OUT
 ```
-18:23:42.989 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
+19:24:38.257 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
 
 ```
 :::
@@ -405,9 +405,9 @@ Thread B:                         [request]──→ instant result
 ::: {.callout-note}
 ## OUT
 ```
-18:23:43.298 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-concurrency-test
-18:23:43.298 INFO scicloj.pocket - Mem-cache options set: {:policy :lru, :threshold 3}
-18:23:43.298 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :lru, :threshold 3}
+19:24:38.569 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-concurrency-test
+19:24:38.569 INFO scicloj.pocket - Mem-cache options set: {:policy :lru, :threshold 3}
+19:24:38.570 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :lru, :threshold 3}
 
 ```
 :::
@@ -417,7 +417,7 @@ Thread B:                         [request]──→ instant result
 ::: {.printedClojure}
 ```clojure
 {:started-at
- #object[java.time.LocalTime 0x39acc1e3 "18:23:43.298971385"],
+ #object[java.time.LocalTime 0x7c0af128 "19:24:38.570190514"],
  :mem-cache {:policy :lru, :threshold 3}}
 
 ```
@@ -450,7 +450,7 @@ First request computes, second is instant (memory hit):
 ::: {.callout-note}
 ## OUT
 ```
-18:23:43.301 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
+19:24:38.572 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
 
 ```
 :::
@@ -496,9 +496,9 @@ Timeline:
 ::: {.callout-note}
 ## OUT
 ```
-18:23:43.609 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-concurrency-test
-18:23:43.609 INFO scicloj.pocket - Mem-cache options set: {:policy :lru, :threshold 3}
-18:23:43.609 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :lru, :threshold 3}
+19:24:38.880 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-concurrency-test
+19:24:38.880 INFO scicloj.pocket - Mem-cache options set: {:policy :lru, :threshold 3}
+19:24:38.880 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :lru, :threshold 3}
 
 ```
 :::
@@ -508,7 +508,7 @@ Timeline:
 ::: {.printedClojure}
 ```clojure
 {:started-at
- #object[java.time.LocalTime 0x26d29317 "18:23:43.609247542"],
+ #object[java.time.LocalTime 0x40430fc6 "19:24:38.880285392"],
  :mem-cache {:policy :lru, :threshold 3}}
 
 ```
@@ -542,10 +542,10 @@ Step 1: Compute initial value, then fill cache to cause eviction:
 ::: {.callout-note}
 ## OUT
 ```
-18:23:43.610 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
-18:23:43.913 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
-18:23:44.215 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
-18:23:44.518 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
+19:24:38.882 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
+19:24:39.184 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
+19:24:39.486 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
+19:24:39.788 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
 
 ```
 :::
@@ -616,7 +616,7 @@ Timeline:
 ::: {.callout-note}
 ## OUT
 ```
-18:23:44.829 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-concurrency-test
+19:24:40.099 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-concurrency-test
 
 ```
 :::
@@ -659,8 +659,8 @@ First attempt fails, second succeeds, third hits cache:
 ::: {.callout-note}
 ## OUT
 ```
-18:23:44.831 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/flaky-computation
-18:23:44.832 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/flaky-computation
+19:24:40.104 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/flaky-computation
+19:24:40.105 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/flaky-computation
 
 ```
 :::
@@ -708,9 +708,9 @@ Thread C (x=42): [──── computing ────]──→ 1764
 ::: {.callout-note}
 ## OUT
 ```
-18:23:44.839 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-concurrency-test
-18:23:44.840 INFO scicloj.pocket - Mem-cache options set: {:policy :lru, :threshold 3}
-18:23:44.840 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :lru, :threshold 3}
+19:24:40.109 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-concurrency-test
+19:24:40.109 INFO scicloj.pocket - Mem-cache options set: {:policy :lru, :threshold 3}
+19:24:40.109 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :lru, :threshold 3}
 
 ```
 :::
@@ -720,7 +720,7 @@ Thread C (x=42): [──── computing ────]──→ 1764
 ::: {.printedClojure}
 ```clojure
 {:started-at
- #object[java.time.LocalTime 0x3178206e "18:23:44.840158120"],
+ #object[java.time.LocalTime 0x7840c38c "19:24:40.109623137"],
  :mem-cache {:policy :lru, :threshold 3}}
 
 ```
@@ -746,9 +746,9 @@ Thread C (x=42): [──── computing ────]──→ 1764
 ::: {.callout-note}
 ## OUT
 ```
-18:23:44.842 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
-18:23:44.842 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
-18:23:44.842 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
+19:24:40.111 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
+19:24:40.111 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
+19:24:40.112 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
 
 ```
 :::
@@ -757,7 +757,7 @@ Thread C (x=42): [──── computing ────]──→ 1764
 
 ::: {.printedClojure}
 ```clojure
-{:results [1600 1681 1764], :elapsed-ms 303, :parallel? true}
+{:results [1600 1681 1764], :elapsed-ms 302, :parallel? true}
 
 ```
 :::
@@ -790,9 +790,9 @@ Threads A, B, C all request x=50
 ::: {.callout-note}
 ## OUT
 ```
-18:23:45.151 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-concurrency-test
-18:23:45.151 INFO scicloj.pocket - Mem-cache options set: {:policy :lru, :threshold 3}
-18:23:45.151 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :lru, :threshold 3}
+19:24:40.418 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-concurrency-test
+19:24:40.418 INFO scicloj.pocket - Mem-cache options set: {:policy :lru, :threshold 3}
+19:24:40.418 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :lru, :threshold 3}
 
 ```
 :::
@@ -802,7 +802,7 @@ Threads A, B, C all request x=50
 ::: {.printedClojure}
 ```clojure
 {:started-at
- #object[java.time.LocalTime 0x6a6e19c5 "18:23:45.151958642"],
+ #object[java.time.LocalTime 0x1bf6a714 "19:24:40.418867156"],
  :mem-cache {:policy :lru, :threshold 3}}
 
 ```
@@ -836,7 +836,7 @@ Compute, clear memory, then hit disk:
 ::: {.callout-note}
 ## OUT
 ```
-18:23:45.154 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
+19:24:40.421 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
 
 ```
 :::
@@ -884,9 +884,9 @@ A comprehensive scenario testing all cache layers:
 ::: {.callout-note}
 ## OUT
 ```
-18:23:45.463 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-concurrency-test
-18:23:45.464 INFO scicloj.pocket - Mem-cache options set: {:policy :lru, :threshold 2}
-18:23:45.464 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :lru, :threshold 2}
+19:24:40.730 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-concurrency-test
+19:24:40.730 INFO scicloj.pocket - Mem-cache options set: {:policy :lru, :threshold 2}
+19:24:40.730 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :lru, :threshold 2}
 
 ```
 :::
@@ -896,7 +896,7 @@ A comprehensive scenario testing all cache layers:
 ::: {.printedClojure}
 ```clojure
 {:started-at
- #object[java.time.LocalTime 0xfd2c58b "18:23:45.464197668"],
+ #object[java.time.LocalTime 0x7f283b4a "19:24:40.730800787"],
  :mem-cache {:policy :lru, :threshold 2}}
 
 ```
@@ -946,11 +946,11 @@ A comprehensive scenario testing all cache layers:
 ::: {.callout-note}
 ## OUT
 ```
-18:23:45.467 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
-18:23:45.769 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
-18:23:46.071 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
-18:23:46.374 INFO scicloj.pocket.impl.cache - Invalidated: /tmp/pocket-concurrency-test/f4/(pocket-book.concurrency_slow-computation 60) existed= true
-18:23:46.374 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
+19:24:40.732 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
+19:24:41.035 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
+19:24:41.337 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
+19:24:41.639 INFO scicloj.pocket.impl.cache - Invalidated: /tmp/pocket-concurrency-test/f4/(pocket-book.concurrency_slow-computation 60) existed= true
+19:24:41.639 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
 
 ```
 :::
@@ -960,7 +960,7 @@ A comprehensive scenario testing all cache layers:
 ::: {.printedClojure}
 ```clojure
 {:count-step-1 1,
- :elapsed-step-2 0,
+ :elapsed-step-2 1,
  :count-step-2 1,
  :count-step-3 3,
  :count-step-4 3,
@@ -989,9 +989,9 @@ This is the direct contrast to the core.cache demonstration above.
 ::: {.callout-note}
 ## OUT
 ```
-18:23:46.683 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-concurrency-test
-18:23:46.683 INFO scicloj.pocket - Mem-cache options set: {:policy :lru, :threshold 3}
-18:23:46.683 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :lru, :threshold 3}
+19:24:41.947 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-concurrency-test
+19:24:41.947 INFO scicloj.pocket - Mem-cache options set: {:policy :lru, :threshold 3}
+19:24:41.947 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :lru, :threshold 3}
 
 ```
 :::
@@ -1001,7 +1001,7 @@ This is the direct contrast to the core.cache demonstration above.
 ::: {.printedClojure}
 ```clojure
 {:started-at
- #object[java.time.LocalTime 0x65a2525e "18:23:46.683336429"],
+ #object[java.time.LocalTime 0x7bf8d7c "19:24:41.947843339"],
  :mem-cache {:policy :lru, :threshold 3}}
 
 ```
@@ -1027,7 +1027,7 @@ This is the direct contrast to the core.cache demonstration above.
 ::: {.callout-note}
 ## OUT
 ```
-18:23:46.692 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
+19:24:41.953 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
 
 ```
 :::
@@ -1110,9 +1110,9 @@ compute exactly once.
 ::: {.callout-note}
 ## OUT
 ```
-18:23:47.003 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-concurrency-test
-18:23:47.004 INFO scicloj.pocket - Mem-cache options set: {:policy :lru, :threshold 10}
-18:23:47.004 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :lru, :threshold 10}
+19:24:42.264 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-concurrency-test
+19:24:42.265 INFO scicloj.pocket - Mem-cache options set: {:policy :lru, :threshold 10}
+19:24:42.265 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :lru, :threshold 10}
 
 ```
 :::
@@ -1151,8 +1151,8 @@ Build a two-step pipeline, then deref from 5 threads:
 ::: {.callout-note}
 ## OUT
 ```
-18:23:47.009 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/pipeline-step-b
-18:23:47.009 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/pipeline-step-a
+19:24:42.270 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/pipeline-step-b
+19:24:42.270 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/pipeline-step-a
 
 ```
 :::
@@ -1216,9 +1216,9 @@ A subsequent attempt should succeed (fresh delay).
 ::: {.callout-note}
 ## OUT
 ```
-18:23:47.421 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-concurrency-test
-18:23:47.422 INFO scicloj.pocket - Mem-cache options set: {:policy :lru, :threshold 10}
-18:23:47.422 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :lru, :threshold 10}
+19:24:42.682 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-concurrency-test
+19:24:42.683 INFO scicloj.pocket - Mem-cache options set: {:policy :lru, :threshold 10}
+19:24:42.683 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :lru, :threshold 10}
 
 ```
 :::
@@ -1261,8 +1261,8 @@ A subsequent attempt should succeed (fresh delay).
 ::: {.callout-note}
 ## OUT
 ```
-18:23:47.426 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/fail-once-computation
-18:23:47.629 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/fail-once-computation
+19:24:42.688 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/fail-once-computation
+19:24:42.890 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/fail-once-computation
 
 ```
 :::
@@ -1301,9 +1301,9 @@ duplicate computation for the same key.
 ::: {.callout-note}
 ## OUT
 ```
-18:23:47.735 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-concurrency-test
-18:23:47.735 INFO scicloj.pocket - Mem-cache options set: {:policy :lru, :threshold 2}
-18:23:47.735 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :lru, :threshold 2}
+19:24:42.998 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-concurrency-test
+19:24:42.998 INFO scicloj.pocket - Mem-cache options set: {:policy :lru, :threshold 2}
+19:24:42.998 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :lru, :threshold 2}
 
 ```
 :::
@@ -1313,7 +1313,7 @@ duplicate computation for the same key.
 ::: {.printedClojure}
 ```clojure
 {:started-at
- #object[java.time.LocalTime 0x7e5efd28 "18:23:47.735725870"],
+ #object[java.time.LocalTime 0x6b5855b7 "19:24:42.998320115"],
  :mem-cache {:policy :lru, :threshold 2}}
 
 ```
@@ -1347,9 +1347,9 @@ Each key should compute exactly once despite eviction pressure.
 ::: {.callout-note}
 ## OUT
 ```
-18:23:47.744 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
-18:23:47.744 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
-18:23:47.744 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
+19:24:43.008 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
+19:24:43.008 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
+19:24:43.008 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
 
 ```
 :::
@@ -1388,9 +1388,9 @@ The re-request should compute exactly once.
 ::: {.callout-note}
 ## OUT
 ```
-18:23:48.052 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-concurrency-test
-18:23:48.052 INFO scicloj.pocket - Mem-cache options set: {:policy :lru, :threshold 3}
-18:23:48.053 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :lru, :threshold 3}
+19:24:43.317 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-concurrency-test
+19:24:43.317 INFO scicloj.pocket - Mem-cache options set: {:policy :lru, :threshold 3}
+19:24:43.317 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :lru, :threshold 3}
 
 ```
 :::
@@ -1400,7 +1400,7 @@ The re-request should compute exactly once.
 ::: {.printedClojure}
 ```clojure
 {:started-at
- #object[java.time.LocalTime 0x71a33c1f "18:23:48.053124160"],
+ #object[java.time.LocalTime 0x1c961a84 "19:24:43.317737046"],
  :mem-cache {:policy :lru, :threshold 3}}
 
 ```
@@ -1435,9 +1435,9 @@ Compute and cache a value:
 ::: {.callout-note}
 ## OUT
 ```
-18:23:48.057 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
-18:23:48.360 INFO scicloj.pocket.impl.cache - Invalidated: /tmp/pocket-concurrency-test/22/(pocket-book.concurrency_slow-computation 90) existed= true
-18:23:48.362 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
+19:24:43.324 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
+19:24:43.626 INFO scicloj.pocket.impl.cache - Invalidated: /tmp/pocket-concurrency-test/22/(pocket-book.concurrency_slow-computation 90) existed= true
+19:24:43.628 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
 
 ```
 :::
@@ -1501,7 +1501,7 @@ is dereferenced, **outside** of `computeIfAbsent`.
 ::: {.callout-note}
 ## OUT
 ```
-18:23:48.671 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-concurrency-test
+19:24:43.935 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-concurrency-test
 
 ```
 :::
@@ -1528,8 +1528,8 @@ is dereferenced, **outside** of `computeIfAbsent`.
 ::: {.callout-note}
 ## OUT
 ```
-18:23:48.673 INFO scicloj.pocket - Mem-cache options reset to defaults: {:policy :lru, :threshold 256}
-18:23:48.673 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :lru, :threshold 256}
+19:24:43.936 INFO scicloj.pocket - Mem-cache options reset to defaults: {:policy :lru, :threshold 256}
+19:24:43.936 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :lru, :threshold 256}
 
 ```
 :::

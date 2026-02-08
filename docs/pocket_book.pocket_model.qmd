@@ -136,7 +136,7 @@ giving us all of those things.
 ::: {.callout-note}
 ## OUT
 ```
-18:23:49.881 INFO scicloj.pocket - Cache dir set to: /tmp/pocket-model
+19:24:45.223 INFO scicloj.pocket - Cache dir set to: /tmp/pocket-model
 
 ```
 :::
@@ -163,7 +163,7 @@ giving us all of those things.
 ::: {.callout-note}
 ## OUT
 ```
-18:23:49.881 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-model
+19:24:45.224 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-model
 
 ```
 :::
@@ -321,9 +321,9 @@ First run — trains 3 models (one per fold):
 ::: {.callout-note}
 ## OUT
 ```
-18:23:49.891 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
-18:23:49.898 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
-18:23:49.905 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
+19:24:45.234 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
+19:24:45.240 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
+19:24:45.249 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
 
 ```
 :::
@@ -360,7 +360,7 @@ Cache now has 3 entries (one per fold):
 ::: {.printedClojure}
 ```clojure
 {:total-entries 3,
- :total-size-bytes 53371,
+ :total-size-bytes 53372,
  :entries-per-fn {"scicloj.metamorph.ml/train" 3}}
 
 ```
@@ -422,7 +422,7 @@ combinations train — existing ones hit cache.
 ::: {.callout-note}
 ## OUT
 ```
-18:23:49.940 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-model
+19:24:45.277 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-model
 
 ```
 :::
@@ -474,15 +474,15 @@ Batch 1: depths 4, 8, 12
 ::: {.callout-note}
 ## OUT
 ```
-18:23:49.943 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
-18:23:49.951 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
-18:23:49.958 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
-18:23:49.964 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
-18:23:49.972 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
-18:23:49.983 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
-18:23:49.993 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
-18:23:50.000 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
-18:23:50.007 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
+19:24:45.279 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
+19:24:45.285 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
+19:24:45.290 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
+19:24:45.295 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
+19:24:45.300 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
+19:24:45.306 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
+19:24:45.311 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
+19:24:45.317 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
+19:24:45.324 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
 
 ```
 :::
@@ -502,7 +502,7 @@ Batch 1: depths 4, 8, 12
 ::: {.printedClojure}
 ```clojure
 {:total-entries 9,
- :total-size-bytes 158774,
+ :total-size-bytes 158766,
  :entries-per-fn {"scicloj.metamorph.ml/train" 9}}
 
 ```
@@ -531,15 +531,15 @@ Depths 4, 8, 12 already cached → only 6, 10, 16 are new
 ::: {.callout-note}
 ## OUT
 ```
-18:23:50.038 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
-18:23:50.047 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
-18:23:50.055 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
-18:23:50.067 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
-18:23:50.075 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
-18:23:50.083 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
-18:23:50.096 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
-18:23:50.102 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
-18:23:50.109 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
+19:24:45.344 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
+19:24:45.350 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
+19:24:45.355 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
+19:24:45.366 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
+19:24:45.374 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
+19:24:45.382 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
+19:24:45.401 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
+19:24:45.406 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
+19:24:45.412 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
 
 ```
 :::
@@ -559,7 +559,7 @@ Depths 4, 8, 12 already cached → only 6, 10, 16 are new
 ::: {.printedClojure}
 ```clojure
 {:total-entries 18,
- :total-size-bytes 322365,
+ :total-size-bytes 322358,
  :entries-per-fn {"scicloj.metamorph.ml/train" 18}}
 
 ```
@@ -616,7 +616,7 @@ evaluation. Each model type is cached independently.
 ::: {.callout-note}
 ## OUT
 ```
-18:23:50.135 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-model
+19:24:45.434 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-model
 
 ```
 :::
@@ -669,27 +669,27 @@ evaluation. Each model type is cached independently.
 ::: {.callout-note}
 ## OUT
 ```
-18:23:50.136 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
-18:23:50.145 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
-18:23:50.153 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
-18:23:50.164 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
-Feb 08, 2026 6:23:50 PM org.tribuo.common.sgd.AbstractSGDTrainer train
+19:24:45.435 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
+19:24:45.441 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
+19:24:45.446 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
+19:24:45.451 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
+Feb 08, 2026 7:24:45 PM org.tribuo.common.sgd.AbstractSGDTrainer train
 INFO: Training SGD model with 133 examples
-Feb 08, 2026 6:23:50 PM org.tribuo.common.sgd.AbstractSGDTrainer train
+Feb 08, 2026 7:24:45 PM org.tribuo.common.sgd.AbstractSGDTrainer train
 INFO: Outputs - RegressionInfo({name=y,id=0,count=133,max=32.285163,min=-3.003255,mean=15.591786,variance=84.043799})
-18:23:50.172 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
-Feb 08, 2026 6:23:50 PM org.tribuo.common.sgd.AbstractSGDTrainer train
+19:24:45.457 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
+Feb 08, 2026 7:24:45 PM org.tribuo.common.sgd.AbstractSGDTrainer train
 INFO: Training SGD model with 133 examples
-Feb 08, 2026 6:23:50 PM org.tribuo.common.sgd.AbstractSGDTrainer train
+Feb 08, 2026 7:24:45 PM org.tribuo.common.sgd.AbstractSGDTrainer train
 INFO: Outputs - RegressionInfo({name=y,id=0,count=133,max=31.652557,min=-1.736155,mean=15.631001,variance=80.557863})
-18:23:50.178 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
-Feb 08, 2026 6:23:50 PM org.tribuo.common.sgd.AbstractSGDTrainer train
+19:24:45.462 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
+Feb 08, 2026 7:24:45 PM org.tribuo.common.sgd.AbstractSGDTrainer train
 INFO: Training SGD model with 134 examples
-Feb 08, 2026 6:23:50 PM org.tribuo.common.sgd.AbstractSGDTrainer train
+Feb 08, 2026 7:24:45 PM org.tribuo.common.sgd.AbstractSGDTrainer train
 INFO: Outputs - RegressionInfo({name=y,id=0,count=134,max=32.285163,min=-3.003255,mean=16.262557,variance=77.697467})
-18:23:50.185 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
-18:23:50.214 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
-18:23:50.223 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
+19:24:45.468 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
+19:24:45.477 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
+19:24:45.482 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
 
 ```
 :::
@@ -709,7 +709,7 @@ INFO: Outputs - RegressionInfo({name=y,id=0,count=134,max=32.285163,min=-3.00325
 ::: {.printedClojure}
 ```clojure
 {:total-entries 9,
- :total-size-bytes 188813,
+ :total-size-bytes 188806,
  :entries-per-fn {"scicloj.metamorph.ml/train" 9}}
 
 ```
@@ -765,7 +765,7 @@ still works, just without disk caching for that model.
 ::: {.callout-note}
 ## OUT
 ```
-18:23:50.250 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-model
+19:24:45.501 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-model
 
 ```
 :::
@@ -800,12 +800,12 @@ still works, just without disk caching for that model.
 ::: {.callout-note}
 ## OUT
 ```
-18:23:50.251 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
-18:23:50.263 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
-18:23:50.277 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
-18:23:50.291 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
-18:23:50.309 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
-18:23:50.316 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
+19:24:45.502 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
+19:24:45.510 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
+19:24:45.517 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
+19:24:45.523 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
+19:24:45.530 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
+19:24:45.536 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
 
 ```
 :::
@@ -828,7 +828,7 @@ show up as entries with a `nil` function name:
 ::: {.printedClojure}
 ```clojure
 {:total-entries 6,
- :total-size-bytes 53371,
+ :total-size-bytes 53369,
  :entries-per-fn {"scicloj.metamorph.ml/train" 3, nil 3}}
 
 ```
@@ -881,7 +881,7 @@ cache, models are loaded from disk on next access.
 ::: {.callout-note}
 ## OUT
 ```
-18:23:50.334 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-model
+19:24:45.551 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-model
 
 ```
 :::
@@ -917,9 +917,9 @@ Train fresh:
 ::: {.callout-note}
 ## OUT
 ```
-18:23:50.335 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
-18:23:50.347 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
-18:23:50.358 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
+19:24:45.552 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
+19:24:45.559 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
+19:24:45.564 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
 
 ```
 :::
@@ -1023,7 +1023,7 @@ preprocessing steps, learning curves, and grid search.
 ::: {.callout-note}
 ## OUT
 ```
-18:23:50.387 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-model
+19:24:45.587 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-model
 
 ```
 :::

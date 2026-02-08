@@ -469,7 +469,7 @@ lookup-or-miss
 </div>
 <div id="callout-1" class="callout-1-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>18:23:42.978 INFO scicloj.pocket - Cache dir set to: /tmp/pocket-concurrency-test
+<pre><code>19:24:38.249 INFO scicloj.pocket - Cache dir set to: /tmp/pocket-concurrency-test
 </code></pre>
 </div>
 </div>
@@ -530,16 +530,16 @@ Thread B:                  [─── request ───][ wait ]──→ result
 </div>
 <div id="callout-2" class="callout-2-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>18:23:42.984 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-concurrency-test
-18:23:42.985 INFO scicloj.pocket - Mem-cache options set: {:policy :lru, :threshold 3}
-18:23:42.985 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :lru, :threshold 3}
+<pre><code>19:24:38.253 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-concurrency-test
+19:24:38.253 INFO scicloj.pocket - Mem-cache options set: {:policy :lru, :threshold 3}
+19:24:38.253 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :lru, :threshold 3}
 </code></pre>
 </div>
 </div>
 </div>
 <div class="printedClojure">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>{<span class="at">:started-at</span></span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a> #object[java.<span class="kw">time</span>.LocalTime <span class="bn">0xae9dc3f</span> <span class="st">"18:23:42.985244610"</span>],</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a> #object[java.<span class="kw">time</span>.LocalTime <span class="bn">0x3558389f</span> <span class="st">"19:24:38.253989410"</span>],</span>
 <span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a> <span class="at">:mem-cache</span> {<span class="at">:policy</span> <span class="at">:lru</span>, <span class="at">:threshold</span> <span class="dv">3</span>}}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Launch 5 threads that all deref the same cached value:</p>
@@ -563,7 +563,7 @@ Thread B:                  [─── request ───][ wait ]──→ result
 </div>
 <div id="callout-3" class="callout-3-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>18:23:42.989 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
+<pre><code>19:24:38.257 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
 </code></pre>
 </div>
 </div>
@@ -598,16 +598,16 @@ Thread B:                         [request]──→ instant result
 </div>
 <div id="callout-4" class="callout-4-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>18:23:43.298 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-concurrency-test
-18:23:43.298 INFO scicloj.pocket - Mem-cache options set: {:policy :lru, :threshold 3}
-18:23:43.298 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :lru, :threshold 3}
+<pre><code>19:24:38.569 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-concurrency-test
+19:24:38.569 INFO scicloj.pocket - Mem-cache options set: {:policy :lru, :threshold 3}
+19:24:38.570 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :lru, :threshold 3}
 </code></pre>
 </div>
 </div>
 </div>
 <div class="printedClojure">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb24"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>{<span class="at">:started-at</span></span>
-<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a> #object[java.<span class="kw">time</span>.LocalTime <span class="bn">0x39acc1e3</span> <span class="st">"18:23:43.298971385"</span>],</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a> #object[java.<span class="kw">time</span>.LocalTime <span class="bn">0x7c0af128</span> <span class="st">"19:24:38.570190514"</span>],</span>
 <span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a> <span class="at">:mem-cache</span> {<span class="at">:policy</span> <span class="at">:lru</span>, <span class="at">:threshold</span> <span class="dv">3</span>}}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>First request computes, second is instant (memory hit):</p>
@@ -638,7 +638,7 @@ Thread B:                         [request]──→ instant result
 </div>
 <div id="callout-5" class="callout-5-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>18:23:43.301 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
+<pre><code>19:24:38.572 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
 </code></pre>
 </div>
 </div>
@@ -674,16 +674,16 @@ Thread B:                         [request]──→ instant result
 </div>
 <div id="callout-6" class="callout-6-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>18:23:43.609 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-concurrency-test
-18:23:43.609 INFO scicloj.pocket - Mem-cache options set: {:policy :lru, :threshold 3}
-18:23:43.609 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :lru, :threshold 3}
+<pre><code>19:24:38.880 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-concurrency-test
+19:24:38.880 INFO scicloj.pocket - Mem-cache options set: {:policy :lru, :threshold 3}
+19:24:38.880 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :lru, :threshold 3}
 </code></pre>
 </div>
 </div>
 </div>
 <div class="printedClojure">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb31"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>{<span class="at">:started-at</span></span>
-<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a> #object[java.<span class="kw">time</span>.LocalTime <span class="bn">0x26d29317</span> <span class="st">"18:23:43.609247542"</span>],</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a> #object[java.<span class="kw">time</span>.LocalTime <span class="bn">0x40430fc6</span> <span class="st">"19:24:38.880285392"</span>],</span>
 <span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a> <span class="at">:mem-cache</span> {<span class="at">:policy</span> <span class="at">:lru</span>, <span class="at">:threshold</span> <span class="dv">3</span>}}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Step 1: Compute initial value, then fill cache to cause eviction:</p>
@@ -715,10 +715,10 @@ Thread B:                         [request]──→ instant result
 </div>
 <div id="callout-7" class="callout-7-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>18:23:43.610 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
-18:23:43.913 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
-18:23:44.215 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
-18:23:44.518 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
+<pre><code>19:24:38.882 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
+19:24:39.184 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
+19:24:39.486 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
+19:24:39.788 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
 </code></pre>
 </div>
 </div>
@@ -769,7 +769,7 @@ Thread B:                         [request]──→ instant result
 </div>
 <div id="callout-8" class="callout-8-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>18:23:44.829 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-concurrency-test
+<pre><code>19:24:40.099 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-concurrency-test
 </code></pre>
 </div>
 </div>
@@ -807,8 +807,8 @@ Thread B:                         [request]──→ instant result
 </div>
 <div id="callout-9" class="callout-9-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>18:23:44.831 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/flaky-computation
-18:23:44.832 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/flaky-computation
+<pre><code>19:24:40.104 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/flaky-computation
+19:24:40.105 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/flaky-computation
 </code></pre>
 </div>
 </div>
@@ -846,16 +846,16 @@ Thread C (x=42): [──── computing ────]──→ 1764
 </div>
 <div id="callout-10" class="callout-10-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>18:23:44.839 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-concurrency-test
-18:23:44.840 INFO scicloj.pocket - Mem-cache options set: {:policy :lru, :threshold 3}
-18:23:44.840 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :lru, :threshold 3}
+<pre><code>19:24:40.109 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-concurrency-test
+19:24:40.109 INFO scicloj.pocket - Mem-cache options set: {:policy :lru, :threshold 3}
+19:24:40.109 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :lru, :threshold 3}
 </code></pre>
 </div>
 </div>
 </div>
 <div class="printedClojure">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb47"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a>{<span class="at">:started-at</span></span>
-<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a> #object[java.<span class="kw">time</span>.LocalTime <span class="bn">0x3178206e</span> <span class="st">"18:23:44.840158120"</span>],</span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a> #object[java.<span class="kw">time</span>.LocalTime <span class="bn">0x7840c38c</span> <span class="st">"19:24:40.109623137"</span>],</span>
 <span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a> <span class="at">:mem-cache</span> {<span class="at">:policy</span> <span class="at">:lru</span>, <span class="at">:threshold</span> <span class="dv">3</span>}}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="sourceClojure">
@@ -880,15 +880,15 @@ Thread C (x=42): [──── computing ────]──→ 1764
 </div>
 <div id="callout-11" class="callout-11-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>18:23:44.842 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
-18:23:44.842 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
-18:23:44.842 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
+<pre><code>19:24:40.111 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
+19:24:40.111 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
+19:24:40.112 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
 </code></pre>
 </div>
 </div>
 </div>
 <div class="printedClojure">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb50"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a>{<span class="at">:results</span> [<span class="dv">1600</span> <span class="dv">1681</span> <span class="dv">1764</span>], <span class="at">:elapsed-ms</span> <span class="dv">303</span>, <span class="at">:parallel</span>? <span class="va">true</span>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb50"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a>{<span class="at">:results</span> [<span class="dv">1600</span> <span class="dv">1681</span> <span class="dv">1764</span>], <span class="at">:elapsed-ms</span> <span class="dv">302</span>, <span class="at">:parallel</span>? <span class="va">true</span>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <hr>
 </section>
@@ -914,16 +914,16 @@ Threads A, B, C all request x=50
 </div>
 <div id="callout-12" class="callout-12-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>18:23:45.151 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-concurrency-test
-18:23:45.151 INFO scicloj.pocket - Mem-cache options set: {:policy :lru, :threshold 3}
-18:23:45.151 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :lru, :threshold 3}
+<pre><code>19:24:40.418 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-concurrency-test
+19:24:40.418 INFO scicloj.pocket - Mem-cache options set: {:policy :lru, :threshold 3}
+19:24:40.418 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :lru, :threshold 3}
 </code></pre>
 </div>
 </div>
 </div>
 <div class="printedClojure">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb54"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a>{<span class="at">:started-at</span></span>
-<span id="cb54-2"><a href="#cb54-2" aria-hidden="true" tabindex="-1"></a> #object[java.<span class="kw">time</span>.LocalTime <span class="bn">0x6a6e19c5</span> <span class="st">"18:23:45.151958642"</span>],</span>
+<span id="cb54-2"><a href="#cb54-2" aria-hidden="true" tabindex="-1"></a> #object[java.<span class="kw">time</span>.LocalTime <span class="bn">0x1bf6a714</span> <span class="st">"19:24:40.418867156"</span>],</span>
 <span id="cb54-3"><a href="#cb54-3" aria-hidden="true" tabindex="-1"></a> <span class="at">:mem-cache</span> {<span class="at">:policy</span> <span class="at">:lru</span>, <span class="at">:threshold</span> <span class="dv">3</span>}}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Compute, clear memory, then hit disk:</p>
@@ -955,7 +955,7 @@ Threads A, B, C all request x=50
 </div>
 <div id="callout-13" class="callout-13-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>18:23:45.154 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
+<pre><code>19:24:40.421 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
 </code></pre>
 </div>
 </div>
@@ -994,16 +994,16 @@ Threads A, B, C all request x=50
 </div>
 <div id="callout-14" class="callout-14-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>18:23:45.463 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-concurrency-test
-18:23:45.464 INFO scicloj.pocket - Mem-cache options set: {:policy :lru, :threshold 2}
-18:23:45.464 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :lru, :threshold 2}
+<pre><code>19:24:40.730 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-concurrency-test
+19:24:40.730 INFO scicloj.pocket - Mem-cache options set: {:policy :lru, :threshold 2}
+19:24:40.730 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :lru, :threshold 2}
 </code></pre>
 </div>
 </div>
 </div>
 <div class="printedClojure">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb61"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb61-1"><a href="#cb61-1" aria-hidden="true" tabindex="-1"></a>{<span class="at">:started-at</span></span>
-<span id="cb61-2"><a href="#cb61-2" aria-hidden="true" tabindex="-1"></a> #object[java.<span class="kw">time</span>.LocalTime <span class="bn">0xfd2c58b</span> <span class="st">"18:23:45.464197668"</span>],</span>
+<span id="cb61-2"><a href="#cb61-2" aria-hidden="true" tabindex="-1"></a> #object[java.<span class="kw">time</span>.LocalTime <span class="bn">0x7f283b4a</span> <span class="st">"19:24:40.730800787"</span>],</span>
 <span id="cb61-3"><a href="#cb61-3" aria-hidden="true" tabindex="-1"></a> <span class="at">:mem-cache</span> {<span class="at">:policy</span> <span class="at">:lru</span>, <span class="at">:threshold</span> <span class="dv">2</span>}}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="sourceClojure">
@@ -1052,18 +1052,18 @@ Threads A, B, C all request x=50
 </div>
 <div id="callout-15" class="callout-15-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>18:23:45.467 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
-18:23:45.769 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
-18:23:46.071 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
-18:23:46.374 INFO scicloj.pocket.impl.cache - Invalidated: /tmp/pocket-concurrency-test/f4/(pocket-book.concurrency_slow-computation 60) existed= true
-18:23:46.374 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
+<pre><code>19:24:40.732 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
+19:24:41.035 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
+19:24:41.337 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
+19:24:41.639 INFO scicloj.pocket.impl.cache - Invalidated: /tmp/pocket-concurrency-test/f4/(pocket-book.concurrency_slow-computation 60) existed= true
+19:24:41.639 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
 </code></pre>
 </div>
 </div>
 </div>
 <div class="printedClojure">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb64"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb64-1"><a href="#cb64-1" aria-hidden="true" tabindex="-1"></a>{<span class="at">:count-step-1</span> <span class="dv">1</span>,</span>
-<span id="cb64-2"><a href="#cb64-2" aria-hidden="true" tabindex="-1"></a> <span class="at">:elapsed-step-2</span> <span class="dv">0</span>,</span>
+<span id="cb64-2"><a href="#cb64-2" aria-hidden="true" tabindex="-1"></a> <span class="at">:elapsed-step-2</span> <span class="dv">1</span>,</span>
 <span id="cb64-3"><a href="#cb64-3" aria-hidden="true" tabindex="-1"></a> <span class="at">:count-step-2</span> <span class="dv">1</span>,</span>
 <span id="cb64-4"><a href="#cb64-4" aria-hidden="true" tabindex="-1"></a> <span class="at">:count-step-3</span> <span class="dv">3</span>,</span>
 <span id="cb64-5"><a href="#cb64-5" aria-hidden="true" tabindex="-1"></a> <span class="at">:count-step-4</span> <span class="dv">3</span>,</span>
@@ -1088,16 +1088,16 @@ Threads A, B, C all request x=50
 </div>
 <div id="callout-16" class="callout-16-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>18:23:46.683 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-concurrency-test
-18:23:46.683 INFO scicloj.pocket - Mem-cache options set: {:policy :lru, :threshold 3}
-18:23:46.683 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :lru, :threshold 3}
+<pre><code>19:24:41.947 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-concurrency-test
+19:24:41.947 INFO scicloj.pocket - Mem-cache options set: {:policy :lru, :threshold 3}
+19:24:41.947 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :lru, :threshold 3}
 </code></pre>
 </div>
 </div>
 </div>
 <div class="printedClojure">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb67"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb67-1"><a href="#cb67-1" aria-hidden="true" tabindex="-1"></a>{<span class="at">:started-at</span></span>
-<span id="cb67-2"><a href="#cb67-2" aria-hidden="true" tabindex="-1"></a> #object[java.<span class="kw">time</span>.LocalTime <span class="bn">0x65a2525e</span> <span class="st">"18:23:46.683336429"</span>],</span>
+<span id="cb67-2"><a href="#cb67-2" aria-hidden="true" tabindex="-1"></a> #object[java.<span class="kw">time</span>.LocalTime <span class="bn">0x7bf8d7c</span> <span class="st">"19:24:41.947843339"</span>],</span>
 <span id="cb67-3"><a href="#cb67-3" aria-hidden="true" tabindex="-1"></a> <span class="at">:mem-cache</span> {<span class="at">:policy</span> <span class="at">:lru</span>, <span class="at">:threshold</span> <span class="dv">3</span>}}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="sourceClojure">
@@ -1122,7 +1122,7 @@ Threads A, B, C all request x=50
 </div>
 <div id="callout-17" class="callout-17-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>18:23:46.692 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
+<pre><code>19:24:41.953 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
 </code></pre>
 </div>
 </div>
@@ -1177,9 +1177,9 @@ Threads A, B, C all request x=50
 </div>
 <div id="callout-18" class="callout-18-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>18:23:47.003 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-concurrency-test
-18:23:47.004 INFO scicloj.pocket - Mem-cache options set: {:policy :lru, :threshold 10}
-18:23:47.004 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :lru, :threshold 10}
+<pre><code>19:24:42.264 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-concurrency-test
+19:24:42.265 INFO scicloj.pocket - Mem-cache options set: {:policy :lru, :threshold 10}
+19:24:42.265 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :lru, :threshold 10}
 </code></pre>
 </div>
 </div>
@@ -1213,8 +1213,8 @@ Threads A, B, C all request x=50
 </div>
 <div id="callout-19" class="callout-19-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>18:23:47.009 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/pipeline-step-b
-18:23:47.009 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/pipeline-step-a
+<pre><code>19:24:42.270 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/pipeline-step-b
+19:24:42.270 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/pipeline-step-a
 </code></pre>
 </div>
 </div>
@@ -1260,9 +1260,9 @@ Threads A, B, C all request x=50
 </div>
 <div id="callout-20" class="callout-20-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>18:23:47.421 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-concurrency-test
-18:23:47.422 INFO scicloj.pocket - Mem-cache options set: {:policy :lru, :threshold 10}
-18:23:47.422 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :lru, :threshold 10}
+<pre><code>19:24:42.682 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-concurrency-test
+19:24:42.683 INFO scicloj.pocket - Mem-cache options set: {:policy :lru, :threshold 10}
+19:24:42.683 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :lru, :threshold 10}
 </code></pre>
 </div>
 </div>
@@ -1300,8 +1300,8 @@ Threads A, B, C all request x=50
 </div>
 <div id="callout-21" class="callout-21-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>18:23:47.426 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/fail-once-computation
-18:23:47.629 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/fail-once-computation
+<pre><code>19:24:42.688 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/fail-once-computation
+19:24:42.890 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/fail-once-computation
 </code></pre>
 </div>
 </div>
@@ -1332,16 +1332,16 @@ Threads A, B, C all request x=50
 </div>
 <div id="callout-22" class="callout-22-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>18:23:47.735 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-concurrency-test
-18:23:47.735 INFO scicloj.pocket - Mem-cache options set: {:policy :lru, :threshold 2}
-18:23:47.735 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :lru, :threshold 2}
+<pre><code>19:24:42.998 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-concurrency-test
+19:24:42.998 INFO scicloj.pocket - Mem-cache options set: {:policy :lru, :threshold 2}
+19:24:42.998 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :lru, :threshold 2}
 </code></pre>
 </div>
 </div>
 </div>
 <div class="printedClojure">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb91"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb91-1"><a href="#cb91-1" aria-hidden="true" tabindex="-1"></a>{<span class="at">:started-at</span></span>
-<span id="cb91-2"><a href="#cb91-2" aria-hidden="true" tabindex="-1"></a> #object[java.<span class="kw">time</span>.LocalTime <span class="bn">0x7e5efd28</span> <span class="st">"18:23:47.735725870"</span>],</span>
+<span id="cb91-2"><a href="#cb91-2" aria-hidden="true" tabindex="-1"></a> #object[java.<span class="kw">time</span>.LocalTime <span class="bn">0x6b5855b7</span> <span class="st">"19:24:42.998320115"</span>],</span>
 <span id="cb91-3"><a href="#cb91-3" aria-hidden="true" tabindex="-1"></a> <span class="at">:mem-cache</span> {<span class="at">:policy</span> <span class="at">:lru</span>, <span class="at">:threshold</span> <span class="dv">2</span>}}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Launch 4 threads per key, for 3 different keys. Each key should compute exactly once despite eviction pressure.</p>
@@ -1372,9 +1372,9 @@ Threads A, B, C all request x=50
 </div>
 <div id="callout-23" class="callout-23-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>18:23:47.744 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
-18:23:47.744 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
-18:23:47.744 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
+<pre><code>19:24:43.008 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
+19:24:43.008 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
+19:24:43.008 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
 </code></pre>
 </div>
 </div>
@@ -1406,16 +1406,16 @@ Threads A, B, C all request x=50
 </div>
 <div id="callout-24" class="callout-24-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>18:23:48.052 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-concurrency-test
-18:23:48.052 INFO scicloj.pocket - Mem-cache options set: {:policy :lru, :threshold 3}
-18:23:48.053 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :lru, :threshold 3}
+<pre><code>19:24:43.317 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-concurrency-test
+19:24:43.317 INFO scicloj.pocket - Mem-cache options set: {:policy :lru, :threshold 3}
+19:24:43.317 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :lru, :threshold 3}
 </code></pre>
 </div>
 </div>
 </div>
 <div class="printedClojure">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb97"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb97-1"><a href="#cb97-1" aria-hidden="true" tabindex="-1"></a>{<span class="at">:started-at</span></span>
-<span id="cb97-2"><a href="#cb97-2" aria-hidden="true" tabindex="-1"></a> #object[java.<span class="kw">time</span>.LocalTime <span class="bn">0x71a33c1f</span> <span class="st">"18:23:48.053124160"</span>],</span>
+<span id="cb97-2"><a href="#cb97-2" aria-hidden="true" tabindex="-1"></a> #object[java.<span class="kw">time</span>.LocalTime <span class="bn">0x1c961a84</span> <span class="st">"19:24:43.317737046"</span>],</span>
 <span id="cb97-3"><a href="#cb97-3" aria-hidden="true" tabindex="-1"></a> <span class="at">:mem-cache</span> {<span class="at">:policy</span> <span class="at">:lru</span>, <span class="at">:threshold</span> <span class="dv">3</span>}}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Compute and cache a value:</p>
@@ -1448,9 +1448,9 @@ Threads A, B, C all request x=50
 </div>
 <div id="callout-25" class="callout-25-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>18:23:48.057 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
-18:23:48.360 INFO scicloj.pocket.impl.cache - Invalidated: /tmp/pocket-concurrency-test/22/(pocket-book.concurrency_slow-computation 90) existed= true
-18:23:48.362 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
+<pre><code>19:24:43.324 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
+19:24:43.626 INFO scicloj.pocket.impl.cache - Invalidated: /tmp/pocket-concurrency-test/22/(pocket-book.concurrency_slow-computation 90) existed= true
+19:24:43.628 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.concurrency/slow-computation
 </code></pre>
 </div>
 </div>
@@ -1502,7 +1502,7 @@ Threads A, B, C all request x=50
 </div>
 <div id="callout-26" class="callout-26-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>18:23:48.671 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-concurrency-test
+<pre><code>19:24:43.935 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-concurrency-test
 </code></pre>
 </div>
 </div>
@@ -1525,8 +1525,8 @@ Threads A, B, C all request x=50
 </div>
 <div id="callout-27" class="callout-27-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>18:23:48.673 INFO scicloj.pocket - Mem-cache options reset to defaults: {:policy :lru, :threshold 256}
-18:23:48.673 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :lru, :threshold 256}
+<pre><code>19:24:43.936 INFO scicloj.pocket - Mem-cache options reset to defaults: {:policy :lru, :threshold 256}
+19:24:43.936 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :lru, :threshold 256}
 </code></pre>
 </div>
 </div>

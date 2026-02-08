@@ -73,7 +73,7 @@ any special handling.
 ::: {.callout-note}
 ## OUT
 ```
-18:23:37.485 INFO scicloj.pocket - Cache dir set to: /tmp/pocket-demo-pipelines
+19:24:32.800 INFO scicloj.pocket - Cache dir set to: /tmp/pocket-demo-pipelines
 
 ```
 :::
@@ -100,7 +100,7 @@ any special handling.
 ::: {.callout-note}
 ## OUT
 ```
-18:23:37.486 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo-pipelines
+19:24:32.800 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo-pipelines
 
 ```
 :::
@@ -219,13 +219,13 @@ First pipeline run:
 ::: {.callout-note}
 ## OUT
 ```
-18:23:37.491 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.recursive-caching-in-pipelines/train-model
-18:23:37.492 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.recursive-caching-in-pipelines/preprocess
-18:23:37.492 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.recursive-caching-in-pipelines/load-dataset
+19:24:32.805 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.recursive-caching-in-pipelines/train-model
+19:24:32.805 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.recursive-caching-in-pipelines/preprocess
+19:24:32.805 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.recursive-caching-in-pipelines/load-dataset
 Loading dataset from data/raw.csv ...
 Preprocessing with options: {:scale 2}
 Training model with params: {:epochs 100}
-"Elapsed time: 907.323822 msecs"
+"Elapsed time: 915.962599 msecs"
 
 ```
 :::
@@ -262,7 +262,7 @@ Second pipeline run (all cached):
 ::: {.callout-note}
 ## OUT
 ```
-"Elapsed time: 0.60708 msecs"
+"Elapsed time: 0.744739 msecs"
 
 ```
 :::
@@ -432,9 +432,9 @@ No `:value` keys yet. Now trigger computation:
 ::: {.callout-note}
 ## OUT
 ```
-18:23:38.411 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.recursive-caching-in-pipelines/train-model
-18:23:38.411 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.recursive-caching-in-pipelines/preprocess
-18:23:38.411 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.recursive-caching-in-pipelines/load-dataset
+19:24:33.730 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.recursive-caching-in-pipelines/train-model
+19:24:33.730 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.recursive-caching-in-pipelines/preprocess
+19:24:33.730 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.recursive-caching-in-pipelines/load-dataset
 Loading dataset from data/experiment.csv ...
 Preprocessing with options: {:scale 2}
 Training model with params: {:epochs 100}
@@ -577,7 +577,7 @@ Returns a Mermaid flowchart string. Arrows show data flow direction
 ::: {.callout-note}
 ## OUT
 ```
-18:23:39.323 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo-pipelines
+19:24:34.641 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo-pipelines
 
 ```
 :::

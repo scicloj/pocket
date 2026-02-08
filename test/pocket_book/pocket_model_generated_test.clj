@@ -131,14 +131,14 @@
 (def
  v17_l179
  (mapv
-  (fn* [p1__100675#] (-> p1__100675# :test-transform :metric))
+  (fn* [p1__103272#] (-> p1__103272# :test-transform :metric))
   (flatten results-1)))
 
 
 (deftest
  t18_l181
  (is
-  ((fn [ms] (every? (fn* [p1__100676#] (< p1__100676# 15)) ms))
+  ((fn [ms] (every? (fn* [p1__103273#] (< p1__103273# 15)) ms))
    v17_l179)))
 
 
@@ -167,10 +167,10 @@
  v24_l202
  (=
   (mapv
-   (fn* [p1__100677#] (-> p1__100677# :test-transform :metric))
+   (fn* [p1__103274#] (-> p1__103274# :test-transform :metric))
    (flatten results-1))
   (mapv
-   (fn* [p1__100678#] (-> p1__100678# :test-transform :metric))
+   (fn* [p1__103275#] (-> p1__103275# :test-transform :metric))
    (flatten results-2))))
 
 
@@ -249,7 +249,7 @@
      [pipeline-results]
      (tcc/mean
       (map
-       (fn* [p1__100679#] (-> p1__100679# :test-transform :metric))
+       (fn* [p1__103276#] (-> p1__103276# :test-transform :metric))
        pipeline-results)))
     batch-2)]
   (tc/dataset {:depth depths, :mean-rmse means})))
@@ -312,7 +312,7 @@
      [pipeline-results]
      (tcc/mean
       (map
-       (fn* [p1__100680#] (-> p1__100680# :test-transform :metric))
+       (fn* [p1__103277#] (-> p1__103277# :test-transform :metric))
        pipeline-results)))
     multi-results)]
   (tc/dataset {:model model-names, :mean-rmse means})))
@@ -365,7 +365,7 @@
      [pipeline-results]
      (tcc/mean
       (map
-       (fn* [p1__100681#] (-> p1__100681# :test-transform :metric))
+       (fn* [p1__103278#] (-> p1__103278# :test-transform :metric))
        pipeline-results)))
     fallback-results)]
   (tc/dataset {:model model-names, :mean-rmse means})))
@@ -410,10 +410,10 @@
  v70_l399
  (=
   (mapv
-   (fn* [p1__100682#] (-> p1__100682# :test-transform :metric))
+   (fn* [p1__103279#] (-> p1__103279# :test-transform :metric))
    (flatten persist-results-1))
   (mapv
-   (fn* [p1__100683#] (-> p1__100683# :test-transform :metric))
+   (fn* [p1__103280#] (-> p1__103280# :test-transform :metric))
    (flatten persist-results-2))))
 
 
