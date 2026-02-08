@@ -2,6 +2,12 @@
 ;;
 ;; **Last modified: 2026-02-08**
 ;;
+;; This chapter shows how to cache model training in a
+;; [metamorph.ml](https://github.com/scicloj/metamorph.ml) pipeline
+;; using Pocket. We define a small `pocket-model` function — a
+;; drop-in replacement for `ml/model` — and use it with
+;; cross-validation, grid search, and multiple model types.
+;;
 ;; ## Background
 ;;
 ;; [metamorph.ml](https://github.com/scicloj/metamorph.ml) is the

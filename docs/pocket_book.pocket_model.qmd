@@ -23,6 +23,12 @@ format:
 
 **Last modified: 2026-02-08**
 
+This chapter shows how to cache model training in a
+[metamorph.ml](https://github.com/scicloj/metamorph.ml) pipeline
+using Pocket. We define a small `pocket-model` function — a
+drop-in replacement for `ml/model` — and use it with
+cross-validation, grid search, and multiple model types.
+
 
 ## Background
 
@@ -130,7 +136,7 @@ giving us all of those things.
 ::: {.callout-note}
 ## OUT
 ```
-13:27:54.620 INFO scicloj.pocket - Cache dir set to: /tmp/pocket-model
+13:37:21.551 INFO scicloj.pocket - Cache dir set to: /tmp/pocket-model
 
 ```
 :::
@@ -157,7 +163,7 @@ giving us all of those things.
 ::: {.callout-note}
 ## OUT
 ```
-13:27:54.621 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-model
+13:37:21.552 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-model
 
 ```
 :::
@@ -315,12 +321,12 @@ First run — trains 3 models (one per fold):
 ::: {.callout-note}
 ## OUT
 ```
-13:27:54.639 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
-13:27:54.650 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-model/7a/7a2371066976291d06fe1aad1b48bbeba167ff70
-13:27:54.655 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
-13:27:54.665 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-model/9d/9d2799f31ec89ab47c28abaedf1a94632d6e4912
-13:27:54.669 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
-13:27:54.676 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-model/75/752a5761fad71dd397dad959c21a078b67503a46
+13:37:21.565 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
+13:37:21.572 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-model/7a/7a2371066976291d06fe1aad1b48bbeba167ff70
+13:37:21.577 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
+13:37:21.582 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-model/9d/9d2799f31ec89ab47c28abaedf1a94632d6e4912
+13:37:21.585 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
+13:37:21.589 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-model/75/752a5761fad71dd397dad959c21a078b67503a46
 
 ```
 :::
@@ -357,7 +363,7 @@ Cache now has 3 entries (one per fold):
 ::: {.printedClojure}
 ```clojure
 {:total-entries 3,
- :total-size-bytes 53370,
+ :total-size-bytes 53368,
  :entries-per-fn {"scicloj.metamorph.ml/train" 3}}
 
 ```
@@ -419,7 +425,7 @@ combinations train — existing ones hit cache.
 ::: {.callout-note}
 ## OUT
 ```
-13:27:54.714 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-model
+13:37:21.613 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-model
 
 ```
 :::
@@ -471,24 +477,24 @@ Batch 1: depths 4, 8, 12
 ::: {.callout-note}
 ## OUT
 ```
-13:27:54.716 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
-13:27:54.721 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-model/46/46551ba53c7214873653fd678fb5af5911fd74a8
-13:27:54.724 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
-13:27:54.729 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-model/6f/6fbb7bae3b90b8268e38a91c951088c6cfa3cadb
-13:27:54.733 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
-13:27:54.738 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-model/45/45b255de5fd11e966a46bb2bc197bd25e7dc3f6d
-13:27:54.741 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
-13:27:54.745 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-model/7a/7a2371066976291d06fe1aad1b48bbeba167ff70
-13:27:54.749 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
-13:27:54.754 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-model/9d/9d2799f31ec89ab47c28abaedf1a94632d6e4912
-13:27:54.757 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
-13:27:54.762 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-model/75/752a5761fad71dd397dad959c21a078b67503a46
-13:27:54.766 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
-13:27:54.771 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-model/3b/3b861196a2d47cb991e62014fd3765c71da240f1
-13:27:54.774 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
-13:27:54.782 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-model/b9/b95687a74377288768e9d5b6046213e733681bd6
-13:27:54.787 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
-13:27:54.793 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-model/78/78e74ef9c84789d8e65025fb80d4d14782a68ba3
+13:37:21.615 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
+13:37:21.623 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-model/46/46551ba53c7214873653fd678fb5af5911fd74a8
+13:37:21.629 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
+13:37:21.638 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-model/6f/6fbb7bae3b90b8268e38a91c951088c6cfa3cadb
+13:37:21.642 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
+13:37:21.646 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-model/45/45b255de5fd11e966a46bb2bc197bd25e7dc3f6d
+13:37:21.648 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
+13:37:21.653 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-model/7a/7a2371066976291d06fe1aad1b48bbeba167ff70
+13:37:21.655 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
+13:37:21.659 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-model/9d/9d2799f31ec89ab47c28abaedf1a94632d6e4912
+13:37:21.662 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
+13:37:21.666 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-model/75/752a5761fad71dd397dad959c21a078b67503a46
+13:37:21.668 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
+13:37:21.673 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-model/3b/3b861196a2d47cb991e62014fd3765c71da240f1
+13:37:21.675 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
+13:37:21.680 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-model/b9/b95687a74377288768e9d5b6046213e733681bd6
+13:37:21.682 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
+13:37:21.687 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-model/78/78e74ef9c84789d8e65025fb80d4d14782a68ba3
 
 ```
 :::
@@ -508,7 +514,7 @@ Batch 1: depths 4, 8, 12
 ::: {.printedClojure}
 ```clojure
 {:total-entries 9,
- :total-size-bytes 158779,
+ :total-size-bytes 158764,
  :entries-per-fn {"scicloj.metamorph.ml/train" 9}}
 
 ```
@@ -537,24 +543,24 @@ Depths 4, 8, 12 already cached → only 6, 10, 16 are new
 ::: {.callout-note}
 ## OUT
 ```
-13:27:54.819 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
-13:27:54.824 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-model/fa/fa43248538238553b66d37050b738a274e96a914
-13:27:54.827 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
-13:27:54.833 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-model/73/734a310323e487ea805c11c6c52bda4e9f95e81b
-13:27:54.838 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
-13:27:54.845 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-model/ee/eecb6e24aaa957374028b36ad146f7cbde70d19e
-13:27:54.858 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
-13:27:54.863 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-model/a1/a1e22191f6bb58b528e6f441dff21c21b53a6614
-13:27:54.866 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
-13:27:54.871 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-model/8a/8a0abfef601073e2647c21be0e36785ef4621535
-13:27:54.875 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
-13:27:54.882 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-model/3a/3a962b4c4929eecc8207ab8210d2761d069d7913
-13:27:54.901 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
-13:27:54.908 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-model/b5/b5dd934981c42d27635da730d93b58cd25d29824
-13:27:54.912 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
-13:27:54.917 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-model/ba/bacfed136727155cfce4b6aae389e18c5bccb87a
-13:27:54.921 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
-13:27:54.928 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-model/9f/9f60d660ba8f69b08c04e5e0789fb8c963ebb49e
+13:37:21.706 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
+13:37:21.713 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-model/fa/fa43248538238553b66d37050b738a274e96a914
+13:37:21.716 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
+13:37:21.721 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-model/73/734a310323e487ea805c11c6c52bda4e9f95e81b
+13:37:21.725 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
+13:37:21.731 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-model/ee/eecb6e24aaa957374028b36ad146f7cbde70d19e
+13:37:21.745 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
+13:37:21.750 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-model/a1/a1e22191f6bb58b528e6f441dff21c21b53a6614
+13:37:21.753 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
+13:37:21.758 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-model/8a/8a0abfef601073e2647c21be0e36785ef4621535
+13:37:21.760 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
+13:37:21.765 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-model/3a/3a962b4c4929eecc8207ab8210d2761d069d7913
+13:37:21.777 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
+13:37:21.784 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-model/b5/b5dd934981c42d27635da730d93b58cd25d29824
+13:37:21.787 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
+13:37:21.792 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-model/ba/bacfed136727155cfce4b6aae389e18c5bccb87a
+13:37:21.794 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
+13:37:21.798 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-model/9f/9f60d660ba8f69b08c04e5e0789fb8c963ebb49e
 
 ```
 :::
@@ -574,7 +580,7 @@ Depths 4, 8, 12 already cached → only 6, 10, 16 are new
 ::: {.printedClojure}
 ```clojure
 {:total-entries 18,
- :total-size-bytes 322371,
+ :total-size-bytes 322365,
  :entries-per-fn {"scicloj.metamorph.ml/train" 18}}
 
 ```
@@ -631,7 +637,7 @@ evaluation. Each model type is cached independently.
 ::: {.callout-note}
 ## OUT
 ```
-13:27:54.954 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-model
+13:37:21.820 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-model
 
 ```
 :::
@@ -684,36 +690,36 @@ evaluation. Each model type is cached independently.
 ::: {.callout-note}
 ## OUT
 ```
-13:27:54.956 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
-13:27:54.962 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-model/7a/7a2371066976291d06fe1aad1b48bbeba167ff70
-13:27:54.965 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
-13:27:54.969 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-model/9d/9d2799f31ec89ab47c28abaedf1a94632d6e4912
-13:27:54.972 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
-13:27:54.976 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-model/75/752a5761fad71dd397dad959c21a078b67503a46
-13:27:54.978 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
-Feb 08, 2026 1:27:54 PM org.tribuo.common.sgd.AbstractSGDTrainer train
+13:37:21.822 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
+13:37:21.827 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-model/7a/7a2371066976291d06fe1aad1b48bbeba167ff70
+13:37:21.831 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
+13:37:21.836 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-model/9d/9d2799f31ec89ab47c28abaedf1a94632d6e4912
+13:37:21.839 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
+13:37:21.843 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-model/75/752a5761fad71dd397dad959c21a078b67503a46
+13:37:21.846 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
+Feb 08, 2026 1:37:21 PM org.tribuo.common.sgd.AbstractSGDTrainer train
 INFO: Training SGD model with 133 examples
-Feb 08, 2026 1:27:54 PM org.tribuo.common.sgd.AbstractSGDTrainer train
+Feb 08, 2026 1:37:21 PM org.tribuo.common.sgd.AbstractSGDTrainer train
 INFO: Outputs - RegressionInfo({name=y,id=0,count=133,max=32.285163,min=-3.003255,mean=15.591786,variance=84.043799})
-13:27:54.985 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-model/b4/b48425c23d6d194ac5dc91ecb1c94b36a1c5db5b
-13:27:54.987 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
-Feb 08, 2026 1:27:54 PM org.tribuo.common.sgd.AbstractSGDTrainer train
+13:37:21.851 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-model/b4/b48425c23d6d194ac5dc91ecb1c94b36a1c5db5b
+13:37:21.854 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
+Feb 08, 2026 1:37:21 PM org.tribuo.common.sgd.AbstractSGDTrainer train
 INFO: Training SGD model with 133 examples
-Feb 08, 2026 1:27:54 PM org.tribuo.common.sgd.AbstractSGDTrainer train
+Feb 08, 2026 1:37:21 PM org.tribuo.common.sgd.AbstractSGDTrainer train
 INFO: Outputs - RegressionInfo({name=y,id=0,count=133,max=31.652557,min=-1.736155,mean=15.631001,variance=80.557863})
-13:27:54.993 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-model/a4/a43808eded03da47b365e6dee940247f81f5e73a
-13:27:54.996 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
-Feb 08, 2026 1:27:54 PM org.tribuo.common.sgd.AbstractSGDTrainer train
+13:37:21.858 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-model/a4/a43808eded03da47b365e6dee940247f81f5e73a
+13:37:21.860 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
+Feb 08, 2026 1:37:21 PM org.tribuo.common.sgd.AbstractSGDTrainer train
 INFO: Training SGD model with 134 examples
-Feb 08, 2026 1:27:54 PM org.tribuo.common.sgd.AbstractSGDTrainer train
+Feb 08, 2026 1:37:21 PM org.tribuo.common.sgd.AbstractSGDTrainer train
 INFO: Outputs - RegressionInfo({name=y,id=0,count=134,max=32.285163,min=-3.003255,mean=16.262557,variance=77.697467})
-13:27:55.001 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-model/51/51149c59026c9dc32442658adfc1be2dde62fa0e
-13:27:55.005 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
-13:27:55.010 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-model/c2/c2ccc1e0dcf1c2c00d9c621178aafc97ec23e85e
-13:27:55.012 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
-13:27:55.018 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-model/42/42cb21d2dea2f78ba1450f2f2eb4c3683652e07f
-13:27:55.020 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
-13:27:55.025 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-model/3c/3cb60cf5b7576d22ded8c276361bcc0eac5d3c40
+13:37:21.865 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-model/51/51149c59026c9dc32442658adfc1be2dde62fa0e
+13:37:21.867 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
+13:37:21.873 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-model/c2/c2ccc1e0dcf1c2c00d9c621178aafc97ec23e85e
+13:37:21.875 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
+13:37:21.880 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-model/42/42cb21d2dea2f78ba1450f2f2eb4c3683652e07f
+13:37:21.882 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
+13:37:21.887 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-model/3c/3cb60cf5b7576d22ded8c276361bcc0eac5d3c40
 
 ```
 :::
@@ -733,7 +739,7 @@ INFO: Outputs - RegressionInfo({name=y,id=0,count=134,max=32.285163,min=-3.00325
 ::: {.printedClojure}
 ```clojure
 {:total-entries 9,
- :total-size-bytes 188801,
+ :total-size-bytes 188806,
  :entries-per-fn {"scicloj.metamorph.ml/train" 9}}
 
 ```
@@ -789,7 +795,7 @@ still works, just without disk caching for that model.
 ::: {.callout-note}
 ## OUT
 ```
-13:27:55.039 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-model
+13:37:21.900 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-model
 
 ```
 :::
@@ -824,15 +830,15 @@ still works, just without disk caching for that model.
 ::: {.callout-note}
 ## OUT
 ```
-13:27:55.040 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
-13:27:55.046 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-model/7a/7a2371066976291d06fe1aad1b48bbeba167ff70
-13:27:55.049 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
-13:27:55.054 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-model/9d/9d2799f31ec89ab47c28abaedf1a94632d6e4912
-13:27:55.057 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
-13:27:55.077 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-model/75/752a5761fad71dd397dad959c21a078b67503a46
-13:27:55.080 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
-13:27:55.087 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
-13:27:55.093 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
+13:37:21.901 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
+13:37:21.906 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-model/7a/7a2371066976291d06fe1aad1b48bbeba167ff70
+13:37:21.910 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
+13:37:21.916 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-model/9d/9d2799f31ec89ab47c28abaedf1a94632d6e4912
+13:37:21.920 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
+13:37:21.927 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-model/75/752a5761fad71dd397dad959c21a078b67503a46
+13:37:21.931 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
+13:37:21.942 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
+13:37:21.950 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
 
 ```
 :::
@@ -855,7 +861,7 @@ show up as entries with a `nil` function name:
 ::: {.printedClojure}
 ```clojure
 {:total-entries 6,
- :total-size-bytes 53368,
+ :total-size-bytes 53373,
  :entries-per-fn {"scicloj.metamorph.ml/train" 3, nil 3}}
 
 ```
@@ -908,7 +914,7 @@ cache, models are loaded from disk on next access.
 ::: {.callout-note}
 ## OUT
 ```
-13:27:55.109 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-model
+13:37:21.972 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-model
 
 ```
 :::
@@ -944,12 +950,12 @@ Train fresh:
 ::: {.callout-note}
 ## OUT
 ```
-13:27:55.110 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
-13:27:55.116 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-model/7a/7a2371066976291d06fe1aad1b48bbeba167ff70
-13:27:55.119 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
-13:27:55.124 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-model/9d/9d2799f31ec89ab47c28abaedf1a94632d6e4912
-13:27:55.127 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
-13:27:55.132 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-model/75/752a5761fad71dd397dad959c21a078b67503a46
+13:37:21.973 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
+13:37:21.980 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-model/7a/7a2371066976291d06fe1aad1b48bbeba167ff70
+13:37:21.984 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
+13:37:21.989 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-model/9d/9d2799f31ec89ab47c28abaedf1a94632d6e4912
+13:37:21.993 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
+13:37:21.999 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-model/75/752a5761fad71dd397dad959c21a078b67503a46
 
 ```
 :::
@@ -995,9 +1001,9 @@ Re-evaluate — loads from disk:
 ::: {.callout-note}
 ## OUT
 ```
-13:27:55.136 DEBUG scicloj.pocket.impl.cache - Cache hit (disk): scicloj.metamorph.ml/train /tmp/pocket-model/7a/7a2371066976291d06fe1aad1b48bbeba167ff70
-13:27:55.140 DEBUG scicloj.pocket.impl.cache - Cache hit (disk): scicloj.metamorph.ml/train /tmp/pocket-model/9d/9d2799f31ec89ab47c28abaedf1a94632d6e4912
-13:27:55.142 DEBUG scicloj.pocket.impl.cache - Cache hit (disk): scicloj.metamorph.ml/train /tmp/pocket-model/75/752a5761fad71dd397dad959c21a078b67503a46
+13:37:22.007 DEBUG scicloj.pocket.impl.cache - Cache hit (disk): scicloj.metamorph.ml/train /tmp/pocket-model/7a/7a2371066976291d06fe1aad1b48bbeba167ff70
+13:37:22.012 DEBUG scicloj.pocket.impl.cache - Cache hit (disk): scicloj.metamorph.ml/train /tmp/pocket-model/9d/9d2799f31ec89ab47c28abaedf1a94632d6e4912
+13:37:22.016 DEBUG scicloj.pocket.impl.cache - Cache hit (disk): scicloj.metamorph.ml/train /tmp/pocket-model/75/752a5761fad71dd397dad959c21a078b67503a46
 
 ```
 :::
@@ -1065,7 +1071,7 @@ preprocessing steps, learning curves, and grid search.
 ::: {.callout-note}
 ## OUT
 ```
-13:27:55.150 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-model
+13:37:22.025 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-model
 
 ```
 :::
