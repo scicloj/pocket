@@ -121,11 +121,17 @@
 ;; `preprocess`, which in turn came from `load-dataset`.
 ;;
 ;; This happens automatically when you pass `Cached` objects (without
-;; derefing) from one cached step to the next. If you deref early
-;; with `@` (or `deref`), the downstream step sees a plain value and the
-;; provenance link is lost — the cache key is based on the value's
-;; hash instead. Both patterns work; the choice is whether you need
-;; traceability.
+;; derefing) from one cached step to the next.
+;;
+;; If you deref early with `@` (or `deref`), the derefed value still
+;; carries its origin identity — `(pocket/->id @cached-ref)` returns
+;; the same lightweight identity as the `Cached` reference itself.
+;; This means downstream cached steps get efficient cache keys even
+;; when working with real (derefed) values. The link breaks only when
+;; the value is *transformed* (e.g., adding a column), creating a new
+;; object that falls back to content-based identity.
+;; See [Under the hood: cache keys](pocket_book.cache_keys.html) for
+;; details on the origin registry.
 
 ;; For a fuller example with branching dependencies, see the
 ;; [Real-World Walkthrough](pocket_book.real_world_walkthrough.html).

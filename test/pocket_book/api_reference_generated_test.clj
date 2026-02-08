@@ -136,181 +136,194 @@
 (deftest t55_l137 (is (nil? v54_l135)))
 
 
-(def v56_l139 (kind/doc #'pocket/set-mem-cache-options!))
+(def v57_l142 (defn make-config [x y] {:x x, :y y}))
 
 
 (def
- v58_l143
+ v58_l144
+ (let
+  [c (pocket/cached #'make-config 100 200)]
+  (= (pocket/->id (deref c)) (pocket/->id c))))
+
+
+(deftest t59_l147 (is (true? v58_l144)))
+
+
+(def v60_l149 (kind/doc #'pocket/set-mem-cache-options!))
+
+
+(def
+ v62_l153
  (pocket/set-mem-cache-options! {:policy :fifo, :threshold 100}))
 
 
 (def
- v60_l147
+ v64_l157
  (pocket/set-mem-cache-options! {:policy :lru, :threshold 256}))
 
 
-(def v61_l149 (kind/doc #'pocket/reset-mem-cache-options!))
+(def v65_l159 (kind/doc #'pocket/reset-mem-cache-options!))
 
 
-(def v63_l153 (pocket/reset-mem-cache-options!))
+(def v67_l163 (pocket/reset-mem-cache-options!))
 
 
-(def v64_l155 (kind/doc #'pocket/*storage*))
+(def v68_l165 (kind/doc #'pocket/*storage*))
 
 
-(def v65_l157 (kind/doc #'pocket/set-storage!))
+(def v69_l167 (kind/doc #'pocket/set-storage!))
 
 
-(def v67_l161 (pocket/set-storage! :mem))
+(def v71_l171 (pocket/set-storage! :mem))
 
 
-(def v69_l165 (pocket/set-storage! nil))
+(def v73_l175 (pocket/set-storage! nil))
 
 
 (deftest
- t70_l167
- (is ((fn [_] (= :mem+disk (:storage (pocket/config)))) v69_l165)))
+ t74_l177
+ (is ((fn [_] (= :mem+disk (:storage (pocket/config)))) v73_l175)))
 
 
-(def v71_l169 (kind/doc #'pocket/cleanup!))
+(def v75_l179 (kind/doc #'pocket/cleanup!))
 
 
-(def v72_l171 (pocket/cleanup!))
+(def v76_l181 (pocket/cleanup!))
 
 
-(def v73_l173 (kind/doc #'pocket/clear-mem-cache!))
+(def v77_l183 (kind/doc #'pocket/clear-mem-cache!))
 
 
-(def v75_l177 (deref (pocket/cached #'expensive-calculation 10 20)))
+(def v79_l187 (deref (pocket/cached #'expensive-calculation 10 20)))
 
 
-(def v76_l179 (pocket/clear-mem-cache!))
+(def v80_l189 (pocket/clear-mem-cache!))
 
 
-(def v77_l181 (kind/doc #'pocket/invalidate!))
+(def v81_l191 (kind/doc #'pocket/invalidate!))
 
 
-(def v79_l185 (deref (pocket/cached #'expensive-calculation 10 20)))
+(def v83_l195 (deref (pocket/cached #'expensive-calculation 10 20)))
 
 
-(def v80_l187 (pocket/invalidate! #'expensive-calculation 10 20))
+(def v84_l197 (pocket/invalidate! #'expensive-calculation 10 20))
 
 
-(def v82_l191 (deref (pocket/cached #'expensive-calculation 10 20)))
+(def v86_l201 (deref (pocket/cached #'expensive-calculation 10 20)))
 
 
-(def v83_l193 (kind/doc #'pocket/invalidate-fn!))
+(def v87_l203 (kind/doc #'pocket/invalidate-fn!))
 
 
-(def v85_l197 (deref (pocket/cached #'expensive-calculation 1 2)))
+(def v89_l207 (deref (pocket/cached #'expensive-calculation 1 2)))
 
 
-(def v86_l198 (deref (pocket/cached #'expensive-calculation 3 4)))
+(def v90_l208 (deref (pocket/cached #'expensive-calculation 3 4)))
 
 
-(def v87_l200 (pocket/invalidate-fn! #'expensive-calculation))
+(def v91_l210 (pocket/invalidate-fn! #'expensive-calculation))
 
 
-(def v88_l202 (pocket/cleanup!))
+(def v92_l212 (pocket/cleanup!))
 
 
-(def v89_l204 (kind/doc #'pocket/cache-entries))
+(def v93_l214 (kind/doc #'pocket/cache-entries))
 
 
-(def v91_l208 (deref (pocket/cached #'expensive-calculation 10 20)))
+(def v95_l218 (deref (pocket/cached #'expensive-calculation 10 20)))
 
 
-(def v92_l209 (deref (pocket/cached #'expensive-calculation 3 4)))
+(def v96_l219 (deref (pocket/cached #'expensive-calculation 3 4)))
 
 
-(def v93_l211 (pocket/cache-entries))
+(def v97_l221 (pocket/cache-entries))
 
 
-(deftest t94_l213 (is ((fn [entries] (= 2 (count entries))) v93_l211)))
+(deftest t98_l223 (is ((fn [entries] (= 2 (count entries))) v97_l221)))
 
 
 (def
- v96_l217
+ v100_l227
  (pocket/cache-entries
   "pocket-book.api-reference/expensive-calculation"))
 
 
-(def v97_l219 (kind/doc #'pocket/cache-stats))
+(def v101_l229 (kind/doc #'pocket/cache-stats))
 
 
-(def v98_l221 (pocket/cache-stats))
+(def v102_l231 (pocket/cache-stats))
 
 
-(def v99_l223 (pocket/cleanup!))
+(def v103_l233 (pocket/cleanup!))
 
 
-(def v100_l225 (kind/doc #'pocket/origin-story))
+(def v104_l235 (kind/doc #'pocket/origin-story))
 
 
-(def v102_l231 (defn step-a [x] (+ x 10)))
+(def v106_l241 (defn step-a [x] (+ x 10)))
 
 
-(def v103_l232 (defn step-b [x y] (* x y)))
+(def v107_l242 (defn step-b [x y] (* x y)))
 
 
-(def v104_l234 (def a-c (pocket/cached #'step-a 5)))
+(def v108_l244 (def a-c (pocket/cached #'step-a 5)))
 
 
-(def v105_l235 (def b-c (pocket/cached #'step-b a-c 3)))
+(def v109_l245 (def b-c (pocket/cached #'step-b a-c 3)))
 
 
-(def v107_l239 (pocket/origin-story b-c))
+(def v111_l249 (pocket/origin-story b-c))
 
 
-(def v109_l242 (deref b-c))
+(def v113_l252 (deref b-c))
 
 
-(def v111_l246 (pocket/origin-story b-c))
+(def v115_l256 (pocket/origin-story b-c))
 
 
-(def v112_l248 (kind/doc #'pocket/origin-story-mermaid))
+(def v116_l258 (kind/doc #'pocket/origin-story-mermaid))
 
 
-(def v114_l252 (pocket/origin-story-mermaid b-c))
+(def v118_l262 (pocket/origin-story-mermaid b-c))
 
 
-(def v115_l254 (kind/doc #'pocket/origin-story-graph))
+(def v119_l264 (kind/doc #'pocket/origin-story-graph))
 
 
-(def v117_l259 (pocket/origin-story-graph b-c))
+(def v121_l269 (pocket/origin-story-graph b-c))
 
 
-(def v118_l261 (kind/doc #'pocket/compare-experiments))
+(def v122_l271 (kind/doc #'pocket/compare-experiments))
 
 
-(def v120_l267 (defn run-exp [config] {:rmse (* 0.1 (:lr config))}))
+(def v124_l277 (defn run-exp [config] {:rmse (* 0.1 (:lr config))}))
 
 
 (def
- v121_l270
+ v125_l280
  (def exp1 (pocket/cached #'run-exp {:lr 0.01, :epochs 100})))
 
 
 (def
- v122_l271
+ v126_l281
  (def exp2 (pocket/cached #'run-exp {:lr 0.001, :epochs 100})))
 
 
-(def v123_l273 (pocket/compare-experiments [exp1 exp2]))
+(def v127_l283 (pocket/compare-experiments [exp1 exp2]))
 
 
 (deftest
- t124_l275
+ t128_l285
  (is
   ((fn
     [rows]
     (and
      (= 2 (count rows))
-     (every? (fn* [p1__119393#] (contains? p1__119393# :lr)) rows)
+     (every? (fn* [p1__69905#] (contains? p1__69905# :lr)) rows)
      (not-any?
-      (fn* [p1__119394#] (contains? p1__119394# :epochs))
+      (fn* [p1__69906#] (contains? p1__69906# :epochs))
       rows)))
-   v123_l273)))
+   v127_l283)))
 
 
-(def v126_l284 (pocket/cleanup!))
+(def v130_l294 (pocket/cleanup!))

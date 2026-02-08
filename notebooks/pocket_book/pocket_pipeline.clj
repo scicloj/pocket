@@ -632,6 +632,13 @@
 ;; `pocket-evaluate-pipelines` are currently defined in this notebook.
 ;; A future `scicloj.pocket.ml` namespace could provide them — but
 ;; only if the pattern proves stable across different use cases.
+;;
+;; **Future direction: reusing `ml/evaluate-pipelines`.**
+;; Pocket's origin registry now makes it possible to pass derefed
+;; datasets to metamorph.ml's `evaluate-pipelines` without losing
+;; cache key efficiency. This could simplify or replace
+;; `pocket-evaluate-pipelines`, keeping the DAG provenance while
+;; reusing metamorph.ml's evaluation machinery directly.
 
 ;; ## Cleanup
 

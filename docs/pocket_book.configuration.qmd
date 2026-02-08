@@ -135,7 +135,7 @@ export POCKET_BASE_CACHE_DIR=/path/to/cache
 ::: {.callout-note}
 ## OUT
 ```
-22:14:20.058 INFO scicloj.pocket - Cache dir set to: /tmp/pocket-demo-config
+[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket - Cache dir set to: /tmp/pocket-demo-config
 
 ```
 :::
@@ -162,7 +162,7 @@ export POCKET_BASE_CACHE_DIR=/path/to/cache
 ::: {.callout-note}
 ## OUT
 ```
-22:14:20.059 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo-config
+[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo-config
 
 ```
 :::
@@ -267,8 +267,8 @@ Configure via `set-mem-cache-options!`:
 ::: {.callout-note}
 ## OUT
 ```
-22:14:20.062 INFO scicloj.pocket - Mem-cache options set: {:policy :fifo, :threshold 100}
-22:14:20.063 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :fifo, :threshold 100}
+[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket - Mem-cache options set: {:policy :fifo, :threshold 100}
+[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :fifo, :threshold 100}
 
 ```
 :::
@@ -297,8 +297,8 @@ Or a TTL policy where entries expire after 60 seconds:
 ::: {.callout-note}
 ## OUT
 ```
-22:14:20.064 INFO scicloj.pocket - Mem-cache options set: {:policy :ttl, :ttl 60000}
-22:14:20.065 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :ttl, :ttl 60000}
+[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket - Mem-cache options set: {:policy :ttl, :ttl 60000}
+[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :ttl, :ttl 60000}
 
 ```
 :::
@@ -327,8 +327,8 @@ Reset to the default LRU policy:
 ::: {.callout-note}
 ## OUT
 ```
-22:14:20.065 INFO scicloj.pocket - Mem-cache options set: {:policy :lru, :threshold 256}
-22:14:20.065 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :lru, :threshold 256}
+[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket - Mem-cache options set: {:policy :lru, :threshold 256}
+[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :lru, :threshold 256}
 
 ```
 :::
@@ -395,7 +395,7 @@ result (like a `delay`), but separate instances recompute.
 ::: {.callout-note}
 ## OUT
 ```
-22:14:20.066 INFO scicloj.pocket - Storage policy set to: :mem
+[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket - Storage policy set to: :mem
 
 ```
 :::
@@ -476,7 +476,7 @@ Reset to default:
 ::: {.callout-note}
 ## OUT
 ```
-22:14:20.068 INFO scicloj.pocket - Storage policy set to: nil
+[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket - Storage policy set to: nil
 
 ```
 :::
@@ -524,7 +524,7 @@ need to lower it.
 ::: {.callout-note}
 ## OUT
 ```
-22:14:20.070 INFO scicloj.pocket - Filename length limit set to: 80
+[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket - Filename length limit set to: 80
 
 ```
 :::
@@ -578,7 +578,7 @@ Reset to default (240):
 ::: {.callout-note}
 ## OUT
 ```
-22:14:20.071 INFO scicloj.pocket - Filename length limit set to: nil
+[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket - Filename length limit set to: nil
 
 ```
 :::
@@ -695,7 +695,7 @@ To delete all cached values (both disk and in-memory), use `cleanup!`:
 ::: {.callout-note}
 ## OUT
 ```
-22:14:20.074 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo-config
+[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo-config
 
 ```
 :::

@@ -40,14 +40,27 @@
 (deftest t16_l55 (is ((fn [id] (= (rest id) '(1 2))) v15_l53)))
 
 
-(def v18_l59 (pocket/->id nil))
-
-
-(deftest t19_l61 (is (nil? v18_l59)))
+(def v18_l61 (defn make-pair [a b] {:a a, :b b}))
 
 
 (def
- v21_l74
+ v19_l63
+ (let
+  [c (pocket/cached #'make-pair 1 2)]
+  (= (pocket/->id (deref c)) (pocket/->id c))))
+
+
+(deftest t20_l66 (is (true? v19_l63)))
+
+
+(def v22_l70 (pocket/->id nil))
+
+
+(deftest t23_l72 (is (nil? v22_l70)))
+
+
+(def
+ v25_l85
  (def
   example-ds
   (->
@@ -55,54 +68,54 @@
    (ds-mod/set-inference-target :y))))
 
 
-(def v22_l78 (pocket/->id example-ds))
+(def v26_l89 (pocket/->id example-ds))
 
 
-(def v24_l84 (def ds-a (tc/dataset {:x (range 30), :y (range 30)})))
+(def v28_l95 (def ds-a (tc/dataset {:x (range 30), :y (range 30)})))
 
 
-(def v25_l85 (def ds-b (tc/dataset {:x (range 30), :y (range 30)})))
+(def v29_l96 (def ds-b (tc/dataset {:x (range 30), :y (range 30)})))
 
 
-(def v26_l87 (= (pocket/->id ds-a) (pocket/->id ds-b)))
+(def v30_l98 (= (pocket/->id ds-a) (pocket/->id ds-b)))
 
 
-(deftest t27_l89 (is (true? v26_l87)))
+(deftest t31_l100 (is (true? v30_l98)))
 
 
 (def
- v29_l94
+ v33_l105
  (def
   ds-c
   (tc/dataset
    {:x (range 30), :y (concat (range 15) [999] (range 16 30))})))
 
 
-(def v30_l97 (= (pocket/->id ds-a) (pocket/->id ds-c)))
+(def v34_l108 (= (pocket/->id ds-a) (pocket/->id ds-c)))
 
 
-(deftest t31_l99 (is (false? v30_l97)))
+(deftest t35_l110 (is (false? v34_l108)))
 
 
-(def v33_l114 (defrecord DatasetRef [source version]))
+(def v37_l125 (defrecord DatasetRef [source version]))
 
 
 (def
- v35_l123
+ v39_l134
  (extend-protocol
   pocket/PIdentifiable
   DatasetRef
   (->id [this] (symbol (str (:source this) "-v" (:version this))))))
 
 
-(def v37_l130 (pocket/->id (->DatasetRef "census" 3)))
+(def v41_l141 (pocket/->id (->DatasetRef "census" 3)))
 
 
-(deftest t38_l132 (is (= v37_l130 'census-v3)))
+(deftest t42_l143 (is (= v41_l141 'census-v3)))
 
 
 (def
- v40_l136
+ v44_l147
  (defn
   analyze-dataset
   "Simulate analyzing a dataset."
@@ -121,7 +134,7 @@
 
 
 (def
- v42_l148
+ v46_l159
  (def
   analysis
   (pocket/cached
@@ -130,14 +143,14 @@
    {:method :regression})))
 
 
-(def v43_l153 (pocket/->id analysis))
+(def v47_l164 (pocket/->id analysis))
 
 
-(def v45_l157 (deref analysis))
+(def v49_l168 (deref analysis))
 
 
 (deftest
- t46_l159
+ t50_l170
  (is
   ((fn
     [result]
@@ -145,14 +158,14 @@
      (= "census" (:source result))
      (= 3 (:version result))
      (= :regression (:method result))))
-   v45_l157)))
+   v49_l168)))
 
 
-(def v48_l165 (deref analysis))
+(def v52_l176 (deref analysis))
 
 
 (def
- v50_l169
+ v54_l180
  (deref
   (pocket/cached
    #'analyze-dataset
@@ -160,14 +173,14 @@
    {:method :regression})))
 
 
-(def v52_l177 (pocket/dir-tree))
+(def v56_l188 (pocket/dir-tree))
 
 
-(def v54_l237 (defrecord MyModel [weights bias]))
+(def v58_l248 (defrecord MyModel [weights bias]))
 
 
 (def
- v55_l239
+ v59_l250
  (nippy/extend-freeze
   MyModel
   :my-model
@@ -177,7 +190,7 @@
 
 
 (def
- v56_l244
+ v60_l255
  (do
   (nippy/extend-thaw
    :my-model
@@ -188,36 +201,34 @@
   :done))
 
 
-(def v58_l252 (def original (->MyModel [0.5 -0.3 1.2] 0.1)))
+(def v62_l263 (def original (->MyModel [0.5 -0.3 1.2] 0.1)))
 
 
-(def v59_l254 (= original (nippy/thaw (nippy/freeze original))))
+(def v63_l265 (= original (nippy/thaw (nippy/freeze original))))
 
 
-(deftest t60_l256 (is (true? v59_l254)))
+(deftest t64_l267 (is (true? v63_l265)))
 
 
 (def
- v62_l260
+ v66_l271
  (defn
   train-my-model
   [data]
-  (->MyModel
-   (mapv (fn* [p1__118562#] (* p1__118562# 0.01)) data)
-   0.42)))
+  (->MyModel (mapv (fn* [p1__29571#] (* p1__29571# 0.01)) data) 0.42)))
 
 
 (def
- v63_l263
+ v67_l274
  (let
   [result (deref (pocket/cached #'train-my-model [10 20 30]))]
   result))
 
 
 (deftest
- t64_l266
+ t68_l277
  (is
-  ((fn [m] (and (instance? MyModel m) (= 0.42 (:bias m)))) v63_l263)))
+  ((fn [m] (and (instance? MyModel m) (= 0.42 (:bias m)))) v67_l274)))
 
 
-(def v66_l274 (pocket/cleanup!))
+(def v70_l285 (pocket/cleanup!))

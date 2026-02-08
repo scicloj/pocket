@@ -112,6 +112,68 @@
 ;; rather than by content, keeping key generation fast and enabling
 ;; full provenance through the DAG.
 
+;; ## Origin registry: derefed values keep their identity
+;;
+;; Sometimes we need to pass real values — not `Cached` references — to
+;; code that requires concrete types. For example, metamorph.ml's
+;; `evaluate-pipelines` checks `(instance? Dataset ds)`, which fails
+;; for `Cached` references. The natural solution is to deref the
+;; reference first, but that would lose the lightweight identity:
+;; the derefed dataset would need full content hashing for its cache key.
+;;
+;; Pocket solves this with an **origin registry**. When a `Cached` value
+;; is derefed, the result is registered in a side channel that maps it
+;; back to the `Cached` identity. Later, when `->id` is called on that
+;; derefed value, the registry provides the lightweight identity instead
+;; of hashing the content.
+
+;; A derefed value has the same identity as its `Cached` reference:
+
+(let [data-c (pocket/cached #'make-data 50000)
+      data (deref data-c)]
+  (= (proto/->id data) (proto/->id data-c)))
+
+(kind/test-last [true?])
+
+;; And the performance is the same — sub-millisecond, like a `Cached`
+;; reference, rather than the tens-of-milliseconds cost of hashing
+;; 50,000 rows:
+
+(let [data-c (pocket/cached #'make-data 50000)
+      data (deref data-c)
+      t0 (System/nanoTime)
+      _ (str (cache/canonical-id (proto/->id data)))
+      t1 (System/nanoTime)]
+  {:derefed-with-origin-ms (/ (- t1 t0) 1e6)})
+
+;; ### What breaks the link
+;;
+;; Transforming a derefed value creates a **new object**. The new
+;; object is not in the registry, so `->id` falls back to
+;; content-based identity. This is intentional — a transformed
+;; dataset is semantically different from its source, and its
+;; cache key should reflect its actual content.
+
+(let [data-c (pocket/cached #'make-data 100)
+      data (deref data-c)
+      transformed (tc/add-column data :z (repeat 100 0))]
+  {:original-has-origin (= (proto/->id data) (proto/->id data-c))
+   :transformed-has-origin (= (proto/->id transformed) (proto/->id data-c))})
+
+(kind/test-last
+ [(fn [{:keys [original-has-origin transformed-has-origin]}]
+    (and original-has-origin (not transformed-has-origin)))])
+
+;; ### Which values are registered
+;;
+;; Only values implementing `clojure.lang.IObj` — maps, vectors,
+;; sets, and datasets — are registered. The JVM
+;; [interns](https://en.wikipedia.org/wiki/String_interning) small
+;; integers and other primitives, meaning `(Long/valueOf 1)` always
+;; returns the same object. Registering such values would cause
+;; false origin matches across unrelated computations. Excluding
+;; them avoids this problem entirely.
+
 ;; ## Cleanup
 
 (pocket/cleanup!)

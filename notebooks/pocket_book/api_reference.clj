@@ -136,6 +136,16 @@ pocket/*base-cache-dir*
 
 (kind/test-last [nil?])
 
+;; A derefed `Cached` value carries its origin identity
+;; (for maps, vectors, sets, and datasets):
+
+(defn make-config [x y] {:x x :y y})
+
+(let [c (pocket/cached #'make-config 100 200)]
+  (= (pocket/->id (deref c)) (pocket/->id c)))
+
+(kind/test-last [true?])
+
 (kind/doc #'pocket/set-mem-cache-options!)
 
 ;; Switch to a FIFO policy with 100 entries:

@@ -54,6 +54,17 @@
 
 (kind/test-last [(fn [id] (= (rest id) '(1 2)))])
 
+;; A derefed `Cached` value carries its origin identity — see
+;; [Under the hood: cache keys](pocket_book.cache_keys.html) for details.
+;; This works for maps, vectors, sets, and datasets:
+
+(defn make-pair [a b] {:a a :b b})
+
+(let [c (pocket/cached #'make-pair 1 2)]
+  (= (pocket/->id (deref c)) (pocket/->id c)))
+
+(kind/test-last [true?])
+
 ;; `nil` is handled:
 
 (pocket/->id nil)

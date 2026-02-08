@@ -144,7 +144,11 @@
 
 (defn ->id
   "Return a cache key representation of a value.
-   Dispatches via the `PIdentifiable` protocol."
+   Dispatches via the `PIdentifiable` protocol.
+   
+   For derefed `Cached` values, returns the same lightweight identity
+   as the original `Cached` reference — the origin registry preserves
+   the link automatically (see `cache_keys` notebook for details)."
   [x]
   (protocols/->id x))
 
@@ -207,8 +211,10 @@
      :existed (boolean existed?)}))
 
 (defn clear-mem-cache!
-  "Clear all entries from the in-memory cache without deleting the disk cache.
-   The next deref of a cached value will reload from disk if available.
+  "Clear all entries from the in-memory cache and the origin registry,
+   without deleting the disk cache.
+   The next deref of a cached value will reload from disk if available
+   and re-register origin identity.
    Useful for testing scenarios that need to simulate memory eviction."
   []
   (impl/clear-mem-cache!))

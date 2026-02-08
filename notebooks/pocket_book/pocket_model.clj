@@ -431,6 +431,14 @@
 ;; - Iterative notebook development (change downstream code, keep models)
 ;; - Learning curves (add new sizes, only new ones train)
 ;; - Any workflow where we re-evaluate with the same data + options
+;;
+;; **Cache key efficiency**: When `pocket-model` receives a derefed
+;; dataset (e.g., from `ml/evaluate-pipelines`, which passes real
+;; datasets through `:metamorph/data`), Pocket's origin registry
+;; recognizes it and uses the lightweight identity from the original
+;; `Cached` reference. This avoids hashing the full dataset content
+;; for the cache key — the same efficiency as passing a `Cached`
+;; reference directly.
 
 ;; ## Cleanup
 
