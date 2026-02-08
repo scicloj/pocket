@@ -610,34 +610,32 @@ noise-results
 (kind/test-last
  [(fn [m] (and (map? m) (contains? m :rmse)))])
 
-;; How much did clipping help? Let's compare three scenarios:
-;; no outliers (clean baseline), outliers without clipping, and
-;; outliers with clipping.
+;; How much did clipping help? Let's compare three scenarios
+;; using the same cached building blocks.
 
-(let [clean-data (make-regression-data {:f nonlinear-fn :n 200 :noise-sd 0.3 :seed 99})
-      dirty-data (make-regression-data {:f nonlinear-fn :n 200 :noise-sd 0.3 :seed 99
-                                        :outlier-fraction 0.1 :outlier-scale 15})
-      run (fn [ds]
-            (let [sp (split-dataset ds {:seed 99})
-                  train-prep (prepare-features (:train sp) :poly+trig)
-                  test-prep (prepare-features (:test sp) :poly+trig)
-                  model (ml/train train-prep cart-spec)]
-              (loss/rmse (:y test-prep) (:y (ml/predict test-prep model)))))
-      threshold (fit-outlier-threshold (:train (split-dataset dirty-data {:seed 99})))
-      run-clipped (fn [ds]
-                    (let [sp (split-dataset ds {:seed 99})
-                          train-clip (clip-outliers (:train sp) threshold)
-                          test-clip (clip-outliers (:test sp) threshold)
-                          train-prep (prepare-features train-clip :poly+trig)
-                          test-prep (prepare-features test-clip :poly+trig)
-                          model (ml/train train-prep cart-spec)]
-                      (loss/rmse (:y test-prep) (:y (ml/predict test-prep model)))))]
-  {:clean (run clean-data)
-   :outliers-no-clip (run dirty-data)
-   :outliers-clipped (run-clipped dirty-data)})
+;; The no-clip and clean-baseline pipelines are local — they exist
+;; only for this comparison. Each still builds a cached DAG that
+;; shares steps with the clipped pipeline above.
+
+(let [;; No-clip: skip clipping, go straight from raw splits to features
+      noclip-train-c  (c-prepare dag-train-c :poly+trig)
+      noclip-test-c   (c-prepare dag-test-c :poly+trig)
+      noclip-model-c  (c-train noclip-train-c cart-spec)
+      noclip-metrics  @(c-evaluate noclip-test-c noclip-model-c)
+      ;; Clean baseline: same structure, data without outliers
+      clean-data-c    (pocket/cached #'make-regression-data
+                                     {:f #'nonlinear-fn :n 200 :noise-sd 0.3 :seed 99})
+      clean-split-c   (pocket/cached #'split-dataset clean-data-c {:seed 99})
+      clean-train-c   (c-prepare (pocket/cached :train clean-split-c) :poly+trig)
+      clean-test-c    (c-prepare (pocket/cached :test clean-split-c) :poly+trig)
+      clean-model-c   (c-train clean-train-c cart-spec)
+      clean-metrics   @(c-evaluate clean-test-c clean-model-c)]
+  {:clean            clean-metrics
+   :outliers-no-clip noclip-metrics
+   :outliers-clipped @metrics-c})
 
 (kind/test-last
- [(fn [m] (< (:outliers-clipped m) (:outliers-no-clip m)))])
+ [(fn [m] (< (:rmse (:outliers-clipped m)) (:rmse (:outliers-no-clip m))))])
 
 ;; Clipping x before building polynomial features makes a visible
 ;; difference — the amplification through x² is tamed.

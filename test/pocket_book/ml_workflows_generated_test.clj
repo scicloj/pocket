@@ -322,12 +322,12 @@
      [low
       (first
        (filter
-        (fn* [p1__103013#] (= 0.1 (:noise-sd p1__103013#)))
+        (fn* [p1__104428#] (= 0.1 (:noise-sd p1__104428#)))
         rows))
       high
       (first
        (filter
-        (fn* [p1__103014#] (= 5.0 (:noise-sd p1__103014#)))
+        (fn* [p1__104429#] (= 5.0 (:noise-sd p1__104429#)))
         rows))]
      (and
       (< (:cart-rmse low) (:sgd-rmse low))
@@ -508,65 +508,46 @@
 
 
 (def
- v85_l617
+ v85_l620
  (let
-  [clean-data
-   (make-regression-data
-    {:f nonlinear-fn, :n 200, :noise-sd 0.3, :seed 99})
-   dirty-data
-   (make-regression-data
-    {:f nonlinear-fn,
-     :n 200,
-     :noise-sd 0.3,
-     :seed 99,
-     :outlier-fraction 0.1,
-     :outlier-scale 15})
-   run
-   (fn
-    [ds]
-    (let
-     [sp
-      (split-dataset ds {:seed 99})
-      train-prep
-      (prepare-features (:train sp) :poly+trig)
-      test-prep
-      (prepare-features (:test sp) :poly+trig)
-      model
-      (ml/train train-prep cart-spec)]
-     (loss/rmse (:y test-prep) (:y (ml/predict test-prep model)))))
-   threshold
-   (fit-outlier-threshold
-    (:train (split-dataset dirty-data {:seed 99})))
-   run-clipped
-   (fn
-    [ds]
-    (let
-     [sp
-      (split-dataset ds {:seed 99})
-      train-clip
-      (clip-outliers (:train sp) threshold)
-      test-clip
-      (clip-outliers (:test sp) threshold)
-      train-prep
-      (prepare-features train-clip :poly+trig)
-      test-prep
-      (prepare-features test-clip :poly+trig)
-      model
-      (ml/train train-prep cart-spec)]
-     (loss/rmse (:y test-prep) (:y (ml/predict test-prep model)))))]
-  {:clean (run clean-data),
-   :outliers-no-clip (run dirty-data),
-   :outliers-clipped (run-clipped dirty-data)}))
+  [noclip-train-c
+   (c-prepare dag-train-c :poly+trig)
+   noclip-test-c
+   (c-prepare dag-test-c :poly+trig)
+   noclip-model-c
+   (c-train noclip-train-c cart-spec)
+   noclip-metrics
+   @(c-evaluate noclip-test-c noclip-model-c)
+   clean-data-c
+   (pocket/cached
+    #'make-regression-data
+    {:f #'nonlinear-fn, :n 200, :noise-sd 0.3, :seed 99})
+   clean-split-c
+   (pocket/cached #'split-dataset clean-data-c {:seed 99})
+   clean-train-c
+   (c-prepare (pocket/cached :train clean-split-c) :poly+trig)
+   clean-test-c
+   (c-prepare (pocket/cached :test clean-split-c) :poly+trig)
+   clean-model-c
+   (c-train clean-train-c cart-spec)
+   clean-metrics
+   @(c-evaluate clean-test-c clean-model-c)]
+  {:clean clean-metrics,
+   :outliers-no-clip noclip-metrics,
+   :outliers-clipped @metrics-c}))
 
 
 (deftest
- t86_l639
+ t86_l637
  (is
-  ((fn [m] (< (:outliers-clipped m) (:outliers-no-clip m))) v85_l617)))
+  ((fn
+    [m]
+    (< (:rmse (:outliers-clipped m)) (:rmse (:outliers-no-clip m))))
+   v85_l620)))
 
 
 (def
- v88_l657
+ v88_l655
  (defn
   run-pipeline
   "Run a complete pipeline with given hyperparameters."
@@ -596,7 +577,7 @@
 
 
 (def
- v90_l675
+ v90_l673
  (def
   experiments
   (for
@@ -608,14 +589,14 @@
      :max-depth max-depth}))))
 
 
-(def v92_l686 (def comparison (pocket/compare-experiments experiments)))
+(def v92_l684 (def comparison (pocket/compare-experiments experiments)))
 
 
-(def v93_l689 (tc/dataset comparison))
+(def v93_l687 (tc/dataset comparison))
 
 
 (deftest
- t94_l691
+ t94_l689
  (is
   ((fn
     [ds]
@@ -624,11 +605,11 @@
      (some #{:noise-sd} (tc/column-names ds))
      (some #{:feature-set} (tc/column-names ds))
      (some #{:max-depth} (tc/column-names ds))))
-   v93_l689)))
+   v93_l687)))
 
 
 (def
- v96_l704
+ v96_l702
  (let
   [rows
    (map
@@ -661,4 +642,4 @@
     :layout {:xaxis {:title "max-depth"}, :yaxis {:title "rmse"}}})))
 
 
-(def v98_l763 (pocket/cleanup!))
+(def v98_l761 (pocket/cleanup!))
