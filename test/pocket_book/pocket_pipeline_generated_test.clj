@@ -292,27 +292,34 @@
  (def transform-ctx (mm/transform-pipe test-c pipe-cart fit-ctx)))
 
 
-(def v40_l311 (kind/pprint @(:model fit-ctx)))
+(def
+ v40_l311
+ (->
+  fit-ctx
+  :model
+  deref
+  (update :model-data dissoc :model-as-bytes)
+  kind/pprint))
 
 
-(deftest t41_l313 (is ((fn [model] (map? model)) v40_l311)))
+(deftest t41_l317 (is ((fn [model] (map? model)) v40_l311)))
 
 
-(def v43_l318 (tc/head (deref (:metamorph/data transform-ctx))))
+(def v43_l322 (tc/head (deref (:metamorph/data transform-ctx))))
 
 
 (def
- v45_l322
+ v45_l326
  (loss/rmse
   (:y @(:target transform-ctx))
   (:y @(:metamorph/data transform-ctx))))
 
 
-(deftest t46_l325 (is ((fn [rmse] (< rmse 5.0)) v45_l322)))
+(deftest t46_l329 (is ((fn [rmse] (< rmse 5.0)) v45_l326)))
 
 
 (def
- v48_l335
+ v48_l339
  (defn
   compute-loss
   "Compute RMSE between actual and predicted :y columns."
@@ -321,21 +328,21 @@
 
 
 (def
- v49_l340
+ v49_l344
  (def
   c-compute-loss
   (pocket/caching-fn #'compute-loss {:storage :mem})))
 
 
 (def
- v51_l346
+ v51_l350
  (def
   train-transform-ctx
   (mm/transform-pipe train-c pipe-cart fit-ctx)))
 
 
 (def
- v53_l350
+ v53_l354
  (def
   train-loss-c
   (c-compute-loss
@@ -344,7 +351,7 @@
 
 
 (def
- v54_l354
+ v54_l358
  (def
   test-loss-c
   (c-compute-loss
@@ -353,7 +360,7 @@
 
 
 (def
- v56_l360
+ v56_l364
  (defn
   report
   "Gather train and test loss into a summary map."
@@ -362,33 +369,33 @@
 
 
 (def
- v57_l366
+ v57_l370
  (def c-report (pocket/caching-fn #'report {:storage :mem})))
 
 
-(def v58_l368 (def summary-c (c-report train-loss-c test-loss-c)))
+(def v58_l372 (def summary-c (c-report train-loss-c test-loss-c)))
 
 
-(def v59_l370 (deref summary-c))
+(def v59_l374 (deref summary-c))
 
 
 (deftest
- t60_l372
+ t60_l376
  (is
   ((fn
     [{:keys [train-rmse test-rmse]}]
     (and (< train-rmse test-rmse) (< test-rmse 5.0)))
-   v59_l370)))
+   v59_l374)))
 
 
-(def v62_l381 (pocket/origin-story-mermaid summary-c))
+(def v62_l385 (pocket/origin-story-mermaid summary-c))
 
 
-(def v63_l382 (pocket/cleanup!))
+(def v63_l386 (pocket/cleanup!))
 
 
 (def
- v65_l391
+ v65_l395
  (defn
   nth-split-train
   "Extract the train set of the nth split."
@@ -397,7 +404,7 @@
 
 
 (def
- v66_l396
+ v66_l400
  (defn
   nth-split-test
   "Extract the test set of the nth split."
@@ -406,7 +413,7 @@
 
 
 (def
- v67_l401
+ v67_l405
  (defn-
   n-splits
   "Derive the number of splits from the method and params,\n  without materializing the dataset."
@@ -427,7 +434,7 @@
 
 
 (def
- v68_l411
+ v68_l415
  (defn
   pocket-splits
   "Create k-fold splits as Cached references.\n  Returns [{:train Cached, :test Cached, :idx int} ...]."
@@ -453,7 +460,7 @@
 
 
 (def
- v70_l430
+ v70_l434
  (defn
   pocket-evaluate-pipelines
   "Evaluate pipelines across k-fold splits.\n  Like ml/evaluate-pipelines, but built on Cached references.\n  \n  `pipelines` is a seq of pipeline functions (from mm/pipeline).\n  `metric-fn` takes (test-ds, prediction-ds) and returns a number."
@@ -476,7 +483,7 @@
 
 
 (def
- v72_l454
+ v72_l458
  (defn
   rmse-metric
   "Compute RMSE between actual and predicted :y columns."
@@ -485,7 +492,7 @@
 
 
 (def
- v73_l459
+ v73_l463
  (defn
   make-pipe
   [{:keys [feature-set model-spec]}]
@@ -499,7 +506,7 @@
 
 
 (def
- v74_l465
+ v74_l469
  (def
   configs
   [{:feature-set :poly+trig, :model-spec cart-spec}
@@ -508,7 +515,7 @@
 
 
 (def
- v75_l470
+ v75_l474
  (def
   results
   (pocket-evaluate-pipelines
@@ -519,14 +526,14 @@
    rmse-metric)))
 
 
-(def v77_l477 (count results))
+(def v77_l481 (count results))
 
 
-(deftest t78_l479 (is ((fn [n] (= n 9)) v77_l477)))
+(deftest t78_l483 (is ((fn [n] (= n 9)) v77_l481)))
 
 
 (def
- v80_l484
+ v80_l488
  (def
   summary
   (let
@@ -541,14 +548,14 @@
     grouped))))
 
 
-(def v81_l492 (tc/dataset summary))
+(def v81_l496 (tc/dataset summary))
 
 
-(deftest t82_l494 (is ((fn [ds] (= 3 (tc/row-count ds))) v81_l492)))
+(deftest t82_l498 (is ((fn [ds] (= 3 (tc/row-count ds))) v81_l496)))
 
 
 (def
- v84_l499
+ v84_l503
  (def
   results-2
   (pocket-evaluate-pipelines
@@ -559,17 +566,17 @@
    rmse-metric)))
 
 
-(def v85_l504 (= (mapv :metric results) (mapv :metric results-2)))
+(def v85_l508 (= (mapv :metric results) (mapv :metric results-2)))
 
 
-(deftest t86_l506 (is ((fn [eq] (true? eq)) v85_l504)))
+(deftest t86_l510 (is ((fn [eq] (true? eq)) v85_l508)))
 
 
-(def v88_l516 (pocket/cleanup!))
+(def v88_l520 (pocket/cleanup!))
 
 
 (def
- v89_l518
+ v89_l522
  (def
   sweep-configs
   (vec
@@ -586,7 +593,7 @@
 
 
 (def
- v90_l528
+ v90_l532
  (def
   sweep-results
   (pocket-evaluate-pipelines
@@ -597,14 +604,14 @@
    rmse-metric)))
 
 
-(def v92_l535 (count sweep-results))
+(def v92_l539 (count sweep-results))
 
 
-(deftest t93_l537 (is ((fn [n] (= n 24)) v92_l535)))
+(deftest t93_l541 (is ((fn [n] (= n 24)) v92_l539)))
 
 
 (def
- v95_l542
+ v95_l546
  (def
   sweep-summary
   (let
@@ -628,15 +635,15 @@
     (sort-by :mean-rmse)))))
 
 
-(def v96_l552 (tc/dataset sweep-summary))
+(def v96_l556 (tc/dataset sweep-summary))
 
 
-(deftest t97_l554 (is ((fn [ds] (= 8 (tc/row-count ds))) v96_l552)))
+(deftest t97_l558 (is ((fn [ds] (= 8 (tc/row-count ds))) v96_l556)))
 
 
 (def
- v99_l569
+ v99_l573
  (pocket/origin-story-mermaid (:model (first sweep-results))))
 
 
-(def v101_l635 (pocket/cleanup!))
+(def v101_l639 (pocket/cleanup!))

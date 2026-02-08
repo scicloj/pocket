@@ -241,10 +241,11 @@
                      (nippy/freeze-to-out! data-output (:weights x))
                      (nippy/freeze-to-out! data-output (:bias x)))
 
-(nippy/extend-thaw :my-model
-                   [data-input]
-                   (->MyModel (nippy/thaw-from-in! data-input)
-                              (nippy/thaw-from-in! data-input)))
+(do (nippy/extend-thaw :my-model
+                       [data-input]
+                       (->MyModel (nippy/thaw-from-in! data-input)
+                                  (nippy/thaw-from-in! data-input)))
+    :done)
 
 ;; We can verify the round-trip works:
 

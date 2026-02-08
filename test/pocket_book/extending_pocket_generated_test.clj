@@ -178,44 +178,46 @@
 
 (def
  v56_l244
- (nippy/extend-thaw
-  :my-model
-  [data-input]
-  (->MyModel
-   (nippy/thaw-from-in! data-input)
-   (nippy/thaw-from-in! data-input))))
+ (do
+  (nippy/extend-thaw
+   :my-model
+   [data-input]
+   (->MyModel
+    (nippy/thaw-from-in! data-input)
+    (nippy/thaw-from-in! data-input)))
+  :done))
 
 
-(def v58_l251 (def original (->MyModel [0.5 -0.3 1.2] 0.1)))
+(def v58_l252 (def original (->MyModel [0.5 -0.3 1.2] 0.1)))
 
 
-(def v59_l253 (= original (nippy/thaw (nippy/freeze original))))
+(def v59_l254 (= original (nippy/thaw (nippy/freeze original))))
 
 
-(deftest t60_l255 (is (true? v59_l253)))
+(deftest t60_l256 (is (true? v59_l254)))
 
 
 (def
- v62_l259
+ v62_l260
  (defn
   train-my-model
   [data]
   (->MyModel
-   (mapv (fn* [p1__102842#] (* p1__102842# 0.01)) data)
+   (mapv (fn* [p1__109694#] (* p1__109694# 0.01)) data)
    0.42)))
 
 
 (def
- v63_l262
+ v63_l263
  (let
   [result (deref (pocket/cached #'train-my-model [10 20 30]))]
   result))
 
 
 (deftest
- t64_l265
+ t64_l266
  (is
-  ((fn [m] (and (instance? MyModel m) (= 0.42 (:bias m)))) v63_l262)))
+  ((fn [m] (and (instance? MyModel m) (= 0.42 (:bias m)))) v63_l263)))
 
 
-(def v66_l273 (pocket/cleanup!))
+(def v66_l274 (pocket/cleanup!))
