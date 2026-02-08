@@ -16,17 +16,17 @@
   [clojure.test :refer [deftest is]]))
 
 
-(def v2_l83 (def cache-dir "/tmp/pocket-model"))
+(def v2_l79 (def cache-dir "/tmp/pocket-model"))
 
 
-(def v3_l85 (pocket/set-base-cache-dir! cache-dir))
+(def v3_l81 (pocket/set-base-cache-dir! cache-dir))
 
 
-(def v4_l87 (pocket/cleanup!))
+(def v4_l83 (pocket/cleanup!))
 
 
 (def
- v6_l101
+ v6_l97
  (defn
   pocket-model
   "Drop-in replacement for ml/model that caches training via Pocket.\n  Falls back to uncached training if serialization fails."
@@ -67,7 +67,7 @@
 
 
 (def
- v8_l132
+ v8_l128
  (def
   ds
   (->
@@ -87,17 +87,17 @@
    (ds-mod/set-inference-target :y))))
 
 
-(def v9_l139 (def splits (tc/split->seq ds :kfold {:k 3, :seed 42})))
+(def v9_l135 (def splits (tc/split->seq ds :kfold {:k 3, :seed 42})))
 
 
-(def v10_l141 (count splits))
+(def v10_l137 (count splits))
 
 
-(deftest t11_l143 (is ((fn [n] (= n 3)) v10_l141)))
+(deftest t11_l139 (is ((fn [n] (= n 3)) v10_l137)))
 
 
 (def
- v13_l154
+ v13_l150
  (def
   cart-spec
   {:model-type :scicloj.ml.tribuo/regression,
@@ -109,14 +109,14 @@
 
 
 (def
- v14_l161
+ v14_l157
  (def
   pipe-cart
   (mm/pipeline #:metamorph{:id :model} (pocket-model cart-spec))))
 
 
 (def
- v16_l168
+ v16_l164
  (def
   results-1
   (ml/evaluate-pipelines
@@ -129,29 +129,29 @@
 
 
 (def
- v17_l177
+ v17_l173
  (mapv
-  (fn* [p1__117405#] (-> p1__117405# :test-transform :metric))
+  (fn* [p1__69836#] (-> p1__69836# :test-transform :metric))
   (flatten results-1)))
 
 
 (deftest
- t18_l179
+ t18_l175
  (is
-  ((fn [ms] (every? (fn* [p1__117406#] (< p1__117406# 15)) ms))
-   v17_l177)))
+  ((fn [ms] (every? (fn* [p1__69837#] (< p1__69837# 15)) ms))
+   v17_l173)))
 
 
-(def v20_l184 (pocket/cache-stats))
+(def v20_l180 (pocket/cache-stats))
 
 
 (deftest
- t21_l186
- (is ((fn [stats] (= 3 (:total-entries stats))) v20_l184)))
+ t21_l182
+ (is ((fn [stats] (= 3 (:total-entries stats))) v20_l180)))
 
 
 (def
- v23_l191
+ v23_l187
  (def
   results-2
   (ml/evaluate-pipelines
@@ -164,24 +164,24 @@
 
 
 (def
- v24_l200
+ v24_l196
  (=
   (mapv
-   (fn* [p1__117407#] (-> p1__117407# :test-transform :metric))
+   (fn* [p1__69838#] (-> p1__69838# :test-transform :metric))
    (flatten results-1))
   (mapv
-   (fn* [p1__117408#] (-> p1__117408# :test-transform :metric))
+   (fn* [p1__69839#] (-> p1__69839# :test-transform :metric))
    (flatten results-2))))
 
 
-(deftest t25_l203 (is ((fn [eq] (true? eq)) v24_l200)))
+(deftest t25_l199 (is ((fn [eq] (true? eq)) v24_l196)))
 
 
-(def v27_l213 (pocket/cleanup!))
+(def v27_l209 (pocket/cleanup!))
 
 
 (def
- v28_l215
+ v28_l211
  (defn
   cart-pipe
   [max-depth]
@@ -197,7 +197,7 @@
 
 
 (def
- v30_l227
+ v30_l223
  (def
   batch-1
   (ml/evaluate-pipelines
@@ -209,16 +209,16 @@
     :return-best-pipeline-only false})))
 
 
-(def v32_l238 (pocket/cache-stats))
+(def v32_l234 (pocket/cache-stats))
 
 
 (deftest
- t33_l240
- (is ((fn [stats] (= 9 (:total-entries stats))) v32_l238)))
+ t33_l236
+ (is ((fn [stats] (= 9 (:total-entries stats))) v32_l234)))
 
 
 (def
- v35_l246
+ v35_l242
  (def
   batch-2
   (ml/evaluate-pipelines
@@ -230,16 +230,16 @@
     :return-best-pipeline-only false})))
 
 
-(def v37_l257 (pocket/cache-stats))
+(def v37_l253 (pocket/cache-stats))
 
 
 (deftest
- t38_l259
- (is ((fn [stats] (= 18 (:total-entries stats))) v37_l257)))
+ t38_l255
+ (is ((fn [stats] (= 18 (:total-entries stats))) v37_l253)))
 
 
 (def
- v40_l264
+ v40_l260
  (let
   [depths
    [4 6 8 10 12 16]
@@ -249,20 +249,20 @@
      [pipeline-results]
      (tcc/mean
       (map
-       (fn* [p1__117409#] (-> p1__117409# :test-transform :metric))
+       (fn* [p1__69840#] (-> p1__69840# :test-transform :metric))
        pipeline-results)))
     batch-2)]
   (tc/dataset {:depth depths, :mean-rmse means})))
 
 
-(deftest t41_l270 (is ((fn [ds] (= 6 (tc/row-count ds))) v40_l264)))
+(deftest t41_l266 (is ((fn [ds] (= 6 (tc/row-count ds))) v40_l260)))
 
 
-(def v43_l280 (pocket/cleanup!))
+(def v43_l276 (pocket/cleanup!))
 
 
 (def
- v44_l282
+ v44_l278
  (def
   sgd-spec
   {:model-type :scicloj.ml.tribuo/regression,
@@ -277,7 +277,7 @@
 
 
 (def
- v45_l293
+ v45_l289
  (def
   multi-results
   (ml/evaluate-pipelines
@@ -293,16 +293,16 @@
     :return-best-pipeline-only false})))
 
 
-(def v47_l306 (pocket/cache-stats))
+(def v47_l302 (pocket/cache-stats))
 
 
 (deftest
- t48_l308
- (is ((fn [stats] (= 9 (:total-entries stats))) v47_l306)))
+ t48_l304
+ (is ((fn [stats] (= 9 (:total-entries stats))) v47_l302)))
 
 
 (def
- v50_l313
+ v50_l309
  (let
   [model-names
    ["CART" "SGD" "fastmath-OLS"]
@@ -312,20 +312,20 @@
      [pipeline-results]
      (tcc/mean
       (map
-       (fn* [p1__117410#] (-> p1__117410# :test-transform :metric))
+       (fn* [p1__69841#] (-> p1__69841# :test-transform :metric))
        pipeline-results)))
     multi-results)]
   (tc/dataset {:model model-names, :mean-rmse means})))
 
 
-(deftest t51_l319 (is ((fn [ds] (= 3 (tc/row-count ds))) v50_l313)))
+(deftest t51_l315 (is ((fn [ds] (= 3 (tc/row-count ds))) v50_l309)))
 
 
-(def v53_l331 (pocket/cleanup!))
+(def v53_l327 (pocket/cleanup!))
 
 
 (def
- v54_l333
+ v54_l329
  (def
   fallback-results
   (ml/evaluate-pipelines
@@ -340,22 +340,22 @@
     :return-best-pipeline-only false})))
 
 
-(def v56_l348 (pocket/cache-stats))
+(def v56_l344 (pocket/cache-stats))
 
 
 (deftest
- t57_l350
+ t57_l346
  (is
   ((fn
     [stats]
     (=
      3
      (get-in stats [:entries-per-fn "scicloj.metamorph.ml/train"])))
-   v56_l348)))
+   v56_l344)))
 
 
 (def
- v59_l355
+ v59_l351
  (let
   [model-names
    ["CART" "OLS-fallback"]
@@ -365,20 +365,20 @@
      [pipeline-results]
      (tcc/mean
       (map
-       (fn* [p1__117411#] (-> p1__117411# :test-transform :metric))
+       (fn* [p1__69842#] (-> p1__69842# :test-transform :metric))
        pipeline-results)))
     fallback-results)]
   (tc/dataset {:model model-names, :mean-rmse means})))
 
 
-(deftest t60_l361 (is ((fn [ds] (= 2 (tc/row-count ds))) v59_l355)))
+(deftest t60_l357 (is ((fn [ds] (= 2 (tc/row-count ds))) v59_l351)))
 
 
-(def v62_l371 (pocket/cleanup!))
+(def v62_l367 (pocket/cleanup!))
 
 
 (def
- v64_l374
+ v64_l370
  (def
   persist-results-1
   (ml/evaluate-pipelines
@@ -390,11 +390,11 @@
     :return-best-pipeline-only false})))
 
 
-(def v66_l384 (pocket/clear-mem-cache!))
+(def v66_l380 (pocket/clear-mem-cache!))
 
 
 (def
- v68_l387
+ v68_l383
  (def
   persist-results-2
   (ml/evaluate-pipelines
@@ -407,17 +407,17 @@
 
 
 (def
- v70_l397
+ v70_l393
  (=
   (mapv
-   (fn* [p1__117412#] (-> p1__117412# :test-transform :metric))
+   (fn* [p1__69843#] (-> p1__69843# :test-transform :metric))
    (flatten persist-results-1))
   (mapv
-   (fn* [p1__117413#] (-> p1__117413# :test-transform :metric))
+   (fn* [p1__69844#] (-> p1__69844# :test-transform :metric))
    (flatten persist-results-2))))
 
 
-(deftest t71_l400 (is ((fn [eq] (true? eq)) v70_l397)))
+(deftest t71_l396 (is ((fn [eq] (true? eq)) v70_l393)))
 
 
-(def v73_l430 (pocket/cleanup!))
+(def v73_l426 (pocket/cleanup!))

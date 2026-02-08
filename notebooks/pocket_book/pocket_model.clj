@@ -29,24 +29,20 @@
 ;; bringing a few things that are natural to Pocket's design:
 ;;
 ;; - **Disk persistence** — cached models survive JVM restarts,
-;;   so you can pick up where you left off across sessions
-;; - **Incremental workflows** — add new hyperparameter configs
-;;   and only the new combinations train; previous ones are
-;;   loaded from disk
+;;   so we can pick up where we left off across sessions
 ;; - **Content-based keys** — cache keys derived from function
 ;;   identity and full argument values via SHA-1
 ;; - **Concurrent dedup** — when multiple threads request the same
 ;;   computation, only one trains and the rest wait for the result
 ;;
 ;; The integration is lightweight: a `pocket-model` function that
-;; is a drop-in replacement for `ml/model`. You swap one pipeline
+;; is a drop-in replacement for `ml/model`. We swap one pipeline
 ;; step and everything else — `evaluate-pipelines`, preprocessing,
 ;; grid search — stays the same.
 ;;
-;; **What this gives you**:
+;; **What this gives us**:
 ;; - Same pipeline code, same `evaluate-pipelines`
 ;; - Model training cached to disk (survives JVM restarts)
-;; - Incremental grid search (add new configs, old ones hit cache)
 ;; - Graceful fallback for non-serializable models
 
 ;;
@@ -61,7 +57,7 @@
 ;; produced it.
 ;; A companion notebook is in the works, exploring a deeper
 ;; integration where every pipeline step is a Pocket `caching-fn`,
-;; giving you all of those things.
+;; giving us all of those things.
 
 ;; ## Setup
 
@@ -109,17 +105,17 @@
                     (deref (pocket/cached #'ml/train data options))
                     (catch Exception _e
                       (ml/train data options)))]
-        (assoc ctx id (assoc model ::ml/unsupervised?
+        (assoc ctx id (assoc model :scicloj.metamorph.ml/unsupervised?
                              (get (ml/options->model-def options)
                                   :unsupervised? false))))
       :transform
       (let [model (get ctx id)]
-        (if (get model ::ml/unsupervised?)
+        (if (get model :scicloj.metamorph.ml/unsupervised?)
           ctx
           (-> ctx
               (update id assoc
-                      ::ml/feature-ds (cf/feature data)
-                      ::ml/target-ds (cf/target data))
+                      :scicloj.metamorph.ml/feature-ds (cf/feature data)
+                      :scicloj.metamorph.ml/target-ds (cf/target data))
               (assoc :metamorph/data (ml/predict data model))))))))
 
 ;; ---
@@ -147,7 +143,7 @@
 
 ;; ## Basic usage
 ;;
-;; Use `pocket-model` exactly where you'd use `ml/model`.
+;; Use `pocket-model` in place of `ml/model`.
 ;; The `{:metamorph/id :model}` map step sets the step ID
 ;; that `evaluate-pipelines` expects.
 
@@ -405,7 +401,7 @@
 ;; ## Discussion
 ;;
 ;; `pocket-model` is a thin wrapper — about 20 lines of code — that
-;; gives you disk-persistent model caching with zero changes to your
+;; gives us disk-persistent model caching with zero changes to our
 ;; pipeline structure. It works with `evaluate-pipelines`,
 ;; preprocessing steps, learning curves, and grid search.
 ;;
@@ -423,7 +419,7 @@
 ;; - Grid search / hyperparameter tuning (train once, reuse)
 ;; - Iterative notebook development (change downstream code, keep models)
 ;; - Learning curves (add new sizes, only new ones train)
-;; - Any workflow where you re-evaluate with the same data + options
+;; - Any workflow where we re-evaluate with the same data + options
 
 ;; ## Cleanup
 
