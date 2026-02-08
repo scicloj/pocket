@@ -213,20 +213,26 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="./pocket_book.pocket_pipeline.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">🚧 Draft: Full Pocket integration for ML pipelines</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="./pocket_book.cache_keys.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Under the hood: cache keys</span></span></a>
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Under the hood: cache keys</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./pocket_book.developing_pocket.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Developing Pocket</span></span></a>
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Developing Pocket</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./pocket_book.api_reference.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">API Reference</span></span></a>
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">API Reference</span></span></a>
   </div>
 </li>
     </ul>
@@ -364,7 +370,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <div id="callout-1" class="callout-1-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>21:43:52.525 INFO scicloj.pocket - Cache dir set to: /tmp/pocket-demo-config
+<pre><code>21:50:19.159 INFO scicloj.pocket - Cache dir set to: /tmp/pocket-demo-config
 </code></pre>
 </div>
 </div>
@@ -387,7 +393,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <div id="callout-2" class="callout-2-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>21:43:52.525 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo-config
+<pre><code>21:50:19.159 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo-config
 </code></pre>
 </div>
 </div>
@@ -492,8 +498,8 @@ cache?}
 </div>
 <div id="callout-3" class="callout-3-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>21:43:52.528 INFO scicloj.pocket - Mem-cache options set: {:policy :fifo, :threshold 100}
-21:43:52.528 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :fifo, :threshold 100}
+<pre><code>21:50:19.162 INFO scicloj.pocket - Mem-cache options set: {:policy :fifo, :threshold 100}
+21:50:19.162 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :fifo, :threshold 100}
 </code></pre>
 </div>
 </div>
@@ -517,8 +523,8 @@ cache?}
 </div>
 <div id="callout-4" class="callout-4-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>21:43:52.530 INFO scicloj.pocket - Mem-cache options set: {:policy :ttl, :ttl 60000}
-21:43:52.530 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :ttl, :ttl 60000}
+<pre><code>21:50:19.163 INFO scicloj.pocket - Mem-cache options set: {:policy :ttl, :ttl 60000}
+21:50:19.163 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :ttl, :ttl 60000}
 </code></pre>
 </div>
 </div>
@@ -542,8 +548,8 @@ cache?}
 </div>
 <div id="callout-5" class="callout-5-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>21:43:52.531 INFO scicloj.pocket - Mem-cache options set: {:policy :lru, :threshold 256}
-21:43:52.531 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :lru, :threshold 256}
+<pre><code>21:50:19.164 INFO scicloj.pocket - Mem-cache options set: {:policy :lru, :threshold 256}
+21:50:19.164 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :lru, :threshold 256}
 </code></pre>
 </div>
 </div>
@@ -601,7 +607,7 @@ cache?}
 </div>
 <div id="callout-6" class="callout-6-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>21:43:52.531 INFO scicloj.pocket - Storage policy set to: :mem
+<pre><code>21:50:19.165 INFO scicloj.pocket - Storage policy set to: :mem
 </code></pre>
 </div>
 </div>
@@ -647,7 +653,7 @@ cache?}
 </div>
 <div id="callout-7" class="callout-7-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>21:43:52.533 INFO scicloj.pocket - Storage policy set to: nil
+<pre><code>21:50:19.167 INFO scicloj.pocket - Storage policy set to: nil
 </code></pre>
 </div>
 </div>
@@ -678,7 +684,7 @@ cache?}
 </div>
 <div id="callout-8" class="callout-8-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>21:43:52.535 INFO scicloj.pocket - Filename length limit set to: 80
+<pre><code>21:50:19.168 INFO scicloj.pocket - Filename length limit set to: 80
 </code></pre>
 </div>
 </div>
@@ -711,7 +717,7 @@ cache?}
 </div>
 <div id="callout-9" class="callout-9-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>21:43:52.536 INFO scicloj.pocket - Filename length limit set to: nil
+<pre><code>21:50:19.169 INFO scicloj.pocket - Filename length limit set to: nil
 </code></pre>
 </div>
 </div>
@@ -802,7 +808,7 @@ cache?}
 </div>
 <div id="callout-10" class="callout-10-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>21:43:52.538 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo-config
+<pre><code>21:50:19.172 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo-config
 </code></pre>
 </div>
 </div>

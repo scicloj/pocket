@@ -213,20 +213,26 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="./pocket_book.pocket_pipeline.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">🚧 Draft: Full Pocket integration for ML pipelines</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="./pocket_book.cache_keys.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Under the hood: cache keys</span></span></a>
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Under the hood: cache keys</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./pocket_book.developing_pocket.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Developing Pocket</span></span></a>
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Developing Pocket</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./pocket_book.api_reference.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">API Reference</span></span></a>
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">API Reference</span></span></a>
   </div>
 </li>
     </ul>
@@ -328,7 +334,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <div id="callout-1" class="callout-1-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>21:44:03.887 INFO scicloj.pocket - Cache dir set to: /tmp/pocket-extending
+<pre><code>21:50:30.482 INFO scicloj.pocket - Cache dir set to: /tmp/pocket-extending
 </code></pre>
 </div>
 </div>
@@ -351,7 +357,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <div id="callout-2" class="callout-2-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>21:44:03.888 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-extending
+<pre><code>21:50:30.483 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-extending
 </code></pre>
 </div>
 </div>
@@ -581,9 +587,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <div id="callout-3" class="callout-3-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>21:44:03.909 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.extending-pocket/analyze-dataset
+<pre><code>21:50:30.504 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.extending-pocket/analyze-dataset
   Analyzing census v 3 ...
-21:44:04.111 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-extending/62/(pocket-book.extending-pocket_analyze-dataset census-v3 {:method :regression})
+21:50:30.705 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-extending/62/(pocket-book.extending-pocket_analyze-dataset census-v3 {:method :regression})
 </code></pre>
 </div>
 </div>
@@ -616,9 +622,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <div id="callout-4" class="callout-4-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>21:44:04.116 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.extending-pocket/analyze-dataset
+<pre><code>21:50:30.710 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.extending-pocket/analyze-dataset
   Analyzing census v 4 ...
-21:44:04.318 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-extending/f6/(pocket-book.extending-pocket_analyze-dataset census-v4 {:method :regression})
+21:50:30.910 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-extending/f6/(pocket-book.extending-pocket_analyze-dataset census-v4 {:method :regression})
 </code></pre>
 </div>
 </div>
@@ -746,8 +752,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <div id="callout-6" class="callout-6-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>21:44:04.346 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.extending-pocket/train-my-model
-21:44:04.347 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-extending/ac/(pocket-book.extending-pocket_train-my-model [10 20 30])
+<pre><code>21:50:30.934 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.extending-pocket/train-my-model
+21:50:30.935 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-extending/ac/(pocket-book.extending-pocket_train-my-model [10 20 30])
 </code></pre>
 </div>
 </div>
@@ -775,7 +781,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <div id="callout-7" class="callout-7-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>21:44:04.350 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-extending
+<pre><code>21:50:30.938 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-extending
 </code></pre>
 </div>
 </div>

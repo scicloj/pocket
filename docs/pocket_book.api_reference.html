@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>14&nbsp; API Reference – Pocket</title>
+<title>15&nbsp; API Reference – Pocket</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -117,7 +117,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./pocket_book.api_reference.html"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">API Reference</span></a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./pocket_book.api_reference.html"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">API Reference</span></a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -212,20 +212,26 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="./pocket_book.pocket_pipeline.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">🚧 Draft: Full Pocket integration for ML pipelines</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="./pocket_book.cache_keys.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Under the hood: cache keys</span></span></a>
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Under the hood: cache keys</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./pocket_book.developing_pocket.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Developing Pocket</span></span></a>
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Developing Pocket</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./pocket_book.api_reference.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">API Reference</span></span></a>
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">API Reference</span></span></a>
   </div>
 </li>
     </ul>
@@ -272,7 +278,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">API Reference</span></h1>
+<h1 class="title"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">API Reference</span></h1>
 </div>
 
 
@@ -327,7 +333,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <div id="callout-1" class="callout-1-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>21:44:05.438 INFO scicloj.pocket - Cache dir set to: /tmp/pocket-demo-reference
+<pre><code>21:50:32.515 INFO scicloj.pocket - Cache dir set to: /tmp/pocket-demo-reference
 </code></pre>
 </div>
 </div>
@@ -350,7 +356,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <div id="callout-2" class="callout-2-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>21:44:05.439 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo-reference
+<pre><code>21:50:32.516 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo-reference
 </code></pre>
 </div>
 </div>
@@ -400,7 +406,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <div id="callout-3" class="callout-3-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>21:44:05.441 INFO scicloj.pocket - Cache dir set to: /tmp/pocket-demo-2
+<pre><code>21:50:32.518 INFO scicloj.pocket - Cache dir set to: /tmp/pocket-demo-2
 </code></pre>
 </div>
 </div>
@@ -430,7 +436,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <div id="callout-4" class="callout-4-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>21:44:05.442 INFO scicloj.pocket - Cache dir set to: /tmp/pocket-demo-reference
+<pre><code>21:50:32.519 INFO scicloj.pocket - Cache dir set to: /tmp/pocket-demo-reference
 </code></pre>
 </div>
 </div>
@@ -487,9 +493,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <div id="callout-5" class="callout-5-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>21:44:05.445 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.api-reference/expensive-calculation
+<pre><code>21:50:32.522 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.api-reference/expensive-calculation
 Computing 100 + 200 (this is expensive!)
-21:44:05.846 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo-reference/89/(pocket-book.api-reference_expensive-calculation 100 200)
 </code></pre>
 </div>
 </div>
@@ -537,9 +542,8 @@ Computing 100 + 200 (this is expensive!)
 </div>
 <div id="callout-6" class="callout-6-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>21:44:05.852 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.api-reference/expensive-calculation
+<pre><code>21:50:32.929 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.api-reference/expensive-calculation
 Computing 3 + 4 (this is expensive!)
-21:44:06.254 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo-reference/49/(pocket-book.api-reference_expensive-calculation 3 4)
 </code></pre>
 </div>
 </div>
@@ -641,8 +645,8 @@ Computing 3 + 4 (this is expensive!)
 </div>
 <div id="callout-7" class="callout-7-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>21:44:06.267 INFO scicloj.pocket - Mem-cache options set: {:policy :fifo, :threshold 100}
-21:44:06.267 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :fifo, :threshold 100}
+<pre><code>21:50:33.345 INFO scicloj.pocket - Mem-cache options set: {:policy :fifo, :threshold 100}
+21:50:33.345 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :fifo, :threshold 100}
 </code></pre>
 </div>
 </div>
@@ -666,8 +670,8 @@ Computing 3 + 4 (this is expensive!)
 </div>
 <div id="callout-8" class="callout-8-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>21:44:06.268 INFO scicloj.pocket - Mem-cache options set: {:policy :lru, :threshold 256}
-21:44:06.268 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :lru, :threshold 256}
+<pre><code>21:50:33.346 INFO scicloj.pocket - Mem-cache options set: {:policy :lru, :threshold 256}
+21:50:33.346 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :lru, :threshold 256}
 </code></pre>
 </div>
 </div>
@@ -696,8 +700,8 @@ Computing 3 + 4 (this is expensive!)
 </div>
 <div id="callout-9" class="callout-9-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>21:44:06.270 INFO scicloj.pocket - Mem-cache options reset to defaults: {:policy :lru, :threshold 256}
-21:44:06.270 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :lru, :threshold 256}
+<pre><code>21:50:33.347 INFO scicloj.pocket - Mem-cache options reset to defaults: {:policy :lru, :threshold 256}
+21:50:33.347 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :lru, :threshold 256}
 </code></pre>
 </div>
 </div>
@@ -736,7 +740,7 @@ Computing 3 + 4 (this is expensive!)
 </div>
 <div id="callout-10" class="callout-10-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>21:44:06.272 INFO scicloj.pocket - Storage policy set to: :mem
+<pre><code>21:50:33.348 INFO scicloj.pocket - Storage policy set to: :mem
 </code></pre>
 </div>
 </div>
@@ -760,7 +764,7 @@ Computing 3 + 4 (this is expensive!)
 </div>
 <div id="callout-11" class="callout-11-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>21:44:06.272 INFO scicloj.pocket - Storage policy set to: nil
+<pre><code>21:50:33.349 INFO scicloj.pocket - Storage policy set to: nil
 </code></pre>
 </div>
 </div>
@@ -788,7 +792,7 @@ Computing 3 + 4 (this is expensive!)
 </div>
 <div id="callout-12" class="callout-12-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>21:44:06.276 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo-reference
+<pre><code>21:50:33.352 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo-reference
 </code></pre>
 </div>
 </div>
@@ -817,9 +821,8 @@ Computing 3 + 4 (this is expensive!)
 </div>
 <div id="callout-13" class="callout-13-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>21:44:06.278 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.api-reference/expensive-calculation
+<pre><code>21:50:33.353 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.api-reference/expensive-calculation
 Computing 10 + 20 (this is expensive!)
-21:44:06.680 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo-reference/a3/(pocket-book.api-reference_expensive-calculation 10 20)
 </code></pre>
 </div>
 </div>
@@ -842,6 +845,12 @@ Computing 10 + 20 (this is expensive!)
 <div class="sourceClojure">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb72"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb72-1"><a href="#cb72-1" aria-hidden="true" tabindex="-1"></a>(<span class="kw">deref</span> (pocket/cached <span class="va">#'expensive-calculation</span> <span class="dv">10</span> <span class="dv">20</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
+<div class="printedClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb73"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb73-1"><a href="#cb73-1" aria-hidden="true" tabindex="-1"></a><span class="dv">30</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb74"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb74-1"><a href="#cb74-1" aria-hidden="true" tabindex="-1"></a>(pocket/invalidate! <span class="va">#'expensive-calculation</span> <span class="dv">10</span> <span class="dv">20</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
 <div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-14-contents" aria-controls="callout-14" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
@@ -854,16 +863,19 @@ Computing 10 + 20 (this is expensive!)
 </div>
 <div id="callout-14" class="callout-14-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>21:44:06.685 DEBUG scicloj.pocket.impl.cache - Cache hit (disk): pocket-book.api-reference/expensive-calculation /tmp/pocket-demo-reference/a3/(pocket-book.api-reference_expensive-calculation 10 20)
+<pre><code>21:50:33.759 INFO scicloj.pocket.impl.cache - Invalidated: /tmp/pocket-demo-reference/a3/(pocket-book.api-reference_expensive-calculation 10 20) existed= true
 </code></pre>
 </div>
 </div>
 </div>
 <div class="printedClojure">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb74"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb74-1"><a href="#cb74-1" aria-hidden="true" tabindex="-1"></a><span class="dv">30</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb76"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb76-1"><a href="#cb76-1" aria-hidden="true" tabindex="-1"></a>{<span class="at">:path</span></span>
+<span id="cb76-2"><a href="#cb76-2" aria-hidden="true" tabindex="-1"></a> <span class="st">"/tmp/pocket-demo-reference/a3/(pocket-book.api-reference_expensive-calculation 10 20)"</span>,</span>
+<span id="cb76-3"><a href="#cb76-3" aria-hidden="true" tabindex="-1"></a> <span class="at">:existed</span> <span class="va">true</span>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
+<p>Derefing again will recompute:</p>
 <div class="sourceClojure">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb75"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb75-1"><a href="#cb75-1" aria-hidden="true" tabindex="-1"></a>(pocket/invalidate! <span class="va">#'expensive-calculation</span> <span class="dv">10</span> <span class="dv">20</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb77"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb77-1"><a href="#cb77-1" aria-hidden="true" tabindex="-1"></a>(<span class="kw">deref</span> (pocket/cached <span class="va">#'expensive-calculation</span> <span class="dv">10</span> <span class="dv">20</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-15-contents" aria-controls="callout-15" aria-expanded="false" aria-label="Toggle callout">
@@ -877,19 +889,23 @@ Computing 10 + 20 (this is expensive!)
 </div>
 <div id="callout-15" class="callout-15-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>21:44:06.687 INFO scicloj.pocket.impl.cache - Invalidated: /tmp/pocket-demo-reference/a3/(pocket-book.api-reference_expensive-calculation 10 20) existed= true
+<pre><code>21:50:33.760 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.api-reference/expensive-calculation
+Computing 10 + 20 (this is expensive!)
 </code></pre>
 </div>
 </div>
 </div>
 <div class="printedClojure">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb77"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb77-1"><a href="#cb77-1" aria-hidden="true" tabindex="-1"></a>{<span class="at">:path</span></span>
-<span id="cb77-2"><a href="#cb77-2" aria-hidden="true" tabindex="-1"></a> <span class="st">"/tmp/pocket-demo-reference/a3/(pocket-book.api-reference_expensive-calculation 10 20)"</span>,</span>
-<span id="cb77-3"><a href="#cb77-3" aria-hidden="true" tabindex="-1"></a> <span class="at">:existed</span> <span class="va">true</span>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb79"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb79-1"><a href="#cb79-1" aria-hidden="true" tabindex="-1"></a><span class="dv">30</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<p>Derefing again will recompute:</p>
+</section>
+<section id="invalidate-fn" class="level3">
+<h3 class="anchored" data-anchor-id="invalidate-fn"><code>invalidate-fn!</code></h3>
+<p><code>[func]</code></p>
+<p>Invalidate all cached entries for a given function var (or keyword), regardless of arguments. Removes matching entries from both disk and memory. Returns a map with <code>:fn-name</code>, <code>:count</code>, and <code>:paths</code>.</p>
+<p>Cache a few entries, then invalidate them all:</p>
 <div class="sourceClojure">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb78"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb78-1"><a href="#cb78-1" aria-hidden="true" tabindex="-1"></a>(<span class="kw">deref</span> (pocket/cached <span class="va">#'expensive-calculation</span> <span class="dv">10</span> <span class="dv">20</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb80"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb80-1"><a href="#cb80-1" aria-hidden="true" tabindex="-1"></a>(<span class="kw">deref</span> (pocket/cached <span class="va">#'expensive-calculation</span> <span class="dv">1</span> <span class="dv">2</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-16-contents" aria-controls="callout-16" aria-expanded="false" aria-label="Toggle callout">
@@ -903,24 +919,17 @@ Computing 10 + 20 (this is expensive!)
 </div>
 <div id="callout-16" class="callout-16-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>21:44:06.688 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.api-reference/expensive-calculation
-Computing 10 + 20 (this is expensive!)
-21:44:07.090 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo-reference/a3/(pocket-book.api-reference_expensive-calculation 10 20)
+<pre><code>21:50:34.175 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.api-reference/expensive-calculation
+Computing 1 + 2 (this is expensive!)
 </code></pre>
 </div>
 </div>
 </div>
 <div class="printedClojure">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb80"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb80-1"><a href="#cb80-1" aria-hidden="true" tabindex="-1"></a><span class="dv">30</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb82"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb82-1"><a href="#cb82-1" aria-hidden="true" tabindex="-1"></a><span class="dv">3</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-</section>
-<section id="invalidate-fn" class="level3">
-<h3 class="anchored" data-anchor-id="invalidate-fn"><code>invalidate-fn!</code></h3>
-<p><code>[func]</code></p>
-<p>Invalidate all cached entries for a given function var (or keyword), regardless of arguments. Removes matching entries from both disk and memory. Returns a map with <code>:fn-name</code>, <code>:count</code>, and <code>:paths</code>.</p>
-<p>Cache a few entries, then invalidate them all:</p>
 <div class="sourceClojure">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb81"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb81-1"><a href="#cb81-1" aria-hidden="true" tabindex="-1"></a>(<span class="kw">deref</span> (pocket/cached <span class="va">#'expensive-calculation</span> <span class="dv">1</span> <span class="dv">2</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb83"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb83-1"><a href="#cb83-1" aria-hidden="true" tabindex="-1"></a>(<span class="kw">deref</span> (pocket/cached <span class="va">#'expensive-calculation</span> <span class="dv">3</span> <span class="dv">4</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-17-contents" aria-controls="callout-17" aria-expanded="false" aria-label="Toggle callout">
@@ -934,18 +943,17 @@ Computing 10 + 20 (this is expensive!)
 </div>
 <div id="callout-17" class="callout-17-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>21:44:07.092 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.api-reference/expensive-calculation
-Computing 1 + 2 (this is expensive!)
-21:44:07.494 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo-reference/d2/(pocket-book.api-reference_expensive-calculation 1 2)
+<pre><code>21:50:34.579 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.api-reference/expensive-calculation
+Computing 3 + 4 (this is expensive!)
 </code></pre>
 </div>
 </div>
 </div>
 <div class="printedClojure">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb83"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb83-1"><a href="#cb83-1" aria-hidden="true" tabindex="-1"></a><span class="dv">3</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb85"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb85-1"><a href="#cb85-1" aria-hidden="true" tabindex="-1"></a><span class="dv">7</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="sourceClojure">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb84"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb84-1"><a href="#cb84-1" aria-hidden="true" tabindex="-1"></a>(<span class="kw">deref</span> (pocket/cached <span class="va">#'expensive-calculation</span> <span class="dv">3</span> <span class="dv">4</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb86"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb86-1"><a href="#cb86-1" aria-hidden="true" tabindex="-1"></a>(pocket/invalidate-fn! <span class="va">#'expensive-calculation</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-18-contents" aria-controls="callout-18" aria-expanded="false" aria-label="Toggle callout">
@@ -959,18 +967,21 @@ Computing 1 + 2 (this is expensive!)
 </div>
 <div id="callout-18" class="callout-18-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>21:44:07.495 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.api-reference/expensive-calculation
-Computing 3 + 4 (this is expensive!)
-21:44:07.896 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo-reference/49/(pocket-book.api-reference_expensive-calculation 3 4)
+<pre><code>21:50:34.983 INFO scicloj.pocket.impl.cache - Invalidated 3 entries for pocket-book.api-reference/expensive-calculation
 </code></pre>
 </div>
 </div>
 </div>
 <div class="printedClojure">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb86"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb86-1"><a href="#cb86-1" aria-hidden="true" tabindex="-1"></a><span class="dv">7</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb88"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb88-1"><a href="#cb88-1" aria-hidden="true" tabindex="-1"></a>{<span class="at">:fn-name</span> <span class="st">"pocket-book.api-reference/expensive-calculation"</span>,</span>
+<span id="cb88-2"><a href="#cb88-2" aria-hidden="true" tabindex="-1"></a> <span class="at">:count</span> <span class="dv">3</span>,</span>
+<span id="cb88-3"><a href="#cb88-3" aria-hidden="true" tabindex="-1"></a> <span class="at">:paths</span></span>
+<span id="cb88-4"><a href="#cb88-4" aria-hidden="true" tabindex="-1"></a> [<span class="st">"/tmp/pocket-demo-reference/a3/(pocket-book.api-reference_expensive-calculation 10 20)"</span></span>
+<span id="cb88-5"><a href="#cb88-5" aria-hidden="true" tabindex="-1"></a>  <span class="st">"/tmp/pocket-demo-reference/d2/(pocket-book.api-reference_expensive-calculation 1 2)"</span></span>
+<span id="cb88-6"><a href="#cb88-6" aria-hidden="true" tabindex="-1"></a>  <span class="st">"/tmp/pocket-demo-reference/49/(pocket-book.api-reference_expensive-calculation 3 4)"</span>]}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="sourceClojure">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb87"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb87-1"><a href="#cb87-1" aria-hidden="true" tabindex="-1"></a>(pocket/invalidate-fn! <span class="va">#'expensive-calculation</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb89"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb89-1"><a href="#cb89-1" aria-hidden="true" tabindex="-1"></a>(pocket/cleanup!)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-19-contents" aria-controls="callout-19" aria-expanded="false" aria-label="Toggle callout">
@@ -984,21 +995,23 @@ Computing 3 + 4 (this is expensive!)
 </div>
 <div id="callout-19" class="callout-19-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>21:44:07.900 INFO scicloj.pocket.impl.cache - Invalidated 3 entries for pocket-book.api-reference/expensive-calculation
+<pre><code>21:50:34.984 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo-reference
 </code></pre>
 </div>
 </div>
 </div>
 <div class="printedClojure">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb89"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb89-1"><a href="#cb89-1" aria-hidden="true" tabindex="-1"></a>{<span class="at">:fn-name</span> <span class="st">"pocket-book.api-reference/expensive-calculation"</span>,</span>
-<span id="cb89-2"><a href="#cb89-2" aria-hidden="true" tabindex="-1"></a> <span class="at">:count</span> <span class="dv">3</span>,</span>
-<span id="cb89-3"><a href="#cb89-3" aria-hidden="true" tabindex="-1"></a> <span class="at">:paths</span></span>
-<span id="cb89-4"><a href="#cb89-4" aria-hidden="true" tabindex="-1"></a> [<span class="st">"/tmp/pocket-demo-reference/a3/(pocket-book.api-reference_expensive-calculation 10 20)"</span></span>
-<span id="cb89-5"><a href="#cb89-5" aria-hidden="true" tabindex="-1"></a>  <span class="st">"/tmp/pocket-demo-reference/d2/(pocket-book.api-reference_expensive-calculation 1 2)"</span></span>
-<span id="cb89-6"><a href="#cb89-6" aria-hidden="true" tabindex="-1"></a>  <span class="st">"/tmp/pocket-demo-reference/49/(pocket-book.api-reference_expensive-calculation 3 4)"</span>]}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb91"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb91-1"><a href="#cb91-1" aria-hidden="true" tabindex="-1"></a>{<span class="at">:dir</span> <span class="st">"/tmp/pocket-demo-reference"</span>, <span class="at">:existed</span> <span class="va">true</span>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
+</section>
+<section id="cache-entries" class="level3">
+<h3 class="anchored" data-anchor-id="cache-entries"><code>cache-entries</code></h3>
+<p><code>[]</code></p>
+<p><code>[fn-name]</code></p>
+<p>Scan the cache directory and return a sequence of metadata maps. Each entry contains <code>:path</code>, <code>:id</code>, <code>:fn-name</code>, <code>:args-str</code>, and <code>:created-at</code> (when metadata is available — entries cached before metadata support will only have <code>:path</code>). Optionally filter by function name.</p>
+<p>List all cached entries:</p>
 <div class="sourceClojure">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb90"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb90-1"><a href="#cb90-1" aria-hidden="true" tabindex="-1"></a>(pocket/cleanup!)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb92"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb92-1"><a href="#cb92-1" aria-hidden="true" tabindex="-1"></a>(<span class="kw">deref</span> (pocket/cached <span class="va">#'expensive-calculation</span> <span class="dv">10</span> <span class="dv">20</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-20-contents" aria-controls="callout-20" aria-expanded="false" aria-label="Toggle callout">
@@ -1012,23 +1025,17 @@ Computing 3 + 4 (this is expensive!)
 </div>
 <div id="callout-20" class="callout-20-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>21:44:07.902 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo-reference
+<pre><code>21:50:34.987 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.api-reference/expensive-calculation
+Computing 10 + 20 (this is expensive!)
 </code></pre>
 </div>
 </div>
 </div>
 <div class="printedClojure">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb92"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb92-1"><a href="#cb92-1" aria-hidden="true" tabindex="-1"></a>{<span class="at">:dir</span> <span class="st">"/tmp/pocket-demo-reference"</span>, <span class="at">:existed</span> <span class="va">true</span>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb94"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb94-1"><a href="#cb94-1" aria-hidden="true" tabindex="-1"></a><span class="dv">30</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-</section>
-<section id="cache-entries" class="level3">
-<h3 class="anchored" data-anchor-id="cache-entries"><code>cache-entries</code></h3>
-<p><code>[]</code></p>
-<p><code>[fn-name]</code></p>
-<p>Scan the cache directory and return a sequence of metadata maps. Each entry contains <code>:path</code>, <code>:id</code>, <code>:fn-name</code>, <code>:args-str</code>, and <code>:created-at</code> (when metadata is available — entries cached before metadata support will only have <code>:path</code>). Optionally filter by function name.</p>
-<p>List all cached entries:</p>
 <div class="sourceClojure">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb93"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb93-1"><a href="#cb93-1" aria-hidden="true" tabindex="-1"></a>(<span class="kw">deref</span> (pocket/cached <span class="va">#'expensive-calculation</span> <span class="dv">10</span> <span class="dv">20</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb95"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb95-1"><a href="#cb95-1" aria-hidden="true" tabindex="-1"></a>(<span class="kw">deref</span> (pocket/cached <span class="va">#'expensive-calculation</span> <span class="dv">3</span> <span class="dv">4</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-21-contents" aria-controls="callout-21" aria-expanded="false" aria-label="Toggle callout">
@@ -1042,18 +1049,65 @@ Computing 3 + 4 (this is expensive!)
 </div>
 <div id="callout-21" class="callout-21-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>21:44:07.904 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.api-reference/expensive-calculation
-Computing 10 + 20 (this is expensive!)
-21:44:08.305 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo-reference/a3/(pocket-book.api-reference_expensive-calculation 10 20)
+<pre><code>21:50:35.390 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.api-reference/expensive-calculation
+Computing 3 + 4 (this is expensive!)
 </code></pre>
 </div>
 </div>
 </div>
 <div class="printedClojure">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb95"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb95-1"><a href="#cb95-1" aria-hidden="true" tabindex="-1"></a><span class="dv">30</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb97"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb97-1"><a href="#cb97-1" aria-hidden="true" tabindex="-1"></a><span class="dv">7</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="sourceClojure">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb96"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb96-1"><a href="#cb96-1" aria-hidden="true" tabindex="-1"></a>(<span class="kw">deref</span> (pocket/cached <span class="va">#'expensive-calculation</span> <span class="dv">3</span> <span class="dv">4</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb98"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb98-1"><a href="#cb98-1" aria-hidden="true" tabindex="-1"></a>(pocket/cache-entries)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="printedClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb99"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb99-1"><a href="#cb99-1" aria-hidden="true" tabindex="-1"></a>[{<span class="at">:path</span></span>
+<span id="cb99-2"><a href="#cb99-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">"/tmp/pocket-demo-reference/a3/(pocket-book.api-reference_expensive-calculation 10 20)"</span>,</span>
+<span id="cb99-3"><a href="#cb99-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">:id</span> <span class="st">"(pocket-book.api-reference/expensive-calculation 10 20)"</span>,</span>
+<span id="cb99-4"><a href="#cb99-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">:fn-name</span> <span class="st">"pocket-book.api-reference/expensive-calculation"</span>,</span>
+<span id="cb99-5"><a href="#cb99-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">:args-str</span> <span class="st">"[10 20]"</span>,</span>
+<span id="cb99-6"><a href="#cb99-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">:created-at</span> <span class="st">"2026-02-08T19:50:35.387380847Z"</span>}</span>
+<span id="cb99-7"><a href="#cb99-7" aria-hidden="true" tabindex="-1"></a> {<span class="at">:path</span></span>
+<span id="cb99-8"><a href="#cb99-8" aria-hidden="true" tabindex="-1"></a>  <span class="st">"/tmp/pocket-demo-reference/49/(pocket-book.api-reference_expensive-calculation 3 4)"</span>,</span>
+<span id="cb99-9"><a href="#cb99-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">:id</span> <span class="st">"(pocket-book.api-reference/expensive-calculation 3 4)"</span>,</span>
+<span id="cb99-10"><a href="#cb99-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">:fn-name</span> <span class="st">"pocket-book.api-reference/expensive-calculation"</span>,</span>
+<span id="cb99-11"><a href="#cb99-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">:args-str</span> <span class="st">"[3 4]"</span>,</span>
+<span id="cb99-12"><a href="#cb99-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">:created-at</span> <span class="st">"2026-02-08T19:50:35.790382857Z"</span>}]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Filter by function name:</p>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb100"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb100-1"><a href="#cb100-1" aria-hidden="true" tabindex="-1"></a>(pocket/cache-entries <span class="st">"pocket-book.api-reference/expensive-calculation"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="printedClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb101"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb101-1"><a href="#cb101-1" aria-hidden="true" tabindex="-1"></a>[{<span class="at">:path</span></span>
+<span id="cb101-2"><a href="#cb101-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">"/tmp/pocket-demo-reference/a3/(pocket-book.api-reference_expensive-calculation 10 20)"</span>,</span>
+<span id="cb101-3"><a href="#cb101-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">:id</span> <span class="st">"(pocket-book.api-reference/expensive-calculation 10 20)"</span>,</span>
+<span id="cb101-4"><a href="#cb101-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">:fn-name</span> <span class="st">"pocket-book.api-reference/expensive-calculation"</span>,</span>
+<span id="cb101-5"><a href="#cb101-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">:args-str</span> <span class="st">"[10 20]"</span>,</span>
+<span id="cb101-6"><a href="#cb101-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">:created-at</span> <span class="st">"2026-02-08T19:50:35.387380847Z"</span>}</span>
+<span id="cb101-7"><a href="#cb101-7" aria-hidden="true" tabindex="-1"></a> {<span class="at">:path</span></span>
+<span id="cb101-8"><a href="#cb101-8" aria-hidden="true" tabindex="-1"></a>  <span class="st">"/tmp/pocket-demo-reference/49/(pocket-book.api-reference_expensive-calculation 3 4)"</span>,</span>
+<span id="cb101-9"><a href="#cb101-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">:id</span> <span class="st">"(pocket-book.api-reference/expensive-calculation 3 4)"</span>,</span>
+<span id="cb101-10"><a href="#cb101-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">:fn-name</span> <span class="st">"pocket-book.api-reference/expensive-calculation"</span>,</span>
+<span id="cb101-11"><a href="#cb101-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">:args-str</span> <span class="st">"[3 4]"</span>,</span>
+<span id="cb101-12"><a href="#cb101-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">:created-at</span> <span class="st">"2026-02-08T19:50:35.790382857Z"</span>}]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="cache-stats" class="level3">
+<h3 class="anchored" data-anchor-id="cache-stats"><code>cache-stats</code></h3>
+<p><code>[]</code></p>
+<p>Return aggregate statistics about the cache. Returns a map with <code>:total-entries</code>, <code>:total-size-bytes</code>, and <code>:entries-per-fn</code>.</p>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb102"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb102-1"><a href="#cb102-1" aria-hidden="true" tabindex="-1"></a>(pocket/cache-stats)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="printedClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb103"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb103-1"><a href="#cb103-1" aria-hidden="true" tabindex="-1"></a>{<span class="at">:total-entries</span> <span class="dv">2</span>,</span>
+<span id="cb103-2"><a href="#cb103-2" aria-hidden="true" tabindex="-1"></a> <span class="at">:total-size-bytes</span> <span class="dv">388</span>,</span>
+<span id="cb103-3"><a href="#cb103-3" aria-hidden="true" tabindex="-1"></a> <span class="at">:entries-per-fn</span> {<span class="st">"pocket-book.api-reference/expensive-calculation"</span> <span class="dv">2</span>}}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb104"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb104-1"><a href="#cb104-1" aria-hidden="true" tabindex="-1"></a>(pocket/cleanup!)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-22-contents" aria-controls="callout-22" aria-expanded="false" aria-label="Toggle callout">
@@ -1067,66 +1121,51 @@ Computing 10 + 20 (this is expensive!)
 </div>
 <div id="callout-22" class="callout-22-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>21:44:08.308 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.api-reference/expensive-calculation
-Computing 3 + 4 (this is expensive!)
-21:44:08.720 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo-reference/49/(pocket-book.api-reference_expensive-calculation 3 4)
+<pre><code>21:50:35.800 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo-reference
 </code></pre>
 </div>
 </div>
 </div>
 <div class="printedClojure">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb98"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb98-1"><a href="#cb98-1" aria-hidden="true" tabindex="-1"></a><span class="dv">7</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<div class="sourceClojure">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb99"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb99-1"><a href="#cb99-1" aria-hidden="true" tabindex="-1"></a>(pocket/cache-entries)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<div class="printedClojure">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb100"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb100-1"><a href="#cb100-1" aria-hidden="true" tabindex="-1"></a>[{<span class="at">:path</span></span>
-<span id="cb100-2"><a href="#cb100-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">"/tmp/pocket-demo-reference/a3/(pocket-book.api-reference_expensive-calculation 10 20)"</span>,</span>
-<span id="cb100-3"><a href="#cb100-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">:id</span> <span class="st">"(pocket-book.api-reference/expensive-calculation 10 20)"</span>,</span>
-<span id="cb100-4"><a href="#cb100-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">:fn-name</span> <span class="st">"pocket-book.api-reference/expensive-calculation"</span>,</span>
-<span id="cb100-5"><a href="#cb100-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">:args-str</span> <span class="st">"[10 20]"</span>,</span>
-<span id="cb100-6"><a href="#cb100-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">:created-at</span> <span class="st">"2026-02-08T19:44:08.304999266Z"</span>}</span>
-<span id="cb100-7"><a href="#cb100-7" aria-hidden="true" tabindex="-1"></a> {<span class="at">:path</span></span>
-<span id="cb100-8"><a href="#cb100-8" aria-hidden="true" tabindex="-1"></a>  <span class="st">"/tmp/pocket-demo-reference/49/(pocket-book.api-reference_expensive-calculation 3 4)"</span>,</span>
-<span id="cb100-9"><a href="#cb100-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">:id</span> <span class="st">"(pocket-book.api-reference/expensive-calculation 3 4)"</span>,</span>
-<span id="cb100-10"><a href="#cb100-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">:fn-name</span> <span class="st">"pocket-book.api-reference/expensive-calculation"</span>,</span>
-<span id="cb100-11"><a href="#cb100-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">:args-str</span> <span class="st">"[3 4]"</span>,</span>
-<span id="cb100-12"><a href="#cb100-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">:created-at</span> <span class="st">"2026-02-08T19:44:08.708564961Z"</span>}]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<p>Filter by function name:</p>
-<div class="sourceClojure">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb101"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb101-1"><a href="#cb101-1" aria-hidden="true" tabindex="-1"></a>(pocket/cache-entries <span class="st">"pocket-book.api-reference/expensive-calculation"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<div class="printedClojure">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb102"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb102-1"><a href="#cb102-1" aria-hidden="true" tabindex="-1"></a>[{<span class="at">:path</span></span>
-<span id="cb102-2"><a href="#cb102-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">"/tmp/pocket-demo-reference/a3/(pocket-book.api-reference_expensive-calculation 10 20)"</span>,</span>
-<span id="cb102-3"><a href="#cb102-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">:id</span> <span class="st">"(pocket-book.api-reference/expensive-calculation 10 20)"</span>,</span>
-<span id="cb102-4"><a href="#cb102-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">:fn-name</span> <span class="st">"pocket-book.api-reference/expensive-calculation"</span>,</span>
-<span id="cb102-5"><a href="#cb102-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">:args-str</span> <span class="st">"[10 20]"</span>,</span>
-<span id="cb102-6"><a href="#cb102-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">:created-at</span> <span class="st">"2026-02-08T19:44:08.304999266Z"</span>}</span>
-<span id="cb102-7"><a href="#cb102-7" aria-hidden="true" tabindex="-1"></a> {<span class="at">:path</span></span>
-<span id="cb102-8"><a href="#cb102-8" aria-hidden="true" tabindex="-1"></a>  <span class="st">"/tmp/pocket-demo-reference/49/(pocket-book.api-reference_expensive-calculation 3 4)"</span>,</span>
-<span id="cb102-9"><a href="#cb102-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">:id</span> <span class="st">"(pocket-book.api-reference/expensive-calculation 3 4)"</span>,</span>
-<span id="cb102-10"><a href="#cb102-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">:fn-name</span> <span class="st">"pocket-book.api-reference/expensive-calculation"</span>,</span>
-<span id="cb102-11"><a href="#cb102-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">:args-str</span> <span class="st">"[3 4]"</span>,</span>
-<span id="cb102-12"><a href="#cb102-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">:created-at</span> <span class="st">"2026-02-08T19:44:08.708564961Z"</span>}]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb106"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb106-1"><a href="#cb106-1" aria-hidden="true" tabindex="-1"></a>{<span class="at">:dir</span> <span class="st">"/tmp/pocket-demo-reference"</span>, <span class="at">:existed</span> <span class="va">true</span>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
-<section id="cache-stats" class="level3">
-<h3 class="anchored" data-anchor-id="cache-stats"><code>cache-stats</code></h3>
-<p><code>[]</code></p>
-<p>Return aggregate statistics about the cache. Returns a map with <code>:total-entries</code>, <code>:total-size-bytes</code>, and <code>:entries-per-fn</code>.</p>
+<section id="origin-story" class="level3">
+<h3 class="anchored" data-anchor-id="origin-story"><code>origin-story</code></h3>
+<p><code>[x]</code></p>
+<p>Given a value, return its computation DAG as a nested map.</p>
+<p>For a <code>Cached</code> value, each node is <code>{:fn &lt;var&gt; :args [&lt;nodes&gt;] :id &lt;string&gt;}</code>, with <code>:value</code> included if the computation has been realized. Plain (non-Cached) arguments become <code>{:value &lt;val&gt;}</code> leaf nodes.</p>
+<p>When the same Cached instance appears multiple times in the tree, subsequent occurrences are represented as <code>{:ref &lt;id&gt;}</code> pointing to the first occurrence’s <code>:id</code>. This enables proper DAG representation for diamond dependencies.</p>
+<p>Does not trigger computation — only peeks at already-realized values. Works with all storage policies (<code>:mem+disk</code>, <code>:mem</code>, <code>:none</code>).</p>
+<p><code>origin-story</code> returns a nested map describing a computation’s DAG. Each cached step is <code>{:fn &lt;var&gt; :args [...]}</code>, with <code>:value</code> if realized. Plain arguments become <code>{:value ...}</code> leaves.</p>
 <div class="sourceClojure">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb103"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb103-1"><a href="#cb103-1" aria-hidden="true" tabindex="-1"></a>(pocket/cache-stats)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb107"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb107-1"><a href="#cb107-1" aria-hidden="true" tabindex="-1"></a>(<span class="bu">defn</span><span class="fu"> step-a </span>[x] (<span class="kw">+</span> x <span class="dv">10</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb108"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb108-1"><a href="#cb108-1" aria-hidden="true" tabindex="-1"></a>(<span class="bu">defn</span><span class="fu"> step-b </span>[x y] (<span class="kw">*</span> x y))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb109"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb109-1"><a href="#cb109-1" aria-hidden="true" tabindex="-1"></a>(<span class="bu">def</span><span class="fu"> a-c </span>(pocket/cached <span class="va">#'step-a</span> <span class="dv">5</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb110"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb110-1"><a href="#cb110-1" aria-hidden="true" tabindex="-1"></a>(<span class="bu">def</span><span class="fu"> b-c </span>(pocket/cached <span class="va">#'step-b</span> a-c <span class="dv">3</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Before deref — no <code>:value</code> keys:</p>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb111"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb111-1"><a href="#cb111-1" aria-hidden="true" tabindex="-1"></a>(pocket/origin-story b-c)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="printedClojure">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb104"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb104-1"><a href="#cb104-1" aria-hidden="true" tabindex="-1"></a>{<span class="at">:total-entries</span> <span class="dv">2</span>,</span>
-<span id="cb104-2"><a href="#cb104-2" aria-hidden="true" tabindex="-1"></a> <span class="at">:total-size-bytes</span> <span class="dv">388</span>,</span>
-<span id="cb104-3"><a href="#cb104-3" aria-hidden="true" tabindex="-1"></a> <span class="at">:entries-per-fn</span> {<span class="st">"pocket-book.api-reference/expensive-calculation"</span> <span class="dv">2</span>}}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb112"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb112-1"><a href="#cb112-1" aria-hidden="true" tabindex="-1"></a>{<span class="at">:fn</span> <span class="va">#'pocket-book.api-reference/step-b,</span></span>
+<span id="cb112-2"><a href="#cb112-2" aria-hidden="true" tabindex="-1"></a> <span class="at">:args</span></span>
+<span id="cb112-3"><a href="#cb112-3" aria-hidden="true" tabindex="-1"></a> [{<span class="at">:fn</span> <span class="va">#'pocket-book.api-reference/step-a,</span></span>
+<span id="cb112-4"><a href="#cb112-4" aria-hidden="true" tabindex="-1"></a>   <span class="at">:args</span> [{<span class="at">:value</span> <span class="dv">5</span>}],</span>
+<span id="cb112-5"><a href="#cb112-5" aria-hidden="true" tabindex="-1"></a>   <span class="at">:id</span> <span class="st">"c2"</span>}</span>
+<span id="cb112-6"><a href="#cb112-6" aria-hidden="true" tabindex="-1"></a>  {<span class="at">:value</span> <span class="dv">3</span>}],</span>
+<span id="cb112-7"><a href="#cb112-7" aria-hidden="true" tabindex="-1"></a> <span class="at">:id</span> <span class="st">"c1"</span>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
+<p>Deref to trigger computation:</p>
 <div class="sourceClojure">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb105"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb105-1"><a href="#cb105-1" aria-hidden="true" tabindex="-1"></a>(pocket/cleanup!)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb113"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb113-1"><a href="#cb113-1" aria-hidden="true" tabindex="-1"></a>(<span class="kw">deref</span> b-c)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-23-contents" aria-controls="callout-23" aria-expanded="false" aria-label="Toggle callout">
@@ -1140,89 +1179,29 @@ Computing 3 + 4 (this is expensive!)
 </div>
 <div id="callout-23" class="callout-23-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>21:44:08.729 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo-reference
+<pre><code>21:50:35.804 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.api-reference/step-b
+21:50:35.804 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.api-reference/step-a
 </code></pre>
 </div>
 </div>
 </div>
 <div class="printedClojure">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb107"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb107-1"><a href="#cb107-1" aria-hidden="true" tabindex="-1"></a>{<span class="at">:dir</span> <span class="st">"/tmp/pocket-demo-reference"</span>, <span class="at">:existed</span> <span class="va">true</span>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-</section>
-<section id="origin-story" class="level3">
-<h3 class="anchored" data-anchor-id="origin-story"><code>origin-story</code></h3>
-<p><code>[x]</code></p>
-<p>Given a value, return its computation DAG as a nested map.</p>
-<p>For a <code>Cached</code> value, each node is <code>{:fn &lt;var&gt; :args [&lt;nodes&gt;] :id &lt;string&gt;}</code>, with <code>:value</code> included if the computation has been realized. Plain (non-Cached) arguments become <code>{:value &lt;val&gt;}</code> leaf nodes.</p>
-<p>When the same Cached instance appears multiple times in the tree, subsequent occurrences are represented as <code>{:ref &lt;id&gt;}</code> pointing to the first occurrence’s <code>:id</code>. This enables proper DAG representation for diamond dependencies.</p>
-<p>Does not trigger computation — only peeks at already-realized values. Works with all storage policies (<code>:mem+disk</code>, <code>:mem</code>, <code>:none</code>).</p>
-<p><code>origin-story</code> returns a nested map describing a computation’s DAG. Each cached step is <code>{:fn &lt;var&gt; :args [...]}</code>, with <code>:value</code> if realized. Plain arguments become <code>{:value ...}</code> leaves.</p>
-<div class="sourceClojure">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb108"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb108-1"><a href="#cb108-1" aria-hidden="true" tabindex="-1"></a>(<span class="bu">defn</span><span class="fu"> step-a </span>[x] (<span class="kw">+</span> x <span class="dv">10</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<div class="sourceClojure">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb109"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb109-1"><a href="#cb109-1" aria-hidden="true" tabindex="-1"></a>(<span class="bu">defn</span><span class="fu"> step-b </span>[x y] (<span class="kw">*</span> x y))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<div class="sourceClojure">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb110"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb110-1"><a href="#cb110-1" aria-hidden="true" tabindex="-1"></a>(<span class="bu">def</span><span class="fu"> a-c </span>(pocket/cached <span class="va">#'step-a</span> <span class="dv">5</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<div class="sourceClojure">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb111"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb111-1"><a href="#cb111-1" aria-hidden="true" tabindex="-1"></a>(<span class="bu">def</span><span class="fu"> b-c </span>(pocket/cached <span class="va">#'step-b</span> a-c <span class="dv">3</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<p>Before deref — no <code>:value</code> keys:</p>
-<div class="sourceClojure">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb112"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb112-1"><a href="#cb112-1" aria-hidden="true" tabindex="-1"></a>(pocket/origin-story b-c)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<div class="printedClojure">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb113"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb113-1"><a href="#cb113-1" aria-hidden="true" tabindex="-1"></a>{<span class="at">:fn</span> <span class="va">#'pocket-book.api-reference/step-b,</span></span>
-<span id="cb113-2"><a href="#cb113-2" aria-hidden="true" tabindex="-1"></a> <span class="at">:args</span></span>
-<span id="cb113-3"><a href="#cb113-3" aria-hidden="true" tabindex="-1"></a> [{<span class="at">:fn</span> <span class="va">#'pocket-book.api-reference/step-a,</span></span>
-<span id="cb113-4"><a href="#cb113-4" aria-hidden="true" tabindex="-1"></a>   <span class="at">:args</span> [{<span class="at">:value</span> <span class="dv">5</span>}],</span>
-<span id="cb113-5"><a href="#cb113-5" aria-hidden="true" tabindex="-1"></a>   <span class="at">:id</span> <span class="st">"c2"</span>}</span>
-<span id="cb113-6"><a href="#cb113-6" aria-hidden="true" tabindex="-1"></a>  {<span class="at">:value</span> <span class="dv">3</span>}],</span>
-<span id="cb113-7"><a href="#cb113-7" aria-hidden="true" tabindex="-1"></a> <span class="at">:id</span> <span class="st">"c1"</span>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<p>Deref to trigger computation:</p>
-<div class="sourceClojure">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb114"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb114-1"><a href="#cb114-1" aria-hidden="true" tabindex="-1"></a>(<span class="kw">deref</span> b-c)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-24-contents" aria-controls="callout-24" aria-expanded="false" aria-label="Toggle callout">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Note</span>OUT
-</div>
-<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
-</div>
-<div id="callout-24" class="callout-24-contents callout-collapse collapse">
-<div class="callout-body-container callout-body">
-<pre><code>21:44:08.734 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.api-reference/step-b
-21:44:08.734 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.api-reference/step-a
-21:44:08.734 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo-reference/6a/(pocket-book.api-reference_step-a 5)
-21:44:08.735 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo-reference/1b/(pocket-book.api-reference_step-b (pocket-book.api-reference_step-a 5) 3)
-</code></pre>
-</div>
-</div>
-</div>
-<div class="printedClojure">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb116"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb116-1"><a href="#cb116-1" aria-hidden="true" tabindex="-1"></a><span class="dv">45</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb115"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb115-1"><a href="#cb115-1" aria-hidden="true" tabindex="-1"></a><span class="dv">45</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>After deref — <code>:value</code> keys appear:</p>
 <div class="sourceClojure">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb117"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb117-1"><a href="#cb117-1" aria-hidden="true" tabindex="-1"></a>(pocket/origin-story b-c)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb116"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb116-1"><a href="#cb116-1" aria-hidden="true" tabindex="-1"></a>(pocket/origin-story b-c)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="printedClojure">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb118"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb118-1"><a href="#cb118-1" aria-hidden="true" tabindex="-1"></a>{<span class="at">:fn</span> <span class="va">#'pocket-book.api-reference/step-b,</span></span>
-<span id="cb118-2"><a href="#cb118-2" aria-hidden="true" tabindex="-1"></a> <span class="at">:args</span></span>
-<span id="cb118-3"><a href="#cb118-3" aria-hidden="true" tabindex="-1"></a> [{<span class="at">:fn</span> <span class="va">#'pocket-book.api-reference/step-a,</span></span>
-<span id="cb118-4"><a href="#cb118-4" aria-hidden="true" tabindex="-1"></a>   <span class="at">:args</span> [{<span class="at">:value</span> <span class="dv">5</span>}],</span>
-<span id="cb118-5"><a href="#cb118-5" aria-hidden="true" tabindex="-1"></a>   <span class="at">:id</span> <span class="st">"c2"</span>,</span>
-<span id="cb118-6"><a href="#cb118-6" aria-hidden="true" tabindex="-1"></a>   <span class="at">:value</span> <span class="dv">15</span>}</span>
-<span id="cb118-7"><a href="#cb118-7" aria-hidden="true" tabindex="-1"></a>  {<span class="at">:value</span> <span class="dv">3</span>}],</span>
-<span id="cb118-8"><a href="#cb118-8" aria-hidden="true" tabindex="-1"></a> <span class="at">:id</span> <span class="st">"c1"</span>,</span>
-<span id="cb118-9"><a href="#cb118-9" aria-hidden="true" tabindex="-1"></a> <span class="at">:value</span> <span class="dv">45</span>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb117"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb117-1"><a href="#cb117-1" aria-hidden="true" tabindex="-1"></a>{<span class="at">:fn</span> <span class="va">#'pocket-book.api-reference/step-b,</span></span>
+<span id="cb117-2"><a href="#cb117-2" aria-hidden="true" tabindex="-1"></a> <span class="at">:args</span></span>
+<span id="cb117-3"><a href="#cb117-3" aria-hidden="true" tabindex="-1"></a> [{<span class="at">:fn</span> <span class="va">#'pocket-book.api-reference/step-a,</span></span>
+<span id="cb117-4"><a href="#cb117-4" aria-hidden="true" tabindex="-1"></a>   <span class="at">:args</span> [{<span class="at">:value</span> <span class="dv">5</span>}],</span>
+<span id="cb117-5"><a href="#cb117-5" aria-hidden="true" tabindex="-1"></a>   <span class="at">:id</span> <span class="st">"c2"</span>,</span>
+<span id="cb117-6"><a href="#cb117-6" aria-hidden="true" tabindex="-1"></a>   <span class="at">:value</span> <span class="dv">15</span>}</span>
+<span id="cb117-7"><a href="#cb117-7" aria-hidden="true" tabindex="-1"></a>  {<span class="at">:value</span> <span class="dv">3</span>}],</span>
+<span id="cb117-8"><a href="#cb117-8" aria-hidden="true" tabindex="-1"></a> <span class="at">:id</span> <span class="st">"c1"</span>,</span>
+<span id="cb117-9"><a href="#cb117-9" aria-hidden="true" tabindex="-1"></a> <span class="at">:value</span> <span class="dv">45</span>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
 <section id="origin-story-mermaid" class="level3">
@@ -1233,7 +1212,7 @@ Computing 3 + 4 (this is expensive!)
 <p>Returns a plain string. Wrap with <code>(kind/mermaid ...)</code> for Kindly rendering.</p>
 <p>Returns a Mermaid flowchart with kindly metadata for notebook rendering:</p>
 <div class="sourceClojure">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb119"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb119-1"><a href="#cb119-1" aria-hidden="true" tabindex="-1"></a>(pocket/origin-story-mermaid b-c)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb118"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb118-1"><a href="#cb118-1" aria-hidden="true" tabindex="-1"></a>(pocket/origin-story-mermaid b-c)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="mermaid">flowchart TD
   n0["step-b"]
@@ -1253,15 +1232,15 @@ Computing 3 + 4 (this is expensive!)
 <p>This is the fully normalized (Format B) representation of the DAG. Use <code>origin-story</code> for the tree-with-refs representation (Format A).</p>
 <p><code>origin-story-graph</code> returns a normalized <code>{:nodes ... :edges ...}</code> format, suitable for graph algorithms:</p>
 <div class="sourceClojure">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb120"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb120-1"><a href="#cb120-1" aria-hidden="true" tabindex="-1"></a>(pocket/origin-story-graph b-c)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb119"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb119-1"><a href="#cb119-1" aria-hidden="true" tabindex="-1"></a>(pocket/origin-story-graph b-c)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="printedClojure">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb121"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb121-1"><a href="#cb121-1" aria-hidden="true" tabindex="-1"></a>{<span class="at">:nodes</span></span>
-<span id="cb121-2"><a href="#cb121-2" aria-hidden="true" tabindex="-1"></a> {<span class="st">"c1"</span> {<span class="at">:fn</span> <span class="va">#'pocket-book.api-reference/step-b,</span> <span class="at">:value</span> <span class="dv">45</span>},</span>
-<span id="cb121-3"><a href="#cb121-3" aria-hidden="true" tabindex="-1"></a>  <span class="st">"c2"</span> {<span class="at">:fn</span> <span class="va">#'pocket-book.api-reference/step-a,</span> <span class="at">:value</span> <span class="dv">15</span>},</span>
-<span id="cb121-4"><a href="#cb121-4" aria-hidden="true" tabindex="-1"></a>  <span class="st">"v3"</span> {<span class="at">:value</span> <span class="dv">5</span>},</span>
-<span id="cb121-5"><a href="#cb121-5" aria-hidden="true" tabindex="-1"></a>  <span class="st">"v4"</span> {<span class="at">:value</span> <span class="dv">3</span>}},</span>
-<span id="cb121-6"><a href="#cb121-6" aria-hidden="true" tabindex="-1"></a> <span class="at">:edges</span> [[<span class="st">"c1"</span> <span class="st">"c2"</span>] [<span class="st">"c2"</span> <span class="st">"v3"</span>] [<span class="st">"c1"</span> <span class="st">"v4"</span>]]}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb120"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb120-1"><a href="#cb120-1" aria-hidden="true" tabindex="-1"></a>{<span class="at">:nodes</span></span>
+<span id="cb120-2"><a href="#cb120-2" aria-hidden="true" tabindex="-1"></a> {<span class="st">"c1"</span> {<span class="at">:fn</span> <span class="va">#'pocket-book.api-reference/step-b,</span> <span class="at">:value</span> <span class="dv">45</span>},</span>
+<span id="cb120-3"><a href="#cb120-3" aria-hidden="true" tabindex="-1"></a>  <span class="st">"c2"</span> {<span class="at">:fn</span> <span class="va">#'pocket-book.api-reference/step-a,</span> <span class="at">:value</span> <span class="dv">15</span>},</span>
+<span id="cb120-4"><a href="#cb120-4" aria-hidden="true" tabindex="-1"></a>  <span class="st">"v3"</span> {<span class="at">:value</span> <span class="dv">5</span>},</span>
+<span id="cb120-5"><a href="#cb120-5" aria-hidden="true" tabindex="-1"></a>  <span class="st">"v4"</span> {<span class="at">:value</span> <span class="dv">3</span>}},</span>
+<span id="cb120-6"><a href="#cb120-6" aria-hidden="true" tabindex="-1"></a> <span class="at">:edges</span> [[<span class="st">"c1"</span> <span class="st">"c2"</span>] [<span class="st">"c2"</span> <span class="st">"v3"</span>] [<span class="st">"c1"</span> <span class="st">"v4"</span>]]}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
 <section id="compare-experiments" class="level3">
@@ -1272,17 +1251,42 @@ Computing 3 + 4 (this is expensive!)
 <p>Only parameters that differ across experiments are included. The <code>:result</code> key contains the derefed value of each Cached.</p>
 <p><code>compare-experiments</code> extracts varying parameters from multiple experiments. This is useful for hyperparameter sweeps where you want to see which parameters differ across experiments.</p>
 <div class="sourceClojure">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb122"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb122-1"><a href="#cb122-1" aria-hidden="true" tabindex="-1"></a>(<span class="bu">defn</span><span class="fu"> run-exp </span>[config]</span>
-<span id="cb122-2"><a href="#cb122-2" aria-hidden="true" tabindex="-1"></a>  {<span class="at">:rmse</span> (<span class="kw">*</span> <span class="fl">0.1</span> (<span class="at">:lr</span> config))})</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb121"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb121-1"><a href="#cb121-1" aria-hidden="true" tabindex="-1"></a>(<span class="bu">defn</span><span class="fu"> run-exp </span>[config]</span>
+<span id="cb121-2"><a href="#cb121-2" aria-hidden="true" tabindex="-1"></a>  {<span class="at">:rmse</span> (<span class="kw">*</span> <span class="fl">0.1</span> (<span class="at">:lr</span> config))})</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="sourceClojure">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb123"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb123-1"><a href="#cb123-1" aria-hidden="true" tabindex="-1"></a>(<span class="bu">def</span><span class="fu"> exp1 </span>(pocket/cached <span class="va">#'run-exp</span> {<span class="at">:lr</span> <span class="fl">0.01</span> <span class="at">:epochs</span> <span class="dv">100</span>}))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb122"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb122-1"><a href="#cb122-1" aria-hidden="true" tabindex="-1"></a>(<span class="bu">def</span><span class="fu"> exp1 </span>(pocket/cached <span class="va">#'run-exp</span> {<span class="at">:lr</span> <span class="fl">0.01</span> <span class="at">:epochs</span> <span class="dv">100</span>}))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="sourceClojure">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb124"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb124-1"><a href="#cb124-1" aria-hidden="true" tabindex="-1"></a>(<span class="bu">def</span><span class="fu"> exp2 </span>(pocket/cached <span class="va">#'run-exp</span> {<span class="at">:lr</span> <span class="fl">0.001</span> <span class="at">:epochs</span> <span class="dv">100</span>}))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb123"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb123-1"><a href="#cb123-1" aria-hidden="true" tabindex="-1"></a>(<span class="bu">def</span><span class="fu"> exp2 </span>(pocket/cached <span class="va">#'run-exp</span> {<span class="at">:lr</span> <span class="fl">0.001</span> <span class="at">:epochs</span> <span class="dv">100</span>}))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="sourceClojure">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb125"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb125-1"><a href="#cb125-1" aria-hidden="true" tabindex="-1"></a>(pocket/compare-experiments [exp1 exp2])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb124"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb124-1"><a href="#cb124-1" aria-hidden="true" tabindex="-1"></a>(pocket/compare-experiments [exp1 exp2])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-24-contents" aria-controls="callout-24" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>OUT
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-24" class="callout-24-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<pre><code>21:50:35.812 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.api-reference/run-exp
+21:50:35.813 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.api-reference/run-exp
+</code></pre>
+</div>
+</div>
+</div>
+<div class="printedClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb126"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb126-1"><a href="#cb126-1" aria-hidden="true" tabindex="-1"></a>[{<span class="at">:lr</span> <span class="fl">0.01</span>, <span class="at">:result</span> {<span class="at">:rmse</span> <span class="fl">0.001</span>}} {<span class="at">:lr</span> <span class="fl">0.001</span>, <span class="at">:result</span> {<span class="at">:rmse</span> <span class="fl">1.0E-4</span>}}]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Note: <code>:epochs</code> is not shown because it’s the same (100) in both experiments. Only varying parameters appear in the comparison.</p>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb127"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb127-1"><a href="#cb127-1" aria-hidden="true" tabindex="-1"></a>(pocket/cleanup!)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-25-contents" aria-controls="callout-25" aria-expanded="false" aria-label="Toggle callout">
@@ -1296,40 +1300,13 @@ Computing 3 + 4 (this is expensive!)
 </div>
 <div id="callout-25" class="callout-25-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>21:44:08.741 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.api-reference/run-exp
-21:44:08.742 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo-reference/18/(pocket-book.api-reference_run-exp {:epochs 100, :lr 0.01})
-21:44:08.742 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.api-reference/run-exp
-21:44:08.742 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo-reference/13/(pocket-book.api-reference_run-exp {:epochs 100, :lr 0.001})
+<pre><code>21:50:35.817 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo-reference
 </code></pre>
 </div>
 </div>
 </div>
 <div class="printedClojure">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb127"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb127-1"><a href="#cb127-1" aria-hidden="true" tabindex="-1"></a>[{<span class="at">:lr</span> <span class="fl">0.01</span>, <span class="at">:result</span> {<span class="at">:rmse</span> <span class="fl">0.001</span>}} {<span class="at">:lr</span> <span class="fl">0.001</span>, <span class="at">:result</span> {<span class="at">:rmse</span> <span class="fl">1.0E-4</span>}}]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<p>Note: <code>:epochs</code> is not shown because it’s the same (100) in both experiments. Only varying parameters appear in the comparison.</p>
-<div class="sourceClojure">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb128"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb128-1"><a href="#cb128-1" aria-hidden="true" tabindex="-1"></a>(pocket/cleanup!)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-26-contents" aria-controls="callout-26" aria-expanded="false" aria-label="Toggle callout">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Note</span>OUT
-</div>
-<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
-</div>
-<div id="callout-26" class="callout-26-contents callout-collapse collapse">
-<div class="callout-body-container callout-body">
-<pre><code>21:44:08.745 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo-reference
-</code></pre>
-</div>
-</div>
-</div>
-<div class="printedClojure">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb130"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb130-1"><a href="#cb130-1" aria-hidden="true" tabindex="-1"></a>{<span class="at">:dir</span> <span class="st">"/tmp/pocket-demo-reference"</span>, <span class="at">:existed</span> <span class="va">true</span>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb129"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb129-1"><a href="#cb129-1" aria-hidden="true" tabindex="-1"></a>{<span class="at">:dir</span> <span class="st">"/tmp/pocket-demo-reference"</span>, <span class="at">:existed</span> <span class="va">true</span>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
 </section>
@@ -1746,7 +1723,7 @@ Computing 3 + 4 (this is expensive!)
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
       <a href="./pocket_book.developing_pocket.html" class="pagination-link" aria-label="Developing Pocket">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Developing Pocket</span></span>
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Developing Pocket</span></span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">

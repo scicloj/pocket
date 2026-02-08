@@ -213,20 +213,26 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="./pocket_book.pocket_pipeline.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">🚧 Draft: Full Pocket integration for ML pipelines</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="./pocket_book.cache_keys.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Under the hood: cache keys</span></span></a>
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Under the hood: cache keys</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./pocket_book.developing_pocket.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Developing Pocket</span></span></a>
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Developing Pocket</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./pocket_book.api_reference.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">API Reference</span></span></a>
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">API Reference</span></span></a>
   </div>
 </li>
     </ul>
@@ -317,7 +323,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <div id="callout-1" class="callout-1-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>21:43:51.257 INFO scicloj.pocket - Cache dir set to: /tmp/pocket-demo
+<pre><code>21:50:17.887 INFO scicloj.pocket - Cache dir set to: /tmp/pocket-demo
 </code></pre>
 </div>
 </div>
@@ -341,7 +347,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <div id="callout-2" class="callout-2-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>21:43:51.258 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo
+<pre><code>21:50:17.888 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo
 </code></pre>
 </div>
 </div>
@@ -391,9 +397,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <div id="callout-3" class="callout-3-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>21:43:51.261 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.getting-started/expensive-calculation
+<pre><code>21:50:17.891 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.getting-started/expensive-calculation
 Computing 10 + 20 (this is expensive!)
-"Elapsed time: 401.711914 msecs"
+21:50:18.293 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo/fb/(pocket-book.getting-started_expensive-calculation 10 20)
+"Elapsed time: 402.170627 msecs"
 </code></pre>
 </div>
 </div>
@@ -417,7 +424,7 @@ Computing 10 + 20 (this is expensive!)
 </div>
 <div id="callout-4" class="callout-4-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>"Elapsed time: 0.210095 msecs"
+<pre><code>"Elapsed time: 0.653662 msecs"
 </code></pre>
 </div>
 </div>
@@ -449,9 +456,10 @@ Computing 10 + 20 (this is expensive!)
 </div>
 <div id="callout-5" class="callout-5-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>21:43:51.667 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.getting-started/expensive-calculation
+<pre><code>21:50:18.307 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.getting-started/expensive-calculation
 Computing 5 + 15 (this is expensive!)
-"Elapsed time: 402.309306 msecs"
+21:50:18.719 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo/c4/(pocket-book.getting-started_expensive-calculation 5 15)
+"Elapsed time: 413.095429 msecs"
 </code></pre>
 </div>
 </div>
@@ -475,7 +483,7 @@ Computing 5 + 15 (this is expensive!)
 </div>
 <div id="callout-6" class="callout-6-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>"Elapsed time: 0.51433 msecs"
+<pre><code>"Elapsed time: 0.393533 msecs"
 </code></pre>
 </div>
 </div>
@@ -499,9 +507,10 @@ Computing 5 + 15 (this is expensive!)
 </div>
 <div id="callout-7" class="callout-7-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>21:43:52.076 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.getting-started/expensive-calculation
+<pre><code>21:50:18.725 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.getting-started/expensive-calculation
 Computing 7 + 8 (this is expensive!)
-"Elapsed time: 412.340829 msecs"
+21:50:19.126 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo/a2/(pocket-book.getting-started_expensive-calculation 7 8)
+"Elapsed time: 401.689263 msecs"
 </code></pre>
 </div>
 </div>
@@ -535,7 +544,8 @@ Computing 7 + 8 (this is expensive!)
 </div>
 <div id="callout-8" class="callout-8-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>21:43:52.492 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.getting-started/returns-nil
+<pre><code>21:50:19.130 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.getting-started/returns-nil
+21:50:19.130 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo/7a/(pocket-book.getting-started_returns-nil)
 </code></pre>
 </div>
 </div>
@@ -584,7 +594,7 @@ Computing 7 + 8 (this is expensive!)
 </div>
 <div id="callout-9" class="callout-9-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>21:43:52.496 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo
+<pre><code>21:50:19.133 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo
 </code></pre>
 </div>
 </div>

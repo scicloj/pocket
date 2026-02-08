@@ -127,6 +127,10 @@ Distributed under the MIT License — see [LICENSE](https://github.com/scicloj/p
 
 
 
+- [🚧 Draft: Full Pocket integration for ML pipelines](pocket_book.pocket_pipeline.html)
+
+
+
 - [Under the hood: cache keys](pocket_book.cache_keys.html)
 
 

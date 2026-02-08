@@ -73,6 +73,7 @@ The chapter list lives in `notebooks/chapters.edn`:
  "extending_pocket"
  "ml_workflows"
  "pocket_model"
+ "pocket_pipeline"
  "cache_keys"
  "developing_pocket"
  "api_reference"]
