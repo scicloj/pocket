@@ -164,11 +164,11 @@
    :tribuo-components
    [{:name "squared",
      :type "org.tribuo.regression.sgd.objectives.SquaredLoss"}
-    {:name "trainer",
+    {:name "linear-sgd",
      :type "org.tribuo.regression.sgd.linear.LinearSGDTrainer",
      :properties
      {:objective "squared", :epochs "50", :loggingInterval "10000"}}],
-   :tribuo-trainer-name "trainer"}))
+   :tribuo-trainer-name "linear-sgd"}))
 
 
 (def

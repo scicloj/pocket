@@ -38,7 +38,7 @@
   ((fn
     [{:keys [results computation-count]}]
     (and
-     (every? (fn* [p1__102447#] (= 42 p1__102447#)) results)
+     (every? (fn* [p1__112940#] (= 42 p1__112940#)) results)
      (> computation-count 1)))
    v3_l72)))
 
@@ -105,7 +105,7 @@
     [{:keys [results computation-count]}]
     (and
      (= 5 (count results))
-     (every? (fn* [p1__102448#] (= 100 p1__102448#)) results)
+     (every? (fn* [p1__112941#] (= 100 p1__112941#)) results)
      (= 1 computation-count)))
    v18_l221)))
 
@@ -267,8 +267,8 @@
    futures
    (mapv
     (fn*
-     [p1__102449#]
-     (future @(pocket/cached #'slow-computation p1__102449#)))
+     [p1__112942#]
+     (future @(pocket/cached #'slow-computation p1__112942#)))
     [40 41 42])
    results
    (mapv deref futures)
@@ -323,7 +323,7 @@
        no-recompute?]}]
     (and
      (= 3 (count results))
-     (every? (fn* [p1__102450#] (= 2500 p1__102450#)) results)
+     (every? (fn* [p1__112943#] (= 2500 p1__112943#)) results)
      (= 1 count-after-compute)
      (= 1 count-after-disk-hits)
      no-recompute?))
@@ -421,7 +421,7 @@
   ((fn
     [{:keys [results computation-count]}]
     (and
-     (every? (fn* [p1__102451#] (= 4900 p1__102451#)) results)
+     (every? (fn* [p1__112944#] (= 4900 p1__112944#)) results)
      (= 1 computation-count)))
    v52_l521)))
 
@@ -488,7 +488,7 @@
   ((fn
     [{:keys [results step-a-count step-b-count]}]
     (and
-     (every? (fn* [p1__102452#] (= 71 p1__102452#)) results)
+     (every? (fn* [p1__112945#] (= 71 p1__112945#)) results)
      (= 1 step-a-count)
      (= 1 step-b-count)))
    v61_l569)))
@@ -627,7 +627,7 @@
   ((fn
     [{:keys [results count-after-first count-after-retry]}]
     (and
-     (every? (fn* [p1__102453#] (= 8100 p1__102453#)) results)
+     (every? (fn* [p1__112946#] (= 8100 p1__112946#)) results)
      (= 1 count-after-first)
      (= 2 count-after-retry)))
    v78_l681)))

@@ -66,7 +66,7 @@ format:
 ::: {.callout-note}
 ## OUT
 ```
-19:24:44.051 INFO scicloj.pocket - Cache dir set to: /tmp/pocket-extending
+21:44:03.887 INFO scicloj.pocket - Cache dir set to: /tmp/pocket-extending
 
 ```
 :::
@@ -93,7 +93,7 @@ format:
 ::: {.callout-note}
 ## OUT
 ```
-19:24:44.052 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-extending
+21:44:03.888 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-extending
 
 ```
 :::
@@ -513,8 +513,9 @@ First deref computes:
 ::: {.callout-note}
 ## OUT
 ```
-19:24:44.075 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.extending-pocket/analyze-dataset
+21:44:03.909 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.extending-pocket/analyze-dataset
   Analyzing census v 3 ...
+21:44:04.111 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-extending/62/(pocket-book.extending-pocket_analyze-dataset census-v3 {:method :regression})
 
 ```
 :::
@@ -564,8 +565,9 @@ A different version creates a different cache entry:
 ::: {.callout-note}
 ## OUT
 ```
-19:24:44.284 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.extending-pocket/analyze-dataset
+21:44:04.116 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.extending-pocket/analyze-dataset
   Analyzing census v 4 ...
+21:44:04.318 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-extending/f6/(pocket-book.extending-pocket_analyze-dataset census-v4 {:method :regression})
 
 ```
 :::
@@ -710,10 +712,11 @@ nil
 
 ::: {.sourceClojure}
 ```clojure
-(nippy/extend-thaw :my-model
-                   [data-input]
-                   (->MyModel (nippy/thaw-from-in! data-input)
-                              (nippy/thaw-from-in! data-input)))
+(do (nippy/extend-thaw :my-model
+                       [data-input]
+                       (->MyModel (nippy/thaw-from-in! data-input)
+                                  (nippy/thaw-from-in! data-input)))
+    :done)
 ```
 :::
 
@@ -731,15 +734,7 @@ Warning: resetting Nippy thaw for custom type with id: :my-model
 
 ::: {.printedClojure}
 ```clojure
-{459 #function[tech.v3.datatype.nippy/eval32828/fn--32829/fn--32830],
- -26414
- #function[tech.v3.datatype.nippy/eval32864/fn--32865/fn--32866],
- -26665
- #function[tech.v3.dataset.io.nippy/eval32882/fn--32883/fn--32884],
- -7792
- #function[tech.v3.dataset.io.nippy/eval32896/fn--32897/fn--32898],
- 16600
- #function[pocket-book.extending-pocket/eval102969/fn--102970/fn--102971]}
+:done
 
 ```
 :::
@@ -796,7 +791,8 @@ Now caching a function that returns a `MyModel` works seamlessly:
 ::: {.callout-note}
 ## OUT
 ```
-19:24:44.514 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.extending-pocket/train-my-model
+21:44:04.346 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.extending-pocket/train-my-model
+21:44:04.347 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-extending/ac/(pocket-book.extending-pocket_train-my-model [10 20 30])
 
 ```
 :::
@@ -829,7 +825,7 @@ for more details.
 ::: {.callout-note}
 ## OUT
 ```
-19:24:44.518 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-extending
+21:44:04.350 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-extending
 
 ```
 :::

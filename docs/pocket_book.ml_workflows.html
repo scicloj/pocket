@@ -342,18 +342,18 @@ window.Quarto = {
 <script src="https://cdn.jsdelivr.net/npm/mermaid@11.10.1/dist/mermaid.min.js" type="text/javascript"></script>
 <p><strong>Last modified: 2026-02-08</strong></p>
 <p>This chapter demonstrates Pocket in a realistic machine learning scenario. If you’re new to ML, don’t worry — we’ll explain the concepts as we go. The focus is on how caching helps when you’re exploring many combinations of data, features, and models.</p>
-<p><strong>The problem</strong>: We want to predict a numeric value (like house prices or temperature) from input data. This is called <em>regression</em>. We’ll generate synthetic data, try different ways of preparing it, and compare two learning algorithms.</p>
+<p><strong>The problem</strong>: We want to predict a numeric value (like house prices or temperature) from input data. This is called <a href="https://en.wikipedia.org/wiki/Regression_analysis"><em>regression</em></a>. We’ll generate synthetic data, try different ways of preparing it, and compare two learning algorithms.</p>
 <p><strong>Why caching matters</strong>: Training models can be slow. When you’re experimenting — tweaking parameters, trying new features — you don’t want to recompute everything each time. Pocket caches each step independently, so only the parts you changed get recomputed.</p>
 <p><strong>What we’ll cover</strong>:</p>
 <ul>
-<li>Part 1: Feature engineering — transforming inputs to help models learn</li>
+<li>Part 1: <a href="https://en.wikipedia.org/wiki/Feature_engineering">Feature engineering</a> — transforming inputs to help models learn</li>
 <li>Part 2: Noise sensitivity — how models behave with messy data</li>
 <li>Part 3: The caching payoff — what got cached and why it matters</li>
 <li>Part 4: DAG workflows — when preprocessing steps share dependencies</li>
-<li>Part 5: Hyperparameter sweeps — comparing many experiments at once</li>
+<li>Part 5: <a href="https://en.wikipedia.org/wiki/Hyperparameter_(machine_learning)">Hyperparameter</a> sweeps — comparing many experiments at once</li>
 </ul>
 <p><strong>Note</strong>: This notebook uses <a href="https://scicloj.github.io/tablecloth/">tablecloth</a> for data manipulation, <a href="https://github.com/scicloj/metamorph.ml">metamorph.ml</a> and <a href="https://github.com/scicloj/scicloj.ml.tribuo">tribuo</a> for ML, and <a href="https://plotly.com/javascript/">Plotly.js</a> for visualization. These are not Pocket dependencies — they illustrate a realistic ML workflow. All output is shown inline; to reproduce it, add <a href="https://scicloj.github.io/noj/">noj</a> to your project dependencies.</p>
-<p><strong>Why synthetic data?</strong> Working with synthetic data is a standard practice in machine learning. Because we define the true relationship (<span class="math inline">\(y = \sin(x) \cdot x\)</span>), we can measure exactly how well each model recovers it — something impossible with real-world data where the ground truth is unknown. Synthetic experiments let us isolate one variable at a time: does feature engineering help? How does noise affect each algorithm? These controlled comparisons build intuition that transfers to real problems. In our case, we’ll see that a linear model is helpless against a nonlinear target <em>unless</em> we give it the right features, while a decision tree handles the shape on its own but pays a different price when noise increases.</p>
+<p><strong>Why synthetic data?</strong> Working with synthetic data is a standard practice in machine learning. Because we define the true relationship (<span class="math inline">\(y = \sin(x) \cdot x\)</span>), we can measure exactly how well each model recovers it — something impossible with real-world data where the ground truth is unknown. Synthetic experiments let us isolate one variable at a time: does feature engineering help? How does noise affect each algorithm? These controlled comparisons build intuition that transfers to real problems. In our case, we’ll see that a linear model is helpless against a nonlinear target <em>unless</em> we give it the right features, while a <a href="https://en.wikipedia.org/wiki/Decision_tree_learning">decision tree</a> handles the shape on its own but pays a different price when noise increases.</p>
 <section id="setup" class="level2">
 <h2 class="anchored" data-anchor-id="setup">Setup</h2>
 <div class="sourceClojure">
@@ -393,7 +393,7 @@ window.Quarto = {
 </div>
 <div id="callout-1" class="callout-1-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>19:24:44.581 INFO scicloj.pocket - Cache dir set to: /tmp/pocket-regression
+<pre><code>21:44:04.409 INFO scicloj.pocket - Cache dir set to: /tmp/pocket-regression
 </code></pre>
 </div>
 </div>
@@ -416,7 +416,7 @@ window.Quarto = {
 </div>
 <div id="callout-2" class="callout-2-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>19:24:44.582 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-regression
+<pre><code>21:44:04.409 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-regression
 </code></pre>
 </div>
 </div>
@@ -511,20 +511,20 @@ window.Quarto = {
 <section id="model-specifications" class="level2">
 <h2 class="anchored" data-anchor-id="model-specifications">Model specifications</h2>
 <p>We’ll compare two fundamentally different algorithms:</p>
-<p><strong>Linear model</strong> (gradient descent): Finds the best straight-line (or hyperplane) relationship between inputs and output. Simple and fast, but can only learn linear patterns. Needs good features.</p>
-<p><strong>Decision tree</strong> (CART): Learns by splitting data into regions based on thresholds (“if x &gt; 5, go left”). Can capture complex patterns automatically, but may overfit noisy data.</p>
+<p><strong>Linear model</strong> (<a href="https://en.wikipedia.org/wiki/Stochastic_gradient_descent">gradient descent</a>): Finds the best straight-line (or hyperplane) relationship between inputs and output. Simple and fast, but can only learn linear patterns. Needs good features.</p>
+<p><strong>Decision tree</strong> (<a href="https://en.wikipedia.org/wiki/Decision_tree_learning">CART</a>): Learns by splitting data into regions based on thresholds (“if x &gt; 5, go left”). Can capture complex patterns automatically, but may <a href="https://en.wikipedia.org/wiki/Overfitting">overfit</a> noisy data.</p>
 <p>These algorithms respond differently to feature engineering — that contrast is the heart of Part 1.</p>
 <div class="sourceClojure">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>(<span class="bu">def</span><span class="fu"> linear-sgd-spec</span></span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  {<span class="at">:model-type</span> <span class="at">:scicloj.ml.tribuo/regression</span></span>
 <span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>   <span class="at">:tribuo-components</span> [{<span class="at">:name</span> <span class="st">"squared"</span></span>
 <span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>                        <span class="at">:type</span> <span class="st">"org.tribuo.regression.sgd.objectives.SquaredLoss"</span>}</span>
-<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>                       {<span class="at">:name</span> <span class="st">"trainer"</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>                       {<span class="at">:name</span> <span class="st">"linear-sgd"</span></span>
 <span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>                        <span class="at">:type</span> <span class="st">"org.tribuo.regression.sgd.linear.LinearSGDTrainer"</span></span>
 <span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>                        <span class="at">:properties</span> {<span class="at">:objective</span> <span class="st">"squared"</span></span>
 <span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>                                     <span class="at">:epochs</span> <span class="st">"50"</span></span>
 <span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>                                     <span class="at">:loggingInterval</span> <span class="st">"10000"</span>}}]</span>
-<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>   <span class="at">:tribuo-trainer-name</span> <span class="st">"trainer"</span>})</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>   <span class="at">:tribuo-trainer-name</span> <span class="st">"linear-sgd"</span>})</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="sourceClojure">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>(<span class="bu">def</span><span class="fu"> cart-spec</span></span>
@@ -569,7 +569,8 @@ window.Quarto = {
 </div>
 <div id="callout-3" class="callout-3-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>19:24:44.592 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/make-regression-data
+<pre><code>21:44:04.418 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/make-regression-data
+21:44:04.421 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/b4/(pocket-book.ml-workflows_make-regression-data {:f #'pocket-book.ml-workflows_nonlinear-fn, :n 500, :noise-sd 0.5, :seed 42})
 </code></pre>
 </div>
 </div>
@@ -679,49 +680,68 @@ window.Quarto = {
 </div>
 <div id="callout-4" class="callout-4-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>19:24:44.611 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/prepare-features
-19:24:44.611 INFO scicloj.pocket.impl.cache - Cache miss, computing: :test
-19:24:44.611 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/split-dataset
-19:24:44.615 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/train-model
-19:24:44.615 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/prepare-features
-19:24:44.615 INFO scicloj.pocket.impl.cache - Cache miss, computing: :train
-Feb 08, 2026 7:24:44 PM org.tribuo.common.sgd.AbstractSGDTrainer train
+<pre><code>21:44:04.437 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/prepare-features
+21:44:04.437 INFO scicloj.pocket.impl.cache - Cache miss, computing: :test
+21:44:04.437 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/split-dataset
+21:44:04.440 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/e3/(pocket-book.ml-workflows_split-dataset (pocket-book.ml-workflows_make-regression-data {:f #'pocket-book.ml-workflows_nonlinear-fn, :n 500, :noise-sd 0.5, :seed 42}) {:seed 42})
+21:44:04.441 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/23/(:test (pocket-book.ml-workflows_split-dataset (pocket-book.ml-workflows_make-regression-data {:f #'pocket-book.ml-workflows_nonlinear-fn, :n 500, :noise-sd 0.5, :seed 42}) {:seed 42}))
+21:44:04.441 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/05/(pocket-book.ml-workflows_prepare-features (:test (pocket-book.ml-workflows_split-dataset (pocket-book.ml-workflows_make-regression-data {:f #'pocket-book.ml-workflows_nonlinear-fn, :n 500, :noise-sd 0.5, :seed 42}) {:seed 42})) :raw)
+21:44:04.442 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/train-model
+21:44:04.442 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/prepare-features
+21:44:04.442 INFO scicloj.pocket.impl.cache - Cache miss, computing: :train
+21:44:04.442 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/04/(:train (pocket-book.ml-workflows_split-dataset (pocket-book.ml-workflows_make-regression-data {:f #'pocket-book.ml-workflows_nonlinear-fn, :n 500, :noise-sd 0.5, :seed 42}) {:seed 42}))
+21:44:04.443 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/79/(pocket-book.ml-workflows_prepare-features (:train (pocket-book.ml-workflows_split-dataset (pocket-book.ml-workflows_make-regression-data {:f #'pocket-book.ml-workflows_nonlinear-fn, :n 500, :noise-sd 0.5, :seed 42}) {:seed 42})) :raw)
+Feb 08, 2026 9:44:04 PM org.tribuo.common.sgd.AbstractSGDTrainer train
 INFO: Training SGD model with 333 examples
-Feb 08, 2026 7:24:44 PM org.tribuo.common.sgd.AbstractSGDTrainer train
+Feb 08, 2026 9:44:04 PM org.tribuo.common.sgd.AbstractSGDTrainer train
 INFO: Outputs - RegressionInfo({name=y,id=0,count=333,max=8.866764,min=-5.501972,mean=0.840206,variance=15.440717})
-Feb 08, 2026 7:24:44 PM org.tribuo.common.sgd.AbstractSGDTrainer train
+Feb 08, 2026 9:44:04 PM org.tribuo.common.sgd.AbstractSGDTrainer train
 INFO: At iteration 10000, average loss = 7.061050130878382
-19:24:44.626 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/train-model
-19:24:44.632 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/prepare-features
-19:24:44.633 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/train-model
-19:24:44.633 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/prepare-features
-Feb 08, 2026 7:24:44 PM org.tribuo.common.sgd.AbstractSGDTrainer train
+21:44:04.455 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/c6/c60324b3a114e8d5646efe7ec8bc1d78e743001b
+21:44:04.458 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/train-model
+21:44:04.466 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/1e/1e01826f37666f143cccc6e1883455eb2562ed2e
+21:44:04.471 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/prepare-features
+21:44:04.472 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/6d/(pocket-book.ml-workflows_prepare-features (:test (pocket-book.ml-workflows_split-dataset (pocket-book.ml-workflows_make-regression-data {:f #'pocket-book.ml-workflows_nonlinear-fn, :n 500, :noise-sd 0.5, :seed 42}) {:seed 42})) :quadratic)
+21:44:04.472 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/train-model
+21:44:04.473 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/prepare-features
+21:44:04.473 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/06/0644c627bd9ef15c830deb29e333d06403c26a4f
+Feb 08, 2026 9:44:04 PM org.tribuo.common.sgd.AbstractSGDTrainer train
 INFO: Training SGD model with 333 examples
-Feb 08, 2026 7:24:44 PM org.tribuo.common.sgd.AbstractSGDTrainer train
+Feb 08, 2026 9:44:04 PM org.tribuo.common.sgd.AbstractSGDTrainer train
 INFO: Outputs - RegressionInfo({name=y,id=0,count=333,max=8.866764,min=-5.501972,mean=0.840206,variance=15.440717})
-Feb 08, 2026 7:24:44 PM org.tribuo.common.sgd.AbstractSGDTrainer train
+Feb 08, 2026 9:44:04 PM org.tribuo.common.sgd.AbstractSGDTrainer train
 INFO: At iteration 10000, average loss = 7.746488252108407
-19:24:44.643 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/train-model
-19:24:44.653 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/prepare-features
-19:24:44.655 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/train-model
-19:24:44.655 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/prepare-features
-Feb 08, 2026 7:24:44 PM org.tribuo.common.sgd.AbstractSGDTrainer train
+21:44:04.478 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/2f/2fdc6bcd8e2009e923d805ad1f2fdc52fc57948e
+21:44:04.479 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/train-model
+21:44:04.485 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/cc/cc330e34b3221a68d7bb7649e629ad6b645e4f47
+21:44:04.487 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/prepare-features
+21:44:04.488 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/98/(pocket-book.ml-workflows_prepare-features (:test (pocket-book.ml-workflows_split-dataset (pocket-book.ml-workflows_make-regression-data {:f #'pocket-book.ml-workflows_nonlinear-fn, :n 500, :noise-sd 0.5, :seed 42}) {:seed 42})) :trig)
+21:44:04.488 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/train-model
+21:44:04.488 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/prepare-features
+21:44:04.489 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/9b/(pocket-book.ml-workflows_prepare-features (:train (pocket-book.ml-workflows_split-dataset (pocket-book.ml-workflows_make-regression-data {:f #'pocket-book.ml-workflows_nonlinear-fn, :n 500, :noise-sd 0.5, :seed 42}) {:seed 42})) :trig)
+Feb 08, 2026 9:44:04 PM org.tribuo.common.sgd.AbstractSGDTrainer train
 INFO: Training SGD model with 333 examples
-Feb 08, 2026 7:24:44 PM org.tribuo.common.sgd.AbstractSGDTrainer train
+Feb 08, 2026 9:44:04 PM org.tribuo.common.sgd.AbstractSGDTrainer train
 INFO: Outputs - RegressionInfo({name=y,id=0,count=333,max=8.866764,min=-5.501972,mean=0.840206,variance=15.440717})
-Feb 08, 2026 7:24:44 PM org.tribuo.common.sgd.AbstractSGDTrainer train
+Feb 08, 2026 9:44:04 PM org.tribuo.common.sgd.AbstractSGDTrainer train
 INFO: At iteration 10000, average loss = 0.9717267353378612
-19:24:44.665 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/train-model
-19:24:44.675 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/prepare-features
-19:24:44.677 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/train-model
-19:24:44.677 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/prepare-features
-Feb 08, 2026 7:24:44 PM org.tribuo.common.sgd.AbstractSGDTrainer train
+21:44:04.495 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/31/31897de14a3f45f4aaf19d0981053c5fb21403cb
+21:44:04.496 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/train-model
+21:44:04.504 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/04/04527115901fc961e204e50922811c525652d96d
+21:44:04.505 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/prepare-features
+21:44:04.507 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/99/(pocket-book.ml-workflows_prepare-features (:test (pocket-book.ml-workflows_split-dataset (pocket-book.ml-workflows_make-regression-data {:f #'pocket-book.ml-workflows_nonlinear-fn, :n 500, :noise-sd 0.5, :seed 42}) {:seed 42})) :poly+trig)
+21:44:04.507 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/train-model
+21:44:04.507 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/prepare-features
+21:44:04.508 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/d7/d737f05eb6b2fdcaf7508a2f74277ea684a788ac
+Feb 08, 2026 9:44:04 PM org.tribuo.common.sgd.AbstractSGDTrainer train
 INFO: Training SGD model with 333 examples
-Feb 08, 2026 7:24:44 PM org.tribuo.common.sgd.AbstractSGDTrainer train
+Feb 08, 2026 9:44:04 PM org.tribuo.common.sgd.AbstractSGDTrainer train
 INFO: Outputs - RegressionInfo({name=y,id=0,count=333,max=8.866764,min=-5.501972,mean=0.840206,variance=15.440717})
-Feb 08, 2026 7:24:44 PM org.tribuo.common.sgd.AbstractSGDTrainer train
+Feb 08, 2026 9:44:04 PM org.tribuo.common.sgd.AbstractSGDTrainer train
 INFO: At iteration 10000, average loss = 1.5031022528715852
-19:24:44.686 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/train-model
+21:44:04.513 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/9a/9af00491ae43878968b94538ab45619c1c58f0d9
+21:44:04.514 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/train-model
+21:44:04.523 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/d1/d168df4bc60ad63e27c35709a7e8e2c6b8036407
 </code></pre>
 </div>
 </div>
@@ -809,70 +829,110 @@ INFO: At iteration 10000, average loss = 1.5031022528715852
 </div>
 <div id="callout-5" class="callout-5-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>19:24:44.708 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/prepare-features
-19:24:44.708 INFO scicloj.pocket.impl.cache - Cache miss, computing: :test
-19:24:44.708 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/split-dataset
-19:24:44.708 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/make-regression-data
-19:24:44.723 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/train-model
-19:24:44.723 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/prepare-features
-19:24:44.723 INFO scicloj.pocket.impl.cache - Cache miss, computing: :train
-19:24:44.734 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/prepare-features
-19:24:44.737 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/train-model
-19:24:44.737 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/prepare-features
-Feb 08, 2026 7:24:44 PM org.tribuo.common.sgd.AbstractSGDTrainer train
+<pre><code>21:44:04.535 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/prepare-features
+21:44:04.535 INFO scicloj.pocket.impl.cache - Cache miss, computing: :test
+21:44:04.535 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/split-dataset
+21:44:04.535 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/make-regression-data
+21:44:04.536 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/6a/(pocket-book.ml-workflows_make-regression-data {:f #'pocket-book.ml-workflows_nonlinear-fn, :n 500, :noise-sd 0.1, :seed 42})
+21:44:04.538 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/3a/(pocket-book.ml-workflows_split-dataset (pocket-book.ml-workflows_make-regression-data {:f #'pocket-book.ml-workflows_nonlinear-fn, :n 500, :noise-sd 0.1, :seed 42}) {:seed 42})
+21:44:04.538 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/94/(:test (pocket-book.ml-workflows_split-dataset (pocket-book.ml-workflows_make-regression-data {:f #'pocket-book.ml-workflows_nonlinear-fn, :n 500, :noise-sd 0.1, :seed 42}) {:seed 42}))
+21:44:04.539 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/96/(pocket-book.ml-workflows_prepare-features (:test (pocket-book.ml-workflows_split-dataset (pocket-book.ml-workflows_make-regression-data {:f #'pocket-book.ml-workflows_nonlinear-fn, :n 500, :noise-sd 0.1, :seed 42}) {:seed 42})) :raw)
+21:44:04.539 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/train-model
+21:44:04.539 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/prepare-features
+21:44:04.539 INFO scicloj.pocket.impl.cache - Cache miss, computing: :train
+21:44:04.540 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/55/(:train (pocket-book.ml-workflows_split-dataset (pocket-book.ml-workflows_make-regression-data {:f #'pocket-book.ml-workflows_nonlinear-fn, :n 500, :noise-sd 0.1, :seed 42}) {:seed 42}))
+21:44:04.540 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/08/(pocket-book.ml-workflows_prepare-features (:train (pocket-book.ml-workflows_split-dataset (pocket-book.ml-workflows_make-regression-data {:f #'pocket-book.ml-workflows_nonlinear-fn, :n 500, :noise-sd 0.1, :seed 42}) {:seed 42})) :raw)
+21:44:04.545 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/b8/b852ace3759232f1dec48d3e01572a918e9e31e6
+21:44:04.546 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/prepare-features
+21:44:04.548 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/dd/(pocket-book.ml-workflows_prepare-features (:test (pocket-book.ml-workflows_split-dataset (pocket-book.ml-workflows_make-regression-data {:f #'pocket-book.ml-workflows_nonlinear-fn, :n 500, :noise-sd 0.1, :seed 42}) {:seed 42})) :poly+trig)
+21:44:04.548 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/train-model
+21:44:04.548 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/prepare-features
+21:44:04.549 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/bc/bcc1185d8c044fe468f72f058191a99f73c4ea91
+Feb 08, 2026 9:44:04 PM org.tribuo.common.sgd.AbstractSGDTrainer train
 INFO: Training SGD model with 333 examples
-Feb 08, 2026 7:24:44 PM org.tribuo.common.sgd.AbstractSGDTrainer train
+Feb 08, 2026 9:44:04 PM org.tribuo.common.sgd.AbstractSGDTrainer train
 INFO: Outputs - RegressionInfo({name=y,id=0,count=333,max=8.106624,min=-5.332393,mean=0.805881,variance=15.304966})
-Feb 08, 2026 7:24:44 PM org.tribuo.common.sgd.AbstractSGDTrainer train
+Feb 08, 2026 9:44:04 PM org.tribuo.common.sgd.AbstractSGDTrainer train
 INFO: At iteration 10000, average loss = 1.4235088958624642
-19:24:44.748 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/prepare-features
-19:24:44.748 INFO scicloj.pocket.impl.cache - Cache miss, computing: :test
-19:24:44.748 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/split-dataset
-19:24:44.749 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/make-regression-data
-19:24:44.753 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/train-model
-19:24:44.753 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/prepare-features
-19:24:44.753 INFO scicloj.pocket.impl.cache - Cache miss, computing: :train
-19:24:44.766 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/prepare-features
-19:24:44.768 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/train-model
-19:24:44.768 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/prepare-features
-Feb 08, 2026 7:24:44 PM org.tribuo.common.sgd.AbstractSGDTrainer train
+21:44:04.554 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/82/82fcdba4291961e398a2dabf02049538d45de7ff
+21:44:04.557 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/prepare-features
+21:44:04.557 INFO scicloj.pocket.impl.cache - Cache miss, computing: :test
+21:44:04.557 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/split-dataset
+21:44:04.557 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/make-regression-data
+21:44:04.558 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/53/(pocket-book.ml-workflows_make-regression-data {:f #'pocket-book.ml-workflows_nonlinear-fn, :n 500, :noise-sd 1.0, :seed 42})
+21:44:04.559 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/68/(pocket-book.ml-workflows_split-dataset (pocket-book.ml-workflows_make-regression-data {:f #'pocket-book.ml-workflows_nonlinear-fn, :n 500, :noise-sd 1.0, :seed 42}) {:seed 42})
+21:44:04.560 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/85/(:test (pocket-book.ml-workflows_split-dataset (pocket-book.ml-workflows_make-regression-data {:f #'pocket-book.ml-workflows_nonlinear-fn, :n 500, :noise-sd 1.0, :seed 42}) {:seed 42}))
+21:44:04.560 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/d1/(pocket-book.ml-workflows_prepare-features (:test (pocket-book.ml-workflows_split-dataset (pocket-book.ml-workflows_make-regression-data {:f #'pocket-book.ml-workflows_nonlinear-fn, :n 500, :noise-sd 1.0, :seed 42}) {:seed 42})) :raw)
+21:44:04.560 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/train-model
+21:44:04.560 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/prepare-features
+21:44:04.560 INFO scicloj.pocket.impl.cache - Cache miss, computing: :train
+21:44:04.561 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/62/(:train (pocket-book.ml-workflows_split-dataset (pocket-book.ml-workflows_make-regression-data {:f #'pocket-book.ml-workflows_nonlinear-fn, :n 500, :noise-sd 1.0, :seed 42}) {:seed 42}))
+21:44:04.562 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/ac/(pocket-book.ml-workflows_prepare-features (:train (pocket-book.ml-workflows_split-dataset (pocket-book.ml-workflows_make-regression-data {:f #'pocket-book.ml-workflows_nonlinear-fn, :n 500, :noise-sd 1.0, :seed 42}) {:seed 42})) :raw)
+21:44:04.566 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/56/56b12a0b688bc09e6b02b1079e0b3db9e27780bb
+21:44:04.567 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/prepare-features
+21:44:04.568 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/3d/(pocket-book.ml-workflows_prepare-features (:test (pocket-book.ml-workflows_split-dataset (pocket-book.ml-workflows_make-regression-data {:f #'pocket-book.ml-workflows_nonlinear-fn, :n 500, :noise-sd 1.0, :seed 42}) {:seed 42})) :poly+trig)
+21:44:04.569 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/train-model
+21:44:04.569 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/prepare-features
+21:44:04.570 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/21/2138858cf3d145d3b1dda31f1fbff57c42021903
+Feb 08, 2026 9:44:04 PM org.tribuo.common.sgd.AbstractSGDTrainer train
 INFO: Training SGD model with 333 examples
-Feb 08, 2026 7:24:44 PM org.tribuo.common.sgd.AbstractSGDTrainer train
+Feb 08, 2026 9:44:04 PM org.tribuo.common.sgd.AbstractSGDTrainer train
 INFO: Outputs - RegressionInfo({name=y,id=0,count=333,max=9.816940,min=-6.625413,mean=0.883112,variance=15.979208})
-Feb 08, 2026 7:24:44 PM org.tribuo.common.sgd.AbstractSGDTrainer train
+Feb 08, 2026 9:44:04 PM org.tribuo.common.sgd.AbstractSGDTrainer train
 INFO: At iteration 10000, average loss = 1.8153008504655874
-19:24:44.783 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/prepare-features
-19:24:44.783 INFO scicloj.pocket.impl.cache - Cache miss, computing: :test
-19:24:44.783 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/split-dataset
-19:24:44.783 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/make-regression-data
-19:24:44.789 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/train-model
-19:24:44.789 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/prepare-features
-19:24:44.789 INFO scicloj.pocket.impl.cache - Cache miss, computing: :train
-19:24:44.801 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/prepare-features
-19:24:44.804 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/train-model
-19:24:44.804 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/prepare-features
-Feb 08, 2026 7:24:44 PM org.tribuo.common.sgd.AbstractSGDTrainer train
+21:44:04.577 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/af/afcc6439d95dc6b19a47d7bb13b405a6e3f7bf75
+21:44:04.578 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/prepare-features
+21:44:04.578 INFO scicloj.pocket.impl.cache - Cache miss, computing: :test
+21:44:04.578 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/split-dataset
+21:44:04.578 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/make-regression-data
+21:44:04.579 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/1f/(pocket-book.ml-workflows_make-regression-data {:f #'pocket-book.ml-workflows_nonlinear-fn, :n 500, :noise-sd 2.0, :seed 42})
+21:44:04.581 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/ec/(pocket-book.ml-workflows_split-dataset (pocket-book.ml-workflows_make-regression-data {:f #'pocket-book.ml-workflows_nonlinear-fn, :n 500, :noise-sd 2.0, :seed 42}) {:seed 42})
+21:44:04.582 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/a2/(:test (pocket-book.ml-workflows_split-dataset (pocket-book.ml-workflows_make-regression-data {:f #'pocket-book.ml-workflows_nonlinear-fn, :n 500, :noise-sd 2.0, :seed 42}) {:seed 42}))
+21:44:04.583 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/b0/(pocket-book.ml-workflows_prepare-features (:test (pocket-book.ml-workflows_split-dataset (pocket-book.ml-workflows_make-regression-data {:f #'pocket-book.ml-workflows_nonlinear-fn, :n 500, :noise-sd 2.0, :seed 42}) {:seed 42})) :raw)
+21:44:04.583 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/train-model
+21:44:04.583 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/prepare-features
+21:44:04.583 INFO scicloj.pocket.impl.cache - Cache miss, computing: :train
+21:44:04.584 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/be/(:train (pocket-book.ml-workflows_split-dataset (pocket-book.ml-workflows_make-regression-data {:f #'pocket-book.ml-workflows_nonlinear-fn, :n 500, :noise-sd 2.0, :seed 42}) {:seed 42}))
+21:44:04.585 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/d8/(pocket-book.ml-workflows_prepare-features (:train (pocket-book.ml-workflows_split-dataset (pocket-book.ml-workflows_make-regression-data {:f #'pocket-book.ml-workflows_nonlinear-fn, :n 500, :noise-sd 2.0, :seed 42}) {:seed 42})) :raw)
+21:44:04.592 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/42/4283017d384a0edb1360ed439ce2022cded0120a
+21:44:04.593 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/prepare-features
+21:44:04.595 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/9a/(pocket-book.ml-workflows_prepare-features (:test (pocket-book.ml-workflows_split-dataset (pocket-book.ml-workflows_make-regression-data {:f #'pocket-book.ml-workflows_nonlinear-fn, :n 500, :noise-sd 2.0, :seed 42}) {:seed 42})) :poly+trig)
+21:44:04.595 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/train-model
+21:44:04.595 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/prepare-features
+21:44:04.596 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/c5/c596cf0eff32ed864e9956ede9b9f1a8ba604d8a
+Feb 08, 2026 9:44:04 PM org.tribuo.common.sgd.AbstractSGDTrainer train
 INFO: Training SGD model with 333 examples
-Feb 08, 2026 7:24:44 PM org.tribuo.common.sgd.AbstractSGDTrainer train
+Feb 08, 2026 9:44:04 PM org.tribuo.common.sgd.AbstractSGDTrainer train
 INFO: Outputs - RegressionInfo({name=y,id=0,count=333,max=11.717291,min=-8.958664,mean=0.968924,variance=18.285525})
-Feb 08, 2026 7:24:44 PM org.tribuo.common.sgd.AbstractSGDTrainer train
+Feb 08, 2026 9:44:04 PM org.tribuo.common.sgd.AbstractSGDTrainer train
 INFO: At iteration 10000, average loss = 3.123027977933463
-19:24:44.875 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/prepare-features
-19:24:44.875 INFO scicloj.pocket.impl.cache - Cache miss, computing: :test
-19:24:44.875 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/split-dataset
-19:24:44.875 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/make-regression-data
-19:24:44.881 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/train-model
-19:24:44.882 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/prepare-features
-19:24:44.882 INFO scicloj.pocket.impl.cache - Cache miss, computing: :train
-19:24:44.895 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/prepare-features
-19:24:44.896 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/train-model
-19:24:44.897 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/prepare-features
-Feb 08, 2026 7:24:44 PM org.tribuo.common.sgd.AbstractSGDTrainer train
+21:44:04.604 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/e7/e73082ba807aa7585ee9bfe055500e1478428bfb
+21:44:04.605 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/prepare-features
+21:44:04.606 INFO scicloj.pocket.impl.cache - Cache miss, computing: :test
+21:44:04.606 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/split-dataset
+21:44:04.606 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/make-regression-data
+21:44:04.607 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/16/(pocket-book.ml-workflows_make-regression-data {:f #'pocket-book.ml-workflows_nonlinear-fn, :n 500, :noise-sd 5.0, :seed 42})
+21:44:04.609 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/33/(pocket-book.ml-workflows_split-dataset (pocket-book.ml-workflows_make-regression-data {:f #'pocket-book.ml-workflows_nonlinear-fn, :n 500, :noise-sd 5.0, :seed 42}) {:seed 42})
+21:44:04.609 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/f6/(:test (pocket-book.ml-workflows_split-dataset (pocket-book.ml-workflows_make-regression-data {:f #'pocket-book.ml-workflows_nonlinear-fn, :n 500, :noise-sd 5.0, :seed 42}) {:seed 42}))
+21:44:04.610 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/1d/(pocket-book.ml-workflows_prepare-features (:test (pocket-book.ml-workflows_split-dataset (pocket-book.ml-workflows_make-regression-data {:f #'pocket-book.ml-workflows_nonlinear-fn, :n 500, :noise-sd 5.0, :seed 42}) {:seed 42})) :raw)
+21:44:04.610 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/train-model
+21:44:04.610 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/prepare-features
+21:44:04.610 INFO scicloj.pocket.impl.cache - Cache miss, computing: :train
+21:44:04.612 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/b2/(:train (pocket-book.ml-workflows_split-dataset (pocket-book.ml-workflows_make-regression-data {:f #'pocket-book.ml-workflows_nonlinear-fn, :n 500, :noise-sd 5.0, :seed 42}) {:seed 42}))
+21:44:04.613 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/c0/(pocket-book.ml-workflows_prepare-features (:train (pocket-book.ml-workflows_split-dataset (pocket-book.ml-workflows_make-regression-data {:f #'pocket-book.ml-workflows_nonlinear-fn, :n 500, :noise-sd 5.0, :seed 42}) {:seed 42})) :raw)
+21:44:04.619 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/41/4125ad81cf3bdb18d7b227f84c899e30d5692f27
+21:44:04.620 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/prepare-features
+21:44:04.621 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/2a/(pocket-book.ml-workflows_prepare-features (:test (pocket-book.ml-workflows_split-dataset (pocket-book.ml-workflows_make-regression-data {:f #'pocket-book.ml-workflows_nonlinear-fn, :n 500, :noise-sd 5.0, :seed 42}) {:seed 42})) :poly+trig)
+21:44:04.621 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/train-model
+21:44:04.622 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/prepare-features
+21:44:04.622 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/2a/2ab54b2e292bd3cd5f65f72be9ddd1b0a17c3de8
+Feb 08, 2026 9:44:04 PM org.tribuo.common.sgd.AbstractSGDTrainer train
 INFO: Training SGD model with 333 examples
-Feb 08, 2026 7:24:44 PM org.tribuo.common.sgd.AbstractSGDTrainer train
+Feb 08, 2026 9:44:04 PM org.tribuo.common.sgd.AbstractSGDTrainer train
 INFO: Outputs - RegressionInfo({name=y,id=0,count=333,max=17.418345,min=-15.958416,mean=1.226360,variance=35.039175})
-Feb 08, 2026 7:24:44 PM org.tribuo.common.sgd.AbstractSGDTrainer train
+Feb 08, 2026 9:44:04 PM org.tribuo.common.sgd.AbstractSGDTrainer train
 INFO: At iteration 10000, average loss = 12.1030268449752
+21:44:04.629 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/53/533425c770f1d0b6600c387d76730e7b41036713
 </code></pre>
 </div>
 </div>
@@ -899,10 +959,10 @@ INFO: At iteration 10000, average loss = 12.1030268449752
 </div>
 <p><strong>What the results show</strong>:</p>
 <p>At low noise, the tree wins — it captures fine details the linear model smooths over. But as noise increases, the tree starts memorizing random wiggles (<em>overfitting</em>), and its error explodes.</p>
-<p>The linear model degrades more gracefully. Its rigid structure (a weighted sum of features) acts as a built-in regularizer — it can’t chase noise even if it wanted to.</p>
+<p>The linear model degrades more gracefully. Its rigid structure (a weighted sum of features) acts as a built-in <a href="https://en.wikipedia.org/wiki/Regularization_(mathematics)">regularizer</a> — it can’t chase noise even if it wanted to.</p>
 <p><strong>Takeaway</strong>: Flexible models (trees) excel with clean data but suffer with noise. Simple models (linear) are more robust.</p>
 <section id="rmse-vs.-noise" class="level3">
-<h3 class="anchored" data-anchor-id="rmse-vs.-noise">RMSE vs.&nbsp;noise</h3>
+<h3 class="anchored" data-anchor-id="rmse-vs.-noise"><a href="https://en.wikipedia.org/wiki/Root_mean_square_deviation">RMSE</a> vs.&nbsp;noise</h3>
 <div class="sourceClojure">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb36"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>(<span class="kw">let</span> [noise-sds (<span class="kw">vec</span> (<span class="kw">map</span> <span class="at">:noise-sd</span> noise-results))</span>
 <span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>      cart-rmses (<span class="kw">vec</span> (<span class="kw">map</span> <span class="at">:cart-rmse</span> noise-results))</span>
@@ -929,9 +989,9 @@ INFO: At iteration 10000, average loss = 12.1030268449752
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb39"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>(<span class="at">:entries-per-fn</span> (pocket/cache-stats))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="printedClojure">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb40"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>{<span class="st">"pocket-book.ml-workflows/prepare-features"</span> <span class="dv">24</span>,</span>
-<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a> <span class="st">"pocket-book.ml-workflows/make-regression-data"</span> <span class="dv">5</span>,</span>
-<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a> <span class="st">"pocket-book.ml-workflows/train-model"</span> <span class="dv">16</span>,</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb40"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>{<span class="st">"pocket-book.ml-workflows/train-model"</span> <span class="dv">16</span>,</span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a> <span class="st">"pocket-book.ml-workflows/prepare-features"</span> <span class="dv">24</span>,</span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a> <span class="st">"pocket-book.ml-workflows/make-regression-data"</span> <span class="dv">5</span>,</span>
 <span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a> <span class="st">":test"</span> <span class="dv">5</span>,</span>
 <span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a> <span class="st">":train"</span> <span class="dv">5</span>,</span>
 <span id="cb40-6"><a href="#cb40-6" aria-hidden="true" tabindex="-1"></a> <span class="st">"pocket-book.ml-workflows/split-dataset"</span> <span class="dv">5</span>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -986,7 +1046,7 @@ INFO: At iteration 10000, average loss = 12.1030268449752
 </div>
 <div id="callout-6" class="callout-6-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>19:24:44.943 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-regression
+<pre><code>21:44:04.653 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-regression
 </code></pre>
 </div>
 </div>
@@ -1305,19 +1365,24 @@ train-model   |
 </div>
 <div id="callout-7" class="callout-7-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>19:24:44.954 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.ml-workflows/prepare-features
-19:24:44.954 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.ml-workflows/clip-outliers
-19:24:44.954 INFO scicloj.pocket.impl.cache - Cache miss, computing: :test
-19:24:44.954 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/split-dataset
-19:24:44.954 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/make-regression-data
-19:24:44.958 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.ml-workflows/fit-outlier-threshold
-19:24:44.958 INFO scicloj.pocket.impl.cache - Cache miss, computing: :train
+<pre><code>21:44:04.661 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.ml-workflows/prepare-features
+21:44:04.662 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.ml-workflows/clip-outliers
+21:44:04.662 INFO scicloj.pocket.impl.cache - Cache miss, computing: :test
+21:44:04.662 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/split-dataset
+21:44:04.662 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/make-regression-data
+21:44:04.664 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/19/(pocket-book.ml-workflows_make-regression-data {:f #'pocket-book.ml-workflows_nonlinear-fn, :n 200, :noise-sd 0.3, :outlier-fraction 0.1, :outlier-scale 15, :seed 99})
+21:44:04.665 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/53/(pocket-book.ml-workflows_split-dataset (pocket-book.ml-workflows_make-regression-data {:f #'pocket-book.ml-workflows_nonlinear-fn, :n 200, :noise-sd 0.3, :outlier-fraction 0.1, :outlier-scale 15, :seed 99}) {:seed 99})
+21:44:04.666 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/fb/(:test (pocket-book.ml-workflows_split-dataset (pocket-book.ml-workflows_make-regression-data {:f #'pocket-book.ml-workflows_nonlinear-fn, :n 200, :noise-sd 0.3, :outlier-fraction 0.1, :outlier-scale 15, :seed 99}) {:seed 99}))
+21:44:04.666 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.ml-workflows/fit-outlier-threshold
+21:44:04.666 INFO scicloj.pocket.impl.cache - Cache miss, computing: :train
+21:44:04.667 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/09/(:train (pocket-book.ml-workflows_split-dataset (pocket-book.ml-workflows_make-regression-data {:f #'pocket-book.ml-workflows_nonlinear-fn, :n 200, :noise-sd 0.3, :outlier-fraction 0.1, :outlier-scale 15, :seed 99}) {:seed 99}))
   Fitting outlier threshold from training data...
   Clipping outliers with bounds: {:lower -5.499694170624462, :upper 15.994051959902624}
-19:24:44.959 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/train-model
-19:24:44.959 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.ml-workflows/prepare-features
-19:24:44.959 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.ml-workflows/clip-outliers
+21:44:04.668 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/train-model
+21:44:04.668 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.ml-workflows/prepare-features
+21:44:04.668 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.ml-workflows/clip-outliers
   Clipping outliers with bounds: {:lower -5.499694170624462, :upper 15.994051959902624}
+21:44:04.675 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/29/298735d4cc3dbde1964a5f86130dba60f3a9db43
   Evaluating model...
 </code></pre>
 </div>
@@ -1358,17 +1423,23 @@ train-model   |
 </div>
 <div id="callout-8" class="callout-8-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>19:24:44.970 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.ml-workflows/prepare-features
-19:24:44.970 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/train-model
-19:24:44.970 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.ml-workflows/prepare-features
+<pre><code>21:44:04.680 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.ml-workflows/prepare-features
+21:44:04.690 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/train-model
+21:44:04.690 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.ml-workflows/prepare-features
+21:44:04.697 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/81/81bd64358cce9b4ef112b6e4b16b04cb1cdfb14e
   Evaluating model...
-19:24:44.977 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.ml-workflows/prepare-features
-19:24:44.978 INFO scicloj.pocket.impl.cache - Cache miss, computing: :test
-19:24:44.978 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/split-dataset
-19:24:44.978 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/make-regression-data
-19:24:44.986 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/train-model
-19:24:44.986 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.ml-workflows/prepare-features
-19:24:44.986 INFO scicloj.pocket.impl.cache - Cache miss, computing: :train
+21:44:04.698 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.ml-workflows/prepare-features
+21:44:04.698 INFO scicloj.pocket.impl.cache - Cache miss, computing: :test
+21:44:04.698 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/split-dataset
+21:44:04.699 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/make-regression-data
+21:44:04.699 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/55/(pocket-book.ml-workflows_make-regression-data {:f #'pocket-book.ml-workflows_nonlinear-fn, :n 200, :noise-sd 0.3, :seed 99})
+21:44:04.701 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/87/(pocket-book.ml-workflows_split-dataset (pocket-book.ml-workflows_make-regression-data {:f #'pocket-book.ml-workflows_nonlinear-fn, :n 200, :noise-sd 0.3, :seed 99}) {:seed 99})
+21:44:04.702 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/80/(:test (pocket-book.ml-workflows_split-dataset (pocket-book.ml-workflows_make-regression-data {:f #'pocket-book.ml-workflows_nonlinear-fn, :n 200, :noise-sd 0.3, :seed 99}) {:seed 99}))
+21:44:04.702 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/train-model
+21:44:04.702 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.ml-workflows/prepare-features
+21:44:04.702 INFO scicloj.pocket.impl.cache - Cache miss, computing: :train
+21:44:04.703 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/54/(:train (pocket-book.ml-workflows_split-dataset (pocket-book.ml-workflows_make-regression-data {:f #'pocket-book.ml-workflows_nonlinear-fn, :n 200, :noise-sd 0.3, :seed 99}) {:seed 99}))
+21:44:04.708 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/a0/a076e329e7ab037718d99d2a664dfc9114879d46
   Evaluating model...
 </code></pre>
 </div>
@@ -1432,14 +1503,22 @@ train-model   |
 </div>
 <div id="callout-9" class="callout-9-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>19:24:45.019 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/run-pipeline
-19:24:45.025 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/run-pipeline
-19:24:45.030 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/run-pipeline
-19:24:45.036 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/run-pipeline
-19:24:45.042 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/run-pipeline
-19:24:45.046 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/run-pipeline
-19:24:45.052 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/run-pipeline
-19:24:45.061 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/run-pipeline
+<pre><code>21:44:04.717 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/run-pipeline
+21:44:04.722 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/0f/(pocket-book.ml-workflows_run-pipeline {:feature-set :raw, :max-depth 4, :noise-sd 0.3})
+21:44:04.722 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/run-pipeline
+21:44:04.726 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/23/(pocket-book.ml-workflows_run-pipeline {:feature-set :raw, :max-depth 8, :noise-sd 0.3})
+21:44:04.726 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/run-pipeline
+21:44:04.731 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/3f/(pocket-book.ml-workflows_run-pipeline {:feature-set :poly+trig, :max-depth 4, :noise-sd 0.3})
+21:44:04.731 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/run-pipeline
+21:44:04.736 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/40/(pocket-book.ml-workflows_run-pipeline {:feature-set :poly+trig, :max-depth 8, :noise-sd 0.3})
+21:44:04.736 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/run-pipeline
+21:44:04.740 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/c8/(pocket-book.ml-workflows_run-pipeline {:feature-set :raw, :max-depth 4, :noise-sd 0.5})
+21:44:04.740 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/run-pipeline
+21:44:04.744 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/01/(pocket-book.ml-workflows_run-pipeline {:feature-set :raw, :max-depth 8, :noise-sd 0.5})
+21:44:04.744 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/run-pipeline
+21:44:04.749 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/b3/(pocket-book.ml-workflows_run-pipeline {:feature-set :poly+trig, :max-depth 4, :noise-sd 0.5})
+21:44:04.749 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.ml-workflows/run-pipeline
+21:44:04.755 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-regression/00/(pocket-book.ml-workflows_run-pipeline {:feature-set :poly+trig, :max-depth 8, :noise-sd 0.5})
 </code></pre>
 </div>
 </div>
@@ -1566,7 +1645,7 @@ train-model   |
 </div>
 <div id="callout-10" class="callout-10-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>19:24:45.081 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-regression
+<pre><code>21:44:04.764 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-regression
 </code></pre>
 </div>
 </div>

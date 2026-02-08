@@ -126,11 +126,11 @@
    :tribuo-components
    [{:name "squared",
      :type "org.tribuo.regression.sgd.objectives.SquaredLoss"}
-    {:name "trainer",
+    {:name "linear-sgd",
      :type "org.tribuo.regression.sgd.linear.LinearSGDTrainer",
      :properties
      {:objective "squared", :epochs "50", :loggingInterval "10000"}}],
-   :tribuo-trainer-name "trainer"}))
+   :tribuo-trainer-name "linear-sgd"}))
 
 
 (def
@@ -322,12 +322,12 @@
      [low
       (first
        (filter
-        (fn* [p1__111208#] (= 0.1 (:noise-sd p1__111208#)))
+        (fn* [p1__115331#] (= 0.1 (:noise-sd p1__115331#)))
         rows))
       high
       (first
        (filter
-        (fn* [p1__111209#] (= 5.0 (:noise-sd p1__111209#)))
+        (fn* [p1__115332#] (= 5.0 (:noise-sd p1__115332#)))
         rows))]
      (and
       (< (:cart-rmse low) (:sgd-rmse low))

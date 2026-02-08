@@ -34,10 +34,13 @@ arguments like datasets.
 ```clojure
 (ns pocket-book.cache-keys
   (:require
+   ;; Pocket API and internals:
    [scicloj.pocket :as pocket]
    [scicloj.pocket.impl.cache :as cache]
    [scicloj.pocket.protocols :as proto]
+   ;; Annotating kinds of visualizations:
    [scicloj.kindly.v4.kind :as kind]
+   ;; Data processing:
    [tablecloth.api :as tc]
    [tech.v3.dataset.modelling :as ds-mod]))
 ```
@@ -107,11 +110,11 @@ each step:
 ::: {.printedClojure}
 ```clojure
 {:rows 50000,
- :string-length 1541270,
- :->id-ms 2.461174,
- :canonical-id-ms 6.700839,
- :str-ms 22.311826,
- :sha-ms 1.45779}
+ :string-length 1541530,
+ :->id-ms 3.107625,
+ :canonical-id-ms 8.489021,
+ :str-ms 26.945714,
+ :sha-ms 1.471067}
 
 ```
 :::
@@ -141,7 +144,7 @@ it — not the data itself. Compare:
 ::: {.callout-note}
 ## OUT
 ```
-19:24:45.713 INFO scicloj.pocket - Cache dir set to: /tmp/pocket-cache-keys
+21:44:05.362 INFO scicloj.pocket - Cache dir set to: /tmp/pocket-cache-keys
 
 ```
 :::
@@ -168,7 +171,7 @@ it — not the data itself. Compare:
 ::: {.callout-note}
 ## OUT
 ```
-19:24:45.714 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-cache-keys
+21:44:05.362 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-cache-keys
 
 ```
 :::
@@ -210,7 +213,7 @@ Direct dataset — identity includes all 50,000 rows:
 
 ::: {.printedClojure}
 ```clojure
-{:direct-ms 18.390374}
+{:direct-ms 19.043167}
 
 ```
 :::
@@ -233,7 +236,7 @@ Direct dataset — identity includes all 50,000 rows:
 
 ::: {.printedClojure}
 ```clojure
-{:cached-reference-ms 0.273621}
+{:cached-reference-ms 0.254178}
 
 ```
 :::
@@ -263,7 +266,7 @@ full provenance through the DAG.
 ::: {.callout-note}
 ## OUT
 ```
-19:24:45.744 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-cache-keys
+21:44:05.393 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-cache-keys
 
 ```
 :::

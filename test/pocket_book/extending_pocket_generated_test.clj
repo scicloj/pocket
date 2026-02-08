@@ -203,7 +203,7 @@
   train-my-model
   [data]
   (->MyModel
-   (mapv (fn* [p1__109694#] (* p1__109694# 0.01)) data)
+   (mapv (fn* [p1__114979#] (* p1__114979# 0.01)) data)
    0.42)))
 
 

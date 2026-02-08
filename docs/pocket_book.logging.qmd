@@ -29,7 +29,11 @@ format:
 (ns pocket-book.logging
   (:require
    ;; Annotating kinds of visualizations:
-   [scicloj.kindly.v4.kind :as kind]))
+   [scicloj.kindly.v4.kind :as kind])
+  (:import
+   ;; SLF4J classes for runtime log-level control:
+   [org.slf4j LoggerFactory]
+   [org.slf4j.simple SimpleLogger]))
 ```
 :::
 
@@ -54,17 +58,22 @@ of the Pocket project, so the log output shown here is real.
 | `:info` | Cache misses (computation), invalidation, mem-cache reconfiguration, cleanup |
 
 
-## Setup for notebooks
+## Internals
 
-The following configures `slf4j-simple` for notebook use.
-These properties must be set before any logging occurs.
-
-Show debug-level messages (cache hits and writes):
+`slf4j-simple` reads system properties only at class-load time.
+In a warm REPL (or when notebooks are evaluated after loggers already
+exist), we need reflection to change settings on the already-initialized
+`CONFIG_PARAMS` singleton and on existing logger instances.
 
 
 ::: {.sourceClojure}
 ```clojure
-(System/setProperty "org.slf4j.simpleLogger.defaultLogLevel" "debug")
+(defn- get-config
+  "Return the slf4j-simple CONFIG_PARAMS singleton via reflection."
+  []
+  (let [f (.getDeclaredField SimpleLogger "CONFIG_PARAMS")]
+    (.setAccessible f true)
+    (.get f nil)))
 ```
 :::
 
@@ -72,11 +81,112 @@ Show debug-level messages (cache hits and writes):
 
 ::: {.printedClojure}
 ```clojure
-"debug"
+#'pocket-book.logging/get-config
 
 ```
 :::
 
+
+
+::: {.sourceClojure}
+```clojure
+(def ^:private slf4j-levels
+  {:error 40 :warn 30 :info 20 :debug 10 :trace 0})
+```
+:::
+
+
+
+::: {.sourceClojure}
+```clojure
+(defn set-slf4j-level!
+  "Set the slf4j-simple log level via reflection.
+  `level` is a keyword: :error, :warn, :info, :debug, or :trace.
+  Sets both the default for future loggers and the level on
+  existing Pocket logger instances."
+  [level]
+  (try
+    (let [int-level (get slf4j-levels level)
+          config (get-config)
+          dl (.getDeclaredField (class config) "defaultLogLevel")
+          level-field (.getDeclaredField SimpleLogger "currentLogLevel")]
+      (.setAccessible dl true)
+      (.setInt dl config int-level)
+      (.setAccessible level-field true)
+      (doseq [name ["scicloj.pocket" "scicloj.pocket.impl.cache"]]
+        (.setInt level-field (LoggerFactory/getLogger name) int-level)))
+    (catch Exception _)))
+```
+:::
+
+
+
+::: {.sourceClojure}
+```clojure
+(defn- set-slf4j-output-stdout!
+  "Force slf4j-simple to write to stdout via reflection."
+  []
+  (try
+    (let [config (get-config)
+          oc-field (.getDeclaredField (class config) "outputChoice")]
+      (.setAccessible oc-field true)
+      (let [sys-out (java.lang.Enum/valueOf
+                     org.slf4j.simple.OutputChoice$OutputChoiceType "SYS_OUT")
+            ctor (.getDeclaredConstructor
+                  org.slf4j.simple.OutputChoice
+                  (into-array Class [org.slf4j.simple.OutputChoice$OutputChoiceType]))]
+        (.setAccessible ctor true)
+        (.set oc-field config (.newInstance ctor (object-array [sys-out])))))
+    (catch Exception _)))
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+#'pocket-book.logging/set-slf4j-output-stdout!
+
+```
+:::
+
+
+
+::: {.sourceClojure}
+```clojure
+(defn- redirect-jul-to-stdout!
+  "Redirect java.util.logging (JUL) output to stdout.
+  Some libraries (e.g., Tribuo) use JUL directly instead of SLF4J.
+  JUL defaults to stderr, which Clay renders as `## ERR` sections."
+  []
+  (let [root (java.util.logging.Logger/getLogger "")
+        handler (proxy [java.util.logging.StreamHandler]
+                       [System/out (java.util.logging.SimpleFormatter.)]
+                  (publish [record]
+                    (proxy-super publish record)
+                    (.flush this))
+                  (close [] (.flush this)))]
+    (doseq [h (.getHandlers root)]
+      (.removeHandler root h))
+    (.addHandler root handler)))
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+#'pocket-book.logging/redirect-jul-to-stdout!
+
+```
+:::
+
+
+
+## Setup for notebooks
+
+The following configures `slf4j-simple` for notebook use.
+These properties must be set before any logging occurs.
 
 Hide thread names to reduce clutter:
 
@@ -154,28 +264,12 @@ Write to stdout so messages appear as `OUT` rather than `ERR`:
 :::
 
 
-If `slf4j-simple` was already initialized (e.g., in a long-running REPL),
-the properties above won't take effect because `SimpleLogger` reads them
-only once at class-load time. The following forces the output to stdout
-on the already-initialized configuration singleton:
+Apply stdout and debug level via reflection (works even in a warm REPL):
 
 
 ::: {.sourceClojure}
 ```clojure
-(try
-  (let [cp-field (.getDeclaredField org.slf4j.simple.SimpleLogger "CONFIG_PARAMS")]
-    (.setAccessible cp-field true)
-    (let [config (.get cp-field nil)
-          oc-field (.getDeclaredField (class config) "outputChoice")]
-      (.setAccessible oc-field true)
-      (let [sys-out (java.lang.Enum/valueOf
-                     org.slf4j.simple.OutputChoice$OutputChoiceType "SYS_OUT")
-            ctor (.getDeclaredConstructor
-                  org.slf4j.simple.OutputChoice
-                  (into-array Class [org.slf4j.simple.OutputChoice$OutputChoiceType]))]
-        (.setAccessible ctor true)
-        (.set oc-field config (.newInstance ctor (object-array [sys-out]))))))
-  (catch Exception _))
+(set-slf4j-output-stdout!)
 ```
 :::
 
@@ -189,23 +283,27 @@ nil
 :::
 
 
-Some libraries (e.g., Tribuo) use `java.util.logging` (JUL) directly
-instead of SLF4J. JUL defaults to stderr, which Clay renders as
-`## ERR` sections. The following redirects JUL output to stdout:
+
+::: {.sourceClojure}
+```clojure
+(set-slf4j-level! :debug)
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+nil
+
+```
+:::
+
 
 
 ::: {.sourceClojure}
 ```clojure
-(let [root (java.util.logging.Logger/getLogger "")
-      handler (proxy [java.util.logging.StreamHandler]
-                     [System/out (java.util.logging.SimpleFormatter.)]
-                (publish [record]
-                  (proxy-super publish record)
-                  (.flush this))
-                (close [] (.flush this)))]
-  (doseq [h (.getHandlers root)]
-    (.removeHandler root h))
-  (.addHandler root handler))
+(redirect-jul-to-stdout!)
 ```
 :::
 
