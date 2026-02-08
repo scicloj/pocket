@@ -21,6 +21,8 @@ format:
 
 # Extending Pocket
 
+**Last modified: 2026-02-08**
+
 
 ::: {.sourceClojure}
 ```clojure
@@ -62,7 +64,7 @@ format:
 ::: {.callout-note}
 ## OUT
 ```
-[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket - Cache dir set to: /tmp/pocket-extending
+13:27:53.329 INFO scicloj.pocket - Cache dir set to: /tmp/pocket-extending
 
 ```
 :::
@@ -89,7 +91,7 @@ format:
 ::: {.callout-note}
 ## OUT
 ```
-[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket - Cache cleanup: /tmp/pocket-extending
+13:27:53.330 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-extending
 
 ```
 :::
@@ -509,8 +511,9 @@ First deref computes:
 ::: {.callout-note}
 ## OUT
 ```
-[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.extending-pocket/analyze-dataset
+13:27:53.367 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.extending-pocket/analyze-dataset
   Analyzing census v 3 ...
+13:27:53.569 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-extending/62/(pocket-book.extending-pocket_analyze-dataset census-v3 {:method :regression})
 
 ```
 :::
@@ -560,8 +563,9 @@ A different version creates a different cache entry:
 ::: {.callout-note}
 ## OUT
 ```
-[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.extending-pocket/analyze-dataset
+13:27:53.574 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.extending-pocket/analyze-dataset
   Analyzing census v 4 ...
+13:27:53.776 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-extending/f6/(pocket-book.extending-pocket_analyze-dataset census-v4 {:method :regression})
 
 ```
 :::
@@ -701,7 +705,7 @@ for more details.
 ::: {.callout-note}
 ## OUT
 ```
-[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket - Cache cleanup: /tmp/pocket-extending
+13:27:53.779 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-extending
 
 ```
 :::

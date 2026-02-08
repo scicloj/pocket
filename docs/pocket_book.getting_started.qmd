@@ -21,6 +21,8 @@ format:
 
 # Getting Started
 
+**Last modified: 2026-02-08**
+
 [Pocket](https://github.com/scicloj/pocket) is a Clojure library for
 filesystem-based caching of expensive computations. It persists results
 to disk so they survive JVM restarts. Cache keys are derived from the
@@ -67,7 +69,7 @@ First, we set up a cache directory and define an expensive computation:
 ::: {.callout-note}
 ## OUT
 ```
-[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket - Cache dir set to: /tmp/pocket-demo
+13:27:40.454 INFO scicloj.pocket - Cache dir set to: /tmp/pocket-demo
 
 ```
 :::
@@ -96,7 +98,7 @@ Start fresh so the examples below run from a clean slate:
 ::: {.callout-note}
 ## OUT
 ```
-[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo
+13:27:40.455 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo
 
 ```
 :::
@@ -180,9 +182,10 @@ First deref (computes and caches):
 ::: {.callout-note}
 ## OUT
 ```
-[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.getting-started/expensive-calculation
+13:27:40.460 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.getting-started/expensive-calculation
 Computing 10 + 20 (this is expensive!)
-"Elapsed time: 401.256682 msecs"
+13:27:40.862 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo/fb/(pocket-book.getting-started_expensive-calculation 10 20)
+"Elapsed time: 402.664787 msecs"
 
 ```
 :::
@@ -211,7 +214,7 @@ Second deref (loaded from cache, instant):
 ::: {.callout-note}
 ## OUT
 ```
-"Elapsed time: 0.170917 msecs"
+"Elapsed time: 0.315138 msecs"
 
 ```
 :::
@@ -255,9 +258,10 @@ First call:
 ::: {.callout-note}
 ## OUT
 ```
-[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.getting-started/expensive-calculation
+13:27:40.869 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.getting-started/expensive-calculation
 Computing 5 + 15 (this is expensive!)
-"Elapsed time: 401.469055 msecs"
+13:27:41.270 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo/c4/(pocket-book.getting-started_expensive-calculation 5 15)
+"Elapsed time: 402.945575 msecs"
 
 ```
 :::
@@ -286,7 +290,7 @@ Same args — cache hit:
 ::: {.callout-note}
 ## OUT
 ```
-"Elapsed time: 0.393092 msecs"
+"Elapsed time: 0.481505 msecs"
 
 ```
 :::
@@ -315,9 +319,10 @@ Different args — new computation:
 ::: {.callout-note}
 ## OUT
 ```
-[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.getting-started/expensive-calculation
+13:27:41.275 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.getting-started/expensive-calculation
 Computing 7 + 8 (this is expensive!)
-"Elapsed time: 412.224189 msecs"
+13:27:41.677 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo/a2/(pocket-book.getting-started_expensive-calculation 7 8)
+"Elapsed time: 402.129089 msecs"
 
 ```
 :::
@@ -369,7 +374,8 @@ Cached nil value:
 ::: {.callout-note}
 ## OUT
 ```
-[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.getting-started/returns-nil
+13:27:41.681 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.getting-started/returns-nil
+13:27:41.682 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo/7a/(pocket-book.getting-started_returns-nil)
 
 ```
 :::
@@ -448,7 +454,7 @@ for a detailed explanation and more best practices.
 ::: {.callout-note}
 ## OUT
 ```
-[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo
+13:27:41.687 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo
 
 ```
 :::

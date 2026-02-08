@@ -22,6 +22,7 @@ format:
 # Preface
 
 
+
 Filesystem-based [caching](https://en.wikipedia.org/wiki/Cache_(computing)) for expensive Clojure computations
 
 ## What is this about?
@@ -119,6 +120,10 @@ Distributed under the MIT License — see [LICENSE](https://github.com/scicloj/p
 
 
 - [Example: Machine Learning Workflows](pocket_book.ml_workflows.html)
+
+
+
+- [🚧 Draft: `pocket-model` — drop-in caching for metamorph.ml](pocket_book.pocket_model.html)
 
 
 

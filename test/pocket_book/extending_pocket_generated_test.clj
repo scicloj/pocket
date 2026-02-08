@@ -9,44 +9,44 @@
   [clojure.test :refer [deftest is]]))
 
 
-(def v3_l17 (def cache-dir "/tmp/pocket-extending"))
+(def v3_l19 (def cache-dir "/tmp/pocket-extending"))
 
 
-(def v4_l19 (pocket/set-base-cache-dir! cache-dir))
+(def v4_l21 (pocket/set-base-cache-dir! cache-dir))
 
 
-(def v5_l21 (pocket/cleanup!))
+(def v5_l23 (pocket/cleanup!))
 
 
-(def v7_l29 (kind/doc #'pocket/->id))
+(def v7_l31 (kind/doc #'pocket/->id))
 
 
-(def v9_l37 (pocket/->id #'clojure.core/map))
+(def v9_l39 (pocket/->id #'clojure.core/map))
 
 
-(deftest t10_l39 (is (= v9_l37 'clojure.core/map)))
+(deftest t10_l41 (is (= v9_l39 'clojure.core/map)))
 
 
-(def v12_l43 (pocket/->id {:b 2, :a 1}))
+(def v12_l45 (pocket/->id {:b 2, :a 1}))
 
 
-(def v14_l47 (defn add [x y] (+ x y)))
+(def v14_l49 (defn add [x y] (+ x y)))
 
 
-(def v15_l49 (pocket/->id (pocket/cached #'add 1 2)))
+(def v15_l51 (pocket/->id (pocket/cached #'add 1 2)))
 
 
-(deftest t16_l51 (is ((fn [id] (= (rest id) '(1 2))) v15_l49)))
+(deftest t16_l53 (is ((fn [id] (= (rest id) '(1 2))) v15_l51)))
 
 
-(def v18_l55 (pocket/->id nil))
+(def v18_l57 (pocket/->id nil))
 
 
-(deftest t19_l57 (is (nil? v18_l55)))
+(deftest t19_l59 (is (nil? v18_l57)))
 
 
 (def
- v21_l71
+ v21_l73
  (def
   example-ds
   (->
@@ -54,54 +54,54 @@
    (ds-mod/set-inference-target :y))))
 
 
-(def v22_l75 (pocket/->id example-ds))
+(def v22_l77 (pocket/->id example-ds))
 
 
-(def v24_l81 (def ds-a (tc/dataset {:x (range 30), :y (range 30)})))
+(def v24_l83 (def ds-a (tc/dataset {:x (range 30), :y (range 30)})))
 
 
-(def v25_l82 (def ds-b (tc/dataset {:x (range 30), :y (range 30)})))
+(def v25_l84 (def ds-b (tc/dataset {:x (range 30), :y (range 30)})))
 
 
-(def v26_l84 (= (pocket/->id ds-a) (pocket/->id ds-b)))
+(def v26_l86 (= (pocket/->id ds-a) (pocket/->id ds-b)))
 
 
-(deftest t27_l86 (is (true? v26_l84)))
+(deftest t27_l88 (is (true? v26_l86)))
 
 
 (def
- v29_l91
+ v29_l93
  (def
   ds-c
   (tc/dataset
    {:x (range 30), :y (concat (range 15) [999] (range 16 30))})))
 
 
-(def v30_l94 (= (pocket/->id ds-a) (pocket/->id ds-c)))
+(def v30_l96 (= (pocket/->id ds-a) (pocket/->id ds-c)))
 
 
-(deftest t31_l96 (is (false? v30_l94)))
+(deftest t31_l98 (is (false? v30_l96)))
 
 
-(def v33_l111 (defrecord DatasetRef [source version]))
+(def v33_l113 (defrecord DatasetRef [source version]))
 
 
 (def
- v35_l120
+ v35_l122
  (extend-protocol
   pocket/PIdentifiable
   DatasetRef
   (->id [this] (symbol (str (:source this) "-v" (:version this))))))
 
 
-(def v37_l127 (pocket/->id (->DatasetRef "census" 3)))
+(def v37_l129 (pocket/->id (->DatasetRef "census" 3)))
 
 
-(deftest t38_l129 (is (= v37_l127 'census-v3)))
+(deftest t38_l131 (is (= v37_l129 'census-v3)))
 
 
 (def
- v40_l133
+ v40_l135
  (defn
   analyze-dataset
   "Simulate analyzing a dataset."
@@ -120,7 +120,7 @@
 
 
 (def
- v42_l145
+ v42_l147
  (def
   analysis
   (pocket/cached
@@ -129,14 +129,14 @@
    {:method :regression})))
 
 
-(def v43_l150 (pocket/->id analysis))
+(def v43_l152 (pocket/->id analysis))
 
 
-(def v45_l154 (deref analysis))
+(def v45_l156 (deref analysis))
 
 
 (deftest
- t46_l156
+ t46_l158
  (is
   ((fn
     [result]
@@ -144,14 +144,14 @@
      (= "census" (:source result))
      (= 3 (:version result))
      (= :regression (:method result))))
-   v45_l154)))
+   v45_l156)))
 
 
-(def v48_l162 (deref analysis))
+(def v48_l164 (deref analysis))
 
 
 (def
- v50_l166
+ v50_l168
  (deref
   (pocket/cached
    #'analyze-dataset
@@ -159,7 +159,7 @@
    {:method :regression})))
 
 
-(def v52_l174 (pocket/dir-tree))
+(def v52_l176 (pocket/dir-tree))
 
 
-(def v54_l248 (pocket/cleanup!))
+(def v54_l250 (pocket/cleanup!))

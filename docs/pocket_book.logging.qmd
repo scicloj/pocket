@@ -21,6 +21,8 @@ format:
 
 # Logging
 
+**Last modified: 2026-02-08**
+
 
 ::: {.sourceClojure}
 ```clojure
@@ -174,6 +176,36 @@ on the already-initialized configuration singleton:
         (.setAccessible ctor true)
         (.set oc-field config (.newInstance ctor (object-array [sys-out]))))))
   (catch Exception _))
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+nil
+
+```
+:::
+
+
+Some libraries (e.g., Tribuo) use `java.util.logging` (JUL) directly
+instead of SLF4J. JUL defaults to stderr, which Clay renders as
+`## ERR` sections. The following redirects JUL output to stdout:
+
+
+::: {.sourceClojure}
+```clojure
+(let [root (java.util.logging.Logger/getLogger "")
+      handler (proxy [java.util.logging.StreamHandler]
+                     [System/out (java.util.logging.SimpleFormatter.)]
+                (publish [record]
+                  (proxy-super publish record)
+                  (.flush this))
+                (close [] (.flush this)))]
+  (doseq [h (.getHandlers root)]
+    (.removeHandler root h))
+  (.addHandler root handler))
 ```
 :::
 

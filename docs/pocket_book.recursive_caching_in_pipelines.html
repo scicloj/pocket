@@ -207,14 +207,20 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="./pocket_book.pocket_model.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">🚧 Draft: <code>pocket-model</code> — drop-in caching for metamorph.ml</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="./pocket_book.developing_pocket.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Developing Pocket</span></span></a>
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Developing Pocket</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./pocket_book.api_reference.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">API Reference</span></span></a>
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">API Reference</span></span></a>
   </div>
 </li>
     </ul>
@@ -277,6 +283,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="https://code.jquery.com/jquery-3.6.0.min.js" type="text/javascript"></script>
 <script src="https://code.jquery.com/ui/1.13.1/jquery-ui.min.js" type="text/javascript"></script>
 <script src="https://cdn.jsdelivr.net/npm/mermaid@11.10.1/dist/mermaid.min.js" type="text/javascript"></script>
+<p><strong>Last modified: 2026-02-08</strong></p>
 <p>When you pass a <code>Cached</code> value as an argument to another cached function, Pocket handles this recursively. The cache key for the outer computation is derived from the <strong>identity</strong> of the inner computation (its function name and arguments), not from its result. This means the entire pipeline’s cache key captures the full <a href="https://en.wikipedia.org/wiki/Dataflow_programming">computation graph</a>.</p>
 <p>Pocket automatically derefs any <code>Cached</code> arguments before calling the function, so pipeline functions receive plain values and don’t need any special handling.</p>
 <section id="setup" class="level2">
@@ -311,7 +318,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <div id="callout-1" class="callout-1-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket - Cache dir set to: /tmp/pocket-demo-pipelines
+<pre><code>13:27:41.819 INFO scicloj.pocket - Cache dir set to: /tmp/pocket-demo-pipelines
 </code></pre>
 </div>
 </div>
@@ -334,7 +341,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <div id="callout-2" class="callout-2-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo-pipelines
+<pre><code>13:27:41.820 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo-pipelines
 </code></pre>
 </div>
 </div>
@@ -406,13 +413,16 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <div id="callout-3" class="callout-3-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.recursive-caching-in-pipelines/train-model
-[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.recursive-caching-in-pipelines/preprocess
-[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.recursive-caching-in-pipelines/load-dataset
+<pre><code>13:27:41.827 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.recursive-caching-in-pipelines/train-model
+13:27:41.827 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.recursive-caching-in-pipelines/preprocess
+13:27:41.827 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.recursive-caching-in-pipelines/load-dataset
 Loading dataset from data/raw.csv ...
+13:27:42.128 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo-pipelines/b8/(pocket-book.recursive-caching-in-pipelines_load-dataset "data_raw.csv")
 Preprocessing with options: {:scale 2}
+13:27:42.430 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo-pipelines/85/(pocket-book.recursive-caching-in-pipelines_preprocess (pocket-book.recursive-caching-in-pipelines_load-dataset "data_raw.csv") {:scale 2})
 Training model with params: {:epochs 100}
-"Elapsed time: 907.428139 msecs"
+13:27:42.732 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo-pipelines/c9/(pocket-book.recursive-caching-in-pipelines_train-model (pocket-book.recursive-caching-in-pipelines_preprocess (pocket-book.recursive-caching-in-pipelines_load-dataset "data_raw.csv") {:scale 2}) {:epochs 100})
+"Elapsed time: 906.686193 msecs"
 </code></pre>
 </div>
 </div>
@@ -443,7 +453,7 @@ Training model with params: {:epochs 100}
 </div>
 <div id="callout-4" class="callout-4-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>"Elapsed time: 0.810974 msecs"
+<pre><code>"Elapsed time: 1.073537 msecs"
 </code></pre>
 </div>
 </div>
@@ -534,12 +544,15 @@ Training model with params: {:epochs 100}
 </div>
 <div id="callout-5" class="callout-5-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.recursive-caching-in-pipelines/train-model
-[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.recursive-caching-in-pipelines/preprocess
-[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.recursive-caching-in-pipelines/load-dataset
+<pre><code>13:27:42.749 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.recursive-caching-in-pipelines/train-model
+13:27:42.749 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.recursive-caching-in-pipelines/preprocess
+13:27:42.749 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.recursive-caching-in-pipelines/load-dataset
 Loading dataset from data/experiment.csv ...
+13:27:43.050 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo-pipelines/cd/(pocket-book.recursive-caching-in-pipelines_load-dataset "data_experiment.csv")
 Preprocessing with options: {:scale 2}
+13:27:43.352 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo-pipelines/f8/(pocket-book.recursive-caching-in-pipelines_preprocess (pocket-book.recursive-caching-in-pipelines_load-dataset "data_experiment.csv") {:scale 2})
 Training model with params: {:epochs 100}
+13:27:43.665 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo-pipelines/9e/(pocket-book.recursive-caching-in-pipelines_train-model (pocket-book.recursive-caching-in-pipelines_preprocess (pocket-book.recursive-caching-in-pipelines_load-dataset "data_experiment.csv") {:scale 2}) {:epochs 100})
 </code></pre>
 </div>
 </div>
@@ -637,7 +650,7 @@ Training model with params: {:epochs 100}
 </div>
 <div id="callout-6" class="callout-6-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo-pipelines
+<pre><code>13:27:43.674 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo-pipelines
 </code></pre>
 </div>
 </div>

@@ -14,17 +14,17 @@
   [clojure.test :refer [deftest is]]))
 
 
-(def v2_l66 (def cache-dir "/tmp/pocket-regression"))
+(def v2_l68 (def cache-dir "/tmp/pocket-regression"))
 
 
-(def v3_l68 (pocket/set-base-cache-dir! cache-dir))
+(def v3_l70 (pocket/set-base-cache-dir! cache-dir))
 
 
-(def v4_l70 (pocket/cleanup!))
+(def v4_l72 (pocket/cleanup!))
 
 
 (def
- v6_l82
+ v6_l84
  (defn
   make-regression-data
   "Generate a synthetic regression dataset.\n  `f` is a function from x to y (the ground truth).\n  Optional `outlier-fraction` (0–1) and `outlier-scale` inject\n  corrupted x values to simulate sensor glitches."
@@ -61,7 +61,7 @@
 
 
 (def
- v8_l110
+ v8_l112
  (defn
   split-dataset
   "Split a dataset into train/test using holdout."
@@ -70,7 +70,7 @@
 
 
 (def
- v10_l121
+ v10_l123
  (defn
   prepare-features
   "Add derived columns to a dataset according to `feature-set`.\n  Supported feature sets:\n  - `:raw`       — no extra columns\n  - `:quadratic` — add x²\n  - `:trig`      — add sin(x) and cos(x)\n  - `:poly+trig` — add x², sin(x), and cos(x)"
@@ -94,7 +94,7 @@
 
 
 (def
- v12_l146
+ v12_l148
  (defn
   train-model
   "Train a model on a dataset."
@@ -103,7 +103,7 @@
 
 
 (def
- v13_l151
+ v13_l153
  (defn
   predict-and-rmse
   "Predict on test data and return RMSE."
@@ -114,12 +114,12 @@
 
 
 (def
- v15_l167
+ v15_l169
  (defn nonlinear-fn "y = sin(x) · x" [x] (* (Math/sin x) x)))
 
 
 (def
- v17_l187
+ v17_l189
  (def
   linear-sgd-spec
   {:model-type :scicloj.ml.tribuo/regression,
@@ -134,7 +134,7 @@
 
 
 (def
- v18_l198
+ v18_l200
  (def
   cart-spec
   {:model-type :scicloj.ml.tribuo/regression,
@@ -146,7 +146,7 @@
 
 
 (def
- v20_l225
+ v20_l227
  (def
   data-c
   (pocket/cached
@@ -154,25 +154,25 @@
    {:f #'nonlinear-fn, :n 500, :noise-sd 0.5, :seed 42})))
 
 
-(def v21_l229 (tc/head (deref data-c)))
+(def v21_l231 (tc/head (deref data-c)))
 
 
 (def
- v23_l233
+ v23_l235
  (def split-c (pocket/cached #'split-dataset data-c {:seed 42})))
 
 
-(def v25_l240 (def train-c (pocket/cached :train split-c)))
+(def v25_l242 (def train-c (pocket/cached :train split-c)))
 
 
-(def v26_l241 (def test-c (pocket/cached :test split-c)))
+(def v26_l243 (def test-c (pocket/cached :test split-c)))
 
 
-(def v28_l245 (def feature-sets [:raw :quadratic :trig :poly+trig]))
+(def v28_l247 (def feature-sets [:raw :quadratic :trig :poly+trig]))
 
 
 (def
- v30_l252
+ v30_l254
  (def
   prepared
   (into
@@ -183,7 +183,7 @@
 
 
 (def
- v32_l263
+ v32_l265
  (def
   models
   (into
@@ -198,7 +198,7 @@
 
 
 (def
- v34_l275
+ v34_l277
  (def
   feature-results
   (vec
@@ -215,11 +215,11 @@
       @(models [fs model-name]))}))))
 
 
-(def v35_l284 feature-results)
+(def v35_l286 feature-results)
 
 
 (deftest
- t36_l286
+ t36_l288
  (is
   ((fn
     [rows]
@@ -229,11 +229,11 @@
       (> (m [:raw "sgd"]) 3.0)
       (< (m [:poly+trig "sgd"]) 2.0)
       (< (Math/abs (- (m [:raw "cart"]) (m [:trig "cart"]))) 0.5))))
-   v35_l284)))
+   v35_l286)))
 
 
 (def
- v38_l311
+ v38_l313
  (let
   [test-ds
    @(prepared [:raw :test])
@@ -272,11 +272,11 @@
     :layout {:xaxis {:title "x"}, :yaxis {:title "y"}}})))
 
 
-(def v40_l342 (def noise-levels [0.1 0.5 1.0 2.0 5.0]))
+(def v40_l344 (def noise-levels [0.1 0.5 1.0 2.0 5.0]))
 
 
 (def
- v41_l344
+ v41_l346
  (def
   noise-results
   (vec
@@ -310,33 +310,31 @@
       :sgd-rmse (predict-and-rmse @sgd-test @sgd-model)})))))
 
 
-(def v42_l362 noise-results)
+(def v42_l364 noise-results)
 
 
 (deftest
- t43_l364
+ t43_l366
  (is
   ((fn
     [rows]
     (let
      [low
       (first
-       (filter
-        (fn* [p1__107379#] (= 0.1 (:noise-sd p1__107379#)))
-        rows))
+       (filter (fn* [p1__70964#] (= 0.1 (:noise-sd p1__70964#))) rows))
       high
       (first
        (filter
-        (fn* [p1__107380#] (= 5.0 (:noise-sd p1__107380#)))
+        (fn* [p1__70965#] (= 5.0 (:noise-sd p1__70965#)))
         rows))]
      (and
       (< (:cart-rmse low) (:sgd-rmse low))
       (> (:cart-rmse high) (:sgd-rmse high)))))
-   v42_l362)))
+   v42_l364)))
 
 
 (def
- v45_l386
+ v45_l388
  (let
   [noise-sds
    (vec (map :noise-sd noise-results))
@@ -354,20 +352,20 @@
     :layout {:xaxis {:title "noise-sd"}, :yaxis {:title "rmse"}}})))
 
 
-(def v47_l402 (:total-entries (pocket/cache-stats)))
+(def v47_l404 (:total-entries (pocket/cache-stats)))
 
 
-(deftest t48_l404 (is ((fn [n] (> n 30)) v47_l402)))
+(deftest t48_l406 (is ((fn [n] (> n 30)) v47_l404)))
 
 
-(def v49_l407 (:entries-per-fn (pocket/cache-stats)))
+(def v49_l409 (:entries-per-fn (pocket/cache-stats)))
 
 
-(def v51_l425 (pocket/cleanup!))
+(def v51_l427 (pocket/cleanup!))
 
 
 (def
- v53_l483
+ v53_l485
  (defn
   fit-outlier-threshold
   "Compute IQR-based clipping bounds for :x from training data.\n  Returns {:lower <bound> :upper <bound>}."
@@ -388,7 +386,7 @@
 
 
 (def
- v54_l496
+ v54_l498
  (defn
   clip-outliers
   "Clip :x values using pre-computed threshold bounds."
@@ -402,7 +400,7 @@
 
 
 (def
- v55_l503
+ v55_l505
  (defn
   evaluate-model
   "Evaluate a model on test data."
@@ -414,32 +412,32 @@
 
 
 (def
- v57_l522
+ v57_l524
  (def
   c-fit-threshold
   (pocket/caching-fn #'fit-outlier-threshold {:storage :mem})))
 
 
 (def
- v58_l525
+ v58_l527
  (def c-clip (pocket/caching-fn #'clip-outliers {:storage :mem})))
 
 
 (def
- v59_l528
+ v59_l530
  (def c-prepare (pocket/caching-fn #'prepare-features {:storage :mem})))
 
 
-(def v60_l531 (def c-train (pocket/caching-fn #'train-model)))
+(def v60_l533 (def c-train (pocket/caching-fn #'train-model)))
 
 
 (def
- v61_l534
+ v61_l536
  (def c-evaluate (pocket/caching-fn #'evaluate-model {:storage :none})))
 
 
 (def
- v63_l542
+ v63_l544
  (def
   dag-data-c
   (pocket/cached
@@ -453,62 +451,62 @@
 
 
 (def
- v64_l547
+ v64_l549
  (def
   dag-split-c
   (pocket/cached #'split-dataset dag-data-c {:seed 99})))
 
 
-(def v65_l550 (def dag-train-c (pocket/cached :train dag-split-c)))
+(def v65_l552 (def dag-train-c (pocket/cached :train dag-split-c)))
 
 
-(def v66_l551 (def dag-test-c (pocket/cached :test dag-split-c)))
+(def v66_l553 (def dag-test-c (pocket/cached :test dag-split-c)))
 
 
-(def v68_l557 (def threshold-c (c-fit-threshold dag-train-c)))
+(def v68_l559 (def threshold-c (c-fit-threshold dag-train-c)))
 
 
-(def v69_l560 (def train-clipped-c (c-clip dag-train-c threshold-c)))
+(def v69_l562 (def train-clipped-c (c-clip dag-train-c threshold-c)))
 
 
-(def v70_l563 (def test-clipped-c (c-clip dag-test-c threshold-c)))
+(def v70_l565 (def test-clipped-c (c-clip dag-test-c threshold-c)))
 
 
 (def
- v71_l566
+ v71_l568
  (def train-prepped-c (c-prepare train-clipped-c :poly+trig)))
 
 
 (def
- v72_l569
+ v72_l571
  (def test-prepped-c (c-prepare test-clipped-c :poly+trig)))
 
 
-(def v73_l572 (def model-c (c-train train-prepped-c cart-spec)))
+(def v73_l574 (def model-c (c-train train-prepped-c cart-spec)))
 
 
-(def v74_l575 (def metrics-c (c-evaluate test-prepped-c model-c)))
+(def v74_l577 (def metrics-c (c-evaluate test-prepped-c model-c)))
 
 
-(def v76_l589 (pocket/origin-story metrics-c))
+(def v76_l591 (pocket/origin-story metrics-c))
 
 
-(def v78_l597 (pocket/origin-story-graph metrics-c))
+(def v78_l599 (pocket/origin-story-graph metrics-c))
 
 
-(def v80_l604 (pocket/origin-story-mermaid metrics-c))
+(def v80_l606 (pocket/origin-story-mermaid metrics-c))
 
 
-(def v82_l608 (deref metrics-c))
+(def v82_l610 (deref metrics-c))
 
 
 (deftest
- t83_l610
- (is ((fn [m] (and (map? m) (contains? m :rmse))) v82_l608)))
+ t83_l612
+ (is ((fn [m] (and (map? m) (contains? m :rmse))) v82_l610)))
 
 
 (def
- v85_l620
+ v85_l622
  (let
   [noclip-train-c
    (c-prepare dag-train-c :poly+trig)
@@ -538,16 +536,16 @@
 
 
 (deftest
- t86_l637
+ t86_l639
  (is
   ((fn
     [m]
     (< (:rmse (:outliers-clipped m)) (:rmse (:outliers-no-clip m))))
-   v85_l620)))
+   v85_l622)))
 
 
 (def
- v88_l655
+ v88_l657
  (defn
   run-pipeline
   "Run a complete pipeline with given hyperparameters."
@@ -577,7 +575,7 @@
 
 
 (def
- v90_l673
+ v90_l675
  (def
   experiments
   (for
@@ -589,14 +587,14 @@
      :max-depth max-depth}))))
 
 
-(def v92_l684 (def comparison (pocket/compare-experiments experiments)))
+(def v92_l686 (def comparison (pocket/compare-experiments experiments)))
 
 
-(def v93_l687 (tc/dataset comparison))
+(def v93_l689 (tc/dataset comparison))
 
 
 (deftest
- t94_l689
+ t94_l691
  (is
   ((fn
     [ds]
@@ -605,11 +603,11 @@
      (some #{:noise-sd} (tc/column-names ds))
      (some #{:feature-set} (tc/column-names ds))
      (some #{:max-depth} (tc/column-names ds))))
-   v93_l687)))
+   v93_l689)))
 
 
 (def
- v96_l702
+ v96_l704
  (let
   [rows
    (map
@@ -642,4 +640,4 @@
     :layout {:xaxis {:title "max-depth"}, :yaxis {:title "rmse"}}})))
 
 
-(def v98_l761 (pocket/cleanup!))
+(def v98_l763 (pocket/cleanup!))
