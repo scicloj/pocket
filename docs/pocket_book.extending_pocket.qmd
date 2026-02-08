@@ -31,7 +31,10 @@ format:
    ;; Pocket API:
    [scicloj.pocket :as pocket]
    ;; Annotating kinds of visualizations:
-   [scicloj.kindly.v4.kind :as kind]))
+   [scicloj.kindly.v4.kind :as kind]
+   ;; For the dataset identity example:
+   [tablecloth.api :as tc]
+   [tech.v3.dataset.modelling :as ds-mod]))
 ```
 :::
 
@@ -59,7 +62,7 @@ format:
 ::: {.callout-note}
 ## OUT
 ```
-[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket - Cache dir set to: /tmp/pocket-extending
+[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket - Cache dir set to: /tmp/pocket-extending
 
 ```
 :::
@@ -86,7 +89,7 @@ format:
 ::: {.callout-note}
 ## OUT
 ```
-[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket - Cache cleanup: /tmp/pocket-extending
+[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket - Cache cleanup: /tmp/pocket-extending
 
 ```
 :::
@@ -212,6 +215,180 @@ nil
 
 
 
+## Built-in dataset support
+
+Pocket recognizes
+[tech.ml.dataset](https://github.com/techascent/tech.ml.dataset)
+datasets (the type behind tablecloth) and derives their identity
+from the actual column data and metadata — including annotations
+like inference targets.
+
+A dataset's identity is a map of column names to
+`{:data [...] :meta {...}}`:
+
+
+::: {.sourceClojure}
+```clojure
+(def example-ds
+  (-> (tc/dataset {:x (range 30) :y (range 30)})
+      (ds-mod/set-inference-target :y)))
+```
+:::
+
+
+
+::: {.sourceClojure}
+```clojure
+(pocket/->id example-ds)
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+{:x
+ {:data
+  [0
+   1
+   2
+   3
+   4
+   5
+   6
+   7
+   8
+   9
+   10
+   11
+   12
+   13
+   14
+   15
+   16
+   17
+   18
+   19
+   20
+   21
+   22
+   23
+   24
+   25
+   26
+   27
+   28
+   29],
+  :meta {:name :x, :datatype :int64, :n-elems 30}},
+ :y
+ {:data
+  [0
+   1
+   2
+   3
+   4
+   5
+   6
+   7
+   8
+   9
+   10
+   11
+   12
+   13
+   14
+   15
+   16
+   17
+   18
+   19
+   20
+   21
+   22
+   23
+   24
+   25
+   26
+   27
+   28
+   29],
+  :meta
+  {:name :y, :datatype :int64, :n-elems 30, :inference-target? true}}}
+
+```
+:::
+
+
+Two datasets with identical content produce the same identity,
+even when the default `toString` representation would truncate
+rows:
+
+
+::: {.sourceClojure}
+```clojure
+(def ds-a (tc/dataset {:x (range 30) :y (range 30)}))
+```
+:::
+
+
+
+::: {.sourceClojure}
+```clojure
+(def ds-b (tc/dataset {:x (range 30) :y (range 30)}))
+```
+:::
+
+
+
+::: {.sourceClojure}
+```clojure
+(= (pocket/->id ds-a) (pocket/->id ds-b))
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+true
+
+```
+:::
+
+
+Datasets with different content produce different identities,
+even when the difference falls in rows that `toString` would elide:
+
+
+::: {.sourceClojure}
+```clojure
+(def ds-c (tc/dataset {:x (range 30)
+                       :y (concat (range 15) [999] (range 16 30))}))
+```
+:::
+
+
+
+::: {.sourceClojure}
+```clojure
+(= (pocket/->id ds-a) (pocket/->id ds-c))
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+false
+
+```
+:::
+
+
+This means caching functions that take datasets as arguments
+(like `ml/train`) works correctly regardless of dataset size.
+
+
 ## Extending for custom types
 
 If you have domain-specific types, you can control how they
@@ -332,7 +509,7 @@ First deref computes:
 ::: {.callout-note}
 ## OUT
 ```
-[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.extending-pocket/analyze-dataset
+[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.extending-pocket/analyze-dataset
   Analyzing census v 3 ...
 
 ```
@@ -383,7 +560,7 @@ A different version creates a different cache entry:
 ::: {.callout-note}
 ## OUT
 ```
-[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.extending-pocket/analyze-dataset
+[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.extending-pocket/analyze-dataset
   Analyzing census v 4 ...
 
 ```
@@ -524,7 +701,7 @@ for more details.
 ::: {.callout-note}
 ## OUT
 ```
-[nREPL-session-82729048-beba-4fc6-a3b1-df78cef96c87] INFO scicloj.pocket - Cache cleanup: /tmp/pocket-extending
+[nREPL-session-0d604c57-4fb8-4f34-9be9-92fa21fd04a5] INFO scicloj.pocket - Cache cleanup: /tmp/pocket-extending
 
 ```
 :::

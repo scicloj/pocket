@@ -50,11 +50,11 @@
    [scicloj.metamorph.ml.loss :as loss]
    [scicloj.ml.tribuo]))
 
-(def cache-dir "/tmp/pocket-ml-pipelines")
+;; (def cache-dir "/tmp/pocket-ml-pipelines")
 
-(pocket/set-base-cache-dir! cache-dir)
+;; (pocket/set-base-cache-dir! cache-dir)
 
-(pocket/cleanup!)
+;; (pocket/cleanup!)
 
 ;; ---
 
@@ -69,45 +69,45 @@
 
 ;; ### Data and feature functions
 
-(defn make-regression-data
-  "Generate a synthetic regression dataset.
-  `f` is a function from x to y (the ground truth).
-  Optional `outlier-fraction` (0–1) and `outlier-scale` inject
-  corrupted x values to simulate sensor glitches."
-  [{:keys [f n noise-sd seed outlier-fraction outlier-scale]
-    :or {outlier-fraction 0 outlier-scale 10}}]
-  (let [rng (java.util.Random. (long seed))
-        xs (vec (repeatedly n #(* 10.0 (.nextDouble rng))))
-        xs-final (if (pos? outlier-fraction)
-                   (let [out-rng (java.util.Random. (+ (long seed) 7919))]
-                     (mapv (fn [x]
-                             (if (< (.nextDouble out-rng) outlier-fraction)
-                               (+ x (* (double outlier-scale) (.nextGaussian out-rng)))
-                               x))
-                           xs))
-                   xs)
-        ys (mapv (fn [x] (+ (double (f x))
-                            (* (double noise-sd) (.nextGaussian rng))))
-                 xs)]
-    (-> (tc/dataset {:x xs-final :y ys})
-        (ds-mod/set-inference-target :y))))
+;; (defn make-regression-data
+;;   "Generate a synthetic regression dataset.
+;;   `f` is a function from x to y (the ground truth).
+;;   Optional `outlier-fraction` (0–1) and `outlier-scale` inject
+;;   corrupted x values to simulate sensor glitches."
+;;   [{:keys [f n noise-sd seed outlier-fraction outlier-scale]
+;;     :or {outlier-fraction 0 outlier-scale 10}}]
+;;   (let [rng (java.util.Random. (long seed))
+;;         xs (vec (repeatedly n #(* 10.0 (.nextDouble rng))))
+;;         xs-final (if (pos? outlier-fraction)
+;;                    (let [out-rng (java.util.Random. (+ (long seed) 7919))]
+;;                      (mapv (fn [x]
+;;                              (if (< (.nextDouble out-rng) outlier-fraction)
+;;                                (+ x (* (double outlier-scale) (.nextGaussian out-rng)))
+;;                                x))
+;;                            xs))
+;;                    xs)
+;;         ys (mapv (fn [x] (+ (double (f x))
+;;                             (* (double noise-sd) (.nextGaussian rng))))
+;;                  xs)]
+;;     (-> (tc/dataset {:x xs-final :y ys})
+;;         (ds-mod/set-inference-target :y))))
 
-(defn nonlinear-fn
-  "y = sin(x) · x — our ground truth."
-  [x]
-  (* (Math/sin x) x))
+;; (defn nonlinear-fn
+;;   "y = sin(x) · x — our ground truth."
+;;   [x]
+;;   (* (Math/sin x) x))
 
-(defn prepare-features
-  "Add derived columns based on `feature-set`:
-  `:raw` (no extras), `:poly+trig` (x², sin(x), cos(x))."
-  [ds feature-set]
-  (let [x (:x ds)]
-    (-> (case feature-set
-          :raw ds
-          :poly+trig (tc/add-columns ds {:x2 (tcc/sq x)
-                                         :sin-x (tcc/sin x)
-                                         :cos-x (tcc/cos x)}))
-        (ds-mod/set-inference-target :y))))
+;; (defn prepare-features
+;;   "Add derived columns based on `feature-set`:
+;;   `:raw` (no extras), `:poly+trig` (x², sin(x), cos(x))."
+;;   [ds feature-set]
+;;   (let [x (:x ds)]
+;;     (-> (case feature-set
+;;           :raw ds
+;;           :poly+trig (tc/add-columns ds {:x2 (tcc/sq x)
+;;                                          :sin-x (tcc/sin x)
+;;                                          :cos-x (tcc/cos x)}))
+;;         (ds-mod/set-inference-target :y))))
 
 ;; ### Outlier threshold calibration
 ;;
@@ -122,57 +122,57 @@
 ;; We split this into two functions: one to *fit* (compute bounds) and
 ;; one to *apply* (clip values using those bounds).
 
-(defn fit-outlier-threshold
-  "Compute IQR-based clipping bounds for :x from training data.
-  Returns {:lower <bound> :upper <bound>}."
-  [train-ds]
-  (let [xs (sort (vec (:x train-ds)))
-        n (count xs)
-        q1 (nth xs (int (* 0.25 n)))
-        q3 (nth xs (int (* 0.75 n)))
-        iqr (- q3 q1)]
-    {:lower (- q1 (* 1.5 iqr))
-     :upper (+ q3 (* 1.5 iqr))}))
+;; (defn fit-outlier-threshold
+;;   "Compute IQR-based clipping bounds for :x from training data.
+;;   Returns {:lower <bound> :upper <bound>}."
+;;   [train-ds]
+;;   (let [xs (sort (vec (:x train-ds)))
+;;         n (count xs)
+;;         q1 (nth xs (int (* 0.25 n)))
+;;         q3 (nth xs (int (* 0.75 n)))
+;;         iqr (- q3 q1)]
+;;     {:lower (- q1 (* 1.5 iqr))
+;;      :upper (+ q3 (* 1.5 iqr))}))
 
-(defn clip-outliers
-  "Clip :x values using pre-computed threshold bounds."
-  [ds threshold]
-  (let [{:keys [lower upper]} threshold]
-    (tc/add-column ds :x (-> (:x ds) (tcc/max lower) (tcc/min upper)))))
+;; (defn clip-outliers
+;;   "Clip :x values using pre-computed threshold bounds."
+;;   [ds threshold]
+;;   (let [{:keys [lower upper]} threshold]
+;;     (tc/add-column ds :x (-> (:x ds) (tcc/max lower) (tcc/min upper)))))
 
-(defn split-dataset
-  "Split a dataset into train/test using holdout."
-  [ds {:keys [seed]}]
-  (first (tc/split->seq ds :holdout {:seed seed})))
+;; (defn split-dataset
+;;   "Split a dataset into train/test using holdout."
+;;   [ds {:keys [seed]}]
+;;   (first (tc/split->seq ds :holdout {:seed seed})))
 
 ;; ### Model specifications
 
-(def linear-sgd-spec
-  "Linear regression via stochastic gradient descent."
-  {:model-type :scicloj.ml.tribuo/regression
-   :tribuo-components [{:name "squared"
-                        :type "org.tribuo.regression.sgd.objectives.SquaredLoss"}
-                       {:name "trainer"
-                        :type "org.tribuo.regression.sgd.linear.LinearSGDTrainer"
-                        :properties {:objective "squared"
-                                     :epochs "50"
-                                     :loggingInterval "10000"}}]
-   :tribuo-trainer-name "trainer"})
+;; (def linear-sgd-spec
+;;   "Linear regression via stochastic gradient descent."
+;;   {:model-type :scicloj.ml.tribuo/regression
+;;    :tribuo-components [{:name "squared"
+;;                         :type "org.tribuo.regression.sgd.objectives.SquaredLoss"}
+;;                        {:name "trainer"
+;;                         :type "org.tribuo.regression.sgd.linear.LinearSGDTrainer"
+;;                         :properties {:objective "squared"
+;;                                      :epochs "50"
+;;                                      :loggingInterval "10000"}}]
+;;    :tribuo-trainer-name "trainer"})
 
-(def cart-spec
-  "CART regression tree with max depth 8."
-  {:model-type :scicloj.ml.tribuo/regression
-   :tribuo-components [{:name "cart"
-                        :type "org.tribuo.regression.rtree.CARTRegressionTrainer"
-                        :properties {:maxDepth "8"}}]
-   :tribuo-trainer-name "cart"})
+;; (def cart-spec
+;;   "CART regression tree with max depth 8."
+;;   {:model-type :scicloj.ml.tribuo/regression
+;;    :tribuo-components [{:name "cart"
+;;                         :type "org.tribuo.regression.rtree.CARTRegressionTrainer"
+;;                         :properties {:maxDepth "8"}}]
+;;    :tribuo-trainer-name "cart"})
 
 ;; ### Quick check: train and evaluate directly
 
-(def ds-500 (make-regression-data {:f nonlinear-fn :n 500 :noise-sd 0.5 :seed 42
-                                   :outlier-fraction 0.1 :outlier-scale 15}))
+;; (def ds-500 (make-regression-data {:f nonlinear-fn :n 500 :noise-sd 0.5 :seed 42
+;;                                    :outlier-fraction 0.1 :outlier-scale 15}))
 
-(def splits (first (tc/split->seq ds-500 :holdout {:seed 42})))
+;; (def splits (first (tc/split->seq ds-500 :holdout {:seed 42})))
 
 ;; The outlier clipping step is *stateful*: `fit-outlier-threshold`
 ;; computes the normal range of x from the training set, and
@@ -180,16 +180,16 @@
 ;; Clipping happens **before** feature engineering — otherwise x²
 ;; would amplify the outlier values.
 
-(let [threshold (fit-outlier-threshold (:train splits))
-      train-clipped (clip-outliers (:train splits) threshold)
-      train-prep (prepare-features train-clipped :poly+trig)
-      test-clipped (clip-outliers (:test splits) threshold)
-      test-prep (prepare-features test-clipped :poly+trig)
-      model (ml/train train-prep cart-spec)]
-  {:rmse (loss/rmse (:y test-prep) (:y (ml/predict test-prep model)))})
+;; (let [threshold (fit-outlier-threshold (:train splits))
+;;       train-clipped (clip-outliers (:train splits) threshold)
+;;       train-prep (prepare-features train-clipped :poly+trig)
+;;       test-clipped (clip-outliers (:test splits) threshold)
+;;       test-prep (prepare-features test-clipped :poly+trig)
+;;       model (ml/train train-prep cart-spec)]
+;;   {:rmse (loss/rmse (:y test-prep) (:y (ml/predict test-prep model)))})
 
-(kind/test-last
- [(fn [m] (< (:rmse m) 10.0))])
+;; (kind/test-last
+;;  [(fn [m] (< (:rmse m) 10.0))])
 
 ;; With 500 data points, 10% outliers, and a CART tree, the clipping
 ;; brings RMSE down from the outlier-inflated level.
@@ -199,18 +199,18 @@
 ;; Pocket can cache the training step directly — wrap `ml/train`
 ;; with `pocket/cached` and the trained model is persisted to disk:
 
-(pocket/cleanup!)
+;; (pocket/cleanup!)
 
-(let [threshold (fit-outlier-threshold (:train splits))
-      train-clipped (clip-outliers (:train splits) threshold)
-      train-prep (prepare-features train-clipped :poly+trig)
-      test-clipped (clip-outliers (:test splits) threshold)
-      test-prep (prepare-features test-clipped :poly+trig)
-      model @(pocket/cached #'ml/train train-prep cart-spec)]
-  {:rmse (loss/rmse (:y test-prep) (:y (ml/predict test-prep model)))})
+;; (let [threshold (fit-outlier-threshold (:train splits))
+;;       train-clipped (clip-outliers (:train splits) threshold)
+;;       train-prep (prepare-features train-clipped :poly+trig)
+;;       test-clipped (clip-outliers (:test splits) threshold)
+;;       test-prep (prepare-features test-clipped :poly+trig)
+;;       model @(pocket/cached #'ml/train train-prep cart-spec)]
+;;   {:rmse (loss/rmse (:y test-prep) (:y (ml/predict test-prep model)))})
 
-(kind/test-last
- [(fn [m] (< (:rmse m) 10.0))])
+;; (kind/test-last
+;;  [(fn [m] (< (:rmse m) 10.0))])
 
 ;; Same result. Call it again and the model loads from cache — no
 ;; retraining. This is the approach shown in the
@@ -253,20 +253,20 @@
 ;; The context map carries state between modes: the step stores its
 ;; fitted bounds under its `:metamorph/id` key.
 
-(defn clip-outlier-step
-  "Pipeline step: fit outlier threshold in :fit mode, apply stored bounds in :transform."
-  []
-  (fn [{:metamorph/keys [data mode id] :as ctx}]
-    (case mode
-      :fit (let [threshold (fit-outlier-threshold data)]
-             (assoc ctx id threshold :metamorph/data (clip-outliers data threshold)))
-      :transform (assoc ctx :metamorph/data (clip-outliers data (get ctx id))))))
+;; (defn clip-outlier-step
+;;   "Pipeline step: fit outlier threshold in :fit mode, apply stored bounds in :transform."
+;;   []
+;;   (fn [{:metamorph/keys [data mode id] :as ctx}]
+;;     (case mode
+;;       :fit (let [threshold (fit-outlier-threshold data)]
+;;              (assoc ctx id threshold :metamorph/data (clip-outliers data threshold)))
+;;       :transform (assoc ctx :metamorph/data (clip-outliers data (get ctx id))))))
 
-(def cart-pipeline
-  (mm/pipeline
-   {:metamorph/id :clip-outlier} (clip-outlier-step)
-   (mm/lift prepare-features :poly+trig)
-   {:metamorph/id :model} (ml/model cart-spec)))
+;; (def cart-pipeline
+;;   (mm/pipeline
+;;    {:metamorph/id :clip-outlier} (clip-outlier-step)
+;;    (mm/lift prepare-features :poly+trig)
+;;    {:metamorph/id :model} (ml/model cart-spec)))
 
 ;; The `{:metamorph/id ...}` tags give steps fixed names.
 ;; `:model` is required so `evaluate-pipelines` (Section 6) can find the
@@ -275,20 +275,20 @@
 
 ;; ### Fit and transform
 
-(def fitted-ctx
-  (mm/fit-pipe (:train splits) cart-pipeline))
+;; (def fitted-ctx
+;;   (mm/fit-pipe (:train splits) cart-pipeline))
 
 ;; The fitted context now contains the trained model under the `:model` key.
 ;; We can apply it to test data:
 
-(def predictions
-  (:metamorph/data
-   (mm/transform-pipe (:test splits) cart-pipeline fitted-ctx)))
+;; (def predictions
+;;   (:metamorph/data
+;;    (mm/transform-pipe (:test splits) cart-pipeline fitted-ctx)))
 
-(loss/rmse (:y (:test splits)) (:y predictions))
+;; (loss/rmse (:y (:test splits)) (:y predictions))
 
-(kind/test-last
- [(fn [rmse] (< rmse 10.0))])
+;; (kind/test-last
+;;  [(fn [rmse] (< rmse 10.0))])
 
 ;; Same result as before, but the pipeline is now a single object
 ;; that can be passed to evaluation functions.
@@ -298,33 +298,33 @@
 ;; We can define several pipeline variants and compare them.
 ;; Different feature sets, different models — each is a pipeline:
 
-(def pipe-fns
-  {:cart-raw (mm/pipeline
-              {:metamorph/id :clip-outlier} (clip-outlier-step)
-              (mm/lift prepare-features :raw)
-              {:metamorph/id :model} (ml/model cart-spec))
-   :cart-poly (mm/pipeline
-               {:metamorph/id :clip-outlier} (clip-outlier-step)
-               (mm/lift prepare-features :poly+trig)
-               {:metamorph/id :model} (ml/model cart-spec))
-   :sgd-poly (mm/pipeline
-              {:metamorph/id :clip-outlier} (clip-outlier-step)
-              (mm/lift prepare-features :poly+trig)
-              {:metamorph/id :model} (ml/model linear-sgd-spec))})
+;; (def pipe-fns
+;;   {:cart-raw (mm/pipeline
+;;               {:metamorph/id :clip-outlier} (clip-outlier-step)
+;;               (mm/lift prepare-features :raw)
+;;               {:metamorph/id :model} (ml/model cart-spec))
+;;    :cart-poly (mm/pipeline
+;;                {:metamorph/id :clip-outlier} (clip-outlier-step)
+;;                (mm/lift prepare-features :poly+trig)
+;;                {:metamorph/id :model} (ml/model cart-spec))
+;;    :sgd-poly (mm/pipeline
+;;               {:metamorph/id :clip-outlier} (clip-outlier-step)
+;;               (mm/lift prepare-features :poly+trig)
+;;               {:metamorph/id :model} (ml/model linear-sgd-spec))})
 
-(def manual-results
-  (into {}
-        (for [[pipe-name pipe-fn] pipe-fns]
-          (let [fitted (mm/fit-pipe (:train splits) pipe-fn)
-                pred-ds (:metamorph/data
-                         (mm/transform-pipe (:test splits) pipe-fn fitted))]
-            [pipe-name
-             {:rmse (loss/rmse (:y (:test splits)) (:y pred-ds))}]))))
+;; (def manual-results
+;;   (into {}
+;;         (for [[pipe-name pipe-fn] pipe-fns]
+;;           (let [fitted (mm/fit-pipe (:train splits) pipe-fn)
+;;                 pred-ds (:metamorph/data
+;;                          (mm/transform-pipe (:test splits) pipe-fn fitted))]
+;;             [pipe-name
+;;              {:rmse (loss/rmse (:y (:test splits)) (:y pred-ds))}]))))
 
-manual-results
+;; manual-results
 
-(kind/test-last
- [(fn [m] (< (:rmse (:cart-raw m)) 10.0))])
+;; (kind/test-last
+;;  [(fn [m] (< (:rmse (:cart-raw m)) 10.0))])
 
 ;; This works, but we wrote the fit-transform loop ourselves.
 ;; We also used a single train/test split — not very robust.
@@ -337,30 +337,30 @@ manual-results
 ;; split, measures a metric, and returns structured results.
 ;; We use `tc/split->seq` to create splits:
 
-(def holdout-splits
-  (tc/split->seq ds-500 :holdout {:seed 42}))
+;; (def holdout-splits
+;;   (tc/split->seq ds-500 :holdout {:seed 42}))
 
 ;; Each split is a map with `:train` and `:test` datasets.
 
-(def eval-results
-  (ml/evaluate-pipelines
-   (vals pipe-fns)
-   holdout-splits
-   loss/rmse
-   :loss
-   {:return-best-pipeline-only false
-    :return-best-crossvalidation-only false}))
+;; (def eval-results
+;;   (ml/evaluate-pipelines
+;;    (vals pipe-fns)
+;;    holdout-splits
+;;    loss/rmse
+;;    :loss
+;;    {:return-best-pipeline-only false
+;;     :return-best-crossvalidation-only false}))
 
 ;; Extract metrics:
 
-(mapv (fn [pipe-results]
-        (let [r (first pipe-results)]
-          {:rmse (get-in r [:test-transform :metric])
-           :fit-ms (:timing-fit r)}))
-      eval-results)
+;; (mapv (fn [pipe-results]
+;;         (let [r (first pipe-results)]
+;;           {:rmse (get-in r [:test-transform :metric])
+;;            :fit-ms (:timing-fit r)}))
+;;       eval-results)
 
-(kind/test-last
- [(fn [rows] (every? #(number? (:rmse %)) rows))])
+;; (kind/test-last
+;;  [(fn [rows] (every? #(number? (:rmse %)) rows))])
 
 ;; Each result includes the test metric, timing, and the full fitted
 ;; context. But notice: **every call recomputes everything from
@@ -375,37 +375,37 @@ manual-results
 ;; `train-predict-cache` atom. It stores trained models in memory,
 ;; keyed by `(hash dataset)` + `(hash options)`:
 
-ml/train-predict-cache
+;; ml/train-predict-cache
 
 ;; By default, caching is off (`{:use-cache false}`). Let's enable it
 ;; with a simple in-memory store:
 
-(def mm-cache (atom {}))
+;; (def mm-cache (atom {}))
 
-(reset! ml/train-predict-cache
-        {:use-cache true
-         :get-fn (fn [k] (get @mm-cache k))
-         :set-fn (fn [k v] (swap! mm-cache assoc k v))})
+;; (reset! ml/train-predict-cache
+;;         {:use-cache true
+;;          :get-fn (fn [k] (get @mm-cache k))
+;;          :set-fn (fn [k v] (swap! mm-cache assoc k v))})
 
 ;; Now `ml/train` checks this cache before training:
 
-(let [threshold (fit-outlier-threshold (:train splits))
-      train-clipped (clip-outliers (:train splits) threshold)
-      train-prep (prepare-features train-clipped :poly+trig)]
-  (let [start (System/nanoTime)
-        _ (ml/train train-prep cart-spec)
-        first-ms (/ (- (System/nanoTime) start) 1e6)
+;; (let [threshold (fit-outlier-threshold (:train splits))
+;;       train-clipped (clip-outliers (:train splits) threshold)
+;;       train-prep (prepare-features train-clipped :poly+trig)]
+;;   (let [start (System/nanoTime)
+;;         _ (ml/train train-prep cart-spec)
+;;         first-ms (/ (- (System/nanoTime) start) 1e6)
 
-        start2 (System/nanoTime)
-        _ (ml/train train-prep cart-spec)
-        second-ms (/ (- (System/nanoTime) start2) 1e6)]
-    {:first-ms (Math/round first-ms)
-     :second-ms (Math/round second-ms)
-     :cache-entries (count @mm-cache)}))
+;;         start2 (System/nanoTime)
+;;         _ (ml/train train-prep cart-spec)
+;;         second-ms (/ (- (System/nanoTime) start2) 1e6)]
+;;     {:first-ms (Math/round first-ms)
+;;      :second-ms (Math/round second-ms)
+;;      :cache-entries (count @mm-cache)}))
 
-(kind/test-last
- [(fn [m] (and (= 1 (:cache-entries m))
-               (> (:first-ms m) (:second-ms m))))])
+;; (kind/test-last
+;;  [(fn [m] (and (= 1 (:cache-entries m))
+;;                (> (:first-ms m) (:second-ms m))))])
 
 ;; The second call is nearly instant — it returns the cached model.
 ;; This is handy for quick in-session iteration: zero configuration,
@@ -415,10 +415,10 @@ ml/train-predict-cache
 ;; sessions, or want to inspect what's been cached — Pocket can add
 ;; a few things on top. Let's see how.
 
-(reset! ml/train-predict-cache
-        {:use-cache false
-         :get-fn (fn [k] nil)
-         :set-fn (fn [k v] nil)})
+;; (reset! ml/train-predict-cache
+;;         {:use-cache false
+;;          :get-fn (fn [k] nil)
+;;          :set-fn (fn [k v] nil)})
 
 ;; ---
 
@@ -438,26 +438,26 @@ ml/train-predict-cache
 
 ;; ### The `pocket-model` step
 
-(defn pocket-model
-  "Like `ml/model`, but caches `ml/train` calls through Pocket.
-   Drop-in replacement for `ml/model` in metamorph pipelines.
+;; (defn pocket-model
+;;   "Like `ml/model`, but caches `ml/train` calls through Pocket.
+;;    Drop-in replacement for `ml/model` in metamorph pipelines.
 
-   In `:fit` mode, wraps `ml/train` with `pocket/cached` — the trained
-   model is persisted to disk, keyed by the dataset content and options.
-   In `:transform` mode, calls `ml/predict` directly (predictions are
-   cheap and dataset-dependent, so caching them is usually not worth it)."
-  [options]
-  (fn [{:metamorph/keys [id data mode] :as ctx}]
-    (case mode
-      :fit
-      (let [model (deref (pocket/cached #'ml/train data options))]
-        (assoc ctx id (assoc model ::ml/unsupervised? false)))
-      :transform
-      (-> ctx
-          (update id assoc
-                  ::ml/feature-ds (cf/feature data)
-                  ::ml/target-ds (cf/target data))
-          (assoc :metamorph/data (ml/predict data (get ctx id)))))))
+;;    In `:fit` mode, wraps `ml/train` with `pocket/cached` — the trained
+;;    model is persisted to disk, keyed by the dataset content and options.
+;;    In `:transform` mode, calls `ml/predict` directly (predictions are
+;;    cheap and dataset-dependent, so caching them is usually not worth it)."
+;;   [options]
+;;   (fn [{:metamorph/keys [id data mode] :as ctx}]
+;;     (case mode
+;;       :fit
+;;       (let [model (deref (pocket/cached #'ml/train data options))]
+;;         (assoc ctx id (assoc model ::ml/unsupervised? false)))
+;;       :transform
+;;       (-> ctx
+;;           (update id assoc
+;;                   ::ml/feature-ds (cf/feature data)
+;;                   ::ml/target-ds (cf/target data))
+;;           (assoc :metamorph/data (ml/predict data (get ctx id)))))))
 
 ;; A few things to note:
 ;;
@@ -471,38 +471,38 @@ ml/train-predict-cache
 
 ;; ### Using `pocket-model` in a pipeline
 
-(pocket/cleanup!)
+;; (pocket/cleanup!)
 
-(def pocket-cart-pipe
-  (mm/pipeline
-   {:metamorph/id :clip-outlier} (clip-outlier-step)
-   (mm/lift prepare-features :poly+trig)
-   {:metamorph/id :model} (pocket-model cart-spec)))
+;; (def pocket-cart-pipe
+;;   (mm/pipeline
+;;    {:metamorph/id :clip-outlier} (clip-outlier-step)
+;;    (mm/lift prepare-features :poly+trig)
+;;    {:metamorph/id :model} (pocket-model cart-spec)))
 
 ;; First run — trains and caches:
 
-(def pocket-fitted (mm/fit-pipe (:train splits) pocket-cart-pipe))
+;; (def pocket-fitted (mm/fit-pipe (:train splits) pocket-cart-pipe))
 
 ;; The model is now cached on disk. Let's verify:
 
-(pocket/cache-stats)
+;; (pocket/cache-stats)
 
-(kind/test-last
- [(fn [stats] (= 1 (:total-entries stats)))])
+;; (kind/test-last
+;;  [(fn [stats] (= 1 (:total-entries stats)))])
 
 ;; Second run — loads from cache (no "Cache miss" log message):
 
-(def pocket-fitted-2 (mm/fit-pipe (:train splits) pocket-cart-pipe))
+;; (def pocket-fitted-2 (mm/fit-pipe (:train splits) pocket-cart-pipe))
 
 ;; Both produce the same predictions:
 
-(let [pred1 (:metamorph/data (mm/transform-pipe (:test splits) pocket-cart-pipe pocket-fitted))
-      pred2 (:metamorph/data (mm/transform-pipe (:test splits) pocket-cart-pipe pocket-fitted-2))]
-  {:rmse-1 (loss/rmse (:y (:test splits)) (:y pred1))
-   :rmse-2 (loss/rmse (:y (:test splits)) (:y pred2))})
+;; (let [pred1 (:metamorph/data (mm/transform-pipe (:test splits) pocket-cart-pipe pocket-fitted))
+;;       pred2 (:metamorph/data (mm/transform-pipe (:test splits) pocket-cart-pipe pocket-fitted-2))]
+;;   {:rmse-1 (loss/rmse (:y (:test splits)) (:y pred1))
+;;    :rmse-2 (loss/rmse (:y (:test splits)) (:y pred2))})
 
-(kind/test-last
- [(fn [m] (= (:rmse-1 m) (:rmse-2 m)))])
+;; (kind/test-last
+;;  [(fn [m] (= (:rmse-1 m) (:rmse-2 m)))])
 
 ;; Since Pocket persists to disk, this cache **survives JVM restarts**.
 ;; Close the REPL, reopen it, and the cached model is still there —
@@ -513,22 +513,22 @@ ml/train-predict-cache
 ;; Since `pocket-model` follows the same protocol as `ml/model`,
 ;; it works seamlessly with `evaluate-pipelines`:
 
-(pocket/cleanup!)
+;; (pocket/cleanup!)
 
-(def pocket-eval
-  (ml/evaluate-pipelines
-   [pocket-cart-pipe]
-   holdout-splits
-   loss/rmse
-   :loss
-   {:return-best-pipeline-only false
-    :return-best-crossvalidation-only false}))
+;; (def pocket-eval
+;;   (ml/evaluate-pipelines
+;;    [pocket-cart-pipe]
+;;    holdout-splits
+;;    loss/rmse
+;;    :loss
+;;    {:return-best-pipeline-only false
+;;     :return-best-crossvalidation-only false}))
 
-(let [r (first (first pocket-eval))]
-  {:test-rmse (get-in r [:test-transform :metric])})
+;; (let [r (first (first pocket-eval))]
+;;   {:test-rmse (get-in r [:test-transform :metric])})
 
-(kind/test-last
- [(fn [m] (< (:test-rmse m) 10.0))])
+;; (kind/test-last
+;;  [(fn [m] (< (:test-rmse m) 10.0))])
 
 ;; ---
 
@@ -553,23 +553,23 @@ ml/train-predict-cache
 ;; a diamond dependency — `threshold-c` feeds both the training
 ;; clipping and the test clipping.
 
-(pocket/cleanup!)
+;; (pocket/cleanup!)
 
-(def data-c
-  (pocket/cached #'make-regression-data
-                 {:f #'nonlinear-fn :n 500 :noise-sd 0.5 :seed 42
-                  :outlier-fraction 0.1 :outlier-scale 15}))
+;; (def data-c
+;;   (pocket/cached #'make-regression-data
+;;                  {:f #'nonlinear-fn :n 500 :noise-sd 0.5 :seed 42
+;;                   :outlier-fraction 0.1 :outlier-scale 15}))
 
-(def split-c (pocket/cached #'split-dataset data-c {:seed 42}))
-(def train-c (pocket/cached :train split-c))
-(def test-c (pocket/cached :test split-c))
+;; (def split-c (pocket/cached #'split-dataset data-c {:seed 42}))
+;; (def train-c (pocket/cached :train split-c))
+;; (def test-c (pocket/cached :test split-c))
 
-(def threshold-c (pocket/cached #'fit-outlier-threshold train-c))
-(def train-clipped-c (pocket/cached #'clip-outliers train-c threshold-c))
-(def test-clipped-c (pocket/cached #'clip-outliers test-c threshold-c))
-(def train-prepped-c (pocket/cached #'prepare-features train-clipped-c :poly+trig))
-(def test-prepped-c (pocket/cached #'prepare-features test-clipped-c :poly+trig))
-(def model-c (pocket/cached #'ml/train train-prepped-c cart-spec))
+;; (def threshold-c (pocket/cached #'fit-outlier-threshold train-c))
+;; (def train-clipped-c (pocket/cached #'clip-outliers train-c threshold-c))
+;; (def test-clipped-c (pocket/cached #'clip-outliers test-c threshold-c))
+;; (def train-prepped-c (pocket/cached #'prepare-features train-clipped-c :poly+trig))
+;; (def test-prepped-c (pocket/cached #'prepare-features test-clipped-c :poly+trig))
+;; (def model-c (pocket/cached #'ml/train train-prepped-c cart-spec))
 
 ;; ### Provenance
 ;;
@@ -578,7 +578,7 @@ ml/train-predict-cache
 ;; full DAG — from the scalar seed and row count, through data
 ;; generation, splitting, outlier clipping, feature engineering, to the
 
-(pocket/origin-story-mermaid model-c)
+;; (pocket/origin-story-mermaid model-c)
 
 ;; The diamond dependency is visible: `threshold-c` (fitted from
 ;; training data) feeds both `train-clipped-c` and `test-clipped-c`.
@@ -590,12 +590,12 @@ ml/train-predict-cache
 ;; For prediction, we deref the cached model and the preprocessed
 ;; test set:
 
-(let [test-prepped @test-prepped-c]
-  {:rmse (loss/rmse (:y test-prepped)
-                    (:y (ml/predict test-prepped @model-c)))})
+;; (let [test-prepped @test-prepped-c]
+;;   {:rmse (loss/rmse (:y test-prepped)
+;;                     (:y (ml/predict test-prepped @model-c)))})
 
-(kind/test-last
- [(fn [m] (< (:rmse m) 10.0))])
+;; (kind/test-last
+;;  [(fn [m] (< (:rmse m) 10.0))])
 
 ;; This is the same computation as the metamorph pipeline, expressed
 ;; as explicit cached steps. The trade-off: more verbose, but every
@@ -603,7 +603,7 @@ ml/train-predict-cache
 ;; where you want to understand exactly what changed and why, this
 ;; can be valuable.
 
-(pocket/cleanup!)
+;; (pocket/cleanup!)
 
 ;; ---
 
@@ -621,21 +621,21 @@ ml/train-predict-cache
 ;; Too shallow and it underfits; too deep and it overfits. Let's search
 ;; over several values:
 
-(pocket/cleanup!)
+;; (pocket/cleanup!)
 
-(def depth-values [2 4 6 8 12])
+;; (def depth-values [2 4 6 8 12])
 
-(def depth-pipe-fns
-  (vec (for [depth depth-values]
-         (let [spec {:model-type :scicloj.ml.tribuo/regression
-                     :tribuo-components [{:name "cart"
-                                          :type "org.tribuo.regression.rtree.CARTRegressionTrainer"
-                                          :properties {:maxDepth (str depth)}}]
-                     :tribuo-trainer-name "cart"}]
-           (mm/pipeline
-            {:metamorph/id :clip-outlier} (clip-outlier-step)
-            (mm/lift prepare-features :poly+trig)
-            {:metamorph/id :model} (pocket-model spec))))))
+;; (def depth-pipe-fns
+;;   (vec (for [depth depth-values]
+;;          (let [spec {:model-type :scicloj.ml.tribuo/regression
+;;                      :tribuo-components [{:name "cart"
+;;                                           :type "org.tribuo.regression.rtree.CARTRegressionTrainer"
+;;                                           :properties {:maxDepth (str depth)}}]
+;;                      :tribuo-trainer-name "cart"}]
+;;            (mm/pipeline
+;;             {:metamorph/id :clip-outlier} (clip-outlier-step)
+;;             (mm/lift prepare-features :poly+trig)
+;;             {:metamorph/id :model} (pocket-model spec))))))
 
 ;; ### 3-fold cross-validation
 
@@ -644,64 +644,64 @@ ml/train-predict-cache
 ;; test set. This gives 3 estimates per pipeline, reducing the risk of
 ;; a lucky or unlucky split.
 
-(def kfold-splits
-  (tc/split->seq ds-500 :kfold {:k 3 :seed 42}))
+;; (def kfold-splits
+;;   (tc/split->seq ds-500 :kfold {:k 3 :seed 42}))
 
 ;; 5 depths × 3 folds = 15 training runs. First run:
 
-(defn run-depth-search []
-  (ml/evaluate-pipelines
-   depth-pipe-fns
-   kfold-splits
-   loss/rmse
-   :loss
-   {:return-best-pipeline-only false
-    :return-best-crossvalidation-only true}))
+;; (defn run-depth-search []
+;;   (ml/evaluate-pipelines
+;;    depth-pipe-fns
+;;    kfold-splits
+;;    loss/rmse
+;;    :loss
+;;    {:return-best-pipeline-only false
+;;     :return-best-crossvalidation-only true}))
 
-(def first-run-ms
-  (let [start (System/nanoTime)
-        _ (run-depth-search)
-        elapsed (/ (- (System/nanoTime) start) 1e6)]
-    (Math/round elapsed)))
+;; (def first-run-ms
+;;   (let [start (System/nanoTime)
+;;         _ (run-depth-search)
+;;         elapsed (/ (- (System/nanoTime) start) 1e6)]
+;;     (Math/round elapsed)))
 
-first-run-ms
+;; first-run-ms
 
 ;; Second run — all 15 training calls hit cache:
 
-(def second-run-ms
-  (let [start (System/nanoTime)
-        _ (run-depth-search)
-        elapsed (/ (- (System/nanoTime) start) 1e6)]
-    (Math/round elapsed)))
+;; (def second-run-ms
+;;   (let [start (System/nanoTime)
+;;         _ (run-depth-search)
+;;         elapsed (/ (- (System/nanoTime) start) 1e6)]
+;;     (Math/round elapsed)))
 
-second-run-ms
+;; second-run-ms
 
-(kind/test-last
- [(fn [ms] (< ms first-run-ms))])
+;; (kind/test-last
+;;  [(fn [ms] (< ms first-run-ms))])
 
 ;; The cached run is much faster — no model training, just cache lookups.
 
-(pocket/cache-stats)
+;; (pocket/cache-stats)
 
-(kind/test-last
- [(fn [stats] (= 15 (:total-entries stats)))])
+;; (kind/test-last
+;;  [(fn [stats] (= 15 (:total-entries stats)))])
 
 ;; ### Results by depth
 
-(def depth-results (run-depth-search))
+;; (def depth-results (run-depth-search))
 
-(def depth-summary
-  (mapv (fn [pipe-results depth]
-          {:depth depth
-           :test-rmse (get-in (first pipe-results)
-                              [:test-transform :metric])})
-        depth-results
-        depth-values))
+;; (def depth-summary
+;;   (mapv (fn [pipe-results depth]
+;;           {:depth depth
+;;            :test-rmse (get-in (first pipe-results)
+;;                               [:test-transform :metric])})
+;;         depth-results
+;;         depth-values))
 
-depth-summary
+;; depth-summary
 
-(kind/test-last
- [(fn [rows] (= (count rows) (count depth-values)))])
+;; (kind/test-last
+;;  [(fn [rows] (= (count rows) (count depth-values)))])
 
 ;; ### Combined search: depth × feature set × model type
 ;; Let's go bigger. We'll search over:
@@ -711,55 +711,55 @@ depth-summary
 ;;
 ;; That's 3×2 CART + 1 SGD = 7 pipelines, each evaluated with 3-fold CV = 21 training runs.
 
-(pocket/cleanup!)
+;; (pocket/cleanup!)
 
-(def search-pipe-fns
-  (vec
-   (concat
-     ;; CART × depths × feature sets
-    (for [depth [4 6 8]
-          fs [:raw :poly+trig]]
-      (let [spec {:model-type :scicloj.ml.tribuo/regression
-                  :tribuo-components [{:name "cart"
-                                       :type "org.tribuo.regression.rtree.CARTRegressionTrainer"
-                                       :properties {:maxDepth (str depth)}}]
-                  :tribuo-trainer-name "cart"}]
-        (mm/pipeline
-         {:metamorph/id :clip-outlier} (clip-outlier-step)
-         (mm/lift prepare-features fs)
-         {:metamorph/id :model} (pocket-model spec))))
-     ;; Linear SGD with poly+trig (raw features can't capture the
-     ;; nonlinear target, so only one feature set)
-    [(mm/pipeline
-      {:metamorph/id :clip-outlier} (clip-outlier-step)
-      (mm/lift prepare-features :poly+trig)
-      {:metamorph/id :model} (pocket-model linear-sgd-spec))])))
+;; (def search-pipe-fns
+;;   (vec
+;;    (concat
+;;      ;; CART × depths × feature sets
+;;     (for [depth [4 6 8]
+;;           fs [:raw :poly+trig]]
+;;       (let [spec {:model-type :scicloj.ml.tribuo/regression
+;;                   :tribuo-components [{:name "cart"
+;;                                        :type "org.tribuo.regression.rtree.CARTRegressionTrainer"
+;;                                        :properties {:maxDepth (str depth)}}]
+;;                   :tribuo-trainer-name "cart"}]
+;;         (mm/pipeline
+;;          {:metamorph/id :clip-outlier} (clip-outlier-step)
+;;          (mm/lift prepare-features fs)
+;;          {:metamorph/id :model} (pocket-model spec))))
+;;      ;; Linear SGD with poly+trig (raw features can't capture the
+;;      ;; nonlinear target, so only one feature set)
+;;     [(mm/pipeline
+;;       {:metamorph/id :clip-outlier} (clip-outlier-step)
+;;       (mm/lift prepare-features :poly+trig)
+;;       {:metamorph/id :model} (pocket-model linear-sgd-spec))])))
 
-(def search-results
-  (ml/evaluate-pipelines
-   search-pipe-fns
-   kfold-splits
-   loss/rmse
-   :loss
-   {:return-best-pipeline-only false
-    :return-best-crossvalidation-only true}))
+;; (def search-results
+;;   (ml/evaluate-pipelines
+;;    search-pipe-fns
+;;    kfold-splits
+;;    loss/rmse
+;;    :loss
+;;    {:return-best-pipeline-only false
+;;     :return-best-crossvalidation-only true}))
 
 ;; Best result:
 
-(let [best (first (first
-                   (sort-by #(get-in (first %) [:test-transform :metric])
-                            search-results)))]
-  {:best-rmse (get-in best [:test-transform :metric])
-   :best-fit-ms (:timing-fit best)})
+;; (let [best (first (first
+;;                    (sort-by #(get-in (first %) [:test-transform :metric])
+;;                             search-results)))]
+;;   {:best-rmse (get-in best [:test-transform :metric])
+;;    :best-fit-ms (:timing-fit best)})
 
-(kind/test-last
- [(fn [m] (< (:best-rmse m) 10.0))])
+;; (kind/test-last
+;;  [(fn [m] (< (:best-rmse m) 10.0))])
 
 ;; All 21 training runs are now cached. Re-running the search is instant.
 ;; If we add a new depth value or feature set, only the new combinations
 ;; train — everything else comes from cache.
 
-(pocket/cache-stats)
+;; (pocket/cache-stats)
 
 ;; ---
 
@@ -775,52 +775,52 @@ depth-summary
 ;; - **Pocket first run**: using `pocket-model` (cache miss → train + write)
 ;; - **Pocket second run**: using `pocket-model` (cache hit → read from disk)
 
-(defn time-pipeline
-  "Time a 3-fold CV evaluation of a single pipeline.
-   Returns elapsed milliseconds."
-  [pipe-fn data]
-  (let [start (System/nanoTime)
-        _ (ml/evaluate-pipelines
-           [pipe-fn]
-           (tc/split->seq data :kfold {:k 3 :seed 42})
-           loss/rmse :loss
-           {:return-best-pipeline-only false})
-        elapsed (/ (- (System/nanoTime) start) 1e6)]
-    (Math/round elapsed)))
+;; (defn time-pipeline
+;;   "Time a 3-fold CV evaluation of a single pipeline.
+;;    Returns elapsed milliseconds."
+;;   [pipe-fn data]
+;;   (let [start (System/nanoTime)
+;;         _ (ml/evaluate-pipelines
+;;            [pipe-fn]
+;;            (tc/split->seq data :kfold {:k 3 :seed 42})
+;;            loss/rmse :loss
+;;            {:return-best-pipeline-only false})
+;;         elapsed (/ (- (System/nanoTime) start) 1e6)]
+;;     (Math/round elapsed)))
 
-(def scaling-results
-  (vec
-   (for [n [500 5000 10000]]
-     (let [data (make-regression-data
-                 {:f nonlinear-fn :n n :noise-sd 0.5 :seed 42
-                  :outlier-fraction 0.1 :outlier-scale 15})
-           uncached-pipe (mm/pipeline
-                          {:metamorph/id :clip-outlier} (clip-outlier-step)
-                          (mm/lift prepare-features :poly+trig)
-                          {:metamorph/id :model} (ml/model cart-spec))
-           cached-pipe (mm/pipeline
-                        {:metamorph/id :clip-outlier} (clip-outlier-step)
-                        (mm/lift prepare-features :poly+trig)
-                        {:metamorph/id :model} (pocket-model cart-spec))]
-       ;; Uncached
-       (pocket/cleanup!)
-       (let [uncached-ms (time-pipeline uncached-pipe data)
-             ;; Pocket first run (cache miss)
-             first-ms (time-pipeline cached-pipe data)
-             ;; Pocket second run (cache hit)
-             second-ms (time-pipeline cached-pipe data)]
-         {:n n
-          :uncached-ms uncached-ms
-          :pocket-first-ms first-ms
-          :pocket-second-ms second-ms})))))
+;; (def scaling-results
+;;   (vec
+;;    (for [n [500 5000 10000]]
+;;      (let [data (make-regression-data
+;;                  {:f nonlinear-fn :n n :noise-sd 0.5 :seed 42
+;;                   :outlier-fraction 0.1 :outlier-scale 15})
+;;            uncached-pipe (mm/pipeline
+;;                           {:metamorph/id :clip-outlier} (clip-outlier-step)
+;;                           (mm/lift prepare-features :poly+trig)
+;;                           {:metamorph/id :model} (ml/model cart-spec))
+;;            cached-pipe (mm/pipeline
+;;                         {:metamorph/id :clip-outlier} (clip-outlier-step)
+;;                         (mm/lift prepare-features :poly+trig)
+;;                         {:metamorph/id :model} (pocket-model cart-spec))]
+;;        ;; Uncached
+;;        (pocket/cleanup!)
+;;        (let [uncached-ms (time-pipeline uncached-pipe data)
+;;              ;; Pocket first run (cache miss)
+;;              first-ms (time-pipeline cached-pipe data)
+;;              ;; Pocket second run (cache hit)
+;;              second-ms (time-pipeline cached-pipe data)]
+;;          {:n n
+;;           :uncached-ms uncached-ms
+;;           :pocket-first-ms first-ms
+;;           :pocket-second-ms second-ms})))))
 
-(tc/dataset scaling-results)
+;; (tc/dataset scaling-results)
 
-(kind/test-last
- [(fn [ds]
-    (let [row-10k (last (tc/rows ds :as-maps))]
-      (< (:pocket-second-ms row-10k)
-         (:uncached-ms row-10k))))])
+;; (kind/test-last
+;;  [(fn [ds]
+;;     (let [row-10k (last (tc/rows ds :as-maps))]
+;;       (< (:pocket-second-ms row-10k)
+;;          (:uncached-ms row-10k))))])
 
 ;; At small data sizes, the numbers are similar — training is cheap
 ;; regardless. But as data grows, the gap widens. At 10,000 rows,
@@ -844,23 +844,23 @@ depth-summary
 
 ;; ### Scaling visualization
 
-(let [rows scaling-results]
-  (kind/plotly
-   {:data [{:x (mapv :n rows)
-            :y (mapv :uncached-ms rows)
-            :mode "lines+markers"
-            :name "Uncached (ml/model)"}
-           {:x (mapv :n rows)
-            :y (mapv :pocket-first-ms rows)
-            :mode "lines+markers"
-            :name "Pocket (first run)"}
-           {:x (mapv :n rows)
-            :y (mapv :pocket-second-ms rows)
-            :mode "lines+markers"
-            :name "Pocket (second run)"}]
-    :layout {:xaxis {:title "Data size (n)"}
-             :yaxis {:title "Time (ms)"}
-             :title "3-fold CV timing by data size"}}))
+;; (let [rows scaling-results]
+;;   (kind/plotly
+;;    {:data [{:x (mapv :n rows)
+;;             :y (mapv :uncached-ms rows)
+;;             :mode "lines+markers"
+;;             :name "Uncached (ml/model)"}
+;;            {:x (mapv :n rows)
+;;             :y (mapv :pocket-first-ms rows)
+;;             :mode "lines+markers"
+;;             :name "Pocket (first run)"}
+;;            {:x (mapv :n rows)
+;;             :y (mapv :pocket-second-ms rows)
+;;             :mode "lines+markers"
+;;             :name "Pocket (second run)"}]
+;;     :layout {:xaxis {:title "Data size (n)"}
+;;              :yaxis {:title "Time (ms)"}
+;;              :title "3-fold CV timing by data size"}}))
 
 ;; ---
 
@@ -898,7 +898,7 @@ depth-summary
 
 ;; ## Cleanup
 
-(pocket/cleanup!)
+;; (pocket/cleanup!)
 
 
 

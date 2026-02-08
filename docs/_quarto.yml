@@ -10,4 +10,4 @@ format:
 project: {type: book}
 book:
   chapters: [index.qmd, pocket_book.getting_started.qmd, pocket_book.configuration.qmd, pocket_book.logging.qmd, pocket_book.recursive_caching_in_pipelines.qmd, pocket_book.usage_practices.qmd, pocket_book.real_world_walkthrough.qmd, pocket_book.concurrency.qmd, pocket_book.extending_pocket.qmd, pocket_book.ml_workflows.qmd, pocket_book.developing_pocket.qmd, pocket_book.api_reference.qmd]
-  title: Pocket
+  title: Pocket Book

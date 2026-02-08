@@ -32,7 +32,8 @@
 (deftest
  t12_l100
  (is
-  ((fn* [p1__70159#] (str/starts-with? p1__70159# "result")) v11_l98)))
+  ((fn* [p1__106212#] (str/starts-with? p1__106212# "result"))
+   v11_l98)))
 
 
 (def v14_l107 (kind/doc #'clojure.core/map))
