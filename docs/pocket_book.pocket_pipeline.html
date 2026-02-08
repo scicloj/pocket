@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>12&nbsp; 🚧 Draft: Full Pocket integration for ML pipelines – Pocket</title>
+<title>12&nbsp; 🚧 Draft: pocket-pipeline — cached ML pipelines with provenance – Pocket</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -118,7 +118,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./pocket_book.pocket_pipeline.html"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">🚧 Draft: Full Pocket integration for ML pipelines</span></a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./pocket_book.pocket_pipeline.html"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">🚧 Draft: <code>pocket-pipeline</code> — cached ML pipelines with provenance</span></a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -214,7 +214,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./pocket_book.pocket_pipeline.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">🚧 Draft: Full Pocket integration for ML pipelines</span></span></a>
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">🚧 Draft: <code>pocket-pipeline</code> — cached ML pipelines with provenance</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
@@ -275,7 +275,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">🚧 Draft: Full Pocket integration for ML pipelines</span></h1>
+<h1 class="title"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">🚧 Draft: <code>pocket-pipeline</code> — cached ML pipelines with provenance</span></h1>
 </div>
 
 
@@ -413,7 +413,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <div id="callout-1" class="callout-1-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>21:50:31.867 INFO scicloj.pocket - Cache dir set to: /tmp/pocket-metamorph
+<pre><code>22:14:32.851 INFO scicloj.pocket - Cache dir set to: /tmp/pocket-metamorph
 </code></pre>
 </div>
 </div>
@@ -436,7 +436,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <div id="callout-2" class="callout-2-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>21:50:31.868 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-metamorph
+<pre><code>22:14:32.852 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-metamorph
 </code></pre>
 </div>
 </div>
@@ -670,13 +670,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <div id="callout-3" class="callout-3-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>21:50:31.882 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/train-model
-21:50:31.882 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/prepare-features
-21:50:31.883 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/clip-outliers
-21:50:31.883 INFO scicloj.pocket.impl.cache - Cache miss, computing: :train
-21:50:31.883 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/split-dataset
-21:50:31.883 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/make-regression-data
-21:50:31.888 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/fit-outlier-threshold
+<pre><code>22:14:32.867 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/train-model
+22:14:32.867 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/prepare-features
+22:14:32.867 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/clip-outliers
+22:14:32.867 INFO scicloj.pocket.impl.cache - Cache miss, computing: :train
+22:14:32.867 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/split-dataset
+22:14:32.867 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/make-regression-data
+22:14:32.871 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/fit-outlier-threshold
 </code></pre>
 </div>
 </div>
@@ -743,7 +743,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb37-59"><a href="#cb37-59" aria-hidden="true" tabindex="-1"></a>    <span class="at">:properties</span> {<span class="at">:maxDepth</span> <span class="st">"8"</span>}}],</span>
 <span id="cb37-60"><a href="#cb37-60" aria-hidden="true" tabindex="-1"></a>  <span class="at">:tribuo-trainer-name</span> <span class="st">"cart"</span>},</span>
 <span id="cb37-61"><a href="#cb37-61" aria-hidden="true" tabindex="-1"></a> <span class="at">:train-input-hash</span> <span class="va">nil</span>,</span>
-<span id="cb37-62"><a href="#cb37-62" aria-hidden="true" tabindex="-1"></a> <span class="at">:id</span> #uuid <span class="st">"af4751a0-2f7d-43dd-bf8c-a2dd67c5f16f"</span>,</span>
+<span id="cb37-62"><a href="#cb37-62" aria-hidden="true" tabindex="-1"></a> <span class="at">:id</span> #uuid <span class="st">"5425dc6c-5d6b-45ce-87f6-18adba88f0af"</span>,</span>
 <span id="cb37-63"><a href="#cb37-63" aria-hidden="true" tabindex="-1"></a> <span class="at">:feature-columns</span> [<span class="at">:x</span> <span class="at">:x2</span> <span class="at">:sin-x</span> <span class="at">:cos-x</span>],</span>
 <span id="cb37-64"><a href="#cb37-64" aria-hidden="true" tabindex="-1"></a> <span class="at">:target-columns</span> [<span class="at">:y</span>],</span>
 <span id="cb37-65"><a href="#cb37-65" aria-hidden="true" tabindex="-1"></a> <span class="at">:target-datatypes</span> {<span class="at">:y</span> <span class="at">:float64</span>}}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -764,10 +764,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <div id="callout-4" class="callout-4-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>21:50:31.902 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
-21:50:31.902 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/prepare-features
-21:50:31.902 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/clip-outliers
-21:50:31.902 INFO scicloj.pocket.impl.cache - Cache miss, computing: :test
+<pre><code>22:14:32.886 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
+22:14:32.886 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/prepare-features
+22:14:32.886 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/clip-outliers
+22:14:32.886 INFO scicloj.pocket.impl.cache - Cache miss, computing: :test
 </code></pre>
 </div>
 </div>
@@ -863,10 +863,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <div id="callout-5" class="callout-5-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>21:50:31.910 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/report
-21:50:31.910 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/compute-loss
-21:50:31.910 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
-21:50:31.912 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/compute-loss
+<pre><code>22:14:32.894 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/report
+22:14:32.894 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/compute-loss
+22:14:32.894 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
+22:14:32.896 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/compute-loss
 </code></pre>
 </div>
 </div>
@@ -947,7 +947,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <div id="callout-6" class="callout-6-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>21:50:31.917 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-metamorph
+<pre><code>22:14:32.901 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-metamorph
 </code></pre>
 </div>
 </div>
@@ -1065,69 +1065,69 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <div id="callout-7" class="callout-7-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>21:50:31.931 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/prepare-features
-21:50:31.931 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/clip-outliers
-21:50:31.931 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/nth-split-test
-21:50:31.931 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/make-regression-data
-21:50:31.936 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/fit-outlier-threshold
-21:50:31.936 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/nth-split-train
-21:50:31.939 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
-21:50:31.939 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/train-model
-21:50:31.939 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/prepare-features
-21:50:31.939 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/clip-outliers
-21:50:31.952 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/prepare-features
-21:50:31.952 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/clip-outliers
-21:50:31.952 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/nth-split-test
-21:50:31.954 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/fit-outlier-threshold
-21:50:31.954 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/nth-split-train
-21:50:31.956 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
-21:50:31.956 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/train-model
-21:50:31.956 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/prepare-features
-21:50:31.956 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/clip-outliers
-21:50:31.968 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/prepare-features
-21:50:31.968 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/clip-outliers
-21:50:31.968 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/nth-split-test
-21:50:31.970 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/fit-outlier-threshold
-21:50:31.970 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/nth-split-train
-21:50:31.973 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
-21:50:31.973 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/train-model
-21:50:31.973 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/prepare-features
-21:50:31.973 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/clip-outliers
-21:50:31.985 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/prepare-features
-21:50:31.986 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
-21:50:31.986 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/train-model
-21:50:31.986 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/prepare-features
-21:50:31.992 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/prepare-features
-21:50:31.992 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
-21:50:31.992 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/train-model
-21:50:31.992 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/prepare-features
-21:50:31.998 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/prepare-features
-21:50:31.998 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
-21:50:31.998 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/train-model
-21:50:31.998 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/prepare-features
-21:50:32.004 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
-21:50:32.004 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/train-model
-Feb 08, 2026 9:50:32 PM org.tribuo.common.sgd.AbstractSGDTrainer train
+<pre><code>22:14:32.915 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/prepare-features
+22:14:32.915 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/clip-outliers
+22:14:32.915 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/nth-split-test
+22:14:32.915 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/make-regression-data
+22:14:32.919 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/fit-outlier-threshold
+22:14:32.920 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/nth-split-train
+22:14:32.923 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
+22:14:32.923 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/train-model
+22:14:32.923 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/prepare-features
+22:14:32.923 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/clip-outliers
+22:14:32.936 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/prepare-features
+22:14:32.936 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/clip-outliers
+22:14:32.936 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/nth-split-test
+22:14:32.939 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/fit-outlier-threshold
+22:14:32.939 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/nth-split-train
+22:14:32.943 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
+22:14:32.943 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/train-model
+22:14:32.943 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/prepare-features
+22:14:32.943 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/clip-outliers
+22:14:32.958 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/prepare-features
+22:14:32.959 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/clip-outliers
+22:14:32.959 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/nth-split-test
+22:14:32.961 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/fit-outlier-threshold
+22:14:32.961 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/nth-split-train
+22:14:32.964 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
+22:14:32.964 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/train-model
+22:14:32.964 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/prepare-features
+22:14:32.964 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/clip-outliers
+22:14:32.977 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/prepare-features
+22:14:32.978 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
+22:14:32.978 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/train-model
+22:14:32.978 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/prepare-features
+22:14:32.984 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/prepare-features
+22:14:32.984 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
+22:14:32.984 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/train-model
+22:14:32.984 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/prepare-features
+22:14:32.990 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/prepare-features
+22:14:32.990 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
+22:14:32.990 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/train-model
+22:14:32.990 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/prepare-features
+22:14:32.996 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
+22:14:32.997 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/train-model
+Feb 08, 2026 10:14:32 PM org.tribuo.common.sgd.AbstractSGDTrainer train
 INFO: Training SGD model with 333 examples
-Feb 08, 2026 9:50:32 PM org.tribuo.common.sgd.AbstractSGDTrainer train
+Feb 08, 2026 10:14:32 PM org.tribuo.common.sgd.AbstractSGDTrainer train
 INFO: Outputs - RegressionInfo({name=y,id=0,count=333,max=8.866764,min=-5.914919,mean=0.701788,variance=15.193172})
-Feb 08, 2026 9:50:32 PM org.tribuo.common.sgd.AbstractSGDTrainer train
+Feb 08, 2026 10:14:33 PM org.tribuo.common.sgd.AbstractSGDTrainer train
 INFO: At iteration 10000, average loss = 3.7525222314159787
-21:50:32.011 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
-21:50:32.011 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/train-model
-Feb 08, 2026 9:50:32 PM org.tribuo.common.sgd.AbstractSGDTrainer train
+22:14:33.005 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
+22:14:33.006 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/train-model
+Feb 08, 2026 10:14:33 PM org.tribuo.common.sgd.AbstractSGDTrainer train
 INFO: Training SGD model with 333 examples
-Feb 08, 2026 9:50:32 PM org.tribuo.common.sgd.AbstractSGDTrainer train
+Feb 08, 2026 10:14:33 PM org.tribuo.common.sgd.AbstractSGDTrainer train
 INFO: Outputs - RegressionInfo({name=y,id=0,count=333,max=8.498492,min=-5.914919,mean=0.583017,variance=14.288227})
-Feb 08, 2026 9:50:32 PM org.tribuo.common.sgd.AbstractSGDTrainer train
+Feb 08, 2026 10:14:33 PM org.tribuo.common.sgd.AbstractSGDTrainer train
 INFO: At iteration 10000, average loss = 3.695109774152164
-21:50:32.018 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
-21:50:32.018 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/train-model
-Feb 08, 2026 9:50:32 PM org.tribuo.common.sgd.AbstractSGDTrainer train
+22:14:33.016 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
+22:14:33.016 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/train-model
+Feb 08, 2026 10:14:33 PM org.tribuo.common.sgd.AbstractSGDTrainer train
 INFO: Training SGD model with 334 examples
-Feb 08, 2026 9:50:32 PM org.tribuo.common.sgd.AbstractSGDTrainer train
+Feb 08, 2026 10:14:33 PM org.tribuo.common.sgd.AbstractSGDTrainer train
 INFO: Outputs - RegressionInfo({name=y,id=0,count=334,max=8.866764,min=-5.501972,mean=0.844474,variance=15.400435})
-Feb 08, 2026 9:50:32 PM org.tribuo.common.sgd.AbstractSGDTrainer train
+Feb 08, 2026 10:14:33 PM org.tribuo.common.sgd.AbstractSGDTrainer train
 INFO: At iteration 10000, average loss = 3.510884525077099
 </code></pre>
 </div>
@@ -1215,7 +1215,7 @@ INFO: At iteration 10000, average loss = 3.510884525077099
 </div>
 <div id="callout-8" class="callout-8-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>21:50:32.049 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-metamorph
+<pre><code>22:14:33.041 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-metamorph
 </code></pre>
 </div>
 </div>
@@ -1252,82 +1252,82 @@ INFO: At iteration 10000, average loss = 3.510884525077099
 </div>
 <div id="callout-9" class="callout-9-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>21:50:32.054 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/prepare-features
-21:50:32.054 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/clip-outliers
-21:50:32.054 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/nth-split-test
-21:50:32.054 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/make-regression-data
-21:50:32.058 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/fit-outlier-threshold
-21:50:32.058 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/nth-split-train
-21:50:32.060 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
-21:50:32.060 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/train-model
-21:50:32.060 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/prepare-features
-21:50:32.060 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/clip-outliers
-21:50:32.066 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/prepare-features
-21:50:32.067 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/clip-outliers
-21:50:32.067 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/nth-split-test
-21:50:32.069 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/fit-outlier-threshold
-21:50:32.069 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/nth-split-train
-21:50:32.071 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
-21:50:32.071 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/train-model
-21:50:32.071 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/prepare-features
-21:50:32.071 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/clip-outliers
-21:50:32.077 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/prepare-features
-21:50:32.077 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/clip-outliers
-21:50:32.077 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/nth-split-test
-21:50:32.079 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/fit-outlier-threshold
-21:50:32.079 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/nth-split-train
-21:50:32.082 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
-21:50:32.082 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/train-model
-21:50:32.082 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/prepare-features
-21:50:32.082 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/clip-outliers
-21:50:32.088 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/prepare-features
-21:50:32.088 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
-21:50:32.089 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/train-model
-21:50:32.089 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/prepare-features
-21:50:32.098 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/prepare-features
-21:50:32.098 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
-21:50:32.098 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/train-model
-21:50:32.098 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/prepare-features
-21:50:32.110 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/prepare-features
-21:50:32.111 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
-21:50:32.111 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/train-model
-21:50:32.111 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/prepare-features
-21:50:32.122 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
-21:50:32.122 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/train-model
-21:50:32.128 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
-21:50:32.128 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/train-model
-21:50:32.135 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
-21:50:32.135 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/train-model
-21:50:32.141 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
-21:50:32.141 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/train-model
-21:50:32.151 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
-21:50:32.151 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/train-model
-21:50:32.161 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
-21:50:32.161 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/train-model
-21:50:32.171 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
-21:50:32.171 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/train-model
-21:50:32.178 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
-21:50:32.178 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/train-model
-21:50:32.188 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
-21:50:32.188 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/train-model
-21:50:32.196 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
-21:50:32.196 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/train-model
-21:50:32.211 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
-21:50:32.212 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/train-model
-21:50:32.223 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
-21:50:32.223 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/train-model
-21:50:32.235 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
-21:50:32.236 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/train-model
-21:50:32.244 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
-21:50:32.244 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/train-model
-21:50:32.253 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
-21:50:32.253 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/train-model
-21:50:32.260 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
-21:50:32.260 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/train-model
-21:50:32.271 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
-21:50:32.271 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/train-model
-21:50:32.284 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
-21:50:32.285 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/train-model
+<pre><code>22:14:33.047 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/prepare-features
+22:14:33.047 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/clip-outliers
+22:14:33.047 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/nth-split-test
+22:14:33.047 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/make-regression-data
+22:14:33.052 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/fit-outlier-threshold
+22:14:33.052 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/nth-split-train
+22:14:33.055 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
+22:14:33.055 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/train-model
+22:14:33.055 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/prepare-features
+22:14:33.056 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/clip-outliers
+22:14:33.065 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/prepare-features
+22:14:33.065 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/clip-outliers
+22:14:33.065 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/nth-split-test
+22:14:33.068 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/fit-outlier-threshold
+22:14:33.068 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/nth-split-train
+22:14:33.071 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
+22:14:33.071 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/train-model
+22:14:33.071 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/prepare-features
+22:14:33.071 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/clip-outliers
+22:14:33.078 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/prepare-features
+22:14:33.078 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/clip-outliers
+22:14:33.078 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/nth-split-test
+22:14:33.080 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/fit-outlier-threshold
+22:14:33.080 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/nth-split-train
+22:14:33.082 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
+22:14:33.082 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/train-model
+22:14:33.082 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/prepare-features
+22:14:33.083 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/clip-outliers
+22:14:33.088 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/prepare-features
+22:14:33.089 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
+22:14:33.089 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/train-model
+22:14:33.089 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/prepare-features
+22:14:33.100 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/prepare-features
+22:14:33.101 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
+22:14:33.101 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/train-model
+22:14:33.101 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/prepare-features
+22:14:33.113 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/prepare-features
+22:14:33.113 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
+22:14:33.113 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/train-model
+22:14:33.113 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/prepare-features
+22:14:33.124 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
+22:14:33.124 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/train-model
+22:14:33.130 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
+22:14:33.130 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/train-model
+22:14:33.135 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
+22:14:33.136 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/train-model
+22:14:33.142 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
+22:14:33.142 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/train-model
+22:14:33.152 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
+22:14:33.152 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/train-model
+22:14:33.163 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
+22:14:33.163 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/train-model
+22:14:33.174 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
+22:14:33.174 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/train-model
+22:14:33.180 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
+22:14:33.180 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/train-model
+22:14:33.190 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
+22:14:33.191 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/train-model
+22:14:33.201 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
+22:14:33.201 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/train-model
+22:14:33.217 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
+22:14:33.217 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/train-model
+22:14:33.231 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
+22:14:33.231 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/train-model
+22:14:33.245 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
+22:14:33.245 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/train-model
+22:14:33.252 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
+22:14:33.252 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/train-model
+22:14:33.258 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
+22:14:33.258 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/train-model
+22:14:33.265 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
+22:14:33.265 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/train-model
+22:14:33.277 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
+22:14:33.277 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/train-model
+22:14:33.289 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
+22:14:33.289 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/train-model
 </code></pre>
 </div>
 </div>
@@ -1522,7 +1522,7 @@ INFO: At iteration 10000, average loss = 3.510884525077099
 </div>
 <div id="callout-10" class="callout-10-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>21:50:32.310 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-metamorph
+<pre><code>22:14:33.318 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-metamorph
 </code></pre>
 </div>
 </div>

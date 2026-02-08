@@ -66,7 +66,7 @@ format:
 ::: {.callout-note}
 ## OUT
 ```
-21:50:30.482 INFO scicloj.pocket - Cache dir set to: /tmp/pocket-extending
+22:14:31.436 INFO scicloj.pocket - Cache dir set to: /tmp/pocket-extending
 
 ```
 :::
@@ -93,7 +93,7 @@ format:
 ::: {.callout-note}
 ## OUT
 ```
-21:50:30.483 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-extending
+22:14:31.437 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-extending
 
 ```
 :::
@@ -513,9 +513,9 @@ First deref computes:
 ::: {.callout-note}
 ## OUT
 ```
-21:50:30.504 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.extending-pocket/analyze-dataset
+22:14:31.462 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.extending-pocket/analyze-dataset
   Analyzing census v 3 ...
-21:50:30.705 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-extending/62/(pocket-book.extending-pocket_analyze-dataset census-v3 {:method :regression})
+22:14:31.664 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-extending/62/(pocket-book.extending-pocket_analyze-dataset census-v3 {:method :regression})
 
 ```
 :::
@@ -565,9 +565,9 @@ A different version creates a different cache entry:
 ::: {.callout-note}
 ## OUT
 ```
-21:50:30.710 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.extending-pocket/analyze-dataset
+22:14:31.671 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.extending-pocket/analyze-dataset
   Analyzing census v 4 ...
-21:50:30.910 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-extending/f6/(pocket-book.extending-pocket_analyze-dataset census-v4 {:method :regression})
+22:14:31.872 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-extending/f6/(pocket-book.extending-pocket_analyze-dataset census-v4 {:method :regression})
 
 ```
 :::
@@ -791,8 +791,8 @@ Now caching a function that returns a `MyModel` works seamlessly:
 ::: {.callout-note}
 ## OUT
 ```
-21:50:30.934 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.extending-pocket/train-my-model
-21:50:30.935 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-extending/ac/(pocket-book.extending-pocket_train-my-model [10 20 30])
+22:14:31.895 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.extending-pocket/train-my-model
+22:14:31.896 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-extending/ac/(pocket-book.extending-pocket_train-my-model [10 20 30])
 
 ```
 :::
@@ -825,7 +825,7 @@ for more details.
 ::: {.callout-note}
 ## OUT
 ```
-21:50:30.938 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-extending
+22:14:31.899 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-extending
 
 ```
 :::

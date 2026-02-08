@@ -110,11 +110,11 @@ each step:
 ::: {.printedClojure}
 ```clojure
 {:rows 50000,
- :string-length 1541486,
- :->id-ms 2.49089,
- :canonical-id-ms 6.64036,
- :str-ms 22.935016,
- :sha-ms 1.483822}
+ :string-length 1541278,
+ :->id-ms 2.847531,
+ :canonical-id-ms 8.059703,
+ :str-ms 22.274872,
+ :sha-ms 1.444101}
 
 ```
 :::
@@ -144,7 +144,7 @@ it — not the data itself. Compare:
 ::: {.callout-note}
 ## OUT
 ```
-21:50:32.449 INFO scicloj.pocket - Cache dir set to: /tmp/pocket-cache-keys
+22:14:33.481 INFO scicloj.pocket - Cache dir set to: /tmp/pocket-cache-keys
 
 ```
 :::
@@ -171,7 +171,7 @@ it — not the data itself. Compare:
 ::: {.callout-note}
 ## OUT
 ```
-21:50:32.451 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-cache-keys
+22:14:33.482 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-cache-keys
 
 ```
 :::
@@ -213,7 +213,7 @@ Direct dataset — identity includes all 50,000 rows:
 
 ::: {.printedClojure}
 ```clojure
-{:direct-ms 18.593518}
+{:direct-ms 20.026776}
 
 ```
 :::
@@ -236,7 +236,7 @@ Direct dataset — identity includes all 50,000 rows:
 
 ::: {.printedClojure}
 ```clojure
-{:cached-reference-ms 0.06546}
+{:cached-reference-ms 0.073254}
 
 ```
 :::
@@ -266,7 +266,7 @@ full provenance through the DAG.
 ::: {.callout-note}
 ## OUT
 ```
-21:50:32.480 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-cache-keys
+22:14:33.513 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-cache-keys
 
 ```
 :::

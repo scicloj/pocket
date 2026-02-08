@@ -213,7 +213,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./pocket_book.pocket_pipeline.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">🚧 Draft: Full Pocket integration for ML pipelines</span></span></a>
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">🚧 Draft: <code>pocket-pipeline</code> — cached ML pipelines with provenance</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
@@ -333,7 +333,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <div id="callout-1" class="callout-1-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>21:50:32.515 INFO scicloj.pocket - Cache dir set to: /tmp/pocket-demo-reference
+<pre><code>22:14:33.620 INFO scicloj.pocket - Cache dir set to: /tmp/pocket-demo-reference
 </code></pre>
 </div>
 </div>
@@ -356,7 +356,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <div id="callout-2" class="callout-2-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>21:50:32.516 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo-reference
+<pre><code>22:14:33.621 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo-reference
 </code></pre>
 </div>
 </div>
@@ -406,7 +406,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <div id="callout-3" class="callout-3-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>21:50:32.518 INFO scicloj.pocket - Cache dir set to: /tmp/pocket-demo-2
+<pre><code>22:14:33.624 INFO scicloj.pocket - Cache dir set to: /tmp/pocket-demo-2
 </code></pre>
 </div>
 </div>
@@ -436,7 +436,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <div id="callout-4" class="callout-4-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>21:50:32.519 INFO scicloj.pocket - Cache dir set to: /tmp/pocket-demo-reference
+<pre><code>22:14:33.625 INFO scicloj.pocket - Cache dir set to: /tmp/pocket-demo-reference
 </code></pre>
 </div>
 </div>
@@ -493,7 +493,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <div id="callout-5" class="callout-5-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>21:50:32.522 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.api-reference/expensive-calculation
+<pre><code>22:14:33.628 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.api-reference/expensive-calculation
 Computing 100 + 200 (this is expensive!)
 </code></pre>
 </div>
@@ -542,7 +542,7 @@ Computing 100 + 200 (this is expensive!)
 </div>
 <div id="callout-6" class="callout-6-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>21:50:32.929 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.api-reference/expensive-calculation
+<pre><code>22:14:34.035 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.api-reference/expensive-calculation
 Computing 3 + 4 (this is expensive!)
 </code></pre>
 </div>
@@ -645,8 +645,8 @@ Computing 3 + 4 (this is expensive!)
 </div>
 <div id="callout-7" class="callout-7-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>21:50:33.345 INFO scicloj.pocket - Mem-cache options set: {:policy :fifo, :threshold 100}
-21:50:33.345 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :fifo, :threshold 100}
+<pre><code>22:14:34.451 INFO scicloj.pocket - Mem-cache options set: {:policy :fifo, :threshold 100}
+22:14:34.451 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :fifo, :threshold 100}
 </code></pre>
 </div>
 </div>
@@ -670,8 +670,8 @@ Computing 3 + 4 (this is expensive!)
 </div>
 <div id="callout-8" class="callout-8-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>21:50:33.346 INFO scicloj.pocket - Mem-cache options set: {:policy :lru, :threshold 256}
-21:50:33.346 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :lru, :threshold 256}
+<pre><code>22:14:34.452 INFO scicloj.pocket - Mem-cache options set: {:policy :lru, :threshold 256}
+22:14:34.452 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :lru, :threshold 256}
 </code></pre>
 </div>
 </div>
@@ -700,8 +700,8 @@ Computing 3 + 4 (this is expensive!)
 </div>
 <div id="callout-9" class="callout-9-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>21:50:33.347 INFO scicloj.pocket - Mem-cache options reset to defaults: {:policy :lru, :threshold 256}
-21:50:33.347 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :lru, :threshold 256}
+<pre><code>22:14:34.453 INFO scicloj.pocket - Mem-cache options reset to defaults: {:policy :lru, :threshold 256}
+22:14:34.453 INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :lru, :threshold 256}
 </code></pre>
 </div>
 </div>
@@ -740,7 +740,7 @@ Computing 3 + 4 (this is expensive!)
 </div>
 <div id="callout-10" class="callout-10-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>21:50:33.348 INFO scicloj.pocket - Storage policy set to: :mem
+<pre><code>22:14:34.455 INFO scicloj.pocket - Storage policy set to: :mem
 </code></pre>
 </div>
 </div>
@@ -764,7 +764,7 @@ Computing 3 + 4 (this is expensive!)
 </div>
 <div id="callout-11" class="callout-11-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>21:50:33.349 INFO scicloj.pocket - Storage policy set to: nil
+<pre><code>22:14:34.456 INFO scicloj.pocket - Storage policy set to: nil
 </code></pre>
 </div>
 </div>
@@ -792,7 +792,7 @@ Computing 3 + 4 (this is expensive!)
 </div>
 <div id="callout-12" class="callout-12-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>21:50:33.352 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo-reference
+<pre><code>22:14:34.459 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo-reference
 </code></pre>
 </div>
 </div>
@@ -821,7 +821,7 @@ Computing 3 + 4 (this is expensive!)
 </div>
 <div id="callout-13" class="callout-13-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>21:50:33.353 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.api-reference/expensive-calculation
+<pre><code>22:14:34.461 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.api-reference/expensive-calculation
 Computing 10 + 20 (this is expensive!)
 </code></pre>
 </div>
@@ -863,7 +863,7 @@ Computing 10 + 20 (this is expensive!)
 </div>
 <div id="callout-14" class="callout-14-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>21:50:33.759 INFO scicloj.pocket.impl.cache - Invalidated: /tmp/pocket-demo-reference/a3/(pocket-book.api-reference_expensive-calculation 10 20) existed= true
+<pre><code>22:14:34.866 INFO scicloj.pocket.impl.cache - Invalidated: /tmp/pocket-demo-reference/a3/(pocket-book.api-reference_expensive-calculation 10 20) existed= true
 </code></pre>
 </div>
 </div>
@@ -889,7 +889,7 @@ Computing 10 + 20 (this is expensive!)
 </div>
 <div id="callout-15" class="callout-15-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>21:50:33.760 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.api-reference/expensive-calculation
+<pre><code>22:14:34.867 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.api-reference/expensive-calculation
 Computing 10 + 20 (this is expensive!)
 </code></pre>
 </div>
@@ -919,7 +919,7 @@ Computing 10 + 20 (this is expensive!)
 </div>
 <div id="callout-16" class="callout-16-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>21:50:34.175 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.api-reference/expensive-calculation
+<pre><code>22:14:35.272 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.api-reference/expensive-calculation
 Computing 1 + 2 (this is expensive!)
 </code></pre>
 </div>
@@ -943,7 +943,7 @@ Computing 1 + 2 (this is expensive!)
 </div>
 <div id="callout-17" class="callout-17-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>21:50:34.579 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.api-reference/expensive-calculation
+<pre><code>22:14:35.677 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.api-reference/expensive-calculation
 Computing 3 + 4 (this is expensive!)
 </code></pre>
 </div>
@@ -967,7 +967,7 @@ Computing 3 + 4 (this is expensive!)
 </div>
 <div id="callout-18" class="callout-18-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>21:50:34.983 INFO scicloj.pocket.impl.cache - Invalidated 3 entries for pocket-book.api-reference/expensive-calculation
+<pre><code>22:14:36.094 INFO scicloj.pocket.impl.cache - Invalidated 3 entries for pocket-book.api-reference/expensive-calculation
 </code></pre>
 </div>
 </div>
@@ -995,7 +995,7 @@ Computing 3 + 4 (this is expensive!)
 </div>
 <div id="callout-19" class="callout-19-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>21:50:34.984 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo-reference
+<pre><code>22:14:36.095 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo-reference
 </code></pre>
 </div>
 </div>
@@ -1025,7 +1025,7 @@ Computing 3 + 4 (this is expensive!)
 </div>
 <div id="callout-20" class="callout-20-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>21:50:34.987 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.api-reference/expensive-calculation
+<pre><code>22:14:36.097 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.api-reference/expensive-calculation
 Computing 10 + 20 (this is expensive!)
 </code></pre>
 </div>
@@ -1049,7 +1049,7 @@ Computing 10 + 20 (this is expensive!)
 </div>
 <div id="callout-21" class="callout-21-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>21:50:35.390 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.api-reference/expensive-calculation
+<pre><code>22:14:36.501 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.api-reference/expensive-calculation
 Computing 3 + 4 (this is expensive!)
 </code></pre>
 </div>
@@ -1067,13 +1067,13 @@ Computing 3 + 4 (this is expensive!)
 <span id="cb99-3"><a href="#cb99-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">:id</span> <span class="st">"(pocket-book.api-reference/expensive-calculation 10 20)"</span>,</span>
 <span id="cb99-4"><a href="#cb99-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">:fn-name</span> <span class="st">"pocket-book.api-reference/expensive-calculation"</span>,</span>
 <span id="cb99-5"><a href="#cb99-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">:args-str</span> <span class="st">"[10 20]"</span>,</span>
-<span id="cb99-6"><a href="#cb99-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">:created-at</span> <span class="st">"2026-02-08T19:50:35.387380847Z"</span>}</span>
+<span id="cb99-6"><a href="#cb99-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">:created-at</span> <span class="st">"2026-02-08T20:14:36.497920247Z"</span>}</span>
 <span id="cb99-7"><a href="#cb99-7" aria-hidden="true" tabindex="-1"></a> {<span class="at">:path</span></span>
 <span id="cb99-8"><a href="#cb99-8" aria-hidden="true" tabindex="-1"></a>  <span class="st">"/tmp/pocket-demo-reference/49/(pocket-book.api-reference_expensive-calculation 3 4)"</span>,</span>
 <span id="cb99-9"><a href="#cb99-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">:id</span> <span class="st">"(pocket-book.api-reference/expensive-calculation 3 4)"</span>,</span>
 <span id="cb99-10"><a href="#cb99-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">:fn-name</span> <span class="st">"pocket-book.api-reference/expensive-calculation"</span>,</span>
 <span id="cb99-11"><a href="#cb99-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">:args-str</span> <span class="st">"[3 4]"</span>,</span>
-<span id="cb99-12"><a href="#cb99-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">:created-at</span> <span class="st">"2026-02-08T19:50:35.790382857Z"</span>}]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb99-12"><a href="#cb99-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">:created-at</span> <span class="st">"2026-02-08T20:14:36.902094348Z"</span>}]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Filter by function name:</p>
 <div class="sourceClojure">
@@ -1085,13 +1085,13 @@ Computing 3 + 4 (this is expensive!)
 <span id="cb101-3"><a href="#cb101-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">:id</span> <span class="st">"(pocket-book.api-reference/expensive-calculation 10 20)"</span>,</span>
 <span id="cb101-4"><a href="#cb101-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">:fn-name</span> <span class="st">"pocket-book.api-reference/expensive-calculation"</span>,</span>
 <span id="cb101-5"><a href="#cb101-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">:args-str</span> <span class="st">"[10 20]"</span>,</span>
-<span id="cb101-6"><a href="#cb101-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">:created-at</span> <span class="st">"2026-02-08T19:50:35.387380847Z"</span>}</span>
+<span id="cb101-6"><a href="#cb101-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">:created-at</span> <span class="st">"2026-02-08T20:14:36.497920247Z"</span>}</span>
 <span id="cb101-7"><a href="#cb101-7" aria-hidden="true" tabindex="-1"></a> {<span class="at">:path</span></span>
 <span id="cb101-8"><a href="#cb101-8" aria-hidden="true" tabindex="-1"></a>  <span class="st">"/tmp/pocket-demo-reference/49/(pocket-book.api-reference_expensive-calculation 3 4)"</span>,</span>
 <span id="cb101-9"><a href="#cb101-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">:id</span> <span class="st">"(pocket-book.api-reference/expensive-calculation 3 4)"</span>,</span>
 <span id="cb101-10"><a href="#cb101-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">:fn-name</span> <span class="st">"pocket-book.api-reference/expensive-calculation"</span>,</span>
 <span id="cb101-11"><a href="#cb101-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">:args-str</span> <span class="st">"[3 4]"</span>,</span>
-<span id="cb101-12"><a href="#cb101-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">:created-at</span> <span class="st">"2026-02-08T19:50:35.790382857Z"</span>}]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb101-12"><a href="#cb101-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">:created-at</span> <span class="st">"2026-02-08T20:14:36.902094348Z"</span>}]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
 <section id="cache-stats" class="level3">
@@ -1121,7 +1121,7 @@ Computing 3 + 4 (this is expensive!)
 </div>
 <div id="callout-22" class="callout-22-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>21:50:35.800 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo-reference
+<pre><code>22:14:36.911 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo-reference
 </code></pre>
 </div>
 </div>
@@ -1179,8 +1179,8 @@ Computing 3 + 4 (this is expensive!)
 </div>
 <div id="callout-23" class="callout-23-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>21:50:35.804 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.api-reference/step-b
-21:50:35.804 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.api-reference/step-a
+<pre><code>22:14:36.915 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.api-reference/step-b
+22:14:36.915 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.api-reference/step-a
 </code></pre>
 </div>
 </div>
@@ -1275,8 +1275,8 @@ Computing 3 + 4 (this is expensive!)
 </div>
 <div id="callout-24" class="callout-24-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>21:50:35.812 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.api-reference/run-exp
-21:50:35.813 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.api-reference/run-exp
+<pre><code>22:14:36.921 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.api-reference/run-exp
+22:14:36.922 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.api-reference/run-exp
 </code></pre>
 </div>
 </div>
@@ -1300,7 +1300,7 @@ Computing 3 + 4 (this is expensive!)
 </div>
 <div id="callout-25" class="callout-25-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>21:50:35.817 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo-reference
+<pre><code>22:14:36.925 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo-reference
 </code></pre>
 </div>
 </div>

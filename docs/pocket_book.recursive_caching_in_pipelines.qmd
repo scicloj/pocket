@@ -73,7 +73,7 @@ any special handling.
 ::: {.callout-note}
 ## OUT
 ```
-21:50:19.224 INFO scicloj.pocket - Cache dir set to: /tmp/pocket-demo-pipelines
+22:14:20.203 INFO scicloj.pocket - Cache dir set to: /tmp/pocket-demo-pipelines
 
 ```
 :::
@@ -100,7 +100,7 @@ any special handling.
 ::: {.callout-note}
 ## OUT
 ```
-21:50:19.225 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo-pipelines
+22:14:20.204 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo-pipelines
 
 ```
 :::
@@ -219,16 +219,16 @@ First pipeline run:
 ::: {.callout-note}
 ## OUT
 ```
-21:50:19.230 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.recursive-caching-in-pipelines/train-model
-21:50:19.230 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.recursive-caching-in-pipelines/preprocess
-21:50:19.230 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.recursive-caching-in-pipelines/load-dataset
+22:14:20.211 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.recursive-caching-in-pipelines/train-model
+22:14:20.211 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.recursive-caching-in-pipelines/preprocess
+22:14:20.211 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.recursive-caching-in-pipelines/load-dataset
 Loading dataset from data/raw.csv ...
-21:50:19.531 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo-pipelines/b8/(pocket-book.recursive-caching-in-pipelines_load-dataset "data_raw.csv")
+22:14:20.513 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo-pipelines/b8/(pocket-book.recursive-caching-in-pipelines_load-dataset "data_raw.csv")
 Preprocessing with options: {:scale 2}
-21:50:19.834 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo-pipelines/85/(pocket-book.recursive-caching-in-pipelines_preprocess (pocket-book.recursive-caching-in-pipelines_load-dataset "data_raw.csv") {:scale 2})
+22:14:20.815 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo-pipelines/85/(pocket-book.recursive-caching-in-pipelines_preprocess (pocket-book.recursive-caching-in-pipelines_load-dataset "data_raw.csv") {:scale 2})
 Training model with params: {:epochs 100}
-21:50:20.136 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo-pipelines/c9/(pocket-book.recursive-caching-in-pipelines_train-model (pocket-book.recursive-caching-in-pipelines_preprocess (pocket-book.recursive-caching-in-pipelines_load-dataset "data_raw.csv") {:scale 2}) {:epochs 100})
-"Elapsed time: 907.059341 msecs"
+22:14:21.116 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo-pipelines/c9/(pocket-book.recursive-caching-in-pipelines_train-model (pocket-book.recursive-caching-in-pipelines_preprocess (pocket-book.recursive-caching-in-pipelines_load-dataset "data_raw.csv") {:scale 2}) {:epochs 100})
+"Elapsed time: 906.132364 msecs"
 
 ```
 :::
@@ -265,7 +265,7 @@ Second pipeline run (all cached):
 ::: {.callout-note}
 ## OUT
 ```
-"Elapsed time: 0.796995 msecs"
+"Elapsed time: 0.682602 msecs"
 
 ```
 :::
@@ -435,15 +435,15 @@ No `:value` keys yet. Now trigger computation:
 ::: {.callout-note}
 ## OUT
 ```
-21:50:20.148 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.recursive-caching-in-pipelines/train-model
-21:50:20.148 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.recursive-caching-in-pipelines/preprocess
-21:50:20.148 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.recursive-caching-in-pipelines/load-dataset
+22:14:21.126 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.recursive-caching-in-pipelines/train-model
+22:14:21.126 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.recursive-caching-in-pipelines/preprocess
+22:14:21.126 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.recursive-caching-in-pipelines/load-dataset
 Loading dataset from data/experiment.csv ...
-21:50:20.449 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo-pipelines/cd/(pocket-book.recursive-caching-in-pipelines_load-dataset "data_experiment.csv")
+22:14:21.427 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo-pipelines/cd/(pocket-book.recursive-caching-in-pipelines_load-dataset "data_experiment.csv")
 Preprocessing with options: {:scale 2}
-21:50:20.751 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo-pipelines/f8/(pocket-book.recursive-caching-in-pipelines_preprocess (pocket-book.recursive-caching-in-pipelines_load-dataset "data_experiment.csv") {:scale 2})
+22:14:21.729 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo-pipelines/f8/(pocket-book.recursive-caching-in-pipelines_preprocess (pocket-book.recursive-caching-in-pipelines_load-dataset "data_experiment.csv") {:scale 2})
 Training model with params: {:epochs 100}
-21:50:21.053 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo-pipelines/9e/(pocket-book.recursive-caching-in-pipelines_train-model (pocket-book.recursive-caching-in-pipelines_preprocess (pocket-book.recursive-caching-in-pipelines_load-dataset "data_experiment.csv") {:scale 2}) {:epochs 100})
+22:14:22.031 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo-pipelines/9e/(pocket-book.recursive-caching-in-pipelines_train-model (pocket-book.recursive-caching-in-pipelines_preprocess (pocket-book.recursive-caching-in-pipelines_load-dataset "data_experiment.csv") {:scale 2}) {:epochs 100})
 
 ```
 :::
@@ -583,7 +583,7 @@ Returns a Mermaid flowchart string. Arrows show data flow direction
 ::: {.callout-note}
 ## OUT
 ```
-21:50:21.059 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo-pipelines
+22:14:22.037 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo-pipelines
 
 ```
 :::

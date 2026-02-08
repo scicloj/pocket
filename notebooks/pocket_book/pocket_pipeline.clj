@@ -1,5 +1,4 @@
-
-;; # 🚧 Draft: Full Pocket integration for ML pipelines
+;; # 🚧 Draft: `pocket-pipeline` — cached ML pipelines with provenance
 ;;
 ;; **Last modified: 2026-02-08**
 ;;
