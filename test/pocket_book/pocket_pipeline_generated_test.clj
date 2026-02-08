@@ -312,7 +312,7 @@
  (def transform-ctx (mm/transform-pipe test-c pipe-cart fit-ctx)))
 
 
-(def v40_l318 (deref (:model fit-ctx)))
+(def v40_l318 (kind/pprint @(:model fit-ctx)))
 
 
 (deftest t41_l320 (is ((fn [model] (map? model)) v40_l318)))

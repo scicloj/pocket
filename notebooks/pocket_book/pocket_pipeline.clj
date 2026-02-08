@@ -315,7 +315,7 @@
 
 ;; The fitted context carries the model and threshold as `Cached` refs:
 
-(deref (:model fit-ctx))
+(kind/pprint @(:model fit-ctx))
 
 (kind/test-last
  [(fn [model] (map? model))])
