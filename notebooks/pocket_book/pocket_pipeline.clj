@@ -61,7 +61,7 @@
 ;; | What's cached | Training only | Every step |
 ;; | Provenance | Training step only | Full DAG |
 ;; | Storage control | Global | Per-step |
-;; | Evaluation | metamorph.ml's `evaluate-pipelines` | `pocket-evaluate-pipelines` (loops over `Cached` refs) |
+;; | Evaluation | metamorph.ml's `evaluate-pipelines` | `pocket-evaluate-pipelines` (loops over `Cached` references) |
 
 ;; ## Setup
 
@@ -236,7 +236,7 @@
 ;; metamorph provides the pipeline machinery we need:
 ;; `mm/pipeline` composes steps, `mm/lift` wraps stateless functions,
 ;; `mm/fit-pipe` and `mm/transform-pipe` run pipelines in each mode.
-;; These work with `Cached` refs in `:metamorph/data` — they pass the
+;; These work with `Cached` references in `:metamorph/data` — they pass the
 ;; context through without inspecting the data.
 ;;
 ;; We only need two custom step types that metamorph does not provide:
@@ -313,7 +313,7 @@
 
 (def transform-ctx (mm/transform-pipe test-c pipe-cart fit-ctx))
 
-;; The fitted context carries the model and threshold as `Cached` refs:
+;; The fitted context carries the model and threshold as `Cached` references:
 
 (kind/pprint @(:model fit-ctx))
 
@@ -334,7 +334,7 @@
 
 ;; ### Provenance
 ;;
-;; The model `Cached` ref carries full provenance — from the trained
+;; The model `Cached` reference carries full provenance — from the trained
 ;; model back through clipping, feature engineering, and data
 ;; generation to the original scalar parameters:
 
@@ -344,10 +344,10 @@
 
 ;; ---
 
-;; ## Splits as Cached refs
+;; ## Splits as Cached references
 ;;
 ;; For cross-validation, we need k train/test splits — each as a
-;; `Cached` ref so the full provenance chain is maintained.
+;; `Cached` reference so the full provenance chain is maintained.
 
 (defn nth-split-train
   "Extract the train set of the nth split."
@@ -370,7 +370,7 @@
     :loo (throw (ex-info "pocket-splits does not support :loo (needs dataset size)" {}))))
 
 (defn pocket-splits
-  "Create k-fold splits as Cached refs.
+  "Create k-fold splits as Cached references.
   Returns [{:train Cached, :test Cached, :idx int} ...]."
   [data-c split-method split-params]
   (vec (for [idx (range (n-splits split-method split-params))]
@@ -390,7 +390,7 @@
 
 (defn pocket-evaluate-pipelines
   "Evaluate pipelines across k-fold splits.
-  Like ml/evaluate-pipelines, but built on Cached refs.
+  Like ml/evaluate-pipelines, but built on Cached references.
   
   `pipelines` is a seq of pipeline functions (from mm/pipeline).
   `metric-fn` takes (test-ds, prediction-ds) and returns a number."
@@ -545,7 +545,7 @@
 ;; **Reusing metamorph:**
 ;;
 ;; We use `mm/pipeline`, `mm/lift`, `mm/fit-pipe`, and
-;; `mm/transform-pipe` directly — they pass `Cached` refs through
+;; `mm/transform-pipe` directly — they pass `Cached` references through
 ;; `:metamorph/data` without inspecting them. Pocket only adds two
 ;; custom step types:
 ;;
@@ -575,7 +575,7 @@
 ;; ```
 ;;
 ;; On top of this, `pocket-evaluate-pipelines` and `pocket-splits`
-;; wrap cross-validation in `Cached` refs for provenance. Everything
+;; wrap cross-validation in `Cached` references for provenance. Everything
 ;; else is standard metamorph.
 ;;
 ;; **What we write:**
