@@ -83,23 +83,23 @@
   "Generate a synthetic regression dataset.
   `f` is a function from x to y (the ground truth).
   Optional `outlier-fraction` (0–1) and `outlier-scale` inject
-  corrupted y values to simulate measurement errors."
+  corrupted x values to simulate sensor glitches."
   [{:keys [f n noise-sd seed outlier-fraction outlier-scale]
     :or {outlier-fraction 0 outlier-scale 10}}]
   (let [rng (java.util.Random. (long seed))
         xs (vec (repeatedly n #(* 10.0 (.nextDouble rng))))
+        xs-final (if (pos? outlier-fraction)
+                   (let [out-rng (java.util.Random. (+ (long seed) 7919))]
+                     (mapv (fn [x]
+                             (if (< (.nextDouble out-rng) outlier-fraction)
+                               (+ x (* (double outlier-scale) (.nextGaussian out-rng)))
+                               x))
+                           xs))
+                   xs)
         ys (mapv (fn [x] (+ (double (f x))
                             (* (double noise-sd) (.nextGaussian rng))))
-                 xs)
-        ys-final (if (pos? outlier-fraction)
-                   (let [out-rng (java.util.Random. (+ (long seed) 7919))]
-                     (mapv (fn [y]
-                             (if (< (.nextDouble out-rng) outlier-fraction)
-                               (+ y (* (double outlier-scale) (.nextGaussian out-rng)))
-                               y))
-                           ys))
-                   ys)]
-    (-> (tc/dataset {:x xs :y ys-final})
+                 xs)]
+    (-> (tc/dataset {:x xs-final :y ys})
         (ds-mod/set-inference-target :y))))
 
 ;; **Splitting**: `split-dataset` divides data into training and test
@@ -404,7 +404,7 @@ noise-results
 (kind/test-last
  [(fn [n] (> n 30))])
 
-(pocket/cache-entries)
+(:entries-per-fn (pocket/cache-stats))
 
 ;; With this small synthetic data, each step runs in milliseconds.
 ;; But the *structure* is what matters. In real workflows — large
@@ -428,20 +428,24 @@ noise-results
 
 ;; ## Part 4 — Sharing computations across branches
 
-;; Real data is messy — sensors glitch, entries get corrupted, outliers
-;; creep in. Before training a model, you often need to detect what's
-;; "normal" and remove extreme values. This is *outlier clipping*:
-;; compute a threshold from the training data, then clip both train
-;; and test sets to those bounds.
+;; Real sensors glitch. A positioning system occasionally records a
+;; wildly wrong x value — the physics (y) is unaffected, but the
+;; recorded input is corrupted. When we build polynomial features
+;; like x², these outlier x values get amplified: an errant x=50
+;; gives x²=2500 instead of the expected ~25 from a normal x≈5.
 ;;
-;; The threshold **must** come from training data alone. Using test
-;; data would leak future information — a subtle but serious mistake.
+;; The fix is *feature outlier clipping*: compute what range of x is
+;; "normal" from training data, then clip both train and test inputs
+;; to those bounds — **before** feature engineering.
+;;
+;; The clipping threshold **must** come from training data alone.
+;; Using test data would leak future information.
 ;;
 ;; This creates a *diamond dependency* — one computation (the
 ;; threshold) feeds into multiple downstream steps:
 ;;
 ;; ```
-;;  make-regression-data (with outliers)
+;;  make-regression-data (with x outliers)
 ;;          |
 ;;     split-dataset
 ;;          |
@@ -455,6 +459,9 @@ noise-results
 ;;     +----+----+
 ;;     v         v
 ;; clip(train) clip(test)
+;;     |         |
+;;     v         v
+;; features   features
 ;;     |         |
 ;;     v         |
 ;; train-model   |
@@ -474,25 +481,24 @@ noise-results
 ;; clip outliers, or evaluate. Pocket will wire them together.
 
 (defn fit-outlier-threshold
-  "Compute IQR-based clipping bounds for :y from training data.
+  "Compute IQR-based clipping bounds for :x from training data.
   Returns {:lower <bound> :upper <bound>}."
   [train-ds]
   (println "  Fitting outlier threshold from training data...")
-  (let [ys (sort (vec (:y train-ds)))
-        n (count ys)
-        q1 (nth ys (int (* 0.25 n)))
-        q3 (nth ys (int (* 0.75 n)))
+  (let [xs (sort (vec (:x train-ds)))
+        n (count xs)
+        q1 (nth xs (int (* 0.25 n)))
+        q3 (nth xs (int (* 0.75 n)))
         iqr (- q3 q1)]
     {:lower (- q1 (* 1.5 iqr))
      :upper (+ q3 (* 1.5 iqr))}))
 
 (defn clip-outliers
-  "Clip :y values using pre-computed threshold bounds."
+  "Clip :x values using pre-computed threshold bounds."
   [ds threshold]
   (println "  Clipping outliers with bounds:" (select-keys threshold [:lower :upper]))
   (let [{:keys [lower upper]} threshold]
-    (-> (tc/add-column ds :y (-> (:y ds) (tcc/max lower) (tcc/min upper)))
-        (ds-mod/set-inference-target :y))))
+    (tc/add-column ds :x (-> (:x ds) (tcc/max lower) (tcc/min upper)))))
 
 (defn evaluate-model
   "Evaluate a model on test data."
@@ -506,9 +512,9 @@ noise-results
 ;; Not every step needs disk persistence. We use `caching-fn` with
 ;; per-function storage policies:
 ;;
-;; - **`:mem`** for cheap shared computations (threshold, clipping) —
-;;   no disk I/O, but in-memory dedup ensures each runs only once
-;; - **`:mem+disk`** (default) for expensive steps (model training) —
+;; - **`:mem`** for cheap shared computations (threshold, clipping,
+;;   feature engineering) — no disk I/O, but in-memory dedup ensures
+;;   each runs only once
 ;;   persists across JVM sessions
 ;; - **`:none`** for trivial steps (evaluation) — just tracks identity
 ;;   in the DAG without any shared caching
@@ -519,15 +525,19 @@ noise-results
 (def c-clip
   (pocket/caching-fn #'clip-outliers {:storage :mem}))
 
+(def c-prepare
+  (pocket/caching-fn #'prepare-features {:storage :mem}))
+
 (def c-train
   (pocket/caching-fn #'train-model))
 
 (def c-evaluate
   (pocket/caching-fn #'evaluate-model {:storage :none}))
 
-;; Generate data *with outliers* for this demo — 10% of the y values
-;; are corrupted by large random spikes. This simulates the kind of
-;; measurement errors you'd encounter in real sensor data.
+;; Generate data *with outliers* for this demo — 10% of the x values
+;; are corrupted by large random spikes, simulating sensor glitches.
+;; The y values (physics) are computed from the clean x, then noise
+;; is added normally — so only the input is corrupted.
 
 (def dag-data-c
   (pocket/cached #'make-regression-data
@@ -553,11 +563,17 @@ noise-results
 (def test-clipped-c
   (c-clip dag-test-c threshold-c))
 
+(def train-prepped-c
+  (c-prepare train-clipped-c :poly+trig))
+
+(def test-prepped-c
+  (c-prepare test-clipped-c :poly+trig))
+
 (def model-c
-  (c-train train-clipped-c cart-spec))
+  (c-train train-prepped-c cart-spec))
 
 (def metrics-c
-  (c-evaluate test-clipped-c model-c))
+  (c-evaluate test-prepped-c model-c))
 
 ;; ### Visualize the DAG
 
@@ -593,6 +609,38 @@ noise-results
 
 (kind/test-last
  [(fn [m] (and (map? m) (contains? m :rmse)))])
+
+;; How much did clipping help? Let's compare three scenarios:
+;; no outliers (clean baseline), outliers without clipping, and
+;; outliers with clipping.
+
+(let [clean-data (make-regression-data {:f nonlinear-fn :n 200 :noise-sd 0.3 :seed 99})
+      dirty-data (make-regression-data {:f nonlinear-fn :n 200 :noise-sd 0.3 :seed 99
+                                        :outlier-fraction 0.1 :outlier-scale 15})
+      run (fn [ds]
+            (let [sp (split-dataset ds {:seed 99})
+                  train-prep (prepare-features (:train sp) :poly+trig)
+                  test-prep (prepare-features (:test sp) :poly+trig)
+                  model (ml/train train-prep cart-spec)]
+              (loss/rmse (:y test-prep) (:y (ml/predict test-prep model)))))
+      threshold (fit-outlier-threshold (:train (split-dataset dirty-data {:seed 99})))
+      run-clipped (fn [ds]
+                    (let [sp (split-dataset ds {:seed 99})
+                          train-clip (clip-outliers (:train sp) threshold)
+                          test-clip (clip-outliers (:test sp) threshold)
+                          train-prep (prepare-features train-clip :poly+trig)
+                          test-prep (prepare-features test-clip :poly+trig)
+                          model (ml/train train-prep cart-spec)]
+                      (loss/rmse (:y test-prep) (:y (ml/predict test-prep model)))))]
+  {:clean (run clean-data)
+   :outliers-no-clip (run dirty-data)
+   :outliers-clipped (run-clipped dirty-data)})
+
+(kind/test-last
+ [(fn [m] (< (:outliers-clipped m) (:outliers-no-clip m)))])
+
+;; Clipping x before building polynomial features makes a visible
+;; difference — the amplification through x² is tamed.
 
 ;; ---
 
@@ -703,6 +751,12 @@ noise-results
 ;;   recompute. Meanwhile, `compare-experiments` extracted the varying
 ;;   parameters automatically, turning cached results into a
 ;;   comparison table — useful at any scale.
+;;
+;; - **Preprocessing order matters.** Outlier x values get amplified
+;;   by polynomial features (x²), so clipping must come *before*
+;;   feature engineering. The diamond dependency — one threshold
+;;   feeding both train and test clipping — is handled naturally
+;;   by Pocket's DAG.
 
 ;; ## Cleanup
 

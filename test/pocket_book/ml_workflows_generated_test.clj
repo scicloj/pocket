@@ -27,7 +27,7 @@
  v6_l82
  (defn
   make-regression-data
-  "Generate a synthetic regression dataset.\n  `f` is a function from x to y (the ground truth).\n  Optional `outlier-fraction` (0–1) and `outlier-scale` inject\n  corrupted y values to simulate measurement errors."
+  "Generate a synthetic regression dataset.\n  `f` is a function from x to y (the ground truth).\n  Optional `outlier-fraction` (0–1) and `outlier-scale` inject\n  corrupted x values to simulate sensor glitches."
   [{:keys [f n noise-sd seed outlier-fraction outlier-scale],
     :or {outlier-fraction 0, outlier-scale 10}}]
   (let
@@ -35,28 +35,28 @@
     (java.util.Random. (long seed))
     xs
     (vec (repeatedly n (fn* [] (* 10.0 (.nextDouble rng)))))
-    ys
-    (mapv
-     (fn
-      [x]
-      (+ (double (f x)) (* (double noise-sd) (.nextGaussian rng))))
-     xs)
-    ys-final
+    xs-final
     (if
      (pos? outlier-fraction)
      (let
       [out-rng (java.util.Random. (+ (long seed) 7919))]
       (mapv
        (fn
-        [y]
+        [x]
         (if
          (< (.nextDouble out-rng) outlier-fraction)
-         (+ y (* (double outlier-scale) (.nextGaussian out-rng)))
-         y))
-       ys))
-     ys)]
+         (+ x (* (double outlier-scale) (.nextGaussian out-rng)))
+         x))
+       xs))
+     xs)
+    ys
+    (mapv
+     (fn
+      [x]
+      (+ (double (f x)) (* (double noise-sd) (.nextGaussian rng))))
+     xs)]
    (->
-    (tc/dataset {:x xs, :y ys-final})
+    (tc/dataset {:x xs-final, :y ys})
     (ds-mod/set-inference-target :y)))))
 
 
@@ -321,11 +321,13 @@
     (let
      [low
       (first
-       (filter (fn* [p1__97968#] (= 0.1 (:noise-sd p1__97968#))) rows))
+       (filter
+        (fn* [p1__103013#] (= 0.1 (:noise-sd p1__103013#)))
+        rows))
       high
       (first
        (filter
-        (fn* [p1__97969#] (= 5.0 (:noise-sd p1__97969#)))
+        (fn* [p1__103014#] (= 5.0 (:noise-sd p1__103014#)))
         rows))]
      (and
       (< (:cart-rmse low) (:sgd-rmse low))
@@ -358,51 +360,49 @@
 (deftest t48_l404 (is ((fn [n] (> n 30)) v47_l402)))
 
 
-(def v49_l407 (pocket/cache-entries))
+(def v49_l407 (:entries-per-fn (pocket/cache-stats)))
 
 
 (def v51_l425 (pocket/cleanup!))
 
 
 (def
- v53_l476
+ v53_l483
  (defn
   fit-outlier-threshold
-  "Compute IQR-based clipping bounds for :y from training data.\n  Returns {:lower <bound> :upper <bound>}."
+  "Compute IQR-based clipping bounds for :x from training data.\n  Returns {:lower <bound> :upper <bound>}."
   [train-ds]
   (println "  Fitting outlier threshold from training data...")
   (let
-   [ys
-    (sort (vec (:y train-ds)))
+   [xs
+    (sort (vec (:x train-ds)))
     n
-    (count ys)
+    (count xs)
     q1
-    (nth ys (int (* 0.25 n)))
+    (nth xs (int (* 0.25 n)))
     q3
-    (nth ys (int (* 0.75 n)))
+    (nth xs (int (* 0.75 n)))
     iqr
     (- q3 q1)]
    {:lower (- q1 (* 1.5 iqr)), :upper (+ q3 (* 1.5 iqr))})))
 
 
 (def
- v54_l489
+ v54_l496
  (defn
   clip-outliers
-  "Clip :y values using pre-computed threshold bounds."
+  "Clip :x values using pre-computed threshold bounds."
   [ds threshold]
   (println
    "  Clipping outliers with bounds:"
    (select-keys threshold [:lower :upper]))
   (let
    [{:keys [lower upper]} threshold]
-   (->
-    (tc/add-column ds :y (-> (:y ds) (tcc/max lower) (tcc/min upper)))
-    (ds-mod/set-inference-target :y)))))
+   (tc/add-column ds :x (-> (:x ds) (tcc/max lower) (tcc/min upper))))))
 
 
 (def
- v55_l497
+ v55_l503
  (defn
   evaluate-model
   "Evaluate a model on test data."
@@ -414,27 +414,32 @@
 
 
 (def
- v57_l516
+ v57_l522
  (def
   c-fit-threshold
   (pocket/caching-fn #'fit-outlier-threshold {:storage :mem})))
 
 
 (def
- v58_l519
+ v58_l525
  (def c-clip (pocket/caching-fn #'clip-outliers {:storage :mem})))
 
 
-(def v59_l522 (def c-train (pocket/caching-fn #'train-model)))
+(def
+ v59_l528
+ (def c-prepare (pocket/caching-fn #'prepare-features {:storage :mem})))
+
+
+(def v60_l531 (def c-train (pocket/caching-fn #'train-model)))
 
 
 (def
- v60_l525
+ v61_l534
  (def c-evaluate (pocket/caching-fn #'evaluate-model {:storage :none})))
 
 
 (def
- v62_l532
+ v63_l542
  (def
   dag-data-c
   (pocket/cached
@@ -448,52 +453,120 @@
 
 
 (def
- v63_l537
+ v64_l547
  (def
   dag-split-c
   (pocket/cached #'split-dataset dag-data-c {:seed 99})))
 
 
-(def v64_l540 (def dag-train-c (pocket/cached :train dag-split-c)))
+(def v65_l550 (def dag-train-c (pocket/cached :train dag-split-c)))
 
 
-(def v65_l541 (def dag-test-c (pocket/cached :test dag-split-c)))
+(def v66_l551 (def dag-test-c (pocket/cached :test dag-split-c)))
 
 
-(def v67_l547 (def threshold-c (c-fit-threshold dag-train-c)))
+(def v68_l557 (def threshold-c (c-fit-threshold dag-train-c)))
 
 
-(def v68_l550 (def train-clipped-c (c-clip dag-train-c threshold-c)))
+(def v69_l560 (def train-clipped-c (c-clip dag-train-c threshold-c)))
 
 
-(def v69_l553 (def test-clipped-c (c-clip dag-test-c threshold-c)))
-
-
-(def v70_l556 (def model-c (c-train train-clipped-c cart-spec)))
-
-
-(def v71_l559 (def metrics-c (c-evaluate test-clipped-c model-c)))
-
-
-(def v73_l573 (pocket/origin-story metrics-c))
-
-
-(def v75_l581 (pocket/origin-story-graph metrics-c))
-
-
-(def v77_l588 (pocket/origin-story-mermaid metrics-c))
-
-
-(def v79_l592 (deref metrics-c))
-
-
-(deftest
- t80_l594
- (is ((fn [m] (and (map? m) (contains? m :rmse))) v79_l592)))
+(def v70_l563 (def test-clipped-c (c-clip dag-test-c threshold-c)))
 
 
 (def
- v82_l609
+ v71_l566
+ (def train-prepped-c (c-prepare train-clipped-c :poly+trig)))
+
+
+(def
+ v72_l569
+ (def test-prepped-c (c-prepare test-clipped-c :poly+trig)))
+
+
+(def v73_l572 (def model-c (c-train train-prepped-c cart-spec)))
+
+
+(def v74_l575 (def metrics-c (c-evaluate test-prepped-c model-c)))
+
+
+(def v76_l589 (pocket/origin-story metrics-c))
+
+
+(def v78_l597 (pocket/origin-story-graph metrics-c))
+
+
+(def v80_l604 (pocket/origin-story-mermaid metrics-c))
+
+
+(def v82_l608 (deref metrics-c))
+
+
+(deftest
+ t83_l610
+ (is ((fn [m] (and (map? m) (contains? m :rmse))) v82_l608)))
+
+
+(def
+ v85_l617
+ (let
+  [clean-data
+   (make-regression-data
+    {:f nonlinear-fn, :n 200, :noise-sd 0.3, :seed 99})
+   dirty-data
+   (make-regression-data
+    {:f nonlinear-fn,
+     :n 200,
+     :noise-sd 0.3,
+     :seed 99,
+     :outlier-fraction 0.1,
+     :outlier-scale 15})
+   run
+   (fn
+    [ds]
+    (let
+     [sp
+      (split-dataset ds {:seed 99})
+      train-prep
+      (prepare-features (:train sp) :poly+trig)
+      test-prep
+      (prepare-features (:test sp) :poly+trig)
+      model
+      (ml/train train-prep cart-spec)]
+     (loss/rmse (:y test-prep) (:y (ml/predict test-prep model)))))
+   threshold
+   (fit-outlier-threshold
+    (:train (split-dataset dirty-data {:seed 99})))
+   run-clipped
+   (fn
+    [ds]
+    (let
+     [sp
+      (split-dataset ds {:seed 99})
+      train-clip
+      (clip-outliers (:train sp) threshold)
+      test-clip
+      (clip-outliers (:test sp) threshold)
+      train-prep
+      (prepare-features train-clip :poly+trig)
+      test-prep
+      (prepare-features test-clip :poly+trig)
+      model
+      (ml/train train-prep cart-spec)]
+     (loss/rmse (:y test-prep) (:y (ml/predict test-prep model)))))]
+  {:clean (run clean-data),
+   :outliers-no-clip (run dirty-data),
+   :outliers-clipped (run-clipped dirty-data)}))
+
+
+(deftest
+ t86_l639
+ (is
+  ((fn [m] (< (:outliers-clipped m) (:outliers-no-clip m))) v85_l617)))
+
+
+(def
+ v88_l657
  (defn
   run-pipeline
   "Run a complete pipeline with given hyperparameters."
@@ -523,7 +596,7 @@
 
 
 (def
- v84_l627
+ v90_l675
  (def
   experiments
   (for
@@ -535,14 +608,14 @@
      :max-depth max-depth}))))
 
 
-(def v86_l638 (def comparison (pocket/compare-experiments experiments)))
+(def v92_l686 (def comparison (pocket/compare-experiments experiments)))
 
 
-(def v87_l641 (tc/dataset comparison))
+(def v93_l689 (tc/dataset comparison))
 
 
 (deftest
- t88_l643
+ t94_l691
  (is
   ((fn
     [ds]
@@ -551,11 +624,11 @@
      (some #{:noise-sd} (tc/column-names ds))
      (some #{:feature-set} (tc/column-names ds))
      (some #{:max-depth} (tc/column-names ds))))
-   v87_l641)))
+   v93_l689)))
 
 
 (def
- v90_l656
+ v96_l704
  (let
   [rows
    (map
@@ -588,4 +661,4 @@
     :layout {:xaxis {:title "max-depth"}, :yaxis {:title "rmse"}}})))
 
 
-(def v92_l709 (pocket/cleanup!))
+(def v98_l763 (pocket/cleanup!))

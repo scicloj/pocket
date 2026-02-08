@@ -73,23 +73,23 @@
   "Generate a synthetic regression dataset.
   `f` is a function from x to y (the ground truth).
   Optional `outlier-fraction` (0–1) and `outlier-scale` inject
-  corrupted y values to simulate measurement errors."
+  corrupted x values to simulate sensor glitches."
   [{:keys [f n noise-sd seed outlier-fraction outlier-scale]
     :or {outlier-fraction 0 outlier-scale 10}}]
   (let [rng (java.util.Random. (long seed))
         xs (vec (repeatedly n #(* 10.0 (.nextDouble rng))))
+        xs-final (if (pos? outlier-fraction)
+                   (let [out-rng (java.util.Random. (+ (long seed) 7919))]
+                     (mapv (fn [x]
+                             (if (< (.nextDouble out-rng) outlier-fraction)
+                               (+ x (* (double outlier-scale) (.nextGaussian out-rng)))
+                               x))
+                           xs))
+                   xs)
         ys (mapv (fn [x] (+ (double (f x))
                             (* (double noise-sd) (.nextGaussian rng))))
-                 xs)
-        ys-final (if (pos? outlier-fraction)
-                   (let [out-rng (java.util.Random. (+ (long seed) 7919))]
-                     (mapv (fn [y]
-                             (if (< (.nextDouble out-rng) outlier-fraction)
-                               (+ y (* (double outlier-scale) (.nextGaussian out-rng)))
-                               y))
-                           ys))
-                   ys)]
-    (-> (tc/dataset {:x xs :y ys-final})
+                 xs)]
+    (-> (tc/dataset {:x xs-final :y ys})
         (ds-mod/set-inference-target :y))))
 
 (defn nonlinear-fn
@@ -123,23 +123,22 @@
 ;; one to *apply* (clip values using those bounds).
 
 (defn fit-outlier-threshold
-  "Compute IQR-based clipping bounds for :y from training data.
+  "Compute IQR-based clipping bounds for :x from training data.
   Returns {:lower <bound> :upper <bound>}."
   [train-ds]
-  (let [ys (sort (vec (:y train-ds)))
-        n (count ys)
-        q1 (nth ys (int (* 0.25 n)))
-        q3 (nth ys (int (* 0.75 n)))
+  (let [xs (sort (vec (:x train-ds)))
+        n (count xs)
+        q1 (nth xs (int (* 0.25 n)))
+        q3 (nth xs (int (* 0.75 n)))
         iqr (- q3 q1)]
     {:lower (- q1 (* 1.5 iqr))
      :upper (+ q3 (* 1.5 iqr))}))
 
 (defn clip-outliers
-  "Clip :y values using pre-computed threshold bounds."
+  "Clip :x values using pre-computed threshold bounds."
   [ds threshold]
   (let [{:keys [lower upper]} threshold]
-    (-> (tc/add-column ds :y (-> (:y ds) (tcc/max lower) (tcc/min upper)))
-        (ds-mod/set-inference-target :y))))
+    (tc/add-column ds :x (-> (:x ds) (tcc/max lower) (tcc/min upper)))))
 
 (defn split-dataset
   "Split a dataset into train/test using holdout."
@@ -176,17 +175,18 @@
 (def splits (first (tc/split->seq ds-500 :holdout {:seed 42})))
 
 ;; The outlier clipping step is *stateful*: `fit-outlier-threshold`
-;; computes bounds from the training set, and `clip-outliers` uses
-;; those same bounds for both train and test. This prevents
-;; information leaking from test into training.
+;; computes the normal range of x from the training set, and
+;; `clip-outliers` clips x to those bounds for both train and test.
+;; Clipping happens **before** feature engineering — otherwise x²
+;; would amplify the outlier values.
 
-(let [train-prep (prepare-features (:train splits) :poly+trig)
-      threshold (fit-outlier-threshold train-prep)
-      train-clipped (clip-outliers train-prep threshold)
-      test-prep (prepare-features (:test splits) :poly+trig)
-      test-clipped (clip-outliers test-prep threshold)
-      model (ml/train train-clipped cart-spec)]
-  {:rmse (loss/rmse (:y test-clipped) (:y (ml/predict test-clipped model)))})
+(let [threshold (fit-outlier-threshold (:train splits))
+      train-clipped (clip-outliers (:train splits) threshold)
+      train-prep (prepare-features train-clipped :poly+trig)
+      test-clipped (clip-outliers (:test splits) threshold)
+      test-prep (prepare-features test-clipped :poly+trig)
+      model (ml/train train-prep cart-spec)]
+  {:rmse (loss/rmse (:y test-prep) (:y (ml/predict test-prep model)))})
 
 (kind/test-last
  [(fn [m] (< (:rmse m) 10.0))])
@@ -201,13 +201,13 @@
 
 (pocket/cleanup!)
 
-(let [train-prep (prepare-features (:train splits) :poly+trig)
-      threshold (fit-outlier-threshold train-prep)
-      train-clipped (clip-outliers train-prep threshold)
-      test-prep (prepare-features (:test splits) :poly+trig)
-      test-clipped (clip-outliers test-prep threshold)
-      model @(pocket/cached #'ml/train train-clipped cart-spec)]
-  {:rmse (loss/rmse (:y test-clipped) (:y (ml/predict test-clipped model)))})
+(let [threshold (fit-outlier-threshold (:train splits))
+      train-clipped (clip-outliers (:train splits) threshold)
+      train-prep (prepare-features train-clipped :poly+trig)
+      test-clipped (clip-outliers (:test splits) threshold)
+      test-prep (prepare-features test-clipped :poly+trig)
+      model @(pocket/cached #'ml/train train-prep cart-spec)]
+  {:rmse (loss/rmse (:y test-prep) (:y (ml/predict test-prep model)))})
 
 (kind/test-last
  [(fn [m] (< (:rmse m) 10.0))])
@@ -264,8 +264,8 @@
 
 (def cart-pipeline
   (mm/pipeline
-   (mm/lift prepare-features :poly+trig)
    {:metamorph/id :clip-outlier} (clip-outlier-step)
+   (mm/lift prepare-features :poly+trig)
    {:metamorph/id :model} (ml/model cart-spec)))
 
 ;; The `{:metamorph/id ...}` tags give steps fixed names.
@@ -300,16 +300,16 @@
 
 (def pipe-fns
   {:cart-raw (mm/pipeline
-              (mm/lift prepare-features :raw)
               {:metamorph/id :clip-outlier} (clip-outlier-step)
+              (mm/lift prepare-features :raw)
               {:metamorph/id :model} (ml/model cart-spec))
    :cart-poly (mm/pipeline
-               (mm/lift prepare-features :poly+trig)
                {:metamorph/id :clip-outlier} (clip-outlier-step)
+               (mm/lift prepare-features :poly+trig)
                {:metamorph/id :model} (ml/model cart-spec))
    :sgd-poly (mm/pipeline
-              (mm/lift prepare-features :poly+trig)
               {:metamorph/id :clip-outlier} (clip-outlier-step)
+              (mm/lift prepare-features :poly+trig)
               {:metamorph/id :model} (ml/model linear-sgd-spec))})
 
 (def manual-results
@@ -389,14 +389,15 @@ ml/train-predict-cache
 
 ;; Now `ml/train` checks this cache before training:
 
-(let [train-prep (prepare-features (:train splits) :poly+trig)
-      train-clipped (clip-outliers train-prep (fit-outlier-threshold train-prep))]
+(let [threshold (fit-outlier-threshold (:train splits))
+      train-clipped (clip-outliers (:train splits) threshold)
+      train-prep (prepare-features train-clipped :poly+trig)]
   (let [start (System/nanoTime)
-        _ (ml/train train-clipped cart-spec)
+        _ (ml/train train-prep cart-spec)
         first-ms (/ (- (System/nanoTime) start) 1e6)
 
         start2 (System/nanoTime)
-        _ (ml/train train-clipped cart-spec)
+        _ (ml/train train-prep cart-spec)
         second-ms (/ (- (System/nanoTime) start2) 1e6)]
     {:first-ms (Math/round first-ms)
      :second-ms (Math/round second-ms)
@@ -474,8 +475,8 @@ ml/train-predict-cache
 
 (def pocket-cart-pipe
   (mm/pipeline
-   (mm/lift prepare-features :poly+trig)
    {:metamorph/id :clip-outlier} (clip-outlier-step)
+   (mm/lift prepare-features :poly+trig)
    {:metamorph/id :model} (pocket-model cart-spec)))
 
 ;; First run — trains and caches:
@@ -563,19 +564,19 @@ ml/train-predict-cache
 (def train-c (pocket/cached :train split-c))
 (def test-c (pocket/cached :test split-c))
 
-(def train-prepped-c (pocket/cached #'prepare-features train-c :poly+trig))
-(def test-prepped-c (pocket/cached #'prepare-features test-c :poly+trig))
-(def threshold-c (pocket/cached #'fit-outlier-threshold train-prepped-c))
-(def train-clipped-c (pocket/cached #'clip-outliers train-prepped-c threshold-c))
-(def test-clipped-c (pocket/cached #'clip-outliers test-prepped-c threshold-c))
-(def model-c (pocket/cached #'ml/train train-clipped-c cart-spec))
+(def threshold-c (pocket/cached #'fit-outlier-threshold train-c))
+(def train-clipped-c (pocket/cached #'clip-outliers train-c threshold-c))
+(def test-clipped-c (pocket/cached #'clip-outliers test-c threshold-c))
+(def train-prepped-c (pocket/cached #'prepare-features train-clipped-c :poly+trig))
+(def test-prepped-c (pocket/cached #'prepare-features test-clipped-c :poly+trig))
+(def model-c (pocket/cached #'ml/train train-prepped-c cart-spec))
 
 ;; ### Provenance
 ;;
 ;; Every node is a `Cached` ref. `origin-story-mermaid` shows the
 ;; full DAG — from the scalar seed and row count, through data
-;; generation, splitting, feature engineering, outlier clipping, to the
-;; trained model:
+;; full DAG — from the scalar seed and row count, through data
+;; generation, splitting, outlier clipping, feature engineering, to the
 
 (pocket/origin-story-mermaid model-c)
 
@@ -586,12 +587,12 @@ ml/train-predict-cache
 
 ;; ### Prediction on test data
 ;;
-;; For prediction, we deref the cached model and the cached clipped
+;; For prediction, we deref the cached model and the preprocessed
 ;; test set:
 
-(let [test-clipped @test-clipped-c]
-  {:rmse (loss/rmse (:y test-clipped)
-                    (:y (ml/predict test-clipped @model-c)))})
+(let [test-prepped @test-prepped-c]
+  {:rmse (loss/rmse (:y test-prepped)
+                    (:y (ml/predict test-prepped @model-c)))})
 
 (kind/test-last
  [(fn [m] (< (:rmse m) 10.0))])
@@ -632,8 +633,8 @@ ml/train-predict-cache
                                           :properties {:maxDepth (str depth)}}]
                      :tribuo-trainer-name "cart"}]
            (mm/pipeline
-            (mm/lift prepare-features :poly+trig)
             {:metamorph/id :clip-outlier} (clip-outlier-step)
+            (mm/lift prepare-features :poly+trig)
             {:metamorph/id :model} (pocket-model spec))))))
 
 ;; ### 3-fold cross-validation
@@ -724,14 +725,14 @@ depth-summary
                                        :properties {:maxDepth (str depth)}}]
                   :tribuo-trainer-name "cart"}]
         (mm/pipeline
-         (mm/lift prepare-features fs)
          {:metamorph/id :clip-outlier} (clip-outlier-step)
+         (mm/lift prepare-features fs)
          {:metamorph/id :model} (pocket-model spec))))
      ;; Linear SGD with poly+trig (raw features can't capture the
      ;; nonlinear target, so only one feature set)
     [(mm/pipeline
-      (mm/lift prepare-features :poly+trig)
       {:metamorph/id :clip-outlier} (clip-outlier-step)
+      (mm/lift prepare-features :poly+trig)
       {:metamorph/id :model} (pocket-model linear-sgd-spec))])))
 
 (def search-results
@@ -794,12 +795,12 @@ depth-summary
                  {:f nonlinear-fn :n n :noise-sd 0.5 :seed 42
                   :outlier-fraction 0.1 :outlier-scale 15})
            uncached-pipe (mm/pipeline
-                          (mm/lift prepare-features :poly+trig)
                           {:metamorph/id :clip-outlier} (clip-outlier-step)
+                          (mm/lift prepare-features :poly+trig)
                           {:metamorph/id :model} (ml/model cart-spec))
            cached-pipe (mm/pipeline
-                        (mm/lift prepare-features :poly+trig)
                         {:metamorph/id :clip-outlier} (clip-outlier-step)
+                        (mm/lift prepare-features :poly+trig)
                         {:metamorph/id :model} (pocket-model cart-spec))]
        ;; Uncached
        (pocket/cleanup!)
