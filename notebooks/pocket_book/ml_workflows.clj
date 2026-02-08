@@ -8,7 +8,7 @@
 ;; exploring many combinations of data, features, and models.
 ;;
 ;; **The problem**: We want to predict a numeric value (like house
-;; prices or temperature) from input data. This is called *regression*.
+;; prices or temperature) from input data. This is called [*regression*](https://en.wikipedia.org/wiki/Regression_analysis).
 ;; We'll generate synthetic data, try different ways of preparing it,
 ;; and compare two learning algorithms.
 ;;
@@ -18,11 +18,11 @@
 ;; independently, so only the parts you changed get recomputed.
 ;;
 ;; **What we'll cover**:
-;; - Part 1: Feature engineering — transforming inputs to help models learn
+;; - Part 1: [Feature engineering](https://en.wikipedia.org/wiki/Feature_engineering) — transforming inputs to help models learn
 ;; - Part 2: Noise sensitivity — how models behave with messy data
 ;; - Part 3: The caching payoff — what got cached and why it matters
 ;; - Part 4: DAG workflows — when preprocessing steps share dependencies
-;; - Part 5: Hyperparameter sweeps — comparing many experiments at once
+;; - Part 5: [Hyperparameter](https://en.wikipedia.org/wiki/Hyperparameter_(machine_learning)) sweeps — comparing many experiments at once
 ;;
 ;; **Note**: This notebook uses
 ;; [tablecloth](https://scicloj.github.io/tablecloth/) for data manipulation,
@@ -42,7 +42,7 @@
 ;; affect each algorithm? These controlled comparisons build intuition
 ;; that transfers to real problems. In our case, we'll see that a linear
 ;; model is helpless against a nonlinear target *unless* we give it the
-;; right features, while a decision tree handles the shape on its own
+;; right features, while a [decision tree](https://en.wikipedia.org/wiki/Decision_tree_learning) handles the shape on its own
 ;; but pays a different price when noise increases.
 
 ;; ## Setup
@@ -175,13 +175,13 @@
 
 ;; We'll compare two fundamentally different algorithms:
 ;;
-;; **Linear model** (gradient descent): Finds the best straight-line
+;; **Linear model** ([gradient descent](https://en.wikipedia.org/wiki/Stochastic_gradient_descent)): Finds the best straight-line
 ;; (or hyperplane) relationship between inputs and output. Simple and
 ;; fast, but can only learn linear patterns. Needs good features.
 ;;
-;; **Decision tree** (CART): Learns by splitting data into regions
+;; **Decision tree** ([CART](https://en.wikipedia.org/wiki/Decision_tree_learning)): Learns by splitting data into regions
 ;; based on thresholds ("if x > 5, go left"). Can capture complex
-;; patterns automatically, but may overfit noisy data.
+;; patterns automatically, but may [overfit](https://en.wikipedia.org/wiki/Overfitting) noisy data.
 ;;
 ;; These algorithms respond differently to feature engineering —
 ;; that contrast is the heart of Part 1.
@@ -190,12 +190,12 @@
   {:model-type :scicloj.ml.tribuo/regression
    :tribuo-components [{:name "squared"
                         :type "org.tribuo.regression.sgd.objectives.SquaredLoss"}
-                       {:name "trainer"
+                       {:name "linear-sgd"
                         :type "org.tribuo.regression.sgd.linear.LinearSGDTrainer"
                         :properties {:objective "squared"
                                      :epochs "50"
                                      :loggingInterval "10000"}}]
-   :tribuo-trainer-name "trainer"})
+   :tribuo-trainer-name "linear-sgd"})
 
 (def cart-spec
   {:model-type :scicloj.ml.tribuo/regression
@@ -377,13 +377,13 @@ noise-results
 ;; memorizing random wiggles (*overfitting*), and its error explodes.
 ;;
 ;; The linear model degrades more gracefully. Its rigid structure
-;; (a weighted sum of features) acts as a built-in regularizer —
+;; (a weighted sum of features) acts as a built-in [regularizer](https://en.wikipedia.org/wiki/Regularization_(mathematics)) —
 ;; it can't chase noise even if it wanted to.
 ;;
 ;; **Takeaway**: Flexible models (trees) excel with clean data but
 ;; suffer with noise. Simple models (linear) are more robust.
 
-;; ### RMSE vs. noise
+;; ### [RMSE](https://en.wikipedia.org/wiki/Root_mean_square_deviation) vs. noise
 
 (let [noise-sds (vec (map :noise-sd noise-results))
       cart-rmses (vec (map :cart-rmse noise-results))

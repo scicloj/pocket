@@ -38,8 +38,8 @@
 ;; once and reused for prediction.
 ;;
 ;; On top of this, metamorph.ml adds model training/prediction,
-;; cross-validation (`evaluate-pipelines`), loss functions, and
-;; hyperparameter search.
+;; [cross-validation](https://en.wikipedia.org/wiki/Cross-validation_(statistics)) (`evaluate-pipelines`), [loss functions](https://en.wikipedia.org/wiki/Loss_function), and
+;; [hyperparameter](https://en.wikipedia.org/wiki/Hyperparameter_(machine_learning)) search.
 ;;
 ;; ## How this chapter relates to others
 ;;
@@ -185,12 +185,12 @@
   {:model-type :scicloj.ml.tribuo/regression
    :tribuo-components [{:name "squared"
                         :type "org.tribuo.regression.sgd.objectives.SquaredLoss"}
-                       {:name "trainer"
+                       {:name "linear-sgd"
                         :type "org.tribuo.regression.sgd.linear.LinearSGDTrainer"
                         :properties {:objective "squared"
                                      :epochs "50"
                                      :loggingInterval "10000"}}]
-   :tribuo-trainer-name "trainer"})
+   :tribuo-trainer-name "linear-sgd"})
 
 ;; ---
 
@@ -321,7 +321,7 @@
 
 (tc/head (deref (:metamorph/data transform-ctx)))
 
-;; Compute RMSE from the target (preprocessed test data) and predictions:
+;; Compute [RMSE](https://en.wikipedia.org/wiki/Root_mean_square_deviation) from the target (preprocessed test data) and predictions:
 
 (loss/rmse (:y @(:target transform-ctx))
            (:y @(:metamorph/data transform-ctx)))
@@ -332,8 +332,8 @@
 ;; ### Train and test loss
 ;;
 ;; A single metric on test data tells us how well the model generalizes,
-;; but comparing train and test loss reveals whether the model is
-;; overfitting. We compute the loss separately for each, then gather
+;; but comparing train and test [loss](https://en.wikipedia.org/wiki/Loss_function) reveals whether the model is
+;; [overfitting](https://en.wikipedia.org/wiki/Overfitting). We compute the loss separately for each, then gather
 ;; both into a summary.
 
 (defn compute-loss

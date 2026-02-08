@@ -20,8 +20,8 @@
 ;; once and reused for prediction.
 ;;
 ;; On top of this, metamorph.ml adds model training/prediction,
-;; cross-validation (`evaluate-pipelines`), loss functions, and
-;; hyperparameter search. A typical workflow looks like:
+;; [cross-validation](https://en.wikipedia.org/wiki/Cross-validation_(statistics)) (`evaluate-pipelines`), [loss functions](https://en.wikipedia.org/wiki/Loss_function), and
+;; [hyperparameter](https://en.wikipedia.org/wiki/Hyperparameter_(machine_learning)) search. A typical workflow looks like:
 ;;
 ;; 1. Define a pipeline of preprocessing + model steps
 ;; 2. Split data into folds
@@ -290,12 +290,12 @@
   {:model-type :scicloj.ml.tribuo/regression
    :tribuo-components [{:name "squared"
                         :type "org.tribuo.regression.sgd.objectives.SquaredLoss"}
-                       {:name "trainer"
+                       {:name "linear-sgd"
                         :type "org.tribuo.regression.sgd.linear.LinearSGDTrainer"
                         :properties {:objective "squared"
                                      :epochs "50"
                                      :loggingInterval "10000"}}]
-   :tribuo-trainer-name "trainer"})
+   :tribuo-trainer-name "linear-sgd"})
 
 (def multi-results
   (ml/evaluate-pipelines

@@ -322,12 +322,12 @@
      [low
       (first
        (filter
-        (fn* [p1__102991#] (= 0.1 (:noise-sd p1__102991#)))
+        (fn* [p1__111208#] (= 0.1 (:noise-sd p1__111208#)))
         rows))
       high
       (first
        (filter
-        (fn* [p1__102992#] (= 5.0 (:noise-sd p1__102992#)))
+        (fn* [p1__111209#] (= 5.0 (:noise-sd p1__111209#)))
         rows))]
      (and
       (< (:cart-rmse low) (:sgd-rmse low))
