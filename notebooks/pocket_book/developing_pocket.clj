@@ -1,4 +1,6 @@
 ;; # Developing Pocket
+;;
+;; **Last modified: 2026-02-08**
 
 ;; This chapter is for contributors and curious readers. It describes
 ;; how Pocket's documentation is built, how tests are structured, and

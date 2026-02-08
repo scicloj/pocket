@@ -1,4 +1,6 @@
 ;; # Configuration
+;;
+;; **Last modified: 2026-02-08**
 
 (ns pocket-book.configuration
   (:require

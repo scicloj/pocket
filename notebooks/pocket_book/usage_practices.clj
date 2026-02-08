@@ -1,4 +1,6 @@
 ;; # Usage Practices
+;;
+;; **Last modified: 2026-02-08**
 
 ;; This chapter expands on the basics from
 ;; [Getting Started](pocket_book.getting_started.html) with practical

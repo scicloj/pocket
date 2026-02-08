@@ -1,4 +1,6 @@
 ;; # Extending Pocket
+;;
+;; **Last modified: 2026-02-08**
 
 (ns pocket-book.extending-pocket
   (:require

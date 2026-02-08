@@ -1,4 +1,6 @@
 ;; # Logging
+;;
+;; **Last modified: 2026-02-08**
 
 (ns pocket-book.logging
   (:require
@@ -62,6 +64,21 @@
         (.setAccessible ctor true)
         (.set oc-field config (.newInstance ctor (object-array [sys-out]))))))
   (catch Exception _))
+
+;; Some libraries (e.g., Tribuo) use `java.util.logging` (JUL) directly
+;; instead of SLF4J. JUL defaults to stderr, which Clay renders as
+;; `## ERR` sections. The following redirects JUL output to stdout:
+
+(let [root (java.util.logging.Logger/getLogger "")
+      handler (proxy [java.util.logging.StreamHandler]
+                     [System/out (java.util.logging.SimpleFormatter.)]
+                (publish [record]
+                  (proxy-super publish record)
+                  (.flush this))
+                (close [] (.flush this)))]
+  (doseq [h (.getHandlers root)]
+    (.removeHandler root h))
+  (.addHandler root handler))
 
 ;; Other notebooks in this book require this namespace to
 ;; activate logging. In your own projects, configure your

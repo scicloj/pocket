@@ -1,4 +1,6 @@
 ;; # API Reference
+;;
+;; **Last modified: 2026-02-08**
 
 ^{:kindly/hide-code true
   :kindly/options {:kinds-that-hide-code #{:kind/doc}}}

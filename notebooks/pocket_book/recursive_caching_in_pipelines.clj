@@ -1,4 +1,6 @@
 ;; # Recursive Caching in Pipelines
+;;
+;; **Last modified: 2026-02-08**
 
 ;; When you pass a `Cached` value as an argument to another cached function,
 ;; Pocket handles this recursively. The cache key for the outer computation

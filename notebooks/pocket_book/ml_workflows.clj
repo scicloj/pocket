@@ -1,4 +1,6 @@
 ;; # Example: Machine Learning Workflows
+;;
+;; **Last modified: 2026-02-08**
 
 ;; This chapter demonstrates Pocket in a realistic machine learning
 ;; scenario. If you're new to ML, don't worry — we'll explain the

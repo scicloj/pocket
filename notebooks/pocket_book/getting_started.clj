@@ -1,4 +1,6 @@
 ;; # Getting Started
+;;
+;; **Last modified: 2026-02-08**
 
 ;; [Pocket](https://github.com/scicloj/pocket) is a Clojure library for
 ;; filesystem-based caching of expensive computations. It persists results

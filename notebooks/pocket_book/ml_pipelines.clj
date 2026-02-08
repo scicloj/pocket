@@ -1,5 +1,7 @@
 ;; # Example: ML Pipelines with Pocket
 ;;
+;; **Last modified: 2026-02-08**
+;;
 ;; The [previous chapter](ml_workflows.html) showed how Pocket caches
 ;; individual steps of an ML workflow — data generation, splitting,
 ;; feature engineering, and model training — as plain Clojure functions.
