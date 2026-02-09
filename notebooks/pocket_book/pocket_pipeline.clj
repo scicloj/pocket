@@ -1,17 +1,16 @@
-;; # 🚧 Draft: `pocket-pipeline` — cached ML pipelines with provenance
+;; # `pocket-pipeline` — cached ML pipelines with `evaluate-pipelines`
 ;;
-;; **Last modified: 2026-02-08**
-;;
-;; The previous chapter (`pocket-model`) showed how to cache model
-;; training in a [metamorph.ml](https://github.com/scicloj/metamorph.ml)
+;; The previous chapter ([pocket-model](pocket_model.html)) showed
+;; how to cache model training in a
+;; [metamorph.ml](https://github.com/scicloj/metamorph.ml)
 ;; pipeline by swapping one step. That approach is simple — just
 ;; replace `ml/model` with `pocket-model` — but only the training
 ;; step is cached through Pocket.
 ;;
 ;; This chapter explores a deeper integration: building the **entire
-;; pipeline** as a chain of `pocket/caching-fn` calls. Every step —
-;; data splitting, feature engineering, outlier clipping, training,
-;; evaluation — becomes a cached node in a DAG, giving us:
+;; pipeline** as a chain of `pocket/caching-fn` calls, where every
+;; step — data splitting, feature engineering, outlier clipping,
+;; training — becomes a cached node. This gives us:
 ;;
 ;; - **Per-step storage control** — choose `:mem`, `:mem+disk`, or
 ;;   `:none` for each step independently
@@ -21,9 +20,18 @@
 ;;   survive JVM restarts
 ;; - **Concurrent dedup** — same computation runs once across threads
 ;;
-;; We then add a thin evaluation loop on top — `pocket-evaluate-pipelines`
-;; — that provides cross-validation and model comparison, similar to
-;; metamorph.ml's `evaluate-pipelines` but built on Pocket's DAG.
+;; The key ingredient is Pocket's
+;; [origin registry](cache_keys.html#origin-registry-derefed-values-keep-their-identity):
+;; when a `Cached` value is derefed, the real result keeps its
+;; lightweight identity. This lets us deref at each pipeline step —
+;; so real datasets flow through
+;; [metamorph](https://github.com/scicloj/metamorph)'s context —
+;; while cache keys stay efficient. Because the data is always a
+;; real dataset, we can use metamorph.ml's
+;; [`evaluate-pipelines`](https://scicloj.github.io/metamorph.ml/scicloj.metamorph.ml.html#var-evaluate-pipelines)
+;; directly for
+;; [cross-validation](https://en.wikipedia.org/wiki/Cross-validation_(statistics))
+;; and model comparison.
 ;;
 ;; ## Background
 ;;
@@ -46,8 +54,7 @@
 ;; caching with plain functions — `pocket/cached` calls wired into a
 ;; DAG. This chapter uses the same pipeline functions and the same
 ;; DAG approach, but adds **cross-validation and model comparison**
-;; on top, providing functionality similar to metamorph.ml's
-;; `evaluate-pipelines`.
+;; on top, reusing metamorph.ml's `evaluate-pipelines`.
 ;;
 ;; The [pocket-model](pocket_model.html) chapter takes the opposite
 ;; approach: it plugs into metamorph.ml's existing pipeline machinery
@@ -56,11 +63,11 @@
 ;;
 ;; | | pocket-model | This chapter |
 ;; |--|-------------|-------------|
-;; | Integration effort | One-line change | Build pipeline as DAG |
+;; | Integration effort | One-line change | Build pipeline with `caching-fn` wrappers |
 ;; | What's cached | Training only | Every step |
-;; | Provenance | Training step only | Full DAG |
+;; | Provenance | Training step only | Full DAG — any result to its parameters |
 ;; | Storage control | Global | Per-step |
-;; | Evaluation | metamorph.ml's `evaluate-pipelines` | `pocket-evaluate-pipelines` (loops over `Cached` references) |
+;; | Evaluation | `ml/evaluate-pipelines` | `ml/evaluate-pipelines` (same) |
 
 ;; ## Setup
 
@@ -78,6 +85,8 @@
    [tablecloth.api :as tc]
    [tablecloth.column.api :as tcc]
    [tech.v3.dataset.modelling :as ds-mod]
+   ;; Column role filters (feature, target, prediction):
+   [tech.v3.dataset.column-filters :as cf]
    ;; Machine learning:
    [scicloj.metamorph.ml :as ml]
    [scicloj.metamorph.ml.loss :as loss]
@@ -161,11 +170,6 @@
   (let [{:keys [lower upper]} threshold]
     (tc/add-column ds :x (-> (:x ds) (tcc/max lower) (tcc/min upper)))))
 
-(defn train-model
-  "Train a model on a prepared dataset."
-  [train-ds model-spec]
-  (ml/train train-ds model-spec))
-
 (defn predict-model
   "Predict on test data using a trained model."
   [test-ds model]
@@ -198,13 +202,10 @@
 ;; Each pipeline function gets a `caching-fn` wrapper with an
 ;; appropriate storage policy:
 ;;
-;; - **`:mem`** for cheap shared steps (threshold, clipping, features,
-;;   prediction) — no disk I/O, but in-memory dedup ensures each
-;;   runs once
+;; - **`:mem`** for cheap shared steps (threshold, clipping, features, prediction)
+;;   — no disk I/O, but in-memory dedup ensures each runs once
 ;; - **`:mem+disk`** (default) for expensive steps (model training)
 ;;   — persists to disk, survives JVM restarts
-;; - **`:none`** for steps where we only want DAG tracking without
-;;   any shared caching
 
 (def c-fit-outlier-threshold
   (pocket/caching-fn #'fit-outlier-threshold {:storage :mem}))
@@ -214,9 +215,6 @@
 
 (def c-prepare-features
   (pocket/caching-fn #'prepare-features {:storage :mem}))
-
-(def c-train-model
-  (pocket/caching-fn #'train-model))
 
 (def c-predict-model
   (pocket/caching-fn #'predict-model {:storage :mem}))
@@ -228,10 +226,13 @@
 ;; metamorph provides the pipeline machinery we need:
 ;; `mm/pipeline` composes steps, `mm/lift` wraps stateless functions,
 ;; `mm/fit-pipe` and `mm/transform-pipe` run pipelines in each mode.
-;; These work with `Cached` references in `:metamorph/data` — they pass the
-;; context through without inspecting the data.
 ;;
-;; We only need two custom step types that metamorph does not provide:
+;; We build on this with two custom step types. Each step uses
+;; `caching-fn` wrappers internally and **derefs** the `Cached`
+;; result, so `:metamorph/data` always holds a real dataset. The
+;; [origin registry](cache_keys.html#origin-registry-derefed-values-keep-their-identity)
+;; ensures these derefed datasets carry their lightweight identity,
+;; so the next step's cache key stays efficient.
 
 ;; ### `pocket-fitted`
 ;;
@@ -241,46 +242,66 @@
 ;; mode, only the apply function runs, using the parameters saved
 ;; during `:fit`.
 ;;
-;; This has no direct metamorph equivalent — in metamorph, each
-;; stateful step must implement `(case mode :fit ... :transform ...)`
-;; manually. `pocket-fitted` eliminates that boilerplate.
+;; Both functions should be `caching-fn` wrappers. Their `Cached`
+;; results are derefed before being stored in the context or in
+;; `:metamorph/data`.
 
 (defn pocket-fitted
-  "Create a stateful pipeline step from fit and apply functions.
+  "Create a stateful pipeline step from fit and apply caching-fns.
   In :fit mode, fits parameters from data and applies them.
-  In :transform mode, applies previously fitted parameters."
+  In :transform mode, applies previously fitted parameters.
+  Results are derefed so real datasets flow through the pipeline."
   [fit-caching-fn apply-caching-fn]
   (fn [{:metamorph/keys [data mode id] :as ctx}]
     (case mode
-      :fit (let [fitted (fit-caching-fn data)]
-             (-> ctx (assoc id fitted) (assoc :metamorph/data (apply-caching-fn data fitted))))
-      :transform (assoc ctx :metamorph/data (apply-caching-fn data (get ctx id))))))
+      :fit (let [fitted (deref (fit-caching-fn data))]
+             (-> ctx
+                 (assoc id fitted)
+                 (assoc :metamorph/data (deref (apply-caching-fn data fitted)))))
+      :transform (assoc ctx :metamorph/data
+                        (deref (apply-caching-fn data (get ctx id)))))))
 
 ;; ### `pocket-model`
 ;;
-;; The model step — like `ml/model`. Trains in `:fit` mode (cached via
-;; Pocket) and stores the model under its step ID. In `:transform`
-;; mode, predicts using the stored model and saves the preprocessed
-;; test data as `:target` (needed for metric computation in
-;; `pocket-evaluate-pipelines`).
+;; The model step — compatible with `ml/evaluate-pipelines`. Trains
+;; in `:fit` mode (cached via Pocket) and stores the model map under
+;; its step ID. In `:transform` mode, predicts using the stored model
+;; (also cached) and saves the preprocessed test data as `:target`
+;; (for our loss computation) and as
+;; `:scicloj.metamorph.ml/target-ds` (for `evaluate-pipelines`).
+;;
+;; The `Cached` reference from training is also stored (under
+;; `:pocket/model-cached`) so we can trace provenance later.
 
 (defn pocket-model
-  "Create a model pipeline step. Trains in :fit mode,
-  predicts in :transform mode. Like ml/model."
+  "Cached model step compatible with ml/evaluate-pipelines.
+  Caches training and prediction via pocket/cached. Stores the
+  training Cached reference at :pocket/model-cached for provenance."
   [model-spec]
   (fn [{:metamorph/keys [data mode id] :as ctx}]
     (case mode
-      :fit (assoc ctx id (c-train-model data model-spec))
-      :transform (let [model (get ctx id)]
-                   (assoc ctx :target data
-                          :metamorph/data (c-predict-model data model))))))
+      :fit
+      (let [model-c (pocket/cached #'ml/train data model-spec)
+            model (deref model-c)]
+        (assoc ctx id model
+               :pocket/model-cached model-c))
+      :transform
+      (let [model (get ctx id)]
+        (-> ctx
+            (update id assoc
+                    :scicloj.metamorph.ml/feature-ds (cf/feature data)
+                    :scicloj.metamorph.ml/target-ds (cf/target data))
+            (assoc :metamorph/data (deref (c-predict-model data model))
+                   :target data))))))
 
 ;; ---
 
 ;; ## Composing a pipeline
 ;;
-;; With these tools, we can build a specific pipeline by composing
-;; steps — the same way we'd use `mm/pipeline` in metamorph:
+;; With these tools, we can build a pipeline by composing steps.
+;; The `pocket-fitted` step handles stateful outlier clipping,
+;; `mm/lift` with `(comp deref c-fn)` handles stateless cached
+;; feature preparation, and `pocket-model` handles training.
 
 (def data-c
   (pocket/cached #'make-regression-data
@@ -294,22 +315,23 @@
 (def pipe-cart
   (mm/pipeline
    {:metamorph/id :clip} (pocket-fitted c-fit-outlier-threshold c-clip-outliers)
-   {:metamorph/id :prep} (mm/lift c-prepare-features :poly+trig)
+   {:metamorph/id :prep} (mm/lift (comp deref c-prepare-features) :poly+trig)
    {:metamorph/id :model} (pocket-model cart-spec)))
 
-;; Fit on training data:
+;; Fit on training data. We deref the `Cached` split to get a real
+;; dataset — the origin registry ensures our caching-fn wrappers
+;; still see a lightweight cache key:
 
-(def fit-ctx (mm/fit-pipe train-c pipe-cart))
+(def fit-ctx (mm/fit-pipe (deref train-c) pipe-cart))
 
 ;; Transform on test data (using fitted params from training):
 
-(def transform-ctx (mm/transform-pipe test-c pipe-cart fit-ctx))
+(def transform-ctx (mm/transform-pipe (deref test-c) pipe-cart fit-ctx))
 
-;; The fitted context carries the model and threshold as `Cached` references:
+;; The fitted context carries the model:
 
 (-> fit-ctx
-    :model
-    deref
+    (get :model)
     (update :model-data dissoc :model-as-bytes)
     kind/pprint)
 
@@ -318,12 +340,12 @@
 
 ;; Predictions:
 
-(tc/head (deref (:metamorph/data transform-ctx)))
+(tc/head (:metamorph/data transform-ctx))
 
-;; Compute [RMSE](https://en.wikipedia.org/wiki/Root_mean_square_deviation) from the target (preprocessed test data) and predictions:
+;; Compute [RMSE](https://en.wikipedia.org/wiki/Root_mean_square_deviation) from the target and predictions:
 
-(loss/rmse (:y @(:target transform-ctx))
-           (:y @(:metamorph/data transform-ctx)))
+(loss/rmse (:y (get-in transform-ctx [:model :scicloj.metamorph.ml/target-ds]))
+           (:y (:metamorph/data transform-ctx)))
 
 (kind/test-last
  [(fn [rmse] (< rmse 5.0))])
@@ -346,7 +368,7 @@
 ;; training loss, we also transform the training data through the
 ;; fitted pipeline:
 
-(def train-transform-ctx (mm/transform-pipe train-c pipe-cart fit-ctx))
+(def train-transform-ctx (mm/transform-pipe (deref train-c) pipe-cart fit-ctx))
 
 ;; Now we compute loss on each split independently:
 
@@ -377,19 +399,26 @@
     (and (< train-rmse test-rmse)
          (< test-rmse 5.0)))])
 
-;; The summary reference carries full provenance. The DAG branches
-;; into train and test paths that share the same model node — a
-;; diamond dependency that Pocket traces naturally:
+;; ### Provenance
+;;
+;; The summary reference carries full provenance. The origin registry
+;; lets `origin-story` follow derefed values back through the caching
+;; chain — so the DAG branches into train and test paths that share
+;; the same model node. This diamond dependency is traced naturally:
 
 (pocket/origin-story-mermaid summary-c)
+
 (pocket/cleanup!)
 
 ;; ---
 
-;; ## Splits as Cached references
+;; ## Splits as `Cached` references
 ;;
-;; For cross-validation, we need k train/test splits — each as a
-;; `Cached` reference so the full provenance chain is maintained.
+;; For cross-validation, we need k train/test splits. We create
+;; them as `Cached` references — preserving provenance — and then
+;; deref them to get real datasets for `ml/evaluate-pipelines`.
+;; The origin registry ensures the derefed datasets carry their
+;; lightweight identity.
 
 (defn nth-split-train
   "Extract the train set of the nth split."
@@ -402,67 +431,51 @@
   (:test (nth (tc/split->seq ds split-method split-params) idx)))
 
 (defn- n-splits
-  "Derive the number of splits from the method and params,
-  without materializing the dataset."
-  [split-method split-params]
+  "Derive the number of splits from the method and params.
+  For :loo, derefs the dataset to get its row count."
+  [data-c split-method split-params]
   (case split-method
     :kfold (:k split-params 5)
     :holdout 1
     :bootstrap (:repeats split-params 1)
-    :loo (throw (ex-info "pocket-splits does not support :loo (needs dataset size)" {}))))
+    :loo (tc/row-count (deref data-c))))
 
 (defn pocket-splits
   "Create k-fold splits as Cached references.
   Returns [{:train Cached, :test Cached, :idx int} ...]."
   [data-c split-method split-params]
-  (vec (for [idx (range (n-splits split-method split-params))]
+  (vec (for [idx (range (n-splits data-c split-method split-params))]
          {:train (pocket/cached #'nth-split-train
                                 data-c split-method split-params idx)
           :test (pocket/cached #'nth-split-test
                                data-c split-method split-params idx)
           :idx idx})))
 
-;; ---
+;; Create `Cached` splits and deref them for `ml/evaluate-pipelines`.
+;; The derefed datasets are real (passing malli validation) while
+;; carrying their origin identity (for efficient cache keys):
 
-;; ## Evaluation loop
-;;
-;; `pocket-evaluate-pipelines` runs pipelines across splits — like
-;; metamorph.ml's `evaluate-pipelines`. For each pipeline × each
-;; fold, it fits on train, transforms on test, and computes a metric.
+(def cached-splits (pocket-splits data-c :kfold {:k 3 :seed 42}))
 
-(defn pocket-evaluate-pipelines
-  "Evaluate pipelines across k-fold splits.
-  Like ml/evaluate-pipelines, but built on Cached references.
-  
-  `pipelines` is a seq of pipeline functions (from mm/pipeline).
-  `metric-fn` takes (test-ds, prediction-ds) and returns a number."
-  [data-c split-method split-params pipelines metric-fn]
-  (let [splits (pocket-splits data-c split-method split-params)]
-    (vec (for [pipe-fn pipelines
-               {:keys [train test idx]} splits]
-           (let [fit-ctx (mm/fit-pipe train pipe-fn)
-                 transform-ctx (mm/transform-pipe test pipe-fn fit-ctx)
-                 metric (metric-fn @(:target transform-ctx)
-                                   @(:metamorph/data transform-ctx))]
-             {:split-idx idx
-              :metric metric
-              :model (:model fit-ctx)})))))
+(def splits
+  (mapv (fn [{:keys [train test]}]
+          {:train (deref train) :test (deref test)})
+        cached-splits))
 
 ;; ---
 
-;; ## Demo: cross-validation
+;; ## Cross-validation with `ml/evaluate-pipelines`
 ;;
-;; 3-fold CV with three pipeline configurations:
-
-(defn rmse-metric
-  "Compute RMSE between actual and predicted :y columns."
-  [test-ds pred-ds]
-  (loss/rmse (:y test-ds) (:y pred-ds)))
+;; Because our pipeline steps deref their outputs, real datasets
+;; flow through `:metamorph/data` at every point. This makes our
+;; pipeline fully compatible with
+;; [`evaluate-pipelines`](https://scicloj.github.io/metamorph.ml/scicloj.metamorph.ml.html#var-evaluate-pipelines),
+;; which needs real datasets for metric computation.
 
 (defn make-pipe [{:keys [feature-set model-spec]}]
   (mm/pipeline
    {:metamorph/id :clip} (pocket-fitted c-fit-outlier-threshold c-clip-outliers)
-   {:metamorph/id :prep} (mm/lift c-prepare-features feature-set)
+   {:metamorph/id :prep} (mm/lift (comp deref c-prepare-features) feature-set)
    {:metamorph/id :model} (pocket-model model-spec)))
 
 (def configs
@@ -471,52 +484,52 @@
    {:feature-set :poly+trig :model-spec linear-sgd-spec}])
 
 (def results
-  (pocket-evaluate-pipelines data-c :kfold {:k 3 :seed 42}
-                             (mapv make-pipe configs)
-                             rmse-metric))
+  (ml/evaluate-pipelines
+   (mapv make-pipe configs)
+   splits
+   loss/rmse
+   :loss
+   {:return-best-crossvalidation-only false
+    :return-best-pipeline-only false}))
 
-;; 3 configs × 3 folds = 9 evaluations:
-
-(count results)
-
-(kind/test-last
- [(fn [n] (= n 9))])
-
-;; Aggregate mean RMSE per config:
+;; 3 configs × 3 folds — aggregate mean RMSE per config:
 
 (def summary
-  (let [grouped (partition 3 results)]
-    (mapv (fn [config rs]
-            {:feature-set (:feature-set config)
-             :model-type (-> config :model-spec :tribuo-trainer-name)
-             :mean-rmse (tcc/mean (map :metric rs))})
-          configs grouped)))
+  (mapv (fn [config pipeline-results]
+          {:feature-set (:feature-set config)
+           :model-type (-> config :model-spec :tribuo-trainer-name)
+           :mean-rmse (tcc/mean (map #(-> % :test-transform :metric)
+                                     pipeline-results))})
+        configs results))
 
 (tc/dataset summary)
 
 (kind/test-last
  [(fn [ds] (= 3 (tc/row-count ds)))])
 
-;; Second run — all training hits cache:
+;; Second run — all training hits cache, same metrics:
 
 (def results-2
-  (pocket-evaluate-pipelines data-c :kfold {:k 3 :seed 42}
-                             (mapv make-pipe configs)
-                             rmse-metric))
+  (ml/evaluate-pipelines
+   (mapv make-pipe configs)
+   splits
+   loss/rmse
+   :loss
+   {:return-best-crossvalidation-only false
+    :return-best-pipeline-only false}))
 
-(= (mapv :metric results) (mapv :metric results-2))
+(= (mapv #(-> % first :test-transform :metric) results)
+   (mapv #(-> % first :test-transform :metric) results-2))
 
 (kind/test-last
  [(fn [eq] (true? eq))])
 
 ;; ---
 
-;; ## Demo: hyperparameter sweep
+;; ## Hyperparameter sweep
 ;;
 ;; Vary tree depth × feature set. Each unique combination trains once
 ;; and is cached. Re-running adds only new combinations.
-
-(pocket/cleanup!)
 
 (def sweep-configs
   (vec (for [depth [4 6 8 12]
@@ -529,47 +542,44 @@
                        :tribuo-trainer-name "cart"}})))
 
 (def sweep-results
-  (pocket-evaluate-pipelines data-c :kfold {:k 3 :seed 42}
-                             (mapv make-pipe sweep-configs)
-                             rmse-metric))
-
-;; 8 configs × 3 folds = 24 evaluations:
-
-(count sweep-results)
-
-(kind/test-last
- [(fn [n] (= n 24))])
+  (ml/evaluate-pipelines
+   (mapv make-pipe sweep-configs)
+   splits
+   loss/rmse
+   :loss
+   {:return-best-crossvalidation-only false
+    :return-best-pipeline-only false}))
 
 ;; Results by depth and feature set:
 
 (def sweep-summary
-  (let [grouped (partition 3 sweep-results)]
-    (->> (mapv (fn [config rs]
-                 {:depth (-> config :model-spec :tribuo-components
-                             first :properties :maxDepth)
-                  :feature-set (:feature-set config)
-                  :mean-rmse (tcc/mean (map :metric rs))})
-               sweep-configs grouped)
-         (sort-by :mean-rmse))))
+  (->> (mapv (fn [config pipeline-results]
+               {:depth (-> config :model-spec :tribuo-components
+                           first :properties :maxDepth)
+                :feature-set (:feature-set config)
+                :mean-rmse (tcc/mean (map #(-> % :test-transform :metric)
+                                          pipeline-results))})
+             sweep-configs sweep-results)
+       (sort-by :mean-rmse)))
 
 (tc/dataset sweep-summary)
 
 (kind/test-last
  [(fn [ds] (= 8 (tc/row-count ds)))])
 
-;; On this synthetic data, the shallow tree (depth 4) with raw features
-;; outperforms deeper trees and engineered features — a reminder that
-;; more complexity does not always help.
+;; On this synthetic data, deeper trees with engineered features
+;; (`poly+trig`) perform best, while shallower trees show similar
+;; results regardless of feature set.
 
-;; ---
-
-;; ## Provenance
+;; ### Sweep provenance
 ;;
-;; Pick one result and trace its full provenance. The DAG goes
+;; Pick the best result and trace its full provenance. The DAG goes
 ;; from the trained model back to the original scalar parameters
-;; (seed, noise-sd, outlier-fraction, etc.).
+;; (seed, noise-sd, outlier-fraction, etc.):
 
-(pocket/origin-story-mermaid (:model (first sweep-results)))
+(pocket/origin-story-mermaid
+ (:pocket/model-cached
+  (-> sweep-results first first :fit-ctx)))
 
 ;; ---
 
@@ -587,58 +597,45 @@
 ;; **Reusing metamorph:**
 ;;
 ;; We use `mm/pipeline`, `mm/lift`, `mm/fit-pipe`, and
-;; `mm/transform-pipe` directly — they pass `Cached` references through
-;; `:metamorph/data` without inspecting them. Pocket only adds two
+;; `mm/transform-pipe` directly — and now also `ml/evaluate-pipelines`
+;; for cross-validation and model comparison. Pocket only adds two
 ;; custom step types:
 ;;
 ;; - **`pocket-model`** — like `ml/model`, but caches training via
 ;;   `pocket/cached` so models persist to disk
-;; - **`pocket-fitted`** — a new pattern for stateful steps
+;; - **`pocket-fitted`** — a general pattern for stateful steps
 ;;
-;; In metamorph, every stateful step must dispatch on mode manually:
+;; **The deref-through pattern:**
 ;;
-;; ```clj
-;; ;; metamorph style — manual mode dispatch
-;; (fn [{:metamorph/keys [data mode id] :as ctx}]
-;;   (case mode
-;;     :fit       (let [bounds (fit-threshold data)]
-;;                  (assoc ctx id bounds
-;;                         :metamorph/data (clip data bounds)))
-;;     :transform (let [bounds (get ctx id)]
-;;                  (assoc ctx :metamorph/data (clip data bounds)))))
-;; ```
+;; Each pipeline step wraps a `caching-fn` and immediately derefs the
+;; `Cached` result. This means real datasets (not `Cached` references)
+;; flow through `:metamorph/data` at every point. The
+;; [origin registry](cache_keys.html#origin-registry-derefed-values-keep-their-identity)
+;; provides two benefits:
 ;;
-;; `pocket-fitted` eliminates that boilerplate — we just provide
-;; the fit function and the apply function:
+;; 1. **Efficient cache keys** — each derefed dataset carries its
+;;    lightweight identity, so the next step's `caching-fn` avoids
+;;    hashing full dataset content
+;; 2. **Full provenance** — `origin-story` follows derefed values back
+;;    through the registry to their `Cached` origin, preserving the
+;;    complete DAG (as seen in the diamond dependency above)
 ;;
-;; ```clj
-;; ;; Pocket style — same behavior, less ceremony
-;; (pocket-fitted c-fit-outlier-threshold c-clip-outliers)
-;; ```
-;;
-;; On top of this, `pocket-evaluate-pipelines` and `pocket-splits`
-;; wrap cross-validation in `Cached` references for provenance. Everything
-;; else is standard metamorph.
+;; Because `:metamorph/data` is always a real dataset,
+;; `ml/evaluate-pipelines` can call `cf/target`, `cf/prediction`,
+;; and malli validation — things that require concrete dataset types.
 ;;
 ;; **What we write:**
 ;;
 ;; 1. Plain pipeline functions (data in, data out)
 ;; 2. `caching-fn` wrappers with storage policies (one line each)
 ;; 3. Pipeline composition via `mm/pipeline` with our custom steps
-;; 4. `pocket-evaluate-pipelines` for cross-validation across `Cached` splits
+;; 4. `ml/evaluate-pipelines` for cross-validation
 ;;
 ;; **Open question: where should the custom steps live?**
-;; `pocket-fitted`, `pocket-model`, `pocket-splits`, and
-;; `pocket-evaluate-pipelines` are currently defined in this notebook.
-;; A future `scicloj.pocket.ml` namespace could provide them — but
-;; only if the pattern proves stable across different use cases.
-;;
-;; **Future direction: reusing `ml/evaluate-pipelines`.**
-;; Pocket's origin registry now makes it possible to pass derefed
-;; datasets to metamorph.ml's `evaluate-pipelines` without losing
-;; cache key efficiency. This could simplify or replace
-;; `pocket-evaluate-pipelines`, keeping the DAG provenance while
-;; reusing metamorph.ml's evaluation machinery directly.
+;; `pocket-fitted` and `pocket-model` are currently defined in this
+;; notebook. A future `scicloj.pocket.ml` namespace could provide
+;; them — but only if the pattern proves stable across different
+;; use cases.
 
 ;; ## Cleanup
 
