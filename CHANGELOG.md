@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-02-09
 - **Origin-story through derefed values**: The origin registry now stores the `Cached` object alongside the origin identity. This enables `origin-story`, `origin-story-graph`, and `origin-story-mermaid` to follow derefed values back through the registry to their `Cached` origin — producing the full provenance DAG even when real (derefed) datasets flow through a pipeline.
 
 ## [0.2.0] - 2026-02-09

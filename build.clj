@@ -3,7 +3,7 @@
             [deps-deploy.deps-deploy :as dd]))
 
 (def lib 'org.scicloj/pocket)
-(def version "0.2.0")
+(def version "0.2.1")
 (def snapshot (str version "-SNAPSHOT"))
 (def class-dir "target/classes")
 
