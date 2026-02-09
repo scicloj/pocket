@@ -1,4 +1,4 @@
-;; # `pocket-pipeline` — cached ML pipelines with `evaluate-pipelines`
+;; # 🚧 Draft: `pocket-pipeline` — cached ML pipelines with `evaluate-pipelines`
 ;;
 ;; The previous chapter ([pocket-model](pocket_model.html)) showed
 ;; how to cache model training in a
@@ -120,18 +120,18 @@
   [{:keys [f n noise-sd seed outlier-fraction outlier-scale]
     :or {outlier-fraction 0 outlier-scale 10}}]
   (let [rng (java.util.Random. (long seed))
-        xs (vec (repeatedly n #(* 10.0 (.nextDouble rng))))
+        xs (repeatedly n #(* 10.0 (.nextDouble rng)))
         xs-final (if (pos? outlier-fraction)
                    (let [out-rng (java.util.Random. (+ (long seed) 7919))]
-                     (mapv (fn [x]
-                             (if (< (.nextDouble out-rng) outlier-fraction)
-                               (+ x (* (double outlier-scale) (.nextGaussian out-rng)))
-                               x))
-                           xs))
+                     (map (fn [x]
+                            (if (< (.nextDouble out-rng) outlier-fraction)
+                              (+ x (* (double outlier-scale) (.nextGaussian out-rng)))
+                              x))
+                          xs))
                    xs)
-        ys (mapv (fn [x] (+ (double (f x))
-                            (* (double noise-sd) (.nextGaussian rng))))
-                 xs)]
+        ys (map (fn [x] (+ (double (f x))
+                           (* (double noise-sd) (.nextGaussian rng))))
+                xs)]
     (-> (tc/dataset {:x xs-final :y ys})
         (ds-mod/set-inference-target :y))))
 
@@ -156,7 +156,7 @@
 (defn fit-outlier-threshold
   "Compute IQR-based clipping bounds for :x from training data."
   [train-ds]
-  (let [xs (sort (vec (:x train-ds)))
+  (let [xs (sort (:x train-ds))
         n (count xs)
         q1 (nth xs (int (* 0.25 n)))
         q3 (nth xs (int (* 0.75 n)))
@@ -444,12 +444,12 @@
   "Create k-fold splits as Cached references.
   Returns [{:train Cached, :test Cached, :idx int} ...]."
   [data-c split-method split-params]
-  (vec (for [idx (range (n-splits data-c split-method split-params))]
-         {:train (pocket/cached #'nth-split-train
-                                data-c split-method split-params idx)
-          :test (pocket/cached #'nth-split-test
-                               data-c split-method split-params idx)
-          :idx idx})))
+  (for [idx (range (n-splits data-c split-method split-params))]
+    {:train (pocket/cached #'nth-split-train
+                           data-c split-method split-params idx)
+     :test (pocket/cached #'nth-split-test
+                          data-c split-method split-params idx)
+     :idx idx}))
 
 ;; Create `Cached` splits and deref them for `ml/evaluate-pipelines`.
 ;; The derefed datasets are real (passing malli validation) while
@@ -458,9 +458,9 @@
 (def cached-splits (pocket-splits data-c :kfold {:k 3 :seed 42}))
 
 (def splits
-  (mapv (fn [{:keys [train test]}]
-          {:train (deref train) :test (deref test)})
-        cached-splits))
+  (map (fn [{:keys [train test]}]
+         {:train (deref train) :test (deref test)})
+       cached-splits))
 
 ;; ---
 
@@ -485,7 +485,7 @@
 
 (def results
   (ml/evaluate-pipelines
-   (mapv make-pipe configs)
+   (map make-pipe configs)
    splits
    loss/rmse
    :loss
@@ -495,12 +495,12 @@
 ;; 3 configs × 3 folds — aggregate mean RMSE per config:
 
 (def summary
-  (mapv (fn [config pipeline-results]
-          {:feature-set (:feature-set config)
-           :model-type (-> config :model-spec :tribuo-trainer-name)
-           :mean-rmse (tcc/mean (map #(-> % :test-transform :metric)
-                                     pipeline-results))})
-        configs results))
+  (map (fn [config pipeline-results]
+         {:feature-set (:feature-set config)
+          :model-type (-> config :model-spec :tribuo-trainer-name)
+          :mean-rmse (tcc/mean (map #(-> % :test-transform :metric)
+                                    pipeline-results))})
+       configs results))
 
 (tc/dataset summary)
 
@@ -511,15 +511,15 @@
 
 (def results-2
   (ml/evaluate-pipelines
-   (mapv make-pipe configs)
+   (map make-pipe configs)
    splits
    loss/rmse
    :loss
    {:return-best-crossvalidation-only false
     :return-best-pipeline-only false}))
 
-(= (mapv #(-> % first :test-transform :metric) results)
-   (mapv #(-> % first :test-transform :metric) results-2))
+(= (map #(-> % first :test-transform :metric) results)
+   (map #(-> % first :test-transform :metric) results-2))
 
 (kind/test-last
  [(fn [eq] (true? eq))])
@@ -532,18 +532,18 @@
 ;; and is cached. Re-running adds only new combinations.
 
 (def sweep-configs
-  (vec (for [depth [4 6 8 12]
-             fs [:raw :poly+trig]]
-         {:feature-set fs
-          :model-spec {:model-type :scicloj.ml.tribuo/regression
-                       :tribuo-components [{:name "cart"
-                                            :type "org.tribuo.regression.rtree.CARTRegressionTrainer"
-                                            :properties {:maxDepth (str depth)}}]
-                       :tribuo-trainer-name "cart"}})))
+  (for [depth [4 6 8 12]
+        fs [:raw :poly+trig]]
+    {:feature-set fs
+     :model-spec {:model-type :scicloj.ml.tribuo/regression
+                  :tribuo-components [{:name "cart"
+                                       :type "org.tribuo.regression.rtree.CARTRegressionTrainer"
+                                       :properties {:maxDepth (str depth)}}]
+                  :tribuo-trainer-name "cart"}}))
 
 (def sweep-results
   (ml/evaluate-pipelines
-   (mapv make-pipe sweep-configs)
+   (map make-pipe sweep-configs)
    splits
    loss/rmse
    :loss
@@ -553,13 +553,13 @@
 ;; Results by depth and feature set:
 
 (def sweep-summary
-  (->> (mapv (fn [config pipeline-results]
-               {:depth (-> config :model-spec :tribuo-components
-                           first :properties :maxDepth)
-                :feature-set (:feature-set config)
-                :mean-rmse (tcc/mean (map #(-> % :test-transform :metric)
-                                          pipeline-results))})
-             sweep-configs sweep-results)
+  (->> (map (fn [config pipeline-results]
+              {:depth (-> config :model-spec :tribuo-components
+                          first :properties :maxDepth)
+               :feature-set (:feature-set config)
+               :mean-rmse (tcc/mean (map #(-> % :test-transform :metric)
+                                         pipeline-results))})
+            sweep-configs sweep-results)
        (sort-by :mean-rmse)))
 
 (tc/dataset sweep-summary)
