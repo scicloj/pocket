@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- **Origin-story through derefed values**: The origin registry now stores the `Cached` object alongside the origin identity. This enables `origin-story`, `origin-story-graph`, and `origin-story-mermaid` to follow derefed values back through the registry to their `Cached` origin — producing the full provenance DAG even when real (derefed) datasets flow through a pipeline.
+
 ## [0.2.0] - 2026-02-09
 - **Origin registry**: Derefed `Cached` values now [carry their origin identity](https://scicloj.github.io/pocket/pocket_book.cache_keys.html#origin-registry-derefed-values-keep-their-identity). `->id` on a derefed value returns the same lightweight identity as `->id` on the `Cached` reference itself. This enables passing real (derefed) values to code that requires concrete types (e.g., `ml/evaluate-pipelines`) without losing provenance or cache key efficiency. The registry uses `WeakReference` and identity-based matching, so transformed values (new objects) fall back to content-based identity.
 - **Docstrings**: Updated `->id` and `clear-mem-cache!` docstrings to document origin registry behavior.

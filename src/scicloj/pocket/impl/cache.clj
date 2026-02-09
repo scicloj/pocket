@@ -99,14 +99,17 @@
 
 (defn register-origin!
   "Register a derefed value's origin identity in the registry.
-   Uses WeakReference so the value can still be GC'd."
-  [value origin-id]
+   Stores both the origin id (for ->id lookup) and the Cached object
+   (for origin-story traversal). Uses WeakReference for the value
+   so it can still be GC'd."
+  [value origin-id cached-obj]
   (let [hash-key (System/identityHashCode value)]
     (.compute origin-registry hash-key
               (reify java.util.function.BiFunction
                 (apply [_ _k existing]
                   (let [entry {:ref (WeakReference. value)
-                               :origin origin-id}
+                               :origin origin-id
+                               :cached cached-obj}
                         ;; Clean dead refs while we're here
                         live (if existing
                                (filterv #(.get ^WeakReference (:ref %)) existing)
@@ -126,6 +129,21 @@
                 (let [referent (.get ref)]
                   (when (identical? referent value)
                     (vreset! result origin))))
+              entries)
+        @result))))
+
+(defn lookup-origin-cached
+  "Look up the Cached object that produced a derefed value.
+   Returns the Cached instance if found, nil otherwise.
+   Used by origin-story to traverse through derefed values."
+  [value]
+  (let [hash-key (System/identityHashCode value)]
+    (when-let [entries (.get origin-registry hash-key)]
+      (let [result (volatile! nil)]
+        (run! (fn [{:keys [^WeakReference ref cached]}]
+                (let [referent (.get ref)]
+                  (when (identical? referent value)
+                    (vreset! result cached))))
               entries)
         @result))))
 
@@ -290,7 +308,7 @@
       ;; Skip primitives, strings, keywords — these may be interned/shared
       ;; by the JVM and would cause false origin matches.
       (when (instance? clojure.lang.IObj result)
-        (register-origin! result (->id this)))
+        (register-origin! result (->id this) this))
       result)))
 
 (defn- dataset-type? [x]
@@ -399,7 +417,10 @@
         (if (= v ::unrealized)
           node
           (assoc node :value v))))
-    {:value x}))
+    ;; Not a Cached — check origin registry for provenance chain
+    (if-let [cached (lookup-origin-cached x)]
+      (origin-story* cached seen counter)
+      {:value x})))
 
 (defn origin-story
   "Walk a Cached value's argument tree and return a DAG description.
@@ -415,6 +436,11 @@
    to the first occurrence's `:id`. This enables proper DAG representation
    for diamond dependencies.
    
+   Also follows derefed values through the origin registry: if a value
+   was obtained by derefing a Cached, its provenance chain is traversed
+   as if it were the original Cached. This enables full provenance through
+   the deref-through pattern.
+   
    Does not trigger computation — only peeks at already-realized values.
    Works with all storage policies (`:mem+disk`, `:mem`, `:none`)."
   [x]
@@ -427,6 +453,10 @@
    
    Node maps contain `:fn` (for cached steps) or `:value` (for leaves),
    plus `:value` if the cached computation has been realized.
+   
+   Also follows derefed values through the origin registry: if a value
+   was obtained by derefing a Cached, its provenance chain is traversed
+   as if it were the original Cached.
    
    This is the fully normalized (Format B) representation of the DAG.
    Use `origin-story` for the tree-with-refs representation (Format A)."
@@ -452,11 +482,14 @@
                       (swap! edges conj [parent-id node-id]))
                     (doseq [arg (.args node)]
                       (walk arg node-id))))
-                ;; Plain value leaf
-                (let [leaf-id (str "v" (swap! counter inc))]
-                  (swap! nodes assoc leaf-id {:value node})
-                  (when parent-id
-                    (swap! edges conj [parent-id leaf-id])))))]
+                ;; Not a Cached — check origin registry for provenance chain
+                (if-let [cached (lookup-origin-cached node)]
+                  (walk cached parent-id)
+                  ;; Plain value leaf
+                  (let [leaf-id (str "v" (swap! counter inc))]
+                    (swap! nodes assoc leaf-id {:value node})
+                    (when parent-id
+                      (swap! edges conj [parent-id leaf-id]))))))]
       (walk x nil)
       (kind/pprint {:nodes @nodes :edges @edges}))))
 
