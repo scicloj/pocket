@@ -321,11 +321,11 @@
     (let
      [low
       (first
-       (filter (fn* [p1__47765#] (= 0.1 (:noise-sd p1__47765#))) rows))
+       (filter (fn* [p1__71627#] (= 0.1 (:noise-sd p1__71627#))) rows))
       high
       (first
        (filter
-        (fn* [p1__47766#] (= 5.0 (:noise-sd p1__47766#)))
+        (fn* [p1__71628#] (= 5.0 (:noise-sd p1__71628#)))
         rows))]
      (and
       (< (:cart-rmse low) (:sgd-rmse low))

@@ -214,7 +214,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./pocket_book.pocket_pipeline.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">🚧 Draft: <code>pocket-pipeline</code> — cached ML pipelines with provenance</span></span></a>
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">🚧 Draft: <code>pocket-pipeline</code> — cached ML pipelines with <code>evaluate-pipelines</code></span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
@@ -350,11 +350,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <div class="printedClojure">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>{<span class="at">:rows</span> <span class="dv">50000</span>,</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a> <span class="at">:string-length</span> <span class="dv">1541421</span>,</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a> <span class="at">:-</span>&gt;id-ms <span class="fl">20.270076</span>,</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a> <span class="at">:canonical-id-ms</span> <span class="fl">6.13049</span>,</span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a> <span class="at">:str-ms</span> <span class="fl">26.581939</span>,</span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a> <span class="at">:sha-ms</span> <span class="fl">2.011026</span>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a> <span class="at">:string-length</span> <span class="dv">1541262</span>,</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a> <span class="at">:-</span>&gt;id-ms <span class="fl">3.355993</span>,</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a> <span class="at">:canonical-id-ms</span> <span class="fl">5.730036</span>,</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a> <span class="at">:str-ms</span> <span class="fl">25.115645</span>,</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a> <span class="at">:sha-ms</span> <span class="fl">1.579439</span>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>The <code>str</code> serialization step dominates — it must walk the entire nested structure and produce a ~1.5 MB string. SHA-1 hashing that string is fast by comparison. Switching to a faster hash algorithm would not meaningfully help.</p>
 </section>
@@ -376,7 +376,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <div id="callout-1" class="callout-1-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket - Cache dir set to: /tmp/pocket-cache-keys
+<pre><code>10:06:46.813 INFO scicloj.pocket - Cache dir set to: /tmp/pocket-cache-keys
 </code></pre>
 </div>
 </div>
@@ -399,7 +399,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <div id="callout-2" class="callout-2-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket - Cache cleanup: /tmp/pocket-cache-keys
+<pre><code>10:06:46.814 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-cache-keys
 </code></pre>
 </div>
 </div>
@@ -421,7 +421,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>  {<span class="at">:direct-ms</span> (<span class="kw">/</span> (<span class="kw">-</span> t1 t0) <span class="fl">1e6</span>)})</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="printedClojure">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>{<span class="at">:direct-ms</span> <span class="fl">20.118646</span>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>{<span class="at">:direct-ms</span> <span class="fl">20.211526</span>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p><code>Cached</code> reference — identity is just <code>(make-data 50000)</code>:</p>
 <div class="sourceClojure">
@@ -432,7 +432,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>  {<span class="at">:cached-reference-ms</span> (<span class="kw">/</span> (<span class="kw">-</span> t1 t0) <span class="fl">1e6</span>)})</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="printedClojure">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>{<span class="at">:cached-reference-ms</span> <span class="fl">0.083326</span>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>{<span class="at">:cached-reference-ms</span> <span class="fl">0.074606</span>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>The <code>Cached</code> reference is orders of magnitude faster because its identity is a small form like <code>(pocket-book.cache-keys/make-data 50000)</code>, regardless of how large the output dataset is.</p>
 <p>This is one of the key reasons to chain <code>pocket/cached</code> calls in a pipeline: each step’s cache key references its inputs by identity rather than by content, keeping key generation fast and enabling full provenance through the DAG.</p>
@@ -459,7 +459,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <div id="callout-3" class="callout-3-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.cache-keys/make-data
+<pre><code>10:06:46.848 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.cache-keys/make-data
 </code></pre>
 </div>
 </div>
@@ -477,7 +477,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>  {<span class="at">:derefed-with-origin-ms</span> (<span class="kw">/</span> (<span class="kw">-</span> t1 t0) <span class="fl">1e6</span>)})</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="printedClojure">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>{<span class="at">:derefed-with-origin-ms</span> <span class="fl">0.044514</span>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>{<span class="at">:derefed-with-origin-ms</span> <span class="fl">0.036806</span>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <section id="what-breaks-the-link" class="level3">
 <h3 class="anchored" data-anchor-id="what-breaks-the-link">What breaks the link</h3>
@@ -501,7 +501,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <div id="callout-4" class="callout-4-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.cache-keys/make-data
+<pre><code>10:06:46.867 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.cache-keys/make-data
 </code></pre>
 </div>
 </div>
@@ -532,7 +532,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <div id="callout-5" class="callout-5-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket - Cache cleanup: /tmp/pocket-cache-keys
+<pre><code>10:06:46.875 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-cache-keys
 </code></pre>
 </div>
 </div>
@@ -949,8 +949,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   </script>
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
-      <a href="./pocket_book.pocket_pipeline.html" class="pagination-link" aria-label="🚧 Draft: `pocket-pipeline` — cached ML pipelines with provenance">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">🚧 Draft: <code>pocket-pipeline</code> — cached ML pipelines with provenance</span></span>
+      <a href="./pocket_book.pocket_pipeline.html" class="pagination-link" aria-label="🚧 Draft: `pocket-pipeline` — cached ML pipelines with `evaluate-pipelines`">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">🚧 Draft: <code>pocket-pipeline</code> — cached ML pipelines with <code>evaluate-pipelines</code></span></span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">

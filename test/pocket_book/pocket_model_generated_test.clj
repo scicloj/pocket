@@ -131,14 +131,14 @@
 (def
  v17_l184
  (mapv
-  (fn* [p1__68650#] (-> p1__68650# :test-transform :metric))
+  (fn* [p1__71908#] (-> p1__71908# :test-transform :metric))
   (flatten results-1)))
 
 
 (deftest
  t18_l186
  (is
-  ((fn [ms] (every? (fn* [p1__68651#] (< p1__68651# 15)) ms))
+  ((fn [ms] (every? (fn* [p1__71909#] (< p1__71909# 15)) ms))
    v17_l184)))
 
 
@@ -167,10 +167,10 @@
  v24_l207
  (=
   (mapv
-   (fn* [p1__68652#] (-> p1__68652# :test-transform :metric))
+   (fn* [p1__71910#] (-> p1__71910# :test-transform :metric))
    (flatten results-1))
   (mapv
-   (fn* [p1__68653#] (-> p1__68653# :test-transform :metric))
+   (fn* [p1__71911#] (-> p1__71911# :test-transform :metric))
    (flatten results-2))))
 
 
@@ -249,7 +249,7 @@
      [pipeline-results]
      (tcc/mean
       (map
-       (fn* [p1__68654#] (-> p1__68654# :test-transform :metric))
+       (fn* [p1__71912#] (-> p1__71912# :test-transform :metric))
        pipeline-results)))
     batch-2)]
   (tc/dataset {:depth depths, :mean-rmse means})))
@@ -312,7 +312,7 @@
      [pipeline-results]
      (tcc/mean
       (map
-       (fn* [p1__68655#] (-> p1__68655# :test-transform :metric))
+       (fn* [p1__71913#] (-> p1__71913# :test-transform :metric))
        pipeline-results)))
     multi-results)]
   (tc/dataset {:model model-names, :mean-rmse means})))
@@ -365,7 +365,7 @@
      [pipeline-results]
      (tcc/mean
       (map
-       (fn* [p1__68656#] (-> p1__68656# :test-transform :metric))
+       (fn* [p1__71914#] (-> p1__71914# :test-transform :metric))
        pipeline-results)))
     fallback-results)]
   (tc/dataset {:model model-names, :mean-rmse means})))
@@ -410,10 +410,10 @@
  v70_l404
  (=
   (mapv
-   (fn* [p1__68657#] (-> p1__68657# :test-transform :metric))
+   (fn* [p1__71915#] (-> p1__71915# :test-transform :metric))
    (flatten persist-results-1))
   (mapv
-   (fn* [p1__68658#] (-> p1__68658# :test-transform :metric))
+   (fn* [p1__71916#] (-> p1__71916# :test-transform :metric))
    (flatten persist-results-2))))
 
 

@@ -66,7 +66,7 @@ format:
 ::: {.callout-note}
 ## OUT
 ```
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket - Cache dir set to: /tmp/pocket-extending
+10:06:43.918 INFO scicloj.pocket - Cache dir set to: /tmp/pocket-extending
 
 ```
 :::
@@ -93,7 +93,7 @@ format:
 ::: {.callout-note}
 ## OUT
 ```
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket - Cache cleanup: /tmp/pocket-extending
+10:06:43.919 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-extending
 
 ```
 :::
@@ -228,8 +228,8 @@ This works for maps, vectors, sets, and datasets:
 ::: {.callout-note}
 ## OUT
 ```
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.extending-pocket/make-pair
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-extending/55/(pocket-book.extending-pocket_make-pair 1 2)
+10:06:43.925 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.extending-pocket/make-pair
+10:06:43.926 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-extending/55/(pocket-book.extending-pocket_make-pair 1 2)
 
 ```
 :::
@@ -558,9 +558,9 @@ First deref computes:
 ::: {.callout-note}
 ## OUT
 ```
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.extending-pocket/analyze-dataset
+10:06:43.951 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.extending-pocket/analyze-dataset
   Analyzing census v 3 ...
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-extending/62/(pocket-book.extending-pocket_analyze-dataset census-v3 {:method :regression})
+10:06:44.153 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-extending/62/(pocket-book.extending-pocket_analyze-dataset census-v3 {:method :regression})
 
 ```
 :::
@@ -610,9 +610,9 @@ A different version creates a different cache entry:
 ::: {.callout-note}
 ## OUT
 ```
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.extending-pocket/analyze-dataset
+10:06:44.158 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.extending-pocket/analyze-dataset
   Analyzing census v 4 ...
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-extending/f6/(pocket-book.extending-pocket_analyze-dataset census-v4 {:method :regression})
+10:06:44.360 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-extending/f6/(pocket-book.extending-pocket_analyze-dataset census-v4 {:method :regression})
 
 ```
 :::
@@ -771,6 +771,16 @@ nil
 
 
 
+::: {.callout-note}
+## OUT
+```
+Warning: resetting Nippy thaw for custom type with id: :my-model
+
+```
+:::
+
+
+
 ::: {.printedClojure}
 ```clojure
 :done
@@ -830,8 +840,8 @@ Now caching a function that returns a `MyModel` works seamlessly:
 ::: {.callout-note}
 ## OUT
 ```
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.extending-pocket/train-my-model
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-extending/ac/(pocket-book.extending-pocket_train-my-model [10 20 30])
+10:06:44.387 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.extending-pocket/train-my-model
+10:06:44.388 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-extending/ac/(pocket-book.extending-pocket_train-my-model [10 20 30])
 
 ```
 :::
@@ -864,7 +874,7 @@ for more details.
 ::: {.callout-note}
 ## OUT
 ```
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket - Cache cleanup: /tmp/pocket-extending
+10:06:44.391 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-extending
 
 ```
 :::

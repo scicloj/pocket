@@ -21,7 +21,7 @@ format:
 
 # Recursive Caching in Pipelines
 
-**Last modified: 2026-02-08**
+**Last modified: 2026-02-09**
 
 When you pass a `Cached` value as an argument to another cached function,
 Pocket handles this recursively. The cache key for the outer computation
@@ -73,7 +73,7 @@ any special handling.
 ::: {.callout-note}
 ## OUT
 ```
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket - Cache dir set to: /tmp/pocket-demo-pipelines
+10:06:31.991 INFO scicloj.pocket - Cache dir set to: /tmp/pocket-demo-pipelines
 
 ```
 :::
@@ -100,7 +100,7 @@ any special handling.
 ::: {.callout-note}
 ## OUT
 ```
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo-pipelines
+10:06:31.992 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo-pipelines
 
 ```
 :::
@@ -219,16 +219,16 @@ First pipeline run:
 ::: {.callout-note}
 ## OUT
 ```
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.recursive-caching-in-pipelines/train-model
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.recursive-caching-in-pipelines/preprocess
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.recursive-caching-in-pipelines/load-dataset
+10:06:31.998 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.recursive-caching-in-pipelines/train-model
+10:06:31.998 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.recursive-caching-in-pipelines/preprocess
+10:06:31.998 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.recursive-caching-in-pipelines/load-dataset
 Loading dataset from data/raw.csv ...
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo-pipelines/b8/(pocket-book.recursive-caching-in-pipelines_load-dataset "data_raw.csv")
+10:06:32.311 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo-pipelines/b8/(pocket-book.recursive-caching-in-pipelines_load-dataset "data_raw.csv")
 Preprocessing with options: {:scale 2}
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo-pipelines/85/(pocket-book.recursive-caching-in-pipelines_preprocess (pocket-book.recursive-caching-in-pipelines_load-dataset "data_raw.csv") {:scale 2})
+10:06:32.614 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo-pipelines/85/(pocket-book.recursive-caching-in-pipelines_preprocess (pocket-book.recursive-caching-in-pipelines_load-dataset "data_raw.csv") {:scale 2})
 Training model with params: {:epochs 100}
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo-pipelines/c9/(pocket-book.recursive-caching-in-pipelines_train-model (pocket-book.recursive-caching-in-pipelines_preprocess (pocket-book.recursive-caching-in-pipelines_load-dataset "data_raw.csv") {:scale 2}) {:epochs 100})
-"Elapsed time: 919.873448 msecs"
+10:06:32.915 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo-pipelines/c9/(pocket-book.recursive-caching-in-pipelines_train-model (pocket-book.recursive-caching-in-pipelines_preprocess (pocket-book.recursive-caching-in-pipelines_load-dataset "data_raw.csv") {:scale 2}) {:epochs 100})
+"Elapsed time: 918.094275 msecs"
 
 ```
 :::
@@ -265,7 +265,7 @@ Second pipeline run (all cached):
 ::: {.callout-note}
 ## OUT
 ```
-"Elapsed time: 1.71048 msecs"
+"Elapsed time: 0.525695 msecs"
 
 ```
 :::
@@ -351,6 +351,10 @@ the value is *transformed* (e.g., adding a column), creating a new
 object that falls back to content-based identity.
 See [Under the hood: cache keys](pocket_book.cache_keys.html) for
 details on the origin registry.
+
+Similarly, `origin-story` follows derefed values back through the
+registry to their `Cached` origin, producing the full provenance
+DAG. We demonstrate this [below](#provenance-through-derefed-values).
 
 For a fuller example with branching dependencies, see the
 [Real-World Walkthrough](pocket_book.real_world_walkthrough.html).
@@ -441,15 +445,15 @@ No `:value` keys yet. Now trigger computation:
 ::: {.callout-note}
 ## OUT
 ```
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.recursive-caching-in-pipelines/train-model
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.recursive-caching-in-pipelines/preprocess
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.recursive-caching-in-pipelines/load-dataset
+10:06:32.923 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.recursive-caching-in-pipelines/train-model
+10:06:32.923 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.recursive-caching-in-pipelines/preprocess
+10:06:32.923 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.recursive-caching-in-pipelines/load-dataset
 Loading dataset from data/experiment.csv ...
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo-pipelines/cd/(pocket-book.recursive-caching-in-pipelines_load-dataset "data_experiment.csv")
+10:06:33.224 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo-pipelines/cd/(pocket-book.recursive-caching-in-pipelines_load-dataset "data_experiment.csv")
 Preprocessing with options: {:scale 2}
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo-pipelines/f8/(pocket-book.recursive-caching-in-pipelines_preprocess (pocket-book.recursive-caching-in-pipelines_load-dataset "data_experiment.csv") {:scale 2})
+10:06:33.526 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo-pipelines/f8/(pocket-book.recursive-caching-in-pipelines_preprocess (pocket-book.recursive-caching-in-pipelines_load-dataset "data_experiment.csv") {:scale 2})
 Training model with params: {:epochs 100}
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo-pipelines/9e/(pocket-book.recursive-caching-in-pipelines_train-model (pocket-book.recursive-caching-in-pipelines_preprocess (pocket-book.recursive-caching-in-pipelines_load-dataset "data_experiment.csv") {:scale 2}) {:epochs 100})
+10:06:33.828 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo-pipelines/9e/(pocket-book.recursive-caching-in-pipelines_train-model (pocket-book.recursive-caching-in-pipelines_preprocess (pocket-book.recursive-caching-in-pipelines_load-dataset "data_experiment.csv") {:scale 2}) {:epochs 100})
 
 ```
 :::
@@ -575,6 +579,166 @@ Returns a Mermaid flowchart string. Arrows show data flow direction
 
 
 
+## Provenance through derefed values
+
+In the pipeline above, we passed `Cached` references directly
+from one step to the next. But sometimes we need to deref between
+steps — for example, when passing data to a library that expects
+concrete values. The origin registry ensures provenance still
+works in this case.
+
+Here we build the same three-step pipeline, but deref between
+each step:
+
+
+::: {.sourceClojure}
+```clojure
+(def data-c2 (load-dataset* "data/deref-demo.csv"))
+```
+:::
+
+
+
+::: {.sourceClojure}
+```clojure
+(def data-val (deref data-c2))
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+10:06:33.833 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.recursive-caching-in-pipelines/load-dataset
+Loading dataset from data/deref-demo.csv ...
+10:06:34.134 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo-pipelines/94/(pocket-book.recursive-caching-in-pipelines_load-dataset "data_deref-demo.csv")
+
+```
+:::
+
+
+
+::: {.sourceClojure}
+```clojure
+(def processed-c2 (preprocess* data-val {:scale 3}))
+```
+:::
+
+
+
+::: {.sourceClojure}
+```clojure
+(def processed-val (deref processed-c2))
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+10:06:34.136 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.recursive-caching-in-pipelines/preprocess
+Preprocessing with options: {:scale 3}
+10:06:34.437 DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo-pipelines/0c/(pocket-book.recursive-caching-in-pipelines_preprocess (pocket-book.recursive-caching-in-pipelines_load-dataset "data_deref-demo.csv") {:scale 3})
+
+```
+:::
+
+
+
+::: {.sourceClojure}
+```clojure
+(def model-c2 (train-model* processed-val {:epochs 50}))
+```
+:::
+
+
+Even though each cached function received a derefed (real) value,
+`origin-story` traces the full chain — from `train-model` back
+through `preprocess` to `load-dataset`:
+
+
+::: {.sourceClojure}
+```clojure
+(pocket/origin-story model-c2)
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+{:fn #'pocket-book.recursive-caching-in-pipelines/train-model,
+ :args
+ [{:fn #'pocket-book.recursive-caching-in-pipelines/preprocess,
+   :args
+   [{:fn #'pocket-book.recursive-caching-in-pipelines/load-dataset,
+     :args [{:value "data/deref-demo.csv"}],
+     :id "c3",
+     :value {:data [1 2 3 4 5], :source "data/deref-demo.csv"}}
+    {:value {:scale 3}}],
+   :id "c2",
+   :value {:data (3 6 9 12 15), :source "data/deref-demo.csv"}}
+  {:value {:epochs 50}}],
+ :id "c1"}
+
+```
+:::
+
+
+`origin-story-graph` shows three cached nodes (one per pipeline
+step). Without the origin registry, the derefed values would
+appear as opaque leaves and we would see only one cached node:
+
+
+::: {.sourceClojure}
+```clojure
+(let [g (pocket/origin-story-graph model-c2)]
+  (count (filter (fn [[_ v]] (:fn v)) (:nodes g))))
+```
+:::
+
+
+
+::: {.printedClojure}
+```clojure
+3
+
+```
+:::
+
+
+The full chain as a Mermaid flowchart:
+
+
+::: {.sourceClojure}
+```clojure
+(pocket/origin-story-mermaid model-c2)
+```
+:::
+
+
+
+```{=html}
+<div class="mermaid">flowchart TD
+  n0["train-model"]
+  n1["preprocess"]
+  n2["load-dataset"]
+  n3[/"'data/deref-demo.csv'"/]
+  n3 --> n2
+  n2 --> n1
+  n4[/"{:scale 3}"/]
+  n4 --> n1
+  n1 --> n0
+  n5[/"{:epochs 50}"/]
+  n5 --> n0</div>
+```
+
+
+---
+
+
 ## Cleanup
 
 
@@ -589,7 +753,7 @@ Returns a Mermaid flowchart string. Arrows show data flow direction
 ::: {.callout-note}
 ## OUT
 ```
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo-pipelines
+10:06:34.448 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo-pipelines
 
 ```
 :::

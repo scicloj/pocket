@@ -43,7 +43,7 @@
   (update
    data
    :data
-   (fn* [p1__28903#] (map (fn [x] (* x (:scale opts))) p1__28903#)))))
+   (fn* [p1__70791#] (map (fn [x] (* x (:scale opts))) p1__70791#)))))
 
 
 (def
@@ -103,28 +103,59 @@
  (->> (pocket/cache-entries) (mapv :id) (str/join "\n") kind/code))
 
 
-(def v25_l149 (def data-c (load-dataset* "data/experiment.csv")))
+(def v25_l153 (def data-c (load-dataset* "data/experiment.csv")))
 
 
-(def v26_l150 (def preprocessed-c (preprocess* data-c {:scale 2})))
+(def v26_l154 (def preprocessed-c (preprocess* data-c {:scale 2})))
 
 
-(def v27_l151 (def model-c (train-model* preprocessed-c {:epochs 100})))
+(def v27_l155 (def model-c (train-model* preprocessed-c {:epochs 100})))
 
 
-(def v29_l161 (pocket/origin-story model-c))
+(def v29_l165 (pocket/origin-story model-c))
 
 
-(def v31_l165 (deref model-c))
+(def v31_l169 (deref model-c))
 
 
-(def v33_l169 (pocket/origin-story model-c))
+(def v33_l173 (pocket/origin-story model-c))
 
 
-(def v35_l179 (pocket/origin-story-graph model-c))
+(def v35_l183 (pocket/origin-story-graph model-c))
 
 
-(def v37_l186 (pocket/origin-story-mermaid model-c))
+(def v37_l190 (pocket/origin-story-mermaid model-c))
 
 
-(def v39_l190 (pocket/cleanup!))
+(def v39_l203 (def data-c2 (load-dataset* "data/deref-demo.csv")))
+
+
+(def v40_l204 (def data-val (deref data-c2)))
+
+
+(def v41_l206 (def processed-c2 (preprocess* data-val {:scale 3})))
+
+
+(def v42_l207 (def processed-val (deref processed-c2)))
+
+
+(def v43_l209 (def model-c2 (train-model* processed-val {:epochs 50})))
+
+
+(def v45_l215 (pocket/origin-story model-c2))
+
+
+(def
+ v47_l221
+ (let
+  [g (pocket/origin-story-graph model-c2)]
+  (count (filter (fn [[_ v]] (:fn v)) (:nodes g)))))
+
+
+(deftest t48_l224 (is (= v47_l221 3)))
+
+
+(def v50_l228 (pocket/origin-story-mermaid model-c2))
+
+
+(def v52_l234 (pocket/cleanup!))

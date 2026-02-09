@@ -19,20 +19,19 @@ format:
 </style>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js" type="text/javascript"></script><script src="https://code.jquery.com/ui/1.13.1/jquery-ui.min.js" type="text/javascript"></script><script src="https://cdn.jsdelivr.net/npm/mermaid@11.10.1/dist/mermaid.min.js" type="text/javascript"></script>
 
-# 🚧 Draft: `pocket-pipeline` — cached ML pipelines with provenance
+# 🚧 Draft: `pocket-pipeline` — cached ML pipelines with `evaluate-pipelines`
 
-**Last modified: 2026-02-08**
-
-The previous chapter (`pocket-model`) showed how to cache model
-training in a [metamorph.ml](https://github.com/scicloj/metamorph.ml)
+The previous chapter ([pocket-model](pocket_model.html)) showed
+how to cache model training in a
+[metamorph.ml](https://github.com/scicloj/metamorph.ml)
 pipeline by swapping one step. That approach is simple — just
 replace `ml/model` with `pocket-model` — but only the training
 step is cached through Pocket.
 
 This chapter explores a deeper integration: building the **entire
-pipeline** as a chain of `pocket/caching-fn` calls. Every step —
-data splitting, feature engineering, outlier clipping, training,
-evaluation — becomes a cached node in a DAG, giving us:
+pipeline** as a chain of `pocket/caching-fn` calls, where every
+step — data splitting, feature engineering, outlier clipping,
+training — becomes a cached node. This gives us:
 
 
 - **Per-step storage control** — choose `:mem`, `:mem+disk`, or
@@ -46,9 +45,18 @@ evaluation — becomes a cached node in a DAG, giving us:
 
 - **Concurrent dedup** — same computation runs once across threads
 
-We then add a thin evaluation loop on top — `pocket-evaluate-pipelines`
-— that provides cross-validation and model comparison, similar to
-metamorph.ml's `evaluate-pipelines` but built on Pocket's DAG.
+The key ingredient is Pocket's
+[origin registry](cache_keys.html#origin-registry-derefed-values-keep-their-identity):
+when a `Cached` value is derefed, the real result keeps its
+lightweight identity. This lets us deref at each pipeline step —
+so real datasets flow through
+[metamorph](https://github.com/scicloj/metamorph)'s context —
+while cache keys stay efficient. Because the data is always a
+real dataset, we can use metamorph.ml's
+[`evaluate-pipelines`](https://scicloj.github.io/metamorph.ml/scicloj.metamorph.ml.html#var-evaluate-pipelines)
+directly for
+[cross-validation](https://en.wikipedia.org/wiki/Cross-validation_(statistics))
+and model comparison.
 
 
 ## Background
@@ -73,8 +81,7 @@ The [ML Workflows](ml_workflows.html) chapter demonstrates Pocket
 caching with plain functions — `pocket/cached` calls wired into a
 DAG. This chapter uses the same pipeline functions and the same
 DAG approach, but adds **cross-validation and model comparison**
-on top, providing functionality similar to metamorph.ml's
-`evaluate-pipelines`.
+on top, reusing metamorph.ml's `evaluate-pipelines`.
 
 The [pocket-model](pocket_model.html) chapter takes the opposite
 approach: it plugs into metamorph.ml's existing pipeline machinery
@@ -83,11 +90,11 @@ training step is cached through Pocket.
 
 | | pocket-model | This chapter |
 |--|-------------|-------------|
-| Integration effort | One-line change | Build pipeline as DAG |
+| Integration effort | One-line change | Build pipeline with `caching-fn` wrappers |
 | What's cached | Training only | Every step |
-| Provenance | Training step only | Full DAG |
+| Provenance | Training step only | Full DAG — any result to its parameters |
 | Storage control | Global | Per-step |
-| Evaluation | metamorph.ml's `evaluate-pipelines` | `pocket-evaluate-pipelines` (loops over `Cached` references) |
+| Evaluation | `ml/evaluate-pipelines` | `ml/evaluate-pipelines` (same) |
 
 
 ## Setup
@@ -109,6 +116,8 @@ training step is cached through Pocket.
    [tablecloth.api :as tc]
    [tablecloth.column.api :as tcc]
    [tech.v3.dataset.modelling :as ds-mod]
+   ;; Column role filters (feature, target, prediction):
+   [tech.v3.dataset.column-filters :as cf]
    ;; Machine learning:
    [scicloj.metamorph.ml :as ml]
    [scicloj.metamorph.ml.loss :as loss]
@@ -159,7 +168,7 @@ nil
 ::: {.callout-note}
 ## OUT
 ```
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket - Cache dir set to: /tmp/pocket-metamorph
+10:06:45.929 INFO scicloj.pocket - Cache dir set to: /tmp/pocket-metamorph
 
 ```
 :::
@@ -186,7 +195,7 @@ nil
 ::: {.callout-note}
 ## OUT
 ```
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket - Cache cleanup: /tmp/pocket-metamorph
+10:06:45.929 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-metamorph
 
 ```
 :::
@@ -221,18 +230,18 @@ them across folds to add cross-validation.
   [{:keys [f n noise-sd seed outlier-fraction outlier-scale]
     :or {outlier-fraction 0 outlier-scale 10}}]
   (let [rng (java.util.Random. (long seed))
-        xs (vec (repeatedly n #(* 10.0 (.nextDouble rng))))
+        xs (repeatedly n #(* 10.0 (.nextDouble rng)))
         xs-final (if (pos? outlier-fraction)
                    (let [out-rng (java.util.Random. (+ (long seed) 7919))]
-                     (mapv (fn [x]
-                             (if (< (.nextDouble out-rng) outlier-fraction)
-                               (+ x (* (double outlier-scale) (.nextGaussian out-rng)))
-                               x))
-                           xs))
+                     (map (fn [x]
+                            (if (< (.nextDouble out-rng) outlier-fraction)
+                              (+ x (* (double outlier-scale) (.nextGaussian out-rng)))
+                              x))
+                          xs))
                    xs)
-        ys (mapv (fn [x] (+ (double (f x))
-                            (* (double noise-sd) (.nextGaussian rng))))
-                 xs)]
+        ys (map (fn [x] (+ (double (f x))
+                           (* (double noise-sd) (.nextGaussian rng))))
+                xs)]
     (-> (tc/dataset {:x xs-final :y ys})
         (ds-mod/set-inference-target :y))))
 ```
@@ -281,7 +290,7 @@ them across folds to add cross-validation.
 (defn fit-outlier-threshold
   "Compute IQR-based clipping bounds for :x from training data."
   [train-ds]
-  (let [xs (sort (vec (:x train-ds)))
+  (let [xs (sort (:x train-ds))
         n (count xs)
         q1 (nth xs (int (* 0.25 n)))
         q3 (nth xs (int (* 0.75 n)))
@@ -300,17 +309,6 @@ them across folds to add cross-validation.
   [ds threshold]
   (let [{:keys [lower upper]} threshold]
     (tc/add-column ds :x (-> (:x ds) (tcc/max lower) (tcc/min upper)))))
-```
-:::
-
-
-
-::: {.sourceClojure}
-```clojure
-(defn train-model
-  "Train a model on a prepared dataset."
-  [train-ds model-spec]
-  (ml/train train-ds model-spec))
 ```
 :::
 
@@ -368,15 +366,11 @@ Each pipeline function gets a `caching-fn` wrapper with an
 appropriate storage policy:
 
 
-- **`:mem`** for cheap shared steps (threshold, clipping, features,
-  prediction) — no disk I/O, but in-memory dedup ensures each
-  runs once
+- **`:mem`** for cheap shared steps (threshold, clipping, features, prediction)
+  — no disk I/O, but in-memory dedup ensures each runs once
 
 - **`:mem+disk`** (default) for expensive steps (model training)
   — persists to disk, survives JVM restarts
-
-- **`:none`** for steps where we only want DAG tracking without
-  any shared caching
 
 
 ::: {.sourceClojure}
@@ -408,15 +402,6 @@ appropriate storage policy:
 
 ::: {.sourceClojure}
 ```clojure
-(def c-train-model
-  (pocket/caching-fn #'train-model))
-```
-:::
-
-
-
-::: {.sourceClojure}
-```clojure
 (def c-predict-model
   (pocket/caching-fn #'predict-model {:storage :mem}))
 ```
@@ -431,10 +416,13 @@ appropriate storage policy:
 metamorph provides the pipeline machinery we need:
 `mm/pipeline` composes steps, `mm/lift` wraps stateless functions,
 `mm/fit-pipe` and `mm/transform-pipe` run pipelines in each mode.
-These work with `Cached` references in `:metamorph/data` — they pass the
-context through without inspecting the data.
 
-We only need two custom step types that metamorph does not provide:
+We build on this with two custom step types. Each step uses
+`caching-fn` wrappers internally and **derefs** the `Cached`
+result, so `:metamorph/data` always holds a real dataset. The
+[origin registry](cache_keys.html#origin-registry-derefed-values-keep-their-identity)
+ensures these derefed datasets carry their lightweight identity,
+so the next step's cache key stays efficient.
 
 
 ### `pocket-fitted`
@@ -445,23 +433,27 @@ to any dataset. In `:fit` mode, both are called. In `:transform`
 mode, only the apply function runs, using the parameters saved
 during `:fit`.
 
-This has no direct metamorph equivalent — in metamorph, each
-stateful step must implement `(case mode :fit ... :transform ...)`
-manually. `pocket-fitted` eliminates that boilerplate.
+Both functions should be `caching-fn` wrappers. Their `Cached`
+results are derefed before being stored in the context or in
+`:metamorph/data`.
 
 
 ::: {.sourceClojure}
 ```clojure
 (defn pocket-fitted
-  "Create a stateful pipeline step from fit and apply functions.
+  "Create a stateful pipeline step from fit and apply caching-fns.
   In :fit mode, fits parameters from data and applies them.
-  In :transform mode, applies previously fitted parameters."
+  In :transform mode, applies previously fitted parameters.
+  Results are derefed so real datasets flow through the pipeline."
   [fit-caching-fn apply-caching-fn]
   (fn [{:metamorph/keys [data mode id] :as ctx}]
     (case mode
-      :fit (let [fitted (fit-caching-fn data)]
-             (-> ctx (assoc id fitted) (assoc :metamorph/data (apply-caching-fn data fitted))))
-      :transform (assoc ctx :metamorph/data (apply-caching-fn data (get ctx id))))))
+      :fit (let [fitted (deref (fit-caching-fn data))]
+             (-> ctx
+                 (assoc id fitted)
+                 (assoc :metamorph/data (deref (apply-caching-fn data fitted)))))
+      :transform (assoc ctx :metamorph/data
+                        (deref (apply-caching-fn data (get ctx id)))))))
 ```
 :::
 
@@ -469,25 +461,39 @@ manually. `pocket-fitted` eliminates that boilerplate.
 
 ### `pocket-model`
 
-The model step — like `ml/model`. Trains in `:fit` mode (cached via
-Pocket) and stores the model under its step ID. In `:transform`
-mode, predicts using the stored model and saves the preprocessed
-test data as `:target` (needed for metric computation in
-`pocket-evaluate-pipelines`).
+The model step — compatible with `ml/evaluate-pipelines`. Trains
+in `:fit` mode (cached via Pocket) and stores the model map under
+its step ID. In `:transform` mode, predicts using the stored model
+(also cached) and saves the preprocessed test data as `:target`
+(for our loss computation) and as
+`:scicloj.metamorph.ml/target-ds` (for `evaluate-pipelines`).
+
+The `Cached` reference from training is also stored (under
+`:pocket/model-cached`) so we can trace provenance later.
 
 
 ::: {.sourceClojure}
 ```clojure
 (defn pocket-model
-  "Create a model pipeline step. Trains in :fit mode,
-  predicts in :transform mode. Like ml/model."
+  "Cached model step compatible with ml/evaluate-pipelines.
+  Caches training and prediction via pocket/cached. Stores the
+  training Cached reference at :pocket/model-cached for provenance."
   [model-spec]
   (fn [{:metamorph/keys [data mode id] :as ctx}]
     (case mode
-      :fit (assoc ctx id (c-train-model data model-spec))
-      :transform (let [model (get ctx id)]
-                   (assoc ctx :target data
-                          :metamorph/data (c-predict-model data model))))))
+      :fit
+      (let [model-c (pocket/cached #'ml/train data model-spec)
+            model (deref model-c)]
+        (assoc ctx id model
+               :pocket/model-cached model-c))
+      :transform
+      (let [model (get ctx id)]
+        (-> ctx
+            (update id assoc
+                    :scicloj.metamorph.ml/feature-ds (cf/feature data)
+                    :scicloj.metamorph.ml/target-ds (cf/target data))
+            (assoc :metamorph/data (deref (c-predict-model data model))
+                   :target data))))))
 ```
 :::
 
@@ -497,8 +503,10 @@ test data as `:target` (needed for metric computation in
 
 ## Composing a pipeline
 
-With these tools, we can build a specific pipeline by composing
-steps — the same way we'd use `mm/pipeline` in metamorph:
+With these tools, we can build a pipeline by composing steps.
+The `pocket-fitted` step handles stateful outlier clipping,
+`mm/lift` with `(comp deref c-fn)` handles stateless cached
+feature preparation, and `pocket-model` handles training.
 
 
 ::: {.sourceClojure}
@@ -541,18 +549,36 @@ steps — the same way we'd use `mm/pipeline` in metamorph:
 (def pipe-cart
   (mm/pipeline
    {:metamorph/id :clip} (pocket-fitted c-fit-outlier-threshold c-clip-outliers)
-   {:metamorph/id :prep} (mm/lift c-prepare-features :poly+trig)
+   {:metamorph/id :prep} (mm/lift (comp deref c-prepare-features) :poly+trig)
    {:metamorph/id :model} (pocket-model cart-spec)))
 ```
 :::
 
 
-Fit on training data:
+Fit on training data. We deref the `Cached` split to get a real
+dataset — the origin registry ensures our caching-fn wrappers
+still see a lightweight cache key:
 
 
 ::: {.sourceClojure}
 ```clojure
-(def fit-ctx (mm/fit-pipe train-c pipe-cart))
+(def fit-ctx (mm/fit-pipe (deref train-c) pipe-cart))
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+10:06:45.943 INFO scicloj.pocket.impl.cache - Cache miss, computing: :train
+10:06:45.943 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/split-dataset
+10:06:45.943 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/make-regression-data
+10:06:45.953 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/fit-outlier-threshold
+10:06:45.953 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/clip-outliers
+10:06:45.956 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/prepare-features
+10:06:45.957 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
+
 ```
 :::
 
@@ -562,21 +588,7 @@ Transform on test data (using fitted params from training):
 
 ::: {.sourceClojure}
 ```clojure
-(def transform-ctx (mm/transform-pipe test-c pipe-cart fit-ctx))
-```
-:::
-
-
-The fitted context carries the model and threshold as `Cached` references:
-
-
-::: {.sourceClojure}
-```clojure
-(-> fit-ctx
-    :model
-    deref
-    (update :model-data dissoc :model-as-bytes)
-    kind/pprint)
+(def transform-ctx (mm/transform-pipe (deref test-c) pipe-cart fit-ctx))
 ```
 :::
 
@@ -585,14 +597,24 @@ The fitted context carries the model and threshold as `Cached` references:
 ::: {.callout-note}
 ## OUT
 ```
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/train-model
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/prepare-features
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/clip-outliers
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss, computing: :train
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/split-dataset
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/make-regression-data
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/fit-outlier-threshold
+10:06:45.972 INFO scicloj.pocket.impl.cache - Cache miss, computing: :test
+10:06:45.974 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/clip-outliers
+10:06:45.974 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/prepare-features
+10:06:45.976 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
 
+```
+:::
+
+
+The fitted context carries the model:
+
+
+::: {.sourceClojure}
+```clojure
+(-> fit-ctx
+    (get :model)
+    (update :model-data dissoc :model-as-bytes)
+    kind/pprint)
 ```
 :::
 
@@ -604,54 +626,54 @@ The fitted context carries the model and threshold as `Cached` references:
 
 |          :y |
 |------------:|
-|  0.86298957 |
-| -3.31824591 |
-|  0.84502797 |
-|  1.49792721 |
-| -5.11365711 |
-| -4.91894727 |
-|  2.39650543 |
-|  5.85326554 |
-|  0.51279144 |
-|  8.37327886 |
+| -2.03959829 |
+|  1.97631359 |
+| -1.13244613 |
+| -0.28466023 |
+| -3.51203007 |
+|  1.56378543 |
+| -0.34817318 |
+|  3.95058332 |
+|  1.75833936 |
+|  6.90883052 |
 |         ... |
-| -2.65944882 |
-|  0.65420254 |
-| -3.56240281 |
-| -4.51681909 |
-|  7.22642959 |
-| -2.37170016 |
-| -2.88234307 |
-| -2.58490962 |
-|  8.15404050 |
-| -4.08785620 |
-|  1.65671909 |
+|  5.94841143 |
+|  0.76281763 |
+|  6.72108056 |
+| -2.61412072 |
+| -0.47687264 |
+|  0.90381607 |
+|  6.37372487 |
+| -4.57928612 |
+|  0.72187253 |
+| -1.30560162 |
+|  1.86963826 |
 , :feature-ds Group: 0 [333 4]:
 
 |          :x |         :x2 |      :sin-x |      :cos-x |
 |------------:|------------:|------------:|------------:|
-|  0.62212252 |  0.38703643 |  0.58276133 |  0.81264336 |
-|  5.63922880 | 31.80090150 | -0.60036425 |  0.79972668 |
-|  1.24912415 |  1.56031114 |  0.94870808 |  0.31615341 |
-|  1.52711743 |  2.33208765 |  0.99904623 |  0.04366501 |
-|  4.82231721 | 23.25474331 | -0.99396397 |  0.10970697 |
-| -4.37550437 | 19.14503845 |  0.94378903 | -0.33054843 |
-|  1.47898709 |  2.18740283 |  0.99578849 |  0.09168031 |
-|  7.20124675 | 51.85795481 |  0.79442571 |  0.60736133 |
-|  0.34521076 |  0.11917047 |  0.33839501 |  0.94100415 |
-|  7.94559627 | 63.13250002 |  0.99580631 | -0.09148653 |
+|  3.56214010 | 12.68884212 | -0.40826026 | -0.91286557 |
+|  2.64156573 |  6.97786948 |  0.47944917 | -0.87756965 |
+|  9.51947133 | 90.62033446 | -0.09455192 | -0.99551993 |
+|  6.27079557 | 39.32287712 | -0.01238942 |  0.99992325 |
+|  5.62533957 | 31.64444532 | -0.61141358 |  0.79131121 |
+| -4.85326548 | 23.55418581 |  0.99009331 |  0.14041098 |
+|  0.28305731 |  0.08012144 |  0.27929260 |  0.96020604 |
+|  6.94559974 | 48.24135581 |  0.61502245 |  0.78850960 |
+|  6.46688990 | 41.82066494 |  0.18267307 |  0.98317371 |
+|  7.51301426 | 56.44538329 |  0.94243162 |  0.33439893 |
 |         ... |         ... |         ... |         ... |
-| -4.37550437 | 19.14503845 |  0.94378903 | -0.33054843 |
-|  0.36484517 |  0.13311200 |  0.35680466 |  0.93417902 |
-|  5.49169112 | 30.15867130 | -0.71140416 |  0.70278313 |
-|  5.27903869 | 27.86824953 | -0.84370417 |  0.53680842 |
-|  7.64151660 | 58.39277600 |  0.97751408 |  0.21087014 |
-| -4.37550437 | 19.14503845 |  0.94378903 | -0.33054843 |
-|  9.76876450 | 95.42875978 | -0.33724276 | -0.94141772 |
-|  5.67942172 | 32.25583106 | -0.56774469 |  0.82320469 |
-|  8.09594125 | 65.54426469 |  0.97087030 | -0.23960562 |
-|  4.36540394 | 19.05675156 | -0.94040226 | -0.34006408 |
-|  1.52754849 |  2.33340440 |  0.99906496 |  0.04323435 |
+| -4.85326548 | 23.55418581 |  0.99009331 |  0.14041098 |
+|  1.03856897 |  1.07862551 |  0.86167893 |  0.50745386 |
+|  7.39090954 | 54.62554378 |  0.89468442 |  0.44669877 |
+|  3.90381073 | 15.23973824 | -0.69052749 | -0.72330615 |
+|  0.22759616 |  0.05180001 |  0.22563633 |  0.97421160 |
+| -4.85326548 | 23.55418581 |  0.99009331 |  0.14041098 |
+|  7.38225379 | 54.49767101 |  0.89078444 |  0.45442610 |
+|  4.66158402 | 21.73036562 | -0.99870971 | -0.05078310 |
+|  2.67983090 |  7.18149367 |  0.44552604 | -0.89526898 |
+|  3.47865983 | 12.10107420 | -0.33072073 | -0.94372867 |
+|  2.13681411 |  4.56597455 |  0.84404323 | -0.53627515 |
 },
  :options
  {:model-type :scicloj.ml.tribuo/regression,
@@ -661,7 +683,7 @@ The fitted context carries the model and threshold as `Cached` references:
     :properties {:maxDepth "8"}}],
   :tribuo-trainer-name "cart"},
  :train-input-hash nil,
- :id #uuid "aa3ffb71-7a54-49ab-a292-acd428c72de7",
+ :id #uuid "7a635726-06ac-4cab-b9f7-0e65d609d6ba",
  :feature-columns [:x :x2 :sin-x :cos-x],
  :target-columns [:y],
  :target-datatypes {:y :float64}}
@@ -675,20 +697,7 @@ Predictions:
 
 ::: {.sourceClojure}
 ```clojure
-(tc/head (deref (:metamorph/data transform-ctx)))
-```
-:::
-
-
-
-::: {.callout-note}
-## OUT
-```
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/prepare-features
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/clip-outliers
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss, computing: :test
-
+(tc/head (:metamorph/data transform-ctx))
 ```
 :::
 
@@ -698,23 +707,23 @@ _unnamed [5 1]:
 
 |          :y |
 |------------:|
-|  1.88005320 |
-|  0.87019231 |
-|  0.87019231 |
-|  0.87019231 |
-| -3.10429723 |
+|  7.49226834 |
+| -1.63699192 |
+| -4.08775473 |
+| -3.85731359 |
+|  2.39153284 |
 
 
 :::
 
 
-Compute [RMSE](https://en.wikipedia.org/wiki/Root_mean_square_deviation) from the target (preprocessed test data) and predictions:
+Compute [RMSE](https://en.wikipedia.org/wiki/Root_mean_square_deviation) from the target and predictions:
 
 
 ::: {.sourceClojure}
 ```clojure
-(loss/rmse (:y @(:target transform-ctx))
-           (:y @(:metamorph/data transform-ctx)))
+(loss/rmse (:y (get-in transform-ctx [:model :scicloj.metamorph.ml/target-ds]))
+           (:y (:metamorph/data transform-ctx)))
 ```
 :::
 
@@ -722,7 +731,7 @@ Compute [RMSE](https://en.wikipedia.org/wiki/Root_mean_square_deviation) from th
 
 ::: {.printedClojure}
 ```clojure
-1.9830584588944564
+1.6810603338440813
 
 ```
 :::
@@ -762,7 +771,17 @@ fitted pipeline:
 
 ::: {.sourceClojure}
 ```clojure
-(def train-transform-ctx (mm/transform-pipe train-c pipe-cart fit-ctx))
+(def train-transform-ctx (mm/transform-pipe (deref train-c) pipe-cart fit-ctx))
+```
+:::
+
+
+
+::: {.callout-note}
+## OUT
+```
+10:06:45.987 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
+
 ```
 :::
 
@@ -831,10 +850,9 @@ A report function gathers both into one summary:
 ::: {.callout-note}
 ## OUT
 ```
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/report
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/compute-loss
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/compute-loss
+10:06:45.991 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/report
+10:06:45.991 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/compute-loss
+10:06:45.992 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/compute-loss
 
 ```
 :::
@@ -843,15 +861,19 @@ A report function gathers both into one summary:
 
 ::: {.printedClojure}
 ```clojure
-{:train-rmse 0.908876032851451, :test-rmse 1.9830584588944564}
+{:train-rmse 0.9236365142505957, :test-rmse 1.6810603338440813}
 
 ```
 :::
 
 
-The summary reference carries full provenance. The DAG branches
-into train and test paths that share the same model node — a
-diamond dependency that Pocket traces naturally:
+
+### Provenance
+
+The summary reference carries full provenance. The origin registry
+lets `origin-story` follow derefed values back through the caching
+chain — so the DAG branches into train and test paths that share
+the same model node. This diamond dependency is traced naturally:
 
 
 ::: {.sourceClojure}
@@ -887,36 +909,29 @@ diamond dependency that Pocket traces naturally:
   n2 --> n1
   n11["predict-model"]
   n2 --> n11
-  n12["train-model"]
-  n13["prepare-features"]
-  n14["clip-outliers"]
-  n4 --> n14
-  n9 --> n14
-  n14 --> n13
-  n15[/":poly+trig"/]
-  n15 --> n13
+  n12["train"]
+  n2 --> n12
+  n13[/"{:model-type :scicloj.ml.tribuo/regression,<br>:tribuo-components [{:name 'cart',<br>:type 'org.tribuo.regression.rtree.CARTRegressionTrainer',<br>:properties {:maxDepth '8'}}],<br>:tribuo-trainer-name 'cart'}"/]
   n13 --> n12
-  n16[/"{:model-type :scicloj.ml.tribuo/regression,<br>:tribuo-components [{:name 'cart',<br>:type 'org.tribuo.regression.rtree.CARTRegressionTrainer',<br>:properties {:maxDepth '8'}}],<br>:tribuo-trainer-name 'cart'}"/]
-  n16 --> n12
   n12 --> n11
   n11 --> n1
   n1 --> n0
-  n17["compute-loss"]
-  n18["prepare-features"]
-  n19["clip-outliers"]
-  n20[":test"]
-  n5 --> n20
-  n20 --> n19
-  n9 --> n19
-  n19 --> n18
-  n21[/":poly+trig"/]
-  n21 --> n18
-  n18 --> n17
-  n22["predict-model"]
-  n18 --> n22
-  n12 --> n22
-  n22 --> n17
-  n17 --> n0</div>
+  n14["compute-loss"]
+  n15["prepare-features"]
+  n16["clip-outliers"]
+  n17[":test"]
+  n5 --> n17
+  n17 --> n16
+  n9 --> n16
+  n16 --> n15
+  n18[/":poly+trig"/]
+  n18 --> n15
+  n15 --> n14
+  n19["predict-model"]
+  n15 --> n19
+  n12 --> n19
+  n19 --> n14
+  n14 --> n0</div>
 ```
 
 
@@ -932,7 +947,7 @@ diamond dependency that Pocket traces naturally:
 ::: {.callout-note}
 ## OUT
 ```
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket - Cache cleanup: /tmp/pocket-metamorph
+10:06:45.997 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-metamorph
 
 ```
 :::
@@ -950,10 +965,13 @@ diamond dependency that Pocket traces naturally:
 ---
 
 
-## Splits as Cached references
+## Splits as `Cached` references
 
-For cross-validation, we need k train/test splits — each as a
-`Cached` reference so the full provenance chain is maintained.
+For cross-validation, we need k train/test splits. We create
+them as `Cached` references — preserving provenance — and then
+deref them to get real datasets for `ml/evaluate-pipelines`.
+The origin registry ensures the derefed datasets carry their
+lightweight identity.
 
 
 ::: {.sourceClojure}
@@ -981,14 +999,14 @@ For cross-validation, we need k train/test splits — each as a
 ::: {.sourceClojure}
 ```clojure
 (defn- n-splits
-  "Derive the number of splits from the method and params,
-  without materializing the dataset."
-  [split-method split-params]
+  "Derive the number of splits from the method and params.
+  For :loo, derefs the dataset to get its row count."
+  [data-c split-method split-params]
   (case split-method
     :kfold (:k split-params 5)
     :holdout 1
     :bootstrap (:repeats split-params 1)
-    :loo (throw (ex-info "pocket-splits does not support :loo (needs dataset size)" {}))))
+    :loo (tc/row-count (deref data-c))))
 ```
 :::
 
@@ -1009,12 +1027,35 @@ For cross-validation, we need k train/test splits — each as a
   "Create k-fold splits as Cached references.
   Returns [{:train Cached, :test Cached, :idx int} ...]."
   [data-c split-method split-params]
-  (vec (for [idx (range (n-splits split-method split-params))]
-         {:train (pocket/cached #'nth-split-train
-                                data-c split-method split-params idx)
-          :test (pocket/cached #'nth-split-test
-                               data-c split-method split-params idx)
-          :idx idx})))
+  (for [idx (range (n-splits data-c split-method split-params))]
+    {:train (pocket/cached #'nth-split-train
+                           data-c split-method split-params idx)
+     :test (pocket/cached #'nth-split-test
+                          data-c split-method split-params idx)
+     :idx idx}))
+```
+:::
+
+
+Create `Cached` splits and deref them for `ml/evaluate-pipelines`.
+The derefed datasets are real (passing malli validation) while
+carrying their origin identity (for efficient cache keys):
+
+
+::: {.sourceClojure}
+```clojure
+(def cached-splits (pocket-splits data-c :kfold {:k 3 :seed 42}))
+```
+:::
+
+
+
+::: {.sourceClojure}
+```clojure
+(def splits
+  (map (fn [{:keys [train test]}]
+         {:train (deref train) :test (deref test)})
+       cached-splits))
 ```
 :::
 
@@ -1022,53 +1063,13 @@ For cross-validation, we need k train/test splits — each as a
 ---
 
 
-## Evaluation loop
+## Cross-validation with `ml/evaluate-pipelines`
 
-`pocket-evaluate-pipelines` runs pipelines across splits — like
-metamorph.ml's `evaluate-pipelines`. For each pipeline × each
-fold, it fits on train, transforms on test, and computes a metric.
-
-
-::: {.sourceClojure}
-```clojure
-(defn pocket-evaluate-pipelines
-  "Evaluate pipelines across k-fold splits.
-  Like ml/evaluate-pipelines, but built on Cached references.
-  
-  `pipelines` is a seq of pipeline functions (from mm/pipeline).
-  `metric-fn` takes (test-ds, prediction-ds) and returns a number."
-  [data-c split-method split-params pipelines metric-fn]
-  (let [splits (pocket-splits data-c split-method split-params)]
-    (vec (for [pipe-fn pipelines
-               {:keys [train test idx]} splits]
-           (let [fit-ctx (mm/fit-pipe train pipe-fn)
-                 transform-ctx (mm/transform-pipe test pipe-fn fit-ctx)
-                 metric (metric-fn @(:target transform-ctx)
-                                   @(:metamorph/data transform-ctx))]
-             {:split-idx idx
-              :metric metric
-              :model (:model fit-ctx)})))))
-```
-:::
-
-
----
-
-
-## Demo: cross-validation
-
-3-fold CV with three pipeline configurations:
-
-
-::: {.sourceClojure}
-```clojure
-(defn rmse-metric
-  "Compute RMSE between actual and predicted :y columns."
-  [test-ds pred-ds]
-  (loss/rmse (:y test-ds) (:y pred-ds)))
-```
-:::
-
+Because our pipeline steps deref their outputs, real datasets
+flow through `:metamorph/data` at every point. This makes our
+pipeline fully compatible with
+[`evaluate-pipelines`](https://scicloj.github.io/metamorph.ml/scicloj.metamorph.ml.html#var-evaluate-pipelines),
+which needs real datasets for metric computation.
 
 
 ::: {.sourceClojure}
@@ -1076,7 +1077,7 @@ fold, it fits on train, transforms on test, and computes a metric.
 (defn make-pipe [{:keys [feature-set model-spec]}]
   (mm/pipeline
    {:metamorph/id :clip} (pocket-fitted c-fit-outlier-threshold c-clip-outliers)
-   {:metamorph/id :prep} (mm/lift c-prepare-features feature-set)
+   {:metamorph/id :prep} (mm/lift (comp deref c-prepare-features) feature-set)
    {:metamorph/id :model} (pocket-model model-spec)))
 ```
 :::
@@ -1097,9 +1098,13 @@ fold, it fits on train, transforms on test, and computes a metric.
 ::: {.sourceClojure}
 ```clojure
 (def results
-  (pocket-evaluate-pipelines data-c :kfold {:k 3 :seed 42}
-                             (mapv make-pipe configs)
-                             rmse-metric))
+  (ml/evaluate-pipelines
+   (map make-pipe configs)
+   splits
+   loss/rmse
+   :loss
+   {:return-best-crossvalidation-only false
+    :return-best-pipeline-only false}))
 ```
 :::
 
@@ -1108,106 +1113,96 @@ fold, it fits on train, transforms on test, and computes a metric.
 ::: {.callout-note}
 ## OUT
 ```
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/prepare-features
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/clip-outliers
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/nth-split-test
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/make-regression-data
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/fit-outlier-threshold
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/nth-split-train
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/train-model
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/prepare-features
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/clip-outliers
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/prepare-features
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/clip-outliers
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/nth-split-test
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/fit-outlier-threshold
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/nth-split-train
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/train-model
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/prepare-features
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/clip-outliers
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/prepare-features
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/clip-outliers
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/nth-split-test
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/fit-outlier-threshold
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/nth-split-train
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/train-model
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/prepare-features
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/clip-outliers
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/prepare-features
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/train-model
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/prepare-features
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/prepare-features
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/train-model
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/prepare-features
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/prepare-features
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/train-model
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/prepare-features
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/train-model
-Feb 09, 2026 1:22:08 AM org.tribuo.common.sgd.AbstractSGDTrainer train
+10:06:46.008 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/nth-split-train
+10:06:46.008 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/make-regression-data
+10:06:46.021 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/nth-split-test
+10:06:46.030 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/nth-split-train
+10:06:46.035 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/nth-split-test
+10:06:46.040 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/nth-split-train
+10:06:46.044 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/nth-split-test
+10:06:46.049 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/fit-outlier-threshold
+10:06:46.049 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/clip-outliers
+10:06:46.049 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/prepare-features
+10:06:46.050 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
+10:06:46.066 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
+10:06:46.070 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/clip-outliers
+10:06:46.070 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/prepare-features
+10:06:46.071 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
+10:06:46.073 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/fit-outlier-threshold
+10:06:46.074 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/clip-outliers
+10:06:46.074 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/prepare-features
+10:06:46.075 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
+10:06:46.089 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
+10:06:46.091 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/clip-outliers
+10:06:46.092 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/prepare-features
+10:06:46.092 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
+10:06:46.094 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/fit-outlier-threshold
+10:06:46.094 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/clip-outliers
+10:06:46.094 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/prepare-features
+10:06:46.095 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
+10:06:46.108 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
+10:06:46.110 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/clip-outliers
+10:06:46.111 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/prepare-features
+10:06:46.112 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
+10:06:46.115 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/prepare-features
+10:06:46.115 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
+10:06:46.123 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
+10:06:46.126 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/prepare-features
+10:06:46.126 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
+10:06:46.128 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/prepare-features
+10:06:46.128 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
+10:06:46.135 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
+10:06:46.137 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/prepare-features
+10:06:46.138 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
+10:06:46.140 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/prepare-features
+10:06:46.140 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
+10:06:46.149 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
+10:06:46.152 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/prepare-features
+10:06:46.152 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
+10:06:46.154 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
+Feb 09, 2026 10:06:46 AM org.tribuo.common.sgd.AbstractSGDTrainer train
 INFO: Training SGD model with 333 examples
-Feb 09, 2026 1:22:08 AM org.tribuo.common.sgd.AbstractSGDTrainer train
-INFO: Outputs - RegressionInfo({name=y,id=0,count=333,max=8.866764,min=-5.914919,mean=0.701788,variance=15.193172})
-Feb 09, 2026 1:22:08 AM org.tribuo.common.sgd.AbstractSGDTrainer train
-INFO: At iteration 10000, average loss = 3.7525222314159787
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/train-model
-Feb 09, 2026 1:22:08 AM org.tribuo.common.sgd.AbstractSGDTrainer train
+Feb 09, 2026 10:06:46 AM org.tribuo.common.sgd.AbstractSGDTrainer train
+INFO: Outputs - RegressionInfo({name=y,id=0,count=333,max=8.463754,min=-5.615639,mean=1.066586,variance=14.157836})
+Feb 09, 2026 10:06:46 AM org.tribuo.common.sgd.AbstractSGDTrainer train
+INFO: At iteration 10000, average loss = 4.050872565748835
+10:06:46.163 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
+10:06:46.165 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
+10:06:46.166 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
+Feb 09, 2026 10:06:46 AM org.tribuo.common.sgd.AbstractSGDTrainer train
 INFO: Training SGD model with 333 examples
-Feb 09, 2026 1:22:08 AM org.tribuo.common.sgd.AbstractSGDTrainer train
-INFO: Outputs - RegressionInfo({name=y,id=0,count=333,max=8.498492,min=-5.914919,mean=0.583017,variance=14.288227})
-Feb 09, 2026 1:22:08 AM org.tribuo.common.sgd.AbstractSGDTrainer train
-INFO: At iteration 10000, average loss = 3.695109774152164
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/train-model
-Feb 09, 2026 1:22:08 AM org.tribuo.common.sgd.AbstractSGDTrainer train
+Feb 09, 2026 10:06:46 AM org.tribuo.common.sgd.AbstractSGDTrainer train
+INFO: Outputs - RegressionInfo({name=y,id=0,count=333,max=8.739185,min=-5.756192,mean=0.898097,variance=14.475543})
+Feb 09, 2026 10:06:46 AM org.tribuo.common.sgd.AbstractSGDTrainer train
+INFO: At iteration 10000, average loss = 3.2396946375069637
+10:06:46.175 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
+10:06:46.177 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
+10:06:46.179 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
+Feb 09, 2026 10:06:46 AM org.tribuo.common.sgd.AbstractSGDTrainer train
 INFO: Training SGD model with 334 examples
-Feb 09, 2026 1:22:08 AM org.tribuo.common.sgd.AbstractSGDTrainer train
-INFO: Outputs - RegressionInfo({name=y,id=0,count=334,max=8.866764,min=-5.501972,mean=0.844474,variance=15.400435})
-Feb 09, 2026 1:22:08 AM org.tribuo.common.sgd.AbstractSGDTrainer train
-INFO: At iteration 10000, average loss = 3.510884525077099
+Feb 09, 2026 10:06:46 AM org.tribuo.common.sgd.AbstractSGDTrainer train
+INFO: Outputs - RegressionInfo({name=y,id=0,count=334,max=8.739185,min=-5.756192,mean=0.997828,variance=14.612461})
+Feb 09, 2026 10:06:46 AM org.tribuo.common.sgd.AbstractSGDTrainer train
+INFO: At iteration 10000, average loss = 3.473370043059974
+10:06:46.193 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
+10:06:46.196 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
 
 ```
 :::
 
 
-3 configs × 3 folds = 9 evaluations:
-
-
-::: {.sourceClojure}
-```clojure
-(count results)
-```
-:::
-
-
-
-::: {.printedClojure}
-```clojure
-9
-
-```
-:::
-
-
-Aggregate mean RMSE per config:
+3 configs × 3 folds — aggregate mean RMSE per config:
 
 
 ::: {.sourceClojure}
 ```clojure
 (def summary
-  (let [grouped (partition 3 results)]
-    (mapv (fn [config rs]
-            {:feature-set (:feature-set config)
-             :model-type (-> config :model-spec :tribuo-trainer-name)
-             :mean-rmse (tcc/mean (map :metric rs))})
-          configs grouped)))
+  (map (fn [config pipeline-results]
+         {:feature-set (:feature-set config)
+          :model-type (-> config :model-spec :tribuo-trainer-name)
+          :mean-rmse (tcc/mean (map #(-> % :test-transform :metric)
+                                    pipeline-results))})
+       configs results))
 ```
 :::
 
@@ -1225,23 +1220,27 @@ _unnamed [3 3]:
 
 | :feature-set | :model-type | :mean-rmse |
 |--------------|-------------|-----------:|
-|   :poly+trig |        cart | 1.97410371 |
-|         :raw |        cart | 1.79975941 |
-|   :poly+trig |  linear-sgd | 2.00500709 |
+|   :poly+trig |        cart | 1.65064791 |
+|         :raw |        cart | 1.63217429 |
+|   :poly+trig |  linear-sgd | 2.13019778 |
 
 
 :::
 
 
-Second run — all training hits cache:
+Second run — all training hits cache, same metrics:
 
 
 ::: {.sourceClojure}
 ```clojure
 (def results-2
-  (pocket-evaluate-pipelines data-c :kfold {:k 3 :seed 42}
-                             (mapv make-pipe configs)
-                             rmse-metric))
+  (ml/evaluate-pipelines
+   (map make-pipe configs)
+   splits
+   loss/rmse
+   :loss
+   {:return-best-crossvalidation-only false
+    :return-best-pipeline-only false}))
 ```
 :::
 
@@ -1249,7 +1248,8 @@ Second run — all training hits cache:
 
 ::: {.sourceClojure}
 ```clojure
-(= (mapv :metric results) (mapv :metric results-2))
+(= (map #(-> % first :test-transform :metric) results)
+   (map #(-> % first :test-transform :metric) results-2))
 ```
 :::
 
@@ -1266,7 +1266,7 @@ true
 ---
 
 
-## Demo: hyperparameter sweep
+## Hyperparameter sweep
 
 Vary tree depth × feature set. Each unique combination trains once
 and is cached. Re-running adds only new combinations.
@@ -1274,42 +1274,15 @@ and is cached. Re-running adds only new combinations.
 
 ::: {.sourceClojure}
 ```clojure
-(pocket/cleanup!)
-```
-:::
-
-
-
-::: {.callout-note}
-## OUT
-```
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket - Cache cleanup: /tmp/pocket-metamorph
-
-```
-:::
-
-
-
-::: {.printedClojure}
-```clojure
-{:dir "/tmp/pocket-metamorph", :existed true}
-
-```
-:::
-
-
-
-::: {.sourceClojure}
-```clojure
 (def sweep-configs
-  (vec (for [depth [4 6 8 12]
-             fs [:raw :poly+trig]]
-         {:feature-set fs
-          :model-spec {:model-type :scicloj.ml.tribuo/regression
-                       :tribuo-components [{:name "cart"
-                                            :type "org.tribuo.regression.rtree.CARTRegressionTrainer"
-                                            :properties {:maxDepth (str depth)}}]
-                       :tribuo-trainer-name "cart"}})))
+  (for [depth [4 6 8 12]
+        fs [:raw :poly+trig]]
+    {:feature-set fs
+     :model-spec {:model-type :scicloj.ml.tribuo/regression
+                  :tribuo-components [{:name "cart"
+                                       :type "org.tribuo.regression.rtree.CARTRegressionTrainer"
+                                       :properties {:maxDepth (str depth)}}]
+                  :tribuo-trainer-name "cart"}}))
 ```
 :::
 
@@ -1318,9 +1291,13 @@ and is cached. Re-running adds only new combinations.
 ::: {.sourceClojure}
 ```clojure
 (def sweep-results
-  (pocket-evaluate-pipelines data-c :kfold {:k 3 :seed 42}
-                             (mapv make-pipe sweep-configs)
-                             rmse-metric))
+  (ml/evaluate-pipelines
+   (map make-pipe sweep-configs)
+   splits
+   loss/rmse
+   :loss
+   {:return-best-crossvalidation-only false
+    :return-best-pipeline-only false}))
 ```
 :::
 
@@ -1329,101 +1306,60 @@ and is cached. Re-running adds only new combinations.
 ::: {.callout-note}
 ## OUT
 ```
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/prepare-features
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/clip-outliers
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/nth-split-test
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/make-regression-data
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/fit-outlier-threshold
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/nth-split-train
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/train-model
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/prepare-features
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/clip-outliers
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/prepare-features
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/clip-outliers
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/nth-split-test
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/fit-outlier-threshold
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/nth-split-train
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/train-model
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/prepare-features
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/clip-outliers
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/prepare-features
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/clip-outliers
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/nth-split-test
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/fit-outlier-threshold
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/nth-split-train
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/train-model
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/prepare-features
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/clip-outliers
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/prepare-features
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/train-model
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/prepare-features
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/prepare-features
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/train-model
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/prepare-features
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/prepare-features
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/train-model
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/prepare-features
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/train-model
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/train-model
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/train-model
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/train-model
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/train-model
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/train-model
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/train-model
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/train-model
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/train-model
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/train-model
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/train-model
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/train-model
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/train-model
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/train-model
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/train-model
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/train-model
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/train-model
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.pocket-pipeline/train-model
-
-```
-:::
-
-
-8 configs × 3 folds = 24 evaluations:
-
-
-::: {.sourceClojure}
-```clojure
-(count sweep-results)
-```
-:::
-
-
-
-::: {.printedClojure}
-```clojure
-24
+10:06:46.222 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
+10:06:46.229 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
+10:06:46.231 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
+10:06:46.233 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
+10:06:46.240 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
+10:06:46.243 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
+10:06:46.244 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
+10:06:46.251 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
+10:06:46.253 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
+10:06:46.255 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
+10:06:46.266 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
+10:06:46.268 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
+10:06:46.270 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
+10:06:46.281 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
+10:06:46.283 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
+10:06:46.286 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
+10:06:46.296 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
+10:06:46.299 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
+10:06:46.302 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
+10:06:46.311 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
+10:06:46.313 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
+10:06:46.316 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
+10:06:46.346 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
+10:06:46.349 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
+10:06:46.351 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
+10:06:46.362 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
+10:06:46.366 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
+10:06:46.371 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
+10:06:46.394 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
+10:06:46.399 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
+10:06:46.403 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
+10:06:46.477 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
+10:06:46.484 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
+10:06:46.488 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
+10:06:46.507 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
+10:06:46.509 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
+10:06:46.518 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
+10:06:46.527 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
+10:06:46.530 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
+10:06:46.533 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
+10:06:46.543 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
+10:06:46.547 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
+10:06:46.550 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
+10:06:46.561 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
+10:06:46.565 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
+10:06:46.569 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
+10:06:46.585 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
+10:06:46.588 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
+10:06:46.590 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
+10:06:46.604 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
+10:06:46.607 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
+10:06:46.611 INFO scicloj.pocket.impl.cache - Cache miss, computing: scicloj.metamorph.ml/train
+10:06:46.629 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
+10:06:46.632 INFO scicloj.pocket.impl.cache - Cache miss (mem), computing: pocket-book.pocket-pipeline/predict-model
 
 ```
 :::
@@ -1435,14 +1371,14 @@ Results by depth and feature set:
 ::: {.sourceClojure}
 ```clojure
 (def sweep-summary
-  (let [grouped (partition 3 sweep-results)]
-    (->> (mapv (fn [config rs]
-                 {:depth (-> config :model-spec :tribuo-components
-                             first :properties :maxDepth)
-                  :feature-set (:feature-set config)
-                  :mean-rmse (tcc/mean (map :metric rs))})
-               sweep-configs grouped)
-         (sort-by :mean-rmse))))
+  (->> (map (fn [config pipeline-results]
+              {:depth (-> config :model-spec :tribuo-components
+                          first :properties :maxDepth)
+               :feature-set (:feature-set config)
+               :mean-rmse (tcc/mean (map #(-> % :test-transform :metric)
+                                         pipeline-results))})
+            sweep-configs sweep-results)
+       (sort-by :mean-rmse)))
 ```
 :::
 
@@ -1460,36 +1396,36 @@ _unnamed [8 3]:
 
 | :depth | :feature-set | :mean-rmse |
 |--------|--------------|-----------:|
-|      4 |         :raw | 1.56523718 |
-|      6 |         :raw | 1.78120543 |
-|      4 |   :poly+trig | 1.79514560 |
-|      8 |         :raw | 1.79975941 |
-|     12 |         :raw | 1.80992021 |
-|      8 |   :poly+trig | 1.97410371 |
-|     12 |   :poly+trig | 1.98328222 |
-|      6 |   :poly+trig | 1.98966980 |
+|     12 |   :poly+trig | 1.52866093 |
+|      6 |   :poly+trig | 1.63217429 |
+|      8 |   :poly+trig | 1.64435595 |
+|      6 |         :raw | 1.65064791 |
+|      4 |   :poly+trig | 1.65350222 |
+|      4 |         :raw | 1.66164890 |
+|      8 |         :raw | 1.66262333 |
+|     12 |         :raw | 1.71514296 |
 
 
 :::
 
 
-On this synthetic data, the shallow tree (depth 4) with raw features
-outperforms deeper trees and engineered features — a reminder that
-more complexity does not always help.
-
----
+On this synthetic data, deeper trees with engineered features
+(`poly+trig`) perform best, while shallower trees show similar
+results regardless of feature set.
 
 
-## Provenance
+### Sweep provenance
 
-Pick one result and trace its full provenance. The DAG goes
+Pick the best result and trace its full provenance. The DAG goes
 from the trained model back to the original scalar parameters
-(seed, noise-sd, outlier-fraction, etc.).
+(seed, noise-sd, outlier-fraction, etc.):
 
 
 ::: {.sourceClojure}
 ```clojure
-(pocket/origin-story-mermaid (:model (first sweep-results)))
+(pocket/origin-story-mermaid
+ (:pocket/model-cached
+  (-> sweep-results first first :fit-ctx)))
 ```
 :::
 
@@ -1497,7 +1433,7 @@ from the trained model back to the original scalar parameters
 
 ```{=html}
 <div class="mermaid">flowchart TD
-  n0["train-model"]
+  n0["train"]
   n1["prepare-features"]
   n2["clip-outliers"]
   n3["nth-split-train"]
@@ -1516,10 +1452,10 @@ from the trained model back to the original scalar parameters
   n3 --> n9
   n9 --> n2
   n2 --> n1
-  n10[/":raw"/]
+  n10[/":poly+trig"/]
   n10 --> n1
   n1 --> n0
-  n11[/"{:model-type :scicloj.ml.tribuo/regression,<br>:tribuo-components [{:name 'cart',<br>:type 'org.tribuo.regression.rtree.CARTRegressionTrainer',<br>:properties {:maxDepth '4'}}],<br>:tribuo-trainer-name 'cart'}"/]
+  n11[/"{:model-type :scicloj.ml.tribuo/regression,<br>:tribuo-components [{:name 'cart',<br>:type 'org.tribuo.regression.rtree.CARTRegressionTrainer',<br>:properties {:maxDepth '12'}}],<br>:tribuo-trainer-name 'cart'}"/]
   n11 --> n0</div>
 ```
 
@@ -1541,60 +1477,47 @@ from the trained model back to the original scalar parameters
 **Reusing metamorph:**
 
 We use `mm/pipeline`, `mm/lift`, `mm/fit-pipe`, and
-`mm/transform-pipe` directly — they pass `Cached` references through
-`:metamorph/data` without inspecting them. Pocket only adds two
+`mm/transform-pipe` directly — and now also `ml/evaluate-pipelines`
+for cross-validation and model comparison. Pocket only adds two
 custom step types:
 
 
 - **`pocket-model`** — like `ml/model`, but caches training via
   `pocket/cached` so models persist to disk
 
-- **`pocket-fitted`** — a new pattern for stateful steps
+- **`pocket-fitted`** — a general pattern for stateful steps
 
-In metamorph, every stateful step must dispatch on mode manually:
+**The deref-through pattern:**
 
-```clj
-;; metamorph style — manual mode dispatch
-(fn [{:metamorph/keys [data mode id] :as ctx}]
-  (case mode
-    :fit       (let [bounds (fit-threshold data)]
-                 (assoc ctx id bounds
-                        :metamorph/data (clip data bounds)))
-    :transform (let [bounds (get ctx id)]
-                 (assoc ctx :metamorph/data (clip data bounds)))))
-```
+Each pipeline step wraps a `caching-fn` and immediately derefs the
+`Cached` result. This means real datasets (not `Cached` references)
+flow through `:metamorph/data` at every point. The
+[origin registry](cache_keys.html#origin-registry-derefed-values-keep-their-identity)
+provides two benefits:
 
-`pocket-fitted` eliminates that boilerplate — we just provide
-the fit function and the apply function:
+1. **Efficient cache keys** — each derefed dataset carries its
+   lightweight identity, so the next step's `caching-fn` avoids
+   hashing full dataset content
+2. **Full provenance** — `origin-story` follows derefed values back
+   through the registry to their `Cached` origin, preserving the
+   complete DAG (as seen in the diamond dependency above)
 
-```clj
-;; Pocket style — same behavior, less ceremony
-(pocket-fitted c-fit-outlier-threshold c-clip-outliers)
-```
-
-On top of this, `pocket-evaluate-pipelines` and `pocket-splits`
-wrap cross-validation in `Cached` references for provenance. Everything
-else is standard metamorph.
+Because `:metamorph/data` is always a real dataset,
+`ml/evaluate-pipelines` can call `cf/target`, `cf/prediction`,
+and malli validation — things that require concrete dataset types.
 
 **What we write:**
 
 1. Plain pipeline functions (data in, data out)
 2. `caching-fn` wrappers with storage policies (one line each)
 3. Pipeline composition via `mm/pipeline` with our custom steps
-4. `pocket-evaluate-pipelines` for cross-validation across `Cached` splits
+4. `ml/evaluate-pipelines` for cross-validation
 
 **Open question: where should the custom steps live?**
-`pocket-fitted`, `pocket-model`, `pocket-splits`, and
-`pocket-evaluate-pipelines` are currently defined in this notebook.
-A future `scicloj.pocket.ml` namespace could provide them — but
-only if the pattern proves stable across different use cases.
-
-**Future direction: reusing `ml/evaluate-pipelines`.**
-Pocket's origin registry now makes it possible to pass derefed
-datasets to metamorph.ml's `evaluate-pipelines` without losing
-cache key efficiency. This could simplify or replace
-`pocket-evaluate-pipelines`, keeping the DAG provenance while
-reusing metamorph.ml's evaluation machinery directly.
+`pocket-fitted` and `pocket-model` are currently defined in this
+notebook. A future `scicloj.pocket.ml` namespace could provide
+them — but only if the pattern proves stable across different
+use cases.
 
 
 ## Cleanup
@@ -1611,7 +1534,7 @@ reusing metamorph.ml's evaluation machinery directly.
 ::: {.callout-note}
 ## OUT
 ```
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket - Cache cleanup: /tmp/pocket-metamorph
+10:06:46.646 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-metamorph
 
 ```
 :::

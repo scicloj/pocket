@@ -110,11 +110,11 @@ each step:
 ::: {.printedClojure}
 ```clojure
 {:rows 50000,
- :string-length 1541421,
- :->id-ms 20.270076,
- :canonical-id-ms 6.13049,
- :str-ms 26.581939,
- :sha-ms 2.011026}
+ :string-length 1541262,
+ :->id-ms 3.355993,
+ :canonical-id-ms 5.730036,
+ :str-ms 25.115645,
+ :sha-ms 1.579439}
 
 ```
 :::
@@ -144,7 +144,7 @@ it — not the data itself. Compare:
 ::: {.callout-note}
 ## OUT
 ```
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket - Cache dir set to: /tmp/pocket-cache-keys
+10:06:46.813 INFO scicloj.pocket - Cache dir set to: /tmp/pocket-cache-keys
 
 ```
 :::
@@ -171,7 +171,7 @@ it — not the data itself. Compare:
 ::: {.callout-note}
 ## OUT
 ```
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket - Cache cleanup: /tmp/pocket-cache-keys
+10:06:46.814 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-cache-keys
 
 ```
 :::
@@ -213,7 +213,7 @@ Direct dataset — identity includes all 50,000 rows:
 
 ::: {.printedClojure}
 ```clojure
-{:direct-ms 20.118646}
+{:direct-ms 20.211526}
 
 ```
 :::
@@ -236,7 +236,7 @@ Direct dataset — identity includes all 50,000 rows:
 
 ::: {.printedClojure}
 ```clojure
-{:cached-reference-ms 0.083326}
+{:cached-reference-ms 0.074606}
 
 ```
 :::
@@ -283,7 +283,7 @@ A derefed value has the same identity as its `Cached` reference:
 ::: {.callout-note}
 ## OUT
 ```
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.cache-keys/make-data
+10:06:46.848 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.cache-keys/make-data
 
 ```
 :::
@@ -318,7 +318,7 @@ reference, rather than the tens-of-milliseconds cost of hashing
 
 ::: {.printedClojure}
 ```clojure
-{:derefed-with-origin-ms 0.044514}
+{:derefed-with-origin-ms 0.036806}
 
 ```
 :::
@@ -349,7 +349,7 @@ cache key should reflect its actual content.
 ::: {.callout-note}
 ## OUT
 ```
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.cache-keys/make-data
+10:06:46.867 INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.cache-keys/make-data
 
 ```
 :::
@@ -390,7 +390,7 @@ them avoids this problem entirely.
 ::: {.callout-note}
 ## OUT
 ```
-[nREPL-session-da935d57-d44a-48ad-9272-3a3413aeb98c] INFO scicloj.pocket - Cache cleanup: /tmp/pocket-cache-keys
+10:06:46.875 INFO scicloj.pocket - Cache cleanup: /tmp/pocket-cache-keys
 
 ```
 :::
