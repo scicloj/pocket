@@ -1,6 +1,6 @@
 ;; # Recursive Caching in Pipelines
 ;;
-;; **Last modified: 2026-02-08**
+;; **Last modified: 2026-02-09**
 
 ;; When you pass a `Cached` value as an argument to another cached function,
 ;; Pocket handles this recursively. The cache key for the outer computation
@@ -132,6 +132,10 @@
 ;; object that falls back to content-based identity.
 ;; See [Under the hood: cache keys](pocket_book.cache_keys.html) for
 ;; details on the origin registry.
+;;
+;; Similarly, `origin-story` follows derefed values back through the
+;; registry to their `Cached` origin, producing the full provenance
+;; DAG. We demonstrate this [below](#provenance-through-derefed-values).
 
 ;; For a fuller example with branching dependencies, see the
 ;; [Real-World Walkthrough](pocket_book.real_world_walkthrough.html).
@@ -184,6 +188,46 @@
 ;; (from inputs toward the final result). It returns a kindly value that renders directly.
 
 (pocket/origin-story-mermaid model-c)
+
+;; ## Provenance through derefed values
+;;
+;; In the pipeline above, we passed `Cached` references directly
+;; from one step to the next. But sometimes we need to deref between
+;; steps — for example, when passing data to a library that expects
+;; concrete values. The origin registry ensures provenance still
+;; works in this case.
+;;
+;; Here we build the same three-step pipeline, but deref between
+;; each step:
+
+(def data-c2 (load-dataset* "data/deref-demo.csv"))
+(def data-val (deref data-c2))
+
+(def processed-c2 (preprocess* data-val {:scale 3}))
+(def processed-val (deref processed-c2))
+
+(def model-c2 (train-model* processed-val {:epochs 50}))
+
+;; Even though each cached function received a derefed (real) value,
+;; `origin-story` traces the full chain — from `train-model` back
+;; through `preprocess` to `load-dataset`:
+
+(pocket/origin-story model-c2)
+
+;; `origin-story-graph` shows three cached nodes (one per pipeline
+;; step). Without the origin registry, the derefed values would
+;; appear as opaque leaves and we would see only one cached node:
+
+(let [g (pocket/origin-story-graph model-c2)]
+  (count (filter (fn [[_ v]] (:fn v)) (:nodes g))))
+
+(kind/test-last [= 3])
+
+;; The full chain as a Mermaid flowchart:
+
+(pocket/origin-story-mermaid model-c2)
+
+;; ---
 
 ;; ## Cleanup
 
