@@ -3,7 +3,7 @@
             [deps-deploy.deps-deploy :as dd]))
 
 (def lib 'org.scicloj/pocket)
-(def version "0.2.1")
+(def version "0.2.2")
 (def snapshot (str version "-SNAPSHOT"))
 (def class-dir "target/classes")
 
@@ -22,7 +22,7 @@
            :class-dir class-dir
            :target "target"
            :src-dirs ["src"]
-           :resource-dirs [])))
+           :resource-dirs ["resources"])))
 
 (defn run-tests
   "Run tests via cognitect test runner"
@@ -56,7 +56,7 @@
     (println "\nWriting pom.xml...")
     (b/write-pom (assoc opts :pom-data (pom-template version)))
     (println "\nCopying source...")
-    (b/copy-dir {:src-dirs ["src"] :target-dir class-dir})
+    (b/copy-dir {:src-dirs ["resources" "src"] :target-dir class-dir})
     (println "\nBuilding JAR..." (:jar-file opts))
     (b/jar opts))
   opts)
