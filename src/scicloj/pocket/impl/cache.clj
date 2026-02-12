@@ -99,51 +99,56 @@
 
 (defn register-origin!
   "Register a derefed value's origin identity in the registry.
-   Stores both the origin id (for ->id lookup) and the Cached object
-   (for origin-story traversal). Uses WeakReference for the value
-   so it can still be GC'd."
-  [value origin-id cached-obj]
+   Stores WeakReferences to both the value and the Cached object
+   so both can be GC'd when no longer referenced elsewhere.
+   The origin id is computed lazily from the Cached on lookup,
+   avoiding strong retention of large arguments."
+  [value cached-obj]
   (let [hash-key (System/identityHashCode value)]
     (.compute origin-registry hash-key
               (reify java.util.function.BiFunction
                 (apply [_ _k existing]
                   (let [entry {:ref (WeakReference. value)
-                               :origin origin-id
-                               :cached cached-obj}
-                        ;; Clean dead refs while we're here
+                               :cached (WeakReference. cached-obj)}
+                        ;; Clean dead refs while we're here.
+                        ;; An entry is only useful when both refs are alive:
+                        ;; dead value = unlookupable, dead cached = no origin.
                         live (if existing
-                               (filterv #(.get ^WeakReference (:ref %)) existing)
+                               (filterv #(and (.get ^WeakReference (:ref %))
+                                              (.get ^WeakReference (:cached %)))
+                                        existing)
                                [])]
                     (conj live entry)))))
     nil))
 
 (defn lookup-origin
   "Look up a value's origin identity by object identity.
-   Returns the origin id if found, nil otherwise.
-   Cleans dead WeakReferences lazily."
+   Returns the origin id if found (computed lazily from the Cached),
+   nil otherwise. Cleans dead WeakReferences lazily."
   [value]
   (let [hash-key (System/identityHashCode value)]
     (when-let [entries (.get origin-registry hash-key)]
       (let [result (volatile! nil)]
-        (run! (fn [{:keys [^WeakReference ref origin]}]
+        (run! (fn [{:keys [^WeakReference ref ^WeakReference cached]}]
                 (let [referent (.get ref)]
                   (when (identical? referent value)
-                    (vreset! result origin))))
+                    (when-let [cached-obj (.get cached)]
+                      (vreset! result (->id cached-obj))))))
               entries)
         @result))))
 
 (defn lookup-origin-cached
   "Look up the Cached object that produced a derefed value.
-   Returns the Cached instance if found, nil otherwise.
+   Returns the Cached instance if found (and still alive), nil otherwise.
    Used by origin-story to traverse through derefed values."
   [value]
   (let [hash-key (System/identityHashCode value)]
     (when-let [entries (.get origin-registry hash-key)]
       (let [result (volatile! nil)]
-        (run! (fn [{:keys [^WeakReference ref cached]}]
+        (run! (fn [{:keys [^WeakReference ref ^WeakReference cached]}]
                 (let [referent (.get ref)]
                   (when (identical? referent value)
-                    (vreset! result cached))))
+                    (vreset! result (.get cached)))))
               entries)
         @result))))
 
@@ -308,7 +313,7 @@
       ;; Skip primitives, strings, keywords — these may be interned/shared
       ;; by the JVM and would cause false origin matches.
       (when (instance? clojure.lang.IObj result)
-        (register-origin! result (->id this) this))
+        (register-origin! result this))
       result)))
 
 (defn- dataset-type? [x]

@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+- **Fix origin registry memory leak**: The origin registry no longer retains strong references to `Cached` objects or their arguments. Previously, `register-origin!` stored a pre-computed `->id` (which materialized large arguments into a persistent list) and a strong reference to the `Cached` object. Both now use `WeakReference`, and the origin id is computed lazily on lookup. This prevents unbounded heap growth when caching functions with large arguments (e.g., datasets).
 
 ## [0.2.2] - 2026-02-11
 - bugfix: added default config under resources
