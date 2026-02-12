@@ -43,7 +43,7 @@
   (update
    data
    :data
-   (fn* [p1__70791#] (map (fn [x] (* x (:scale opts))) p1__70791#)))))
+   (fn* [p1__70450#] (map (fn [x] (* x (:scale opts))) p1__70450#)))))
 
 
 (def
