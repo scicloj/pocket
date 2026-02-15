@@ -19,14 +19,14 @@
   "Base directory for cache storage.
    
    Resolved with precedence: binding > `set-base-cache-dir!` > 
-   `POCKET_BASE_CACHE_DIR` env var > `pocket.edn` `:base-cache-dir` > `pocket-defaults.edn` (library default: `.cache/pocket`)."
+   `POCKET_BASE_CACHE_DIR` env var > `pocket.edn` (project root or classpath) `:base-cache-dir` > `pocket-defaults.edn` (library default: `.cache/pocket`)."
   nil)
 
 (def ^:dynamic *mem-cache-options*
   "In-memory cache configuration options.
    
    Resolved with precedence: binding > `set-mem-cache-options!` >
-   `POCKET_MEM_CACHE` env var > `pocket.edn` `:mem-cache` >
+   `POCKET_MEM_CACHE` env var > `pocket.edn` (project root or classpath) `:mem-cache` >
    `pocket-defaults.edn` (library defaults).
    
    **Caution**: binding this var reconfigures the shared global mem-cache,
@@ -42,7 +42,7 @@
    - `:none` — no shared cache; instance-local memoization only
    
    Resolved with precedence: binding > `set-storage!` >
-   `POCKET_STORAGE` env var > `pocket.edn` `:storage` >
+   `POCKET_STORAGE` env var > `pocket.edn` (project root or classpath) `:storage` >
    `pocket-defaults.edn` (library default: `:mem+disk`)."
   nil)
 
@@ -54,7 +54,7 @@
    directories may need lower values (e.g., 60-100).
    
    Resolved with precedence: binding > `set-filename-length-limit!` >
-   `POCKET_FILENAME_LENGTH_LIMIT` env var > `pocket.edn` `:filename-length-limit` >
+   `POCKET_FILENAME_LENGTH_LIMIT` env var > `pocket.edn` (project root or classpath) `:filename-length-limit` >
    `pocket-defaults.edn` (library default: 240)."
   nil)
 

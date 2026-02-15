@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.4] - 2026-02-15
+- **`pocket.edn` lookup from project root**: `pocket.edn` is now found in the current working directory (like `deps.edn`), not only on the classpath. Classpath takes precedence when both exist.
+
 ## [0.2.3] - 2026-02-12
 - **Fix origin registry memory leak**: The origin registry no longer retains strong references to `Cached` objects or their arguments. Previously, `register-origin!` stored a pre-computed `->id` (which materialized large arguments into a persistent list) and a strong reference to the `Cached` object. Both now use `WeakReference`, and the origin id is computed lazily on lookup. This prevents unbounded heap growth when caching functions with large arguments (e.g., datasets).
 

@@ -1,5 +1,6 @@
 (ns scicloj.pocket-test
   (:require [clojure.test :refer [deftest testing is use-fixtures]]
+            [clojure.core.cache :as cc]
             [scicloj.pocket :as pocket]
             [scicloj.pocket.impl.cache :as impl]
             [babashka.fs :as fs]))
@@ -347,6 +348,21 @@
       ;; pocket.edn may or may not exist on the test classpath
       ;; just verify the delay resolves without error
       (is (or (nil? edn-val) (map? edn-val)))))
+
+  (testing "pocket.edn is read from current working directory"
+    (let [f (java.io.File. "pocket.edn")]
+      (try
+        (spit f (pr-str {:base-cache-dir "/tmp/pocket-cwd-test"}))
+        ;; Reset TTL cache so fresh read happens
+        (reset! @#'impl/pocket-edn-cache
+                (cc/ttl-cache-factory {} :ttl 1000))
+        (let [edn-val (impl/pocket-edn)]
+          (is (map? edn-val))
+          (is (= "/tmp/pocket-cwd-test" (:base-cache-dir edn-val))))
+        (finally
+          (.delete f)
+          (reset! @#'impl/pocket-edn-cache
+                  (cc/ttl-cache-factory {} :ttl 1000))))))
 
   (testing "resolve-mem-cache-options falls back to defaults"
     (binding [pocket/*mem-cache-options* nil]

@@ -64,14 +64,18 @@
   (atom (cc/ttl-cache-factory {} :ttl 1000)))
 
 (defn pocket-edn
-  "Read pocket.edn from classpath. Cached for 1 second to avoid repeated classpath scans."
+  "Read pocket.edn from classpath or the current working directory.
+   Classpath takes precedence. Cached for 1 second."
   []
   (cw/lookup-or-miss
    pocket-edn-cache
    :pocket-edn
    (fn [_]
-     (when-let [r (io/resource "pocket.edn")]
-       (-> r slurp edn/read-string)))))
+     (let [from-cp (io/resource "pocket.edn")
+           from-cwd (let [f (io/file "pocket.edn")]
+                      (when (.exists f) f))]
+       (when-let [r (or from-cp from-cwd)]
+         (-> r slurp edn/read-string))))))
 
 (def pocket-defaults-edn
   "Library defaults from pocket-defaults.edn. Read once at load time."
