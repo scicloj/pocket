@@ -53,16 +53,6 @@ A few preparations for the code examples below:
 
 
 
-::: {.callout-note}
-## OUT
-```
-[nREPL-session-82f19dfb-7051-41ff-8d31-fe9c05319135] INFO scicloj.pocket - Cache dir set to: /tmp/pocket-demo-reference
-
-```
-:::
-
-
-
 ::: {.printedClojure}
 ```clojure
 "/tmp/pocket-demo-reference"
@@ -75,16 +65,6 @@ A few preparations for the code examples below:
 ::: {.sourceClojure}
 ```clojure
 (pocket/cleanup!)
-```
-:::
-
-
-
-::: {.callout-note}
-## OUT
-```
-[nREPL-session-82f19dfb-7051-41ff-8d31-fe9c05319135] INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo-reference
-
 ```
 :::
 
@@ -118,7 +98,7 @@ A few preparations for the code examples below:
 Base directory for cache storage.
    
    Resolved with precedence: binding > `set-base-cache-dir!` > 
-   `POCKET_BASE_CACHE_DIR` env var > `pocket.edn` `:base-cache-dir` > `pocket-defaults.edn` (library default: `.cache/pocket`).
+   `POCKET_BASE_CACHE_DIR` env var > `pocket.edn` (project root or classpath) `:base-cache-dir` > `pocket-defaults.edn` (library default: `.cache/pocket`).
 
 The current value:
 
@@ -149,16 +129,6 @@ Set the base cache directory by altering `*base-cache-dir*`.
 ::: {.sourceClojure}
 ```clojure
 (pocket/set-base-cache-dir! "/tmp/pocket-demo-2")
-```
-:::
-
-
-
-::: {.callout-note}
-## OUT
-```
-[nREPL-session-82f19dfb-7051-41ff-8d31-fe9c05319135] INFO scicloj.pocket - Cache dir set to: /tmp/pocket-demo-2
-
 ```
 :::
 
@@ -195,16 +165,6 @@ Restore it for the rest of the notebook:
 ::: {.sourceClojure}
 ```clojure
 (pocket/set-base-cache-dir! cache-dir)
-```
-:::
-
-
-
-::: {.callout-note}
-## OUT
-```
-[nREPL-session-82f19dfb-7051-41ff-8d31-fe9c05319135] INFO scicloj.pocket - Cache dir set to: /tmp/pocket-demo-reference
-
 ```
 :::
 
@@ -303,7 +263,6 @@ The computation runs when we deref:
 ::: {.callout-note}
 ## OUT
 ```
-[nREPL-session-82f19dfb-7051-41ff-8d31-fe9c05319135] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.api-reference/expensive-calculation
 Computing 100 + 200 (this is expensive!)
 
 ```
@@ -378,7 +337,6 @@ Wrap a function to automatically cache its results.
 ::: {.callout-note}
 ## OUT
 ```
-[nREPL-session-82f19dfb-7051-41ff-8d31-fe9c05319135] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.api-reference/expensive-calculation
 Computing 3 + 4 (this is expensive!)
 
 ```
@@ -577,16 +535,6 @@ A derefed `Cached` value carries its origin identity
 
 
 
-::: {.callout-note}
-## OUT
-```
-[nREPL-session-82f19dfb-7051-41ff-8d31-fe9c05319135] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.api-reference/make-config
-
-```
-:::
-
-
-
 ::: {.printedClojure}
 ```clojure
 true
@@ -620,17 +568,6 @@ Switch to a FIFO policy with 100 entries:
 
 
 
-::: {.callout-note}
-## OUT
-```
-[nREPL-session-82f19dfb-7051-41ff-8d31-fe9c05319135] INFO scicloj.pocket - Mem-cache options set: {:policy :fifo, :threshold 100}
-[nREPL-session-82f19dfb-7051-41ff-8d31-fe9c05319135] INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :fifo, :threshold 100}
-
-```
-:::
-
-
-
 ::: {.printedClojure}
 ```clojure
 {:policy :fifo, :threshold 100}
@@ -645,17 +582,6 @@ Reset to default:
 ::: {.sourceClojure}
 ```clojure
 (pocket/set-mem-cache-options! {:policy :lru :threshold 256})
-```
-:::
-
-
-
-::: {.callout-note}
-## OUT
-```
-[nREPL-session-82f19dfb-7051-41ff-8d31-fe9c05319135] INFO scicloj.pocket - Mem-cache options set: {:policy :lru, :threshold 256}
-[nREPL-session-82f19dfb-7051-41ff-8d31-fe9c05319135] INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :lru, :threshold 256}
-
 ```
 :::
 
@@ -688,17 +614,6 @@ Reset mem-cache configuration to library defaults:
 
 
 
-::: {.callout-note}
-## OUT
-```
-[nREPL-session-82f19dfb-7051-41ff-8d31-fe9c05319135] INFO scicloj.pocket - Mem-cache options reset to defaults: {:policy :lru, :threshold 256}
-[nREPL-session-82f19dfb-7051-41ff-8d31-fe9c05319135] INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :lru, :threshold 256}
-
-```
-:::
-
-
-
 ::: {.printedClojure}
 ```clojure
 {:policy :lru, :threshold 256}
@@ -716,7 +631,7 @@ Storage policy for cached computations: `:mem+disk`, `:mem`, or `:none`.
    - `:none` — no shared cache; instance-local memoization only
    
    Resolved with precedence: binding > `set-storage!` >
-   `POCKET_STORAGE` env var > `pocket.edn` `:storage` >
+   `POCKET_STORAGE` env var > `pocket.edn` (project root or classpath) `:storage` >
    `pocket-defaults.edn` (library default: `:mem+disk`).
 
 ### `set-storage!`
@@ -732,16 +647,6 @@ Switch to memory-only storage:
 ::: {.sourceClojure}
 ```clojure
 (pocket/set-storage! :mem)
-```
-:::
-
-
-
-::: {.callout-note}
-## OUT
-```
-[nREPL-session-82f19dfb-7051-41ff-8d31-fe9c05319135] INFO scicloj.pocket - Storage policy set to: :mem
-
 ```
 :::
 
@@ -766,16 +671,6 @@ Reset to default:
 
 
 
-::: {.callout-note}
-## OUT
-```
-[nREPL-session-82f19dfb-7051-41ff-8d31-fe9c05319135] INFO scicloj.pocket - Storage policy set to: nil
-
-```
-:::
-
-
-
 ::: {.printedClojure}
 ```clojure
 nil
@@ -795,16 +690,6 @@ Delete the cache directory, removing all cached values.
 ::: {.sourceClojure}
 ```clojure
 (pocket/cleanup!)
-```
-:::
-
-
-
-::: {.callout-note}
-## OUT
-```
-[nREPL-session-82f19dfb-7051-41ff-8d31-fe9c05319135] INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo-reference
-
 ```
 :::
 
@@ -841,7 +726,6 @@ Clear in-memory cache without touching disk:
 ::: {.callout-note}
 ## OUT
 ```
-[nREPL-session-82f19dfb-7051-41ff-8d31-fe9c05319135] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.api-reference/expensive-calculation
 Computing 10 + 20 (this is expensive!)
 
 ```
@@ -909,16 +793,6 @@ Remove a specific cached entry:
 
 
 
-::: {.callout-note}
-## OUT
-```
-[nREPL-session-82f19dfb-7051-41ff-8d31-fe9c05319135] INFO scicloj.pocket.impl.cache - Invalidated: /tmp/pocket-demo-reference/a3/(pocket-book.api-reference_expensive-calculation 10 20) existed= true
-
-```
-:::
-
-
-
 ::: {.printedClojure}
 ```clojure
 {:path
@@ -943,7 +817,6 @@ Derefing again will recompute:
 ::: {.callout-note}
 ## OUT
 ```
-[nREPL-session-82f19dfb-7051-41ff-8d31-fe9c05319135] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.api-reference/expensive-calculation
 Computing 10 + 20 (this is expensive!)
 
 ```
@@ -980,7 +853,6 @@ Cache a few entries, then invalidate them all:
 ::: {.callout-note}
 ## OUT
 ```
-[nREPL-session-82f19dfb-7051-41ff-8d31-fe9c05319135] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.api-reference/expensive-calculation
 Computing 1 + 2 (this is expensive!)
 
 ```
@@ -1008,7 +880,6 @@ Computing 1 + 2 (this is expensive!)
 ::: {.callout-note}
 ## OUT
 ```
-[nREPL-session-82f19dfb-7051-41ff-8d31-fe9c05319135] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.api-reference/expensive-calculation
 Computing 3 + 4 (this is expensive!)
 
 ```
@@ -1033,16 +904,6 @@ Computing 3 + 4 (this is expensive!)
 
 
 
-::: {.callout-note}
-## OUT
-```
-[nREPL-session-82f19dfb-7051-41ff-8d31-fe9c05319135] INFO scicloj.pocket.impl.cache - Invalidated 3 entries for pocket-book.api-reference/expensive-calculation
-
-```
-:::
-
-
-
 ::: {.printedClojure}
 ```clojure
 {:fn-name "pocket-book.api-reference/expensive-calculation",
@@ -1060,16 +921,6 @@ Computing 3 + 4 (this is expensive!)
 ::: {.sourceClojure}
 ```clojure
 (pocket/cleanup!)
-```
-:::
-
-
-
-::: {.callout-note}
-## OUT
-```
-[nREPL-session-82f19dfb-7051-41ff-8d31-fe9c05319135] INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo-reference
-
 ```
 :::
 
@@ -1108,7 +959,6 @@ List all cached entries:
 ::: {.callout-note}
 ## OUT
 ```
-[nREPL-session-82f19dfb-7051-41ff-8d31-fe9c05319135] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.api-reference/expensive-calculation
 Computing 10 + 20 (this is expensive!)
 
 ```
@@ -1136,7 +986,6 @@ Computing 10 + 20 (this is expensive!)
 ::: {.callout-note}
 ## OUT
 ```
-[nREPL-session-82f19dfb-7051-41ff-8d31-fe9c05319135] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.api-reference/expensive-calculation
 Computing 3 + 4 (this is expensive!)
 
 ```
@@ -1168,13 +1017,13 @@ Computing 3 + 4 (this is expensive!)
   :id "(pocket-book.api-reference/expensive-calculation 10 20)",
   :fn-name "pocket-book.api-reference/expensive-calculation",
   :args-str "[10 20]",
-  :created-at "2026-02-12T19:35:37.189135732Z"}
+  :created-at "2026-02-15T17:02:45.125544480Z"}
  {:path
   "/tmp/pocket-demo-reference/49/(pocket-book.api-reference_expensive-calculation 3 4)",
   :id "(pocket-book.api-reference/expensive-calculation 3 4)",
   :fn-name "pocket-book.api-reference/expensive-calculation",
   :args-str "[3 4]",
-  :created-at "2026-02-12T19:35:37.591431507Z"}]
+  :created-at "2026-02-15T17:02:45.529776960Z"}]
 
 ```
 :::
@@ -1198,13 +1047,13 @@ Filter by function name:
   :id "(pocket-book.api-reference/expensive-calculation 10 20)",
   :fn-name "pocket-book.api-reference/expensive-calculation",
   :args-str "[10 20]",
-  :created-at "2026-02-12T19:35:37.189135732Z"}
+  :created-at "2026-02-15T17:02:45.125544480Z"}
  {:path
   "/tmp/pocket-demo-reference/49/(pocket-book.api-reference_expensive-calculation 3 4)",
   :id "(pocket-book.api-reference/expensive-calculation 3 4)",
   :fn-name "pocket-book.api-reference/expensive-calculation",
   :args-str "[3 4]",
-  :created-at "2026-02-12T19:35:37.591431507Z"}]
+  :created-at "2026-02-15T17:02:45.529776960Z"}]
 
 ```
 :::
@@ -1240,16 +1089,6 @@ Return aggregate statistics about the cache.
 ::: {.sourceClojure}
 ```clojure
 (pocket/cleanup!)
-```
-:::
-
-
-
-::: {.callout-note}
-## OUT
-```
-[nREPL-session-82f19dfb-7051-41ff-8d31-fe9c05319135] INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo-reference
-
 ```
 :::
 
@@ -1347,17 +1186,6 @@ Deref to trigger computation:
 ::: {.sourceClojure}
 ```clojure
 (deref b-c)
-```
-:::
-
-
-
-::: {.callout-note}
-## OUT
-```
-[nREPL-session-82f19dfb-7051-41ff-8d31-fe9c05319135] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.api-reference/step-b
-[nREPL-session-82f19dfb-7051-41ff-8d31-fe9c05319135] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.api-reference/step-a
-
 ```
 :::
 
@@ -1521,17 +1349,6 @@ parameters differ across experiments.
 
 
 
-::: {.callout-note}
-## OUT
-```
-[nREPL-session-82f19dfb-7051-41ff-8d31-fe9c05319135] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.api-reference/run-exp
-[nREPL-session-82f19dfb-7051-41ff-8d31-fe9c05319135] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.api-reference/run-exp
-
-```
-:::
-
-
-
 ::: {.printedClojure}
 ```clojure
 [{:lr 0.01, :result {:rmse 0.001}} {:lr 0.001, :result {:rmse 1.0E-4}}]
@@ -1547,16 +1364,6 @@ Only varying parameters appear in the comparison.
 ::: {.sourceClojure}
 ```clojure
 (pocket/cleanup!)
-```
-:::
-
-
-
-::: {.callout-note}
-## OUT
-```
-[nREPL-session-82f19dfb-7051-41ff-8d31-fe9c05319135] INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo-reference
-
 ```
 :::
 

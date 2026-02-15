@@ -47,7 +47,7 @@ from highest to lowest priority:
 1. `binding` (thread-local override)
 2. `set-*!` functions (`set-base-cache-dir!`, `set-mem-cache-options!`)
 3. Environment variable (`POCKET_BASE_CACHE_DIR`, `POCKET_MEM_CACHE`)
-4. `pocket.edn` on classpath
+4. `pocket.edn` (project root or classpath)
 5. Library defaults (`pocket-defaults.edn`)
 
 
@@ -65,7 +65,7 @@ from highest to lowest priority:
 
 ## `pocket.edn`
 
-Place a `pocket.edn` file on your classpath root for declarative,
+Place a `pocket.edn` file in your project root directory for declarative,
 project-level configuration:
 
 ```edn
@@ -73,7 +73,12 @@ project-level configuration:
  :mem-cache {:policy :lru :threshold 256}}
 ```
 
-It is re-read on each cache operation (with a 1-second TTL cache),
+Pocket looks for `pocket.edn` in two places (first match wins):
+
+1. **Classpath** — e.g. in `resources/pocket.edn`. This takes precedence.
+2. **Project root** — `pocket.edn` in the current working directory, like `deps.edn`.
+
+The file is re-read on each cache operation (with a 1-second TTL cache),
 so changes take effect quickly during REPL development.
 It provides defaults that can be
 overridden by environment variables, `set-*!` calls, or `binding`.
@@ -132,16 +137,6 @@ export POCKET_BASE_CACHE_DIR=/path/to/cache
 
 
 
-::: {.callout-note}
-## OUT
-```
-[nREPL-session-82f19dfb-7051-41ff-8d31-fe9c05319135] INFO scicloj.pocket - Cache dir set to: /tmp/pocket-demo-config
-
-```
-:::
-
-
-
 ::: {.printedClojure}
 ```clojure
 "/tmp/pocket-demo-config"
@@ -154,16 +149,6 @@ export POCKET_BASE_CACHE_DIR=/path/to/cache
 ::: {.sourceClojure}
 ```clojure
 (pocket/cleanup!)
-```
-:::
-
-
-
-::: {.callout-note}
-## OUT
-```
-[nREPL-session-82f19dfb-7051-41ff-8d31-fe9c05319135] INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo-config
-
 ```
 :::
 
@@ -264,17 +249,6 @@ Configure via `set-mem-cache-options!`:
 
 
 
-::: {.callout-note}
-## OUT
-```
-[nREPL-session-82f19dfb-7051-41ff-8d31-fe9c05319135] INFO scicloj.pocket - Mem-cache options set: {:policy :fifo, :threshold 100}
-[nREPL-session-82f19dfb-7051-41ff-8d31-fe9c05319135] INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :fifo, :threshold 100}
-
-```
-:::
-
-
-
 ::: {.printedClojure}
 ```clojure
 {:policy :fifo, :threshold 100}
@@ -294,17 +268,6 @@ Or a TTL policy where entries expire after 60 seconds:
 
 
 
-::: {.callout-note}
-## OUT
-```
-[nREPL-session-82f19dfb-7051-41ff-8d31-fe9c05319135] INFO scicloj.pocket - Mem-cache options set: {:policy :ttl, :ttl 60000}
-[nREPL-session-82f19dfb-7051-41ff-8d31-fe9c05319135] INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :ttl, :ttl 60000}
-
-```
-:::
-
-
-
 ::: {.printedClojure}
 ```clojure
 {:policy :ttl, :ttl 60000}
@@ -319,17 +282,6 @@ Reset to the default LRU policy:
 ::: {.sourceClojure}
 ```clojure
 (pocket/set-mem-cache-options! {:policy :lru :threshold 256})
-```
-:::
-
-
-
-::: {.callout-note}
-## OUT
-```
-[nREPL-session-82f19dfb-7051-41ff-8d31-fe9c05319135] INFO scicloj.pocket - Mem-cache options set: {:policy :lru, :threshold 256}
-[nREPL-session-82f19dfb-7051-41ff-8d31-fe9c05319135] INFO scicloj.pocket.impl.cache - Mem-cache reconfigured: {:policy :lru, :threshold 256}
-
 ```
 :::
 
@@ -387,16 +339,6 @@ result (like a `delay`), but separate instances recompute.
 ::: {.sourceClojure}
 ```clojure
 (pocket/set-storage! :mem)
-```
-:::
-
-
-
-::: {.callout-note}
-## OUT
-```
-[nREPL-session-82f19dfb-7051-41ff-8d31-fe9c05319135] INFO scicloj.pocket - Storage policy set to: :mem
-
 ```
 :::
 
@@ -473,16 +415,6 @@ Reset to default:
 
 
 
-::: {.callout-note}
-## OUT
-```
-[nREPL-session-82f19dfb-7051-41ff-8d31-fe9c05319135] INFO scicloj.pocket - Storage policy set to: nil
-
-```
-:::
-
-
-
 ::: {.printedClojure}
 ```clojure
 nil
@@ -516,16 +448,6 @@ need to lower it.
 ::: {.sourceClojure}
 ```clojure
 (pocket/set-filename-length-limit! 80)
-```
-:::
-
-
-
-::: {.callout-note}
-## OUT
-```
-[nREPL-session-82f19dfb-7051-41ff-8d31-fe9c05319135] INFO scicloj.pocket - Filename length limit set to: 80
-
 ```
 :::
 
@@ -570,16 +492,6 @@ Reset to default (240):
 ::: {.sourceClojure}
 ```clojure
 (pocket/set-filename-length-limit! nil)
-```
-:::
-
-
-
-::: {.callout-note}
-## OUT
-```
-[nREPL-session-82f19dfb-7051-41ff-8d31-fe9c05319135] INFO scicloj.pocket - Filename length limit set to: nil
-
 ```
 :::
 
@@ -687,16 +599,6 @@ To delete all cached values (both disk and in-memory), use `cleanup!`:
 ::: {.sourceClojure}
 ```clojure
 (pocket/cleanup!)
-```
-:::
-
-
-
-::: {.callout-note}
-## OUT
-```
-[nREPL-session-82f19dfb-7051-41ff-8d31-fe9c05319135] INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo-config
-
 ```
 :::
 

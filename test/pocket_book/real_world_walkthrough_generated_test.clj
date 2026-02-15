@@ -71,13 +71,13 @@
       rs
       (filter
        (fn*
-        [p1__70652#]
-        (and (:temp-c p1__70652#) (:rain-mm p1__70652#))))
+        [p1__20752#]
+        (and (:temp-c p1__20752#) (:rain-mm p1__20752#))))
       (mapv
        (fn*
-        [p1__70653#]
+        [p1__20753#]
         (->
-         p1__70653#
+         p1__20753#
          (update
           :temp-c
           (fn [t] (Math/round (* t (double precision)))))

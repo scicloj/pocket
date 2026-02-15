@@ -19,7 +19,7 @@
 ;; 1. `binding` (thread-local override)
 ;; 2. `set-*!` functions (`set-base-cache-dir!`, `set-mem-cache-options!`)
 ;; 3. Environment variable (`POCKET_BASE_CACHE_DIR`, `POCKET_MEM_CACHE`)
-;; 4. `pocket.edn` on classpath
+;; 4. `pocket.edn` (project root or classpath)
 ;; 5. Library defaults (`pocket-defaults.edn`)
 
 ^:kindly/hide-code
@@ -34,7 +34,7 @@
 
 ;; ## `pocket.edn`
 ;;
-;; Place a `pocket.edn` file on your classpath root for declarative,
+;; Place a `pocket.edn` file in your project root directory for declarative,
 ;; project-level configuration:
 ;;
 ;; ```edn
@@ -42,7 +42,12 @@
 ;;  :mem-cache {:policy :lru :threshold 256}}
 ;; ```
 ;;
-;; It is re-read on each cache operation (with a 1-second TTL cache),
+;; Pocket looks for `pocket.edn` in two places (first match wins):
+;;
+;; 1. **Classpath** — e.g. in `resources/pocket.edn`. This takes precedence.
+;; 2. **Project root** — `pocket.edn` in the current working directory, like `deps.edn`.
+;;
+;; The file is re-read on each cache operation (with a 1-second TTL cache),
 ;; so changes take effect quickly during REPL development.
 ;; It provides defaults that can be
 ;; overridden by environment variables, `set-*!` calls, or `binding`.

@@ -14,86 +14,86 @@
 
 
 (def
- v5_l55
+ v5_l60
  (->
   (clojure.java.io/resource "pocket-defaults.edn")
   slurp
   clojure.edn/read-string))
 
 
-(def v7_l75 (pocket/set-base-cache-dir! "/tmp/pocket-demo-config"))
+(def v7_l80 (pocket/set-base-cache-dir! "/tmp/pocket-demo-config"))
 
 
-(def v8_l77 (pocket/cleanup!))
+(def v8_l82 (pocket/cleanup!))
 
 
-(def v10_l81 (pocket/config))
+(def v10_l86 (pocket/config))
 
 
 (deftest
- t11_l83
+ t11_l88
  (is
   ((fn [cfg] (= "/tmp/pocket-demo-config" (:base-cache-dir cfg)))
-   v10_l81)))
+   v10_l86)))
 
 
 (def
- v13_l96
+ v13_l101
  (kind/mermaid
   "flowchart LR\n    D(deref) --> MC{In-memory\ncache?}\n    MC -->|hit| R[Return value]\n    MC -->|miss| DC{Disk\ncache?}\n    DC -->|hit| R\n    DC -->|miss| C[Compute] --> W[Write to disk] --> R"))
 
 
 (def
- v15_l134
+ v15_l139
  (pocket/set-mem-cache-options! {:policy :fifo, :threshold 100}))
 
 
 (deftest
- t16_l136
- (is ((fn [result] (= :fifo (:policy result))) v15_l134)))
+ t16_l141
+ (is ((fn [result] (= :fifo (:policy result))) v15_l139)))
 
 
 (def
- v18_l140
+ v18_l145
  (pocket/set-mem-cache-options! {:policy :ttl, :ttl 60000}))
 
 
 (def
- v20_l144
+ v20_l149
  (pocket/set-mem-cache-options! {:policy :lru, :threshold 256}))
 
 
-(def v22_l185 (pocket/set-storage! :mem))
+(def v22_l190 (pocket/set-storage! :mem))
 
 
-(def v23_l187 (pocket/config))
+(def v23_l192 (pocket/config))
 
 
-(deftest t24_l189 (is ((fn [cfg] (= :mem (:storage cfg))) v23_l187)))
+(deftest t24_l194 (is ((fn [cfg] (= :mem (:storage cfg))) v23_l192)))
 
 
-(def v26_l225 (pocket/set-storage! nil))
+(def v26_l230 (pocket/set-storage! nil))
 
 
 (deftest
- t27_l227
- (is ((fn [_] (= :mem+disk (:storage (pocket/config)))) v26_l225)))
+ t27_l232
+ (is ((fn [_] (= :mem+disk (:storage (pocket/config)))) v26_l230)))
 
 
-(def v29_l250 (pocket/set-filename-length-limit! 80))
+(def v29_l255 (pocket/set-filename-length-limit! 80))
 
 
-(def v31_l260 (:filename-length-limit (pocket/config)))
+(def v31_l265 (:filename-length-limit (pocket/config)))
 
 
-(def v33_l264 (pocket/set-filename-length-limit! nil))
+(def v33_l269 (pocket/set-filename-length-limit! nil))
 
 
-(def v35_l295 (defn load-data [path] (slurp path)))
+(def v35_l300 (defn load-data [path] (slurp path)))
 
 
 (def
- v36_l296
+ v36_l301
  (defn
   compute-stats
   [data]
@@ -101,23 +101,23 @@
 
 
 (def
- v37_l297
+ v37_l302
  (defn train-model [data stats] {:model "trained", :stats stats}))
 
 
-(def v39_l300 (def c-load (pocket/caching-fn #'load-data)))
+(def v39_l305 (def c-load (pocket/caching-fn #'load-data)))
 
 
 (def
- v41_l303
+ v41_l308
  (def c-stats (pocket/caching-fn #'compute-stats {:storage :mem})))
 
 
 (def
- v43_l306
+ v43_l311
  (def
   c-train
   (pocket/caching-fn #'train-model {:filename-length-limit 80})))
 
 
-(def v45_l312 (pocket/cleanup!))
+(def v45_l317 (pocket/cleanup!))

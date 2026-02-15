@@ -319,6 +319,67 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="sourceClojure">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>(pocket/set-base-cache-dir! cache-dir)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
+<div class="printedClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="st">"/tmp/pocket-demo-pipelines"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>(pocket/cleanup!)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="printedClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>{<span class="at">:dir</span> <span class="st">"/tmp/pocket-demo-pipelines"</span>, <span class="at">:existed</span> <span class="va">false</span>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="a-three-step-pipeline" class="level2">
+<h2 class="anchored" data-anchor-id="a-three-step-pipeline">A three-step pipeline</h2>
+<p>We’ll build a simple data science pipeline with three stages: load data, preprocess it, and train a model. Each stage is wrapped with <code>caching-fn</code> so every call returns a <code>Cached</code> object. Passing one <code>Cached</code> result into the next stage is what makes the caching recursive.</p>
+<div class="mermaid">flowchart LR
+    LD[load-dataset] --&gt; PP[preprocess]
+    PP --&gt; TM[train-model]</div>
+</section>
+<section id="pipeline-functions" class="level2">
+<h2 class="anchored" data-anchor-id="pipeline-functions">Pipeline functions</h2>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>(<span class="bu">defn</span><span class="fu"> load-dataset </span>[<span class="kw">path</span>]</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">println</span> <span class="st">"Loading dataset from"</span> <span class="kw">path</span> <span class="st">"..."</span>)</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  (Thread/sleep <span class="dv">300</span>)</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  {<span class="at">:data</span> [<span class="dv">1</span> <span class="dv">2</span> <span class="dv">3</span> <span class="dv">4</span> <span class="dv">5</span>] <span class="at">:source</span> <span class="kw">path</span>})</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>(<span class="bu">defn</span><span class="fu"> preprocess </span>[data opts]</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">println</span> <span class="st">"Preprocessing with options:"</span> opts)</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  (Thread/sleep <span class="dv">300</span>)</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">update</span> data <span class="at">:data</span> #(<span class="kw">map</span> (<span class="kw">fn</span> [x] (<span class="kw">*</span> x (<span class="at">:scale</span> opts))) <span class="va">%</span>)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>(<span class="bu">defn</span><span class="fu"> train-model </span>[data params]</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">println</span> <span class="st">"Training model with params:"</span> params)</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  (Thread/sleep <span class="dv">300</span>)</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>  {<span class="at">:model</span> <span class="at">:trained</span> <span class="at">:accuracy</span> <span class="fl">0.95</span> <span class="at">:data</span> data})</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Wrap each function with <code>caching-fn</code> so every call returns a <code>Cached</code> object:</p>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>(<span class="bu">def</span><span class="fu"> load-dataset* </span>(pocket/caching-fn <span class="va">#'load-dataset</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>(<span class="bu">def</span><span class="fu"> preprocess* </span>(pocket/caching-fn <span class="va">#'preprocess</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>(<span class="bu">def</span><span class="fu"> train-model* </span>(pocket/caching-fn <span class="va">#'train-model</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="running-the-pipeline" class="level2">
+<h2 class="anchored" data-anchor-id="running-the-pipeline">Running the pipeline</h2>
+<p>Chain cached computations in a pipeline:</p>
+<p>First pipeline run:</p>
+<div class="sourceClojure">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>(<span class="kw">time</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a> (<span class="kw">-&gt;</span> <span class="st">"data/raw.csv"</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>     (load-dataset*)</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>     (preprocess* {<span class="at">:scale</span> <span class="dv">2</span>})</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>     (train-model* {<span class="at">:epochs</span> <span class="dv">100</span>})</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>     <span class="kw">deref</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>     (<span class="kw">select-keys</span> [<span class="at">:model</span> <span class="at">:accuracy</span>])))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
 <div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
@@ -331,16 +392,27 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <div id="callout-1" class="callout-1-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>[nREPL-session-82f19dfb-7051-41ff-8d31-fe9c05319135] INFO scicloj.pocket - Cache dir set to: /tmp/pocket-demo-pipelines
+<pre><code>Loading dataset from data/raw.csv ...
+Preprocessing with options: {:scale 2}
+Training model with params: {:epochs 100}
+"Elapsed time: 912.715991 msecs"
 </code></pre>
 </div>
 </div>
 </div>
 <div class="printedClojure">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="st">"/tmp/pocket-demo-pipelines"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>{<span class="at">:model</span> <span class="at">:trained</span>, <span class="at">:accuracy</span> <span class="fl">0.95</span>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
+<p>Run the same pipeline again — everything loads from cache:</p>
+<p>Second pipeline run (all cached):</p>
 <div class="sourceClojure">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>(pocket/cleanup!)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>(<span class="kw">time</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a> (<span class="kw">-&gt;</span> <span class="st">"data/raw.csv"</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>     (load-dataset*)</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>     (preprocess* {<span class="at">:scale</span> <span class="dv">2</span>})</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>     (train-model* {<span class="at">:epochs</span> <span class="dv">100</span>})</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>     <span class="kw">deref</span></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>     (<span class="kw">select-keys</span> [<span class="at">:model</span> <span class="at">:accuracy</span>])))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
@@ -354,125 +426,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <div id="callout-2" class="callout-2-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>[nREPL-session-82f19dfb-7051-41ff-8d31-fe9c05319135] INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo-pipelines
+<pre><code>"Elapsed time: 0.822327 msecs"
 </code></pre>
 </div>
 </div>
 </div>
 <div class="printedClojure">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>{<span class="at">:dir</span> <span class="st">"/tmp/pocket-demo-pipelines"</span>, <span class="at">:existed</span> <span class="va">false</span>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-</section>
-<section id="a-three-step-pipeline" class="level2">
-<h2 class="anchored" data-anchor-id="a-three-step-pipeline">A three-step pipeline</h2>
-<p>We’ll build a simple data science pipeline with three stages: load data, preprocess it, and train a model. Each stage is wrapped with <code>caching-fn</code> so every call returns a <code>Cached</code> object. Passing one <code>Cached</code> result into the next stage is what makes the caching recursive.</p>
-<div class="mermaid">flowchart LR
-    LD[load-dataset] --&gt; PP[preprocess]
-    PP --&gt; TM[train-model]</div>
-</section>
-<section id="pipeline-functions" class="level2">
-<h2 class="anchored" data-anchor-id="pipeline-functions">Pipeline functions</h2>
-<div class="sourceClojure">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>(<span class="bu">defn</span><span class="fu"> load-dataset </span>[<span class="kw">path</span>]</span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">println</span> <span class="st">"Loading dataset from"</span> <span class="kw">path</span> <span class="st">"..."</span>)</span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  (Thread/sleep <span class="dv">300</span>)</span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>  {<span class="at">:data</span> [<span class="dv">1</span> <span class="dv">2</span> <span class="dv">3</span> <span class="dv">4</span> <span class="dv">5</span>] <span class="at">:source</span> <span class="kw">path</span>})</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<div class="sourceClojure">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>(<span class="bu">defn</span><span class="fu"> preprocess </span>[data opts]</span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">println</span> <span class="st">"Preprocessing with options:"</span> opts)</span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  (Thread/sleep <span class="dv">300</span>)</span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">update</span> data <span class="at">:data</span> #(<span class="kw">map</span> (<span class="kw">fn</span> [x] (<span class="kw">*</span> x (<span class="at">:scale</span> opts))) <span class="va">%</span>)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<div class="sourceClojure">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>(<span class="bu">defn</span><span class="fu"> train-model </span>[data params]</span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">println</span> <span class="st">"Training model with params:"</span> params)</span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  (Thread/sleep <span class="dv">300</span>)</span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>  {<span class="at">:model</span> <span class="at">:trained</span> <span class="at">:accuracy</span> <span class="fl">0.95</span> <span class="at">:data</span> data})</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<p>Wrap each function with <code>caching-fn</code> so every call returns a <code>Cached</code> object:</p>
-<div class="sourceClojure">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>(<span class="bu">def</span><span class="fu"> load-dataset* </span>(pocket/caching-fn <span class="va">#'load-dataset</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<div class="sourceClojure">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>(<span class="bu">def</span><span class="fu"> preprocess* </span>(pocket/caching-fn <span class="va">#'preprocess</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<div class="sourceClojure">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>(<span class="bu">def</span><span class="fu"> train-model* </span>(pocket/caching-fn <span class="va">#'train-model</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-</section>
-<section id="running-the-pipeline" class="level2">
-<h2 class="anchored" data-anchor-id="running-the-pipeline">Running the pipeline</h2>
-<p>Chain cached computations in a pipeline:</p>
-<p>First pipeline run:</p>
-<div class="sourceClojure">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>(<span class="kw">time</span></span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a> (<span class="kw">-&gt;</span> <span class="st">"data/raw.csv"</span></span>
-<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>     (load-dataset*)</span>
-<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>     (preprocess* {<span class="at">:scale</span> <span class="dv">2</span>})</span>
-<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>     (train-model* {<span class="at">:epochs</span> <span class="dv">100</span>})</span>
-<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>     <span class="kw">deref</span></span>
-<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>     (<span class="kw">select-keys</span> [<span class="at">:model</span> <span class="at">:accuracy</span>])))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-3-contents" aria-controls="callout-3" aria-expanded="false" aria-label="Toggle callout">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Note</span>OUT
-</div>
-<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
-</div>
-<div id="callout-3" class="callout-3-contents callout-collapse collapse">
-<div class="callout-body-container callout-body">
-<pre><code>[nREPL-session-82f19dfb-7051-41ff-8d31-fe9c05319135] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.recursive-caching-in-pipelines/train-model
-[nREPL-session-82f19dfb-7051-41ff-8d31-fe9c05319135] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.recursive-caching-in-pipelines/preprocess
-[nREPL-session-82f19dfb-7051-41ff-8d31-fe9c05319135] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.recursive-caching-in-pipelines/load-dataset
-Loading dataset from data/raw.csv ...
-[nREPL-session-82f19dfb-7051-41ff-8d31-fe9c05319135] DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo-pipelines/b8/(pocket-book.recursive-caching-in-pipelines_load-dataset "data_raw.csv")
-Preprocessing with options: {:scale 2}
-[nREPL-session-82f19dfb-7051-41ff-8d31-fe9c05319135] DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo-pipelines/85/(pocket-book.recursive-caching-in-pipelines_preprocess (pocket-book.recursive-caching-in-pipelines_load-dataset "data_raw.csv") {:scale 2})
-Training model with params: {:epochs 100}
-[nREPL-session-82f19dfb-7051-41ff-8d31-fe9c05319135] DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo-pipelines/c9/(pocket-book.recursive-caching-in-pipelines_train-model (pocket-book.recursive-caching-in-pipelines_preprocess (pocket-book.recursive-caching-in-pipelines_load-dataset "data_raw.csv") {:scale 2}) {:epochs 100})
-"Elapsed time: 905.967104 msecs"
-</code></pre>
-</div>
-</div>
-</div>
-<div class="printedClojure">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>{<span class="at">:model</span> <span class="at">:trained</span>, <span class="at">:accuracy</span> <span class="fl">0.95</span>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<p>Run the same pipeline again — everything loads from cache:</p>
-<p>Second pipeline run (all cached):</p>
-<div class="sourceClojure">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>(<span class="kw">time</span></span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a> (<span class="kw">-&gt;</span> <span class="st">"data/raw.csv"</span></span>
-<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>     (load-dataset*)</span>
-<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>     (preprocess* {<span class="at">:scale</span> <span class="dv">2</span>})</span>
-<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>     (train-model* {<span class="at">:epochs</span> <span class="dv">100</span>})</span>
-<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>     <span class="kw">deref</span></span>
-<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>     (<span class="kw">select-keys</span> [<span class="at">:model</span> <span class="at">:accuracy</span>])))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-4-contents" aria-controls="callout-4" aria-expanded="false" aria-label="Toggle callout">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Note</span>OUT
-</div>
-<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
-</div>
-<div id="callout-4" class="callout-4-contents callout-collapse collapse">
-<div class="callout-body-container callout-body">
-<pre><code>"Elapsed time: 0.242974 msecs"
-</code></pre>
-</div>
-</div>
-</div>
-<div class="printedClojure">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>{<span class="at">:model</span> <span class="at">:trained</span>, <span class="at">:accuracy</span> <span class="fl">0.95</span>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>{<span class="at">:model</span> <span class="at">:trained</span>, <span class="at">:accuracy</span> <span class="fl">0.95</span>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>No log output above — the result was served entirely from the in-memory cache, so no disk I/O or computation occurred. Each step caches independently. If you change only the last step (e.g., different training params), the upstream steps load from cache while only the final step recomputes.</p>
 </section>
@@ -480,24 +440,24 @@ Training model with params: {:epochs 100}
 <h2 class="anchored" data-anchor-id="provenance-in-cache-entries">Provenance in cache entries</h2>
 <p>The cache entries reveal the pipeline structure. Each entry’s identity encodes its full computation history — not just the function name, but the nested identities of all its cached inputs.</p>
 <div class="sourceClojure">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>(<span class="kw">-&gt;&gt;</span> (pocket/cache-entries)</span>
-<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>     (<span class="kw">mapv</span> <span class="at">:id</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>(<span class="kw">-&gt;&gt;</span> (pocket/cache-entries)</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>     (<span class="kw">mapv</span> <span class="at">:id</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="printedClojure">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>[<span class="st">"(pocket-book.recursive-caching-in-pipelines/load-dataset </span><span class="sc">\"</span><span class="st">data/raw.csv</span><span class="sc">\"</span><span class="st">)"</span></span>
-<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a> <span class="st">"(pocket-book.recursive-caching-in-pipelines/preprocess (pocket-book.recursive-caching-in-pipelines/load-dataset </span><span class="sc">\"</span><span class="st">data/raw.csv</span><span class="sc">\"</span><span class="st">) {:scale 2})"</span></span>
-<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a> <span class="st">"(pocket-book.recursive-caching-in-pipelines/train-model (pocket-book.recursive-caching-in-pipelines/preprocess (pocket-book.recursive-caching-in-pipelines/load-dataset </span><span class="sc">\"</span><span class="st">data/raw.csv</span><span class="sc">\"</span><span class="st">) {:scale 2}) {:epochs 100})"</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>[<span class="st">"(pocket-book.recursive-caching-in-pipelines/load-dataset </span><span class="sc">\"</span><span class="st">data/raw.csv</span><span class="sc">\"</span><span class="st">)"</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a> <span class="st">"(pocket-book.recursive-caching-in-pipelines/preprocess (pocket-book.recursive-caching-in-pipelines/load-dataset </span><span class="sc">\"</span><span class="st">data/raw.csv</span><span class="sc">\"</span><span class="st">) {:scale 2})"</span></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a> <span class="st">"(pocket-book.recursive-caching-in-pipelines/train-model (pocket-book.recursive-caching-in-pipelines/preprocess (pocket-book.recursive-caching-in-pipelines/load-dataset </span><span class="sc">\"</span><span class="st">data/raw.csv</span><span class="sc">\"</span><span class="st">) {:scale 2}) {:epochs 100})"</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="sourceClojure">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb23"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>(<span class="kw">-&gt;&gt;</span> (pocket/cache-entries)</span>
-<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>     (<span class="kw">mapv</span> <span class="at">:id</span>)</span>
-<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>     (str/join <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>     kind/code)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>(<span class="kw">-&gt;&gt;</span> (pocket/cache-entries)</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>     (<span class="kw">mapv</span> <span class="at">:id</span>)</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>     (str/join <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>     kind/code)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="sourceClojure">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb24"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>(pocket-book.recursive-caching-in-pipelines/load-dataset <span class="st">"data/raw.csv"</span>)</span>
-<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>(pocket-book.recursive-caching-in-pipelines/preprocess (pocket-book.recursive-caching-in-pipelines/load-dataset <span class="st">"data/raw.csv"</span>) {<span class="at">:scale</span> <span class="dv">2</span>})</span>
-<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>(pocket-book.recursive-caching-in-pipelines/train-model (pocket-book.recursive-caching-in-pipelines/preprocess (pocket-book.recursive-caching-in-pipelines/load-dataset <span class="st">"data/raw.csv"</span>) {<span class="at">:scale</span> <span class="dv">2</span>}) {<span class="at">:epochs</span> <span class="dv">100</span>})</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>(pocket-book.recursive-caching-in-pipelines/load-dataset <span class="st">"data/raw.csv"</span>)</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>(pocket-book.recursive-caching-in-pipelines/preprocess (pocket-book.recursive-caching-in-pipelines/load-dataset <span class="st">"data/raw.csv"</span>) {<span class="at">:scale</span> <span class="dv">2</span>})</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>(pocket-book.recursive-caching-in-pipelines/train-model (pocket-book.recursive-caching-in-pipelines/preprocess (pocket-book.recursive-caching-in-pipelines/load-dataset <span class="st">"data/raw.csv"</span>) {<span class="at">:scale</span> <span class="dv">2</span>}) {<span class="at">:epochs</span> <span class="dv">100</span>})</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>The inner step appears as a literal sub-expression in the outer step’s identity. This is how Pocket tracks provenance: the cache key for <code>train-model</code> records that its input came from <code>preprocess</code>, which in turn came from <code>load-dataset</code>.</p>
 <p>This happens automatically when you pass <code>Cached</code> objects (without derefing) from one cached step to the next.</p>
@@ -515,40 +475,40 @@ Training model with params: {:epochs 100}
 </ul>
 <p>Build the pipeline keeping the intermediate <code>Cached</code> objects:</p>
 <div class="sourceClojure">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb25"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>(<span class="bu">def</span><span class="fu"> data-c </span>(load-dataset* <span class="st">"data/experiment.csv"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb23"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>(<span class="bu">def</span><span class="fu"> data-c </span>(load-dataset* <span class="st">"data/experiment.csv"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="sourceClojure">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb26"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>(<span class="bu">def</span><span class="fu"> preprocessed-c </span>(preprocess* data-c {<span class="at">:scale</span> <span class="dv">2</span>}))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb24"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>(<span class="bu">def</span><span class="fu"> preprocessed-c </span>(preprocess* data-c {<span class="at">:scale</span> <span class="dv">2</span>}))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="sourceClojure">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb27"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>(<span class="bu">def</span><span class="fu"> model-c </span>(train-model* preprocessed-c {<span class="at">:epochs</span> <span class="dv">100</span>}))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb25"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>(<span class="bu">def</span><span class="fu"> model-c </span>(train-model* preprocessed-c {<span class="at">:epochs</span> <span class="dv">100</span>}))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <section id="origin-story-tree-structure" class="level3">
 <h3 class="anchored" data-anchor-id="origin-story-tree-structure"><code>origin-story</code> — tree structure</h3>
 <p>Returns a nested map where each cached step is <code>{:fn &lt;var&gt; :args [...] :id &lt;string&gt;}</code>. Plain arguments become <code>{:value ...}</code> leaves. If a step has been computed, <code>:value</code> is included.</p>
 <p>Before any computation:</p>
 <div class="sourceClojure">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb28"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>(pocket/origin-story model-c)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb26"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>(pocket/origin-story model-c)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="printedClojure">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb29"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>{<span class="at">:fn</span> <span class="va">#'pocket-book.recursive-caching-in-pipelines/train-model,</span></span>
-<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a> <span class="at">:args</span></span>
-<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a> [{<span class="at">:fn</span> <span class="va">#'pocket-book.recursive-caching-in-pipelines/preprocess,</span></span>
-<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>   <span class="at">:args</span></span>
-<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>   [{<span class="at">:fn</span> <span class="va">#'pocket-book.recursive-caching-in-pipelines/load-dataset,</span></span>
-<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>     <span class="at">:args</span> [{<span class="at">:value</span> <span class="st">"data/experiment.csv"</span>}],</span>
-<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a>     <span class="at">:id</span> <span class="st">"c3"</span>}</span>
-<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a>    {<span class="at">:value</span> {<span class="at">:scale</span> <span class="dv">2</span>}}],</span>
-<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a>   <span class="at">:id</span> <span class="st">"c2"</span>}</span>
-<span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a>  {<span class="at">:value</span> {<span class="at">:epochs</span> <span class="dv">100</span>}}],</span>
-<span id="cb29-11"><a href="#cb29-11" aria-hidden="true" tabindex="-1"></a> <span class="at">:id</span> <span class="st">"c1"</span>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb27"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>{<span class="at">:fn</span> <span class="va">#'pocket-book.recursive-caching-in-pipelines/train-model,</span></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a> <span class="at">:args</span></span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a> [{<span class="at">:fn</span> <span class="va">#'pocket-book.recursive-caching-in-pipelines/preprocess,</span></span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>   <span class="at">:args</span></span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>   [{<span class="at">:fn</span> <span class="va">#'pocket-book.recursive-caching-in-pipelines/load-dataset,</span></span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>     <span class="at">:args</span> [{<span class="at">:value</span> <span class="st">"data/experiment.csv"</span>}],</span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a>     <span class="at">:id</span> <span class="st">"c3"</span>}</span>
+<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a>    {<span class="at">:value</span> {<span class="at">:scale</span> <span class="dv">2</span>}}],</span>
+<span id="cb27-9"><a href="#cb27-9" aria-hidden="true" tabindex="-1"></a>   <span class="at">:id</span> <span class="st">"c2"</span>}</span>
+<span id="cb27-10"><a href="#cb27-10" aria-hidden="true" tabindex="-1"></a>  {<span class="at">:value</span> {<span class="at">:epochs</span> <span class="dv">100</span>}}],</span>
+<span id="cb27-11"><a href="#cb27-11" aria-hidden="true" tabindex="-1"></a> <span class="at">:id</span> <span class="st">"c1"</span>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>No <code>:value</code> keys yet. Now trigger computation:</p>
 <div class="sourceClojure">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb30"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>(<span class="kw">deref</span> model-c)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb28"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>(<span class="kw">deref</span> model-c)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-5-contents" aria-controls="callout-5" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-3-contents" aria-controls="callout-3" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -557,48 +517,42 @@ Training model with params: {:epochs 100}
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-5" class="callout-5-contents callout-collapse collapse">
+<div id="callout-3" class="callout-3-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>[nREPL-session-82f19dfb-7051-41ff-8d31-fe9c05319135] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.recursive-caching-in-pipelines/train-model
-[nREPL-session-82f19dfb-7051-41ff-8d31-fe9c05319135] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.recursive-caching-in-pipelines/preprocess
-[nREPL-session-82f19dfb-7051-41ff-8d31-fe9c05319135] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.recursive-caching-in-pipelines/load-dataset
-Loading dataset from data/experiment.csv ...
-[nREPL-session-82f19dfb-7051-41ff-8d31-fe9c05319135] DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo-pipelines/cd/(pocket-book.recursive-caching-in-pipelines_load-dataset "data_experiment.csv")
+<pre><code>Loading dataset from data/experiment.csv ...
 Preprocessing with options: {:scale 2}
-[nREPL-session-82f19dfb-7051-41ff-8d31-fe9c05319135] DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo-pipelines/f8/(pocket-book.recursive-caching-in-pipelines_preprocess (pocket-book.recursive-caching-in-pipelines_load-dataset "data_experiment.csv") {:scale 2})
 Training model with params: {:epochs 100}
-[nREPL-session-82f19dfb-7051-41ff-8d31-fe9c05319135] DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo-pipelines/9e/(pocket-book.recursive-caching-in-pipelines_train-model (pocket-book.recursive-caching-in-pipelines_preprocess (pocket-book.recursive-caching-in-pipelines_load-dataset "data_experiment.csv") {:scale 2}) {:epochs 100})
 </code></pre>
 </div>
 </div>
 </div>
 <div class="printedClojure">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb32"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>{<span class="at">:model</span> <span class="at">:trained</span>,</span>
-<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a> <span class="at">:accuracy</span> <span class="fl">0.95</span>,</span>
-<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a> <span class="at">:data</span> {<span class="at">:data</span> (<span class="dv">2</span> <span class="dv">4</span> <span class="dv">6</span> <span class="dv">8</span> <span class="dv">10</span>), <span class="at">:source</span> <span class="st">"data/experiment.csv"</span>}}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb30"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>{<span class="at">:model</span> <span class="at">:trained</span>,</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a> <span class="at">:accuracy</span> <span class="fl">0.95</span>,</span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a> <span class="at">:data</span> {<span class="at">:data</span> (<span class="dv">2</span> <span class="dv">4</span> <span class="dv">6</span> <span class="dv">8</span> <span class="dv">10</span>), <span class="at">:source</span> <span class="st">"data/experiment.csv"</span>}}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>After deref, every node includes its <code>:value</code>:</p>
 <div class="sourceClojure">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb33"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>(pocket/origin-story model-c)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb31"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>(pocket/origin-story model-c)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="printedClojure">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb34"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>{<span class="at">:fn</span> <span class="va">#'pocket-book.recursive-caching-in-pipelines/train-model,</span></span>
-<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a> <span class="at">:args</span></span>
-<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a> [{<span class="at">:fn</span> <span class="va">#'pocket-book.recursive-caching-in-pipelines/preprocess,</span></span>
-<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>   <span class="at">:args</span></span>
-<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a>   [{<span class="at">:fn</span> <span class="va">#'pocket-book.recursive-caching-in-pipelines/load-dataset,</span></span>
-<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a>     <span class="at">:args</span> [{<span class="at">:value</span> <span class="st">"data/experiment.csv"</span>}],</span>
-<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a>     <span class="at">:id</span> <span class="st">"c3"</span>,</span>
-<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a>     <span class="at">:value</span> {<span class="at">:data</span> [<span class="dv">1</span> <span class="dv">2</span> <span class="dv">3</span> <span class="dv">4</span> <span class="dv">5</span>], <span class="at">:source</span> <span class="st">"data/experiment.csv"</span>}}</span>
-<span id="cb34-9"><a href="#cb34-9" aria-hidden="true" tabindex="-1"></a>    {<span class="at">:value</span> {<span class="at">:scale</span> <span class="dv">2</span>}}],</span>
-<span id="cb34-10"><a href="#cb34-10" aria-hidden="true" tabindex="-1"></a>   <span class="at">:id</span> <span class="st">"c2"</span>,</span>
-<span id="cb34-11"><a href="#cb34-11" aria-hidden="true" tabindex="-1"></a>   <span class="at">:value</span> {<span class="at">:data</span> (<span class="dv">2</span> <span class="dv">4</span> <span class="dv">6</span> <span class="dv">8</span> <span class="dv">10</span>), <span class="at">:source</span> <span class="st">"data/experiment.csv"</span>}}</span>
-<span id="cb34-12"><a href="#cb34-12" aria-hidden="true" tabindex="-1"></a>  {<span class="at">:value</span> {<span class="at">:epochs</span> <span class="dv">100</span>}}],</span>
-<span id="cb34-13"><a href="#cb34-13" aria-hidden="true" tabindex="-1"></a> <span class="at">:id</span> <span class="st">"c1"</span>,</span>
-<span id="cb34-14"><a href="#cb34-14" aria-hidden="true" tabindex="-1"></a> <span class="at">:value</span></span>
-<span id="cb34-15"><a href="#cb34-15" aria-hidden="true" tabindex="-1"></a> {<span class="at">:model</span> <span class="at">:trained</span>,</span>
-<span id="cb34-16"><a href="#cb34-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">:accuracy</span> <span class="fl">0.95</span>,</span>
-<span id="cb34-17"><a href="#cb34-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">:data</span> {<span class="at">:data</span> (<span class="dv">2</span> <span class="dv">4</span> <span class="dv">6</span> <span class="dv">8</span> <span class="dv">10</span>), <span class="at">:source</span> <span class="st">"data/experiment.csv"</span>}}}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb32"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>{<span class="at">:fn</span> <span class="va">#'pocket-book.recursive-caching-in-pipelines/train-model,</span></span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a> <span class="at">:args</span></span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a> [{<span class="at">:fn</span> <span class="va">#'pocket-book.recursive-caching-in-pipelines/preprocess,</span></span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>   <span class="at">:args</span></span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>   [{<span class="at">:fn</span> <span class="va">#'pocket-book.recursive-caching-in-pipelines/load-dataset,</span></span>
+<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a>     <span class="at">:args</span> [{<span class="at">:value</span> <span class="st">"data/experiment.csv"</span>}],</span>
+<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a>     <span class="at">:id</span> <span class="st">"c3"</span>,</span>
+<span id="cb32-8"><a href="#cb32-8" aria-hidden="true" tabindex="-1"></a>     <span class="at">:value</span> {<span class="at">:data</span> [<span class="dv">1</span> <span class="dv">2</span> <span class="dv">3</span> <span class="dv">4</span> <span class="dv">5</span>], <span class="at">:source</span> <span class="st">"data/experiment.csv"</span>}}</span>
+<span id="cb32-9"><a href="#cb32-9" aria-hidden="true" tabindex="-1"></a>    {<span class="at">:value</span> {<span class="at">:scale</span> <span class="dv">2</span>}}],</span>
+<span id="cb32-10"><a href="#cb32-10" aria-hidden="true" tabindex="-1"></a>   <span class="at">:id</span> <span class="st">"c2"</span>,</span>
+<span id="cb32-11"><a href="#cb32-11" aria-hidden="true" tabindex="-1"></a>   <span class="at">:value</span> {<span class="at">:data</span> (<span class="dv">2</span> <span class="dv">4</span> <span class="dv">6</span> <span class="dv">8</span> <span class="dv">10</span>), <span class="at">:source</span> <span class="st">"data/experiment.csv"</span>}}</span>
+<span id="cb32-12"><a href="#cb32-12" aria-hidden="true" tabindex="-1"></a>  {<span class="at">:value</span> {<span class="at">:epochs</span> <span class="dv">100</span>}}],</span>
+<span id="cb32-13"><a href="#cb32-13" aria-hidden="true" tabindex="-1"></a> <span class="at">:id</span> <span class="st">"c1"</span>,</span>
+<span id="cb32-14"><a href="#cb32-14" aria-hidden="true" tabindex="-1"></a> <span class="at">:value</span></span>
+<span id="cb32-15"><a href="#cb32-15" aria-hidden="true" tabindex="-1"></a> {<span class="at">:model</span> <span class="at">:trained</span>,</span>
+<span id="cb32-16"><a href="#cb32-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">:accuracy</span> <span class="fl">0.95</span>,</span>
+<span id="cb32-17"><a href="#cb32-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">:data</span> {<span class="at">:data</span> (<span class="dv">2</span> <span class="dv">4</span> <span class="dv">6</span> <span class="dv">8</span> <span class="dv">10</span>), <span class="at">:source</span> <span class="st">"data/experiment.csv"</span>}}}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>When the same <code>Cached</code> instance appears multiple times (diamond pattern), subsequent occurrences are <code>{:ref &lt;id&gt;}</code> pointing to the first.</p>
 </section>
@@ -606,33 +560,33 @@ Training model with params: {:epochs 100}
 <h3 class="anchored" data-anchor-id="origin-story-graph-flat-graph"><code>origin-story-graph</code> — flat graph</h3>
 <p>Returns <code>{:nodes {&lt;id&gt; &lt;node-map&gt;} :edges [[&lt;from&gt; &lt;to&gt;] ...]}</code>. Useful for graph algorithms or custom rendering.</p>
 <div class="sourceClojure">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb35"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>(pocket/origin-story-graph model-c)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb33"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>(pocket/origin-story-graph model-c)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="printedClojure">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb36"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>{<span class="at">:nodes</span></span>
-<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a> {<span class="st">"c1"</span></span>
-<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>  {<span class="at">:fn</span> <span class="va">#'pocket-book.recursive-caching-in-pipelines/train-model,</span></span>
-<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a>   <span class="at">:value</span></span>
-<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a>   {<span class="at">:model</span> <span class="at">:trained</span>,</span>
-<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">:accuracy</span> <span class="fl">0.95</span>,</span>
-<span id="cb36-7"><a href="#cb36-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">:data</span> {<span class="at">:data</span> (<span class="dv">2</span> <span class="dv">4</span> <span class="dv">6</span> <span class="dv">8</span> <span class="dv">10</span>), <span class="at">:source</span> <span class="st">"data/experiment.csv"</span>}}},</span>
-<span id="cb36-8"><a href="#cb36-8" aria-hidden="true" tabindex="-1"></a>  <span class="st">"c2"</span></span>
-<span id="cb36-9"><a href="#cb36-9" aria-hidden="true" tabindex="-1"></a>  {<span class="at">:fn</span> <span class="va">#'pocket-book.recursive-caching-in-pipelines/preprocess,</span></span>
-<span id="cb36-10"><a href="#cb36-10" aria-hidden="true" tabindex="-1"></a>   <span class="at">:value</span> {<span class="at">:data</span> (<span class="dv">2</span> <span class="dv">4</span> <span class="dv">6</span> <span class="dv">8</span> <span class="dv">10</span>), <span class="at">:source</span> <span class="st">"data/experiment.csv"</span>}},</span>
-<span id="cb36-11"><a href="#cb36-11" aria-hidden="true" tabindex="-1"></a>  <span class="st">"c3"</span></span>
-<span id="cb36-12"><a href="#cb36-12" aria-hidden="true" tabindex="-1"></a>  {<span class="at">:fn</span> <span class="va">#'pocket-book.recursive-caching-in-pipelines/load-dataset,</span></span>
-<span id="cb36-13"><a href="#cb36-13" aria-hidden="true" tabindex="-1"></a>   <span class="at">:value</span> {<span class="at">:data</span> [<span class="dv">1</span> <span class="dv">2</span> <span class="dv">3</span> <span class="dv">4</span> <span class="dv">5</span>], <span class="at">:source</span> <span class="st">"data/experiment.csv"</span>}},</span>
-<span id="cb36-14"><a href="#cb36-14" aria-hidden="true" tabindex="-1"></a>  <span class="st">"v4"</span> {<span class="at">:value</span> <span class="st">"data/experiment.csv"</span>},</span>
-<span id="cb36-15"><a href="#cb36-15" aria-hidden="true" tabindex="-1"></a>  <span class="st">"v5"</span> {<span class="at">:value</span> {<span class="at">:scale</span> <span class="dv">2</span>}},</span>
-<span id="cb36-16"><a href="#cb36-16" aria-hidden="true" tabindex="-1"></a>  <span class="st">"v6"</span> {<span class="at">:value</span> {<span class="at">:epochs</span> <span class="dv">100</span>}}},</span>
-<span id="cb36-17"><a href="#cb36-17" aria-hidden="true" tabindex="-1"></a> <span class="at">:edges</span> [[<span class="st">"c1"</span> <span class="st">"c2"</span>] [<span class="st">"c2"</span> <span class="st">"c3"</span>] [<span class="st">"c3"</span> <span class="st">"v4"</span>] [<span class="st">"c2"</span> <span class="st">"v5"</span>] [<span class="st">"c1"</span> <span class="st">"v6"</span>]]}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb34"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>{<span class="at">:nodes</span></span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a> {<span class="st">"c1"</span></span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>  {<span class="at">:fn</span> <span class="va">#'pocket-book.recursive-caching-in-pipelines/train-model,</span></span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>   <span class="at">:value</span></span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a>   {<span class="at">:model</span> <span class="at">:trained</span>,</span>
+<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">:accuracy</span> <span class="fl">0.95</span>,</span>
+<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">:data</span> {<span class="at">:data</span> (<span class="dv">2</span> <span class="dv">4</span> <span class="dv">6</span> <span class="dv">8</span> <span class="dv">10</span>), <span class="at">:source</span> <span class="st">"data/experiment.csv"</span>}}},</span>
+<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a>  <span class="st">"c2"</span></span>
+<span id="cb34-9"><a href="#cb34-9" aria-hidden="true" tabindex="-1"></a>  {<span class="at">:fn</span> <span class="va">#'pocket-book.recursive-caching-in-pipelines/preprocess,</span></span>
+<span id="cb34-10"><a href="#cb34-10" aria-hidden="true" tabindex="-1"></a>   <span class="at">:value</span> {<span class="at">:data</span> (<span class="dv">2</span> <span class="dv">4</span> <span class="dv">6</span> <span class="dv">8</span> <span class="dv">10</span>), <span class="at">:source</span> <span class="st">"data/experiment.csv"</span>}},</span>
+<span id="cb34-11"><a href="#cb34-11" aria-hidden="true" tabindex="-1"></a>  <span class="st">"c3"</span></span>
+<span id="cb34-12"><a href="#cb34-12" aria-hidden="true" tabindex="-1"></a>  {<span class="at">:fn</span> <span class="va">#'pocket-book.recursive-caching-in-pipelines/load-dataset,</span></span>
+<span id="cb34-13"><a href="#cb34-13" aria-hidden="true" tabindex="-1"></a>   <span class="at">:value</span> {<span class="at">:data</span> [<span class="dv">1</span> <span class="dv">2</span> <span class="dv">3</span> <span class="dv">4</span> <span class="dv">5</span>], <span class="at">:source</span> <span class="st">"data/experiment.csv"</span>}},</span>
+<span id="cb34-14"><a href="#cb34-14" aria-hidden="true" tabindex="-1"></a>  <span class="st">"v4"</span> {<span class="at">:value</span> <span class="st">"data/experiment.csv"</span>},</span>
+<span id="cb34-15"><a href="#cb34-15" aria-hidden="true" tabindex="-1"></a>  <span class="st">"v5"</span> {<span class="at">:value</span> {<span class="at">:scale</span> <span class="dv">2</span>}},</span>
+<span id="cb34-16"><a href="#cb34-16" aria-hidden="true" tabindex="-1"></a>  <span class="st">"v6"</span> {<span class="at">:value</span> {<span class="at">:epochs</span> <span class="dv">100</span>}}},</span>
+<span id="cb34-17"><a href="#cb34-17" aria-hidden="true" tabindex="-1"></a> <span class="at">:edges</span> [[<span class="st">"c1"</span> <span class="st">"c2"</span>] [<span class="st">"c2"</span> <span class="st">"c3"</span>] [<span class="st">"c3"</span> <span class="st">"v4"</span>] [<span class="st">"c2"</span> <span class="st">"v5"</span>] [<span class="st">"c1"</span> <span class="st">"v6"</span>]]}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
 <section id="origin-story-mermaid-visualization" class="level3">
 <h3 class="anchored" data-anchor-id="origin-story-mermaid-visualization"><code>origin-story-mermaid</code> — visualization</h3>
 <p>Returns a Mermaid flowchart string. Arrows show data flow direction (from inputs toward the final result). It returns a kindly value that renders directly.</p>
 <div class="sourceClojure">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb37"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>(pocket/origin-story-mermaid model-c)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb35"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>(pocket/origin-story-mermaid model-c)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="mermaid">flowchart TD
   n0["train-model"]
@@ -653,13 +607,13 @@ Training model with params: {:epochs 100}
 <p>In the pipeline above, we passed <code>Cached</code> references directly from one step to the next. But sometimes we need to deref between steps — for example, when passing data to a library that expects concrete values. The origin registry ensures provenance still works in this case.</p>
 <p>Here we build the same three-step pipeline, but deref between each step:</p>
 <div class="sourceClojure">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb38"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>(<span class="bu">def</span><span class="fu"> data-c2 </span>(load-dataset* <span class="st">"data/deref-demo.csv"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb36"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>(<span class="bu">def</span><span class="fu"> data-c2 </span>(load-dataset* <span class="st">"data/deref-demo.csv"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="sourceClojure">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb39"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>(<span class="bu">def</span><span class="fu"> data-val </span>(<span class="kw">deref</span> data-c2))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb37"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>(<span class="bu">def</span><span class="fu"> data-val </span>(<span class="kw">deref</span> data-c2))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-6-contents" aria-controls="callout-6" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-4-contents" aria-controls="callout-4" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -668,23 +622,21 @@ Training model with params: {:epochs 100}
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-6" class="callout-6-contents callout-collapse collapse">
+<div id="callout-4" class="callout-4-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>[nREPL-session-82f19dfb-7051-41ff-8d31-fe9c05319135] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.recursive-caching-in-pipelines/load-dataset
-Loading dataset from data/deref-demo.csv ...
-[nREPL-session-82f19dfb-7051-41ff-8d31-fe9c05319135] DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo-pipelines/94/(pocket-book.recursive-caching-in-pipelines_load-dataset "data_deref-demo.csv")
+<pre><code>Loading dataset from data/deref-demo.csv ...
 </code></pre>
 </div>
 </div>
 </div>
 <div class="sourceClojure">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb41"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>(<span class="bu">def</span><span class="fu"> processed-c2 </span>(preprocess* data-val {<span class="at">:scale</span> <span class="dv">3</span>}))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb39"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>(<span class="bu">def</span><span class="fu"> processed-c2 </span>(preprocess* data-val {<span class="at">:scale</span> <span class="dv">3</span>}))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="sourceClojure">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb42"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>(<span class="bu">def</span><span class="fu"> processed-val </span>(<span class="kw">deref</span> processed-c2))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb40"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>(<span class="bu">def</span><span class="fu"> processed-val </span>(<span class="kw">deref</span> processed-c2))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-7-contents" aria-controls="callout-7" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-5-contents" aria-controls="callout-5" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -693,48 +645,46 @@ Loading dataset from data/deref-demo.csv ...
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-7" class="callout-7-contents callout-collapse collapse">
+<div id="callout-5" class="callout-5-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<pre><code>[nREPL-session-82f19dfb-7051-41ff-8d31-fe9c05319135] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.recursive-caching-in-pipelines/preprocess
-Preprocessing with options: {:scale 3}
-[nREPL-session-82f19dfb-7051-41ff-8d31-fe9c05319135] DEBUG scicloj.pocket.impl.cache - Cache write: /tmp/pocket-demo-pipelines/0c/(pocket-book.recursive-caching-in-pipelines_preprocess (pocket-book.recursive-caching-in-pipelines_load-dataset "data_deref-demo.csv") {:scale 3})
+<pre><code>Preprocessing with options: {:scale 3}
 </code></pre>
 </div>
 </div>
 </div>
 <div class="sourceClojure">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb44"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>(<span class="bu">def</span><span class="fu"> model-c2 </span>(train-model* processed-val {<span class="at">:epochs</span> <span class="dv">50</span>}))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb42"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>(<span class="bu">def</span><span class="fu"> model-c2 </span>(train-model* processed-val {<span class="at">:epochs</span> <span class="dv">50</span>}))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Even though each cached function received a derefed (real) value, <code>origin-story</code> traces the full chain — from <code>train-model</code> back through <code>preprocess</code> to <code>load-dataset</code>:</p>
 <div class="sourceClojure">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb45"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>(pocket/origin-story model-c2)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb43"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>(pocket/origin-story model-c2)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="printedClojure">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb46"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a>{<span class="at">:fn</span> <span class="va">#'pocket-book.recursive-caching-in-pipelines/train-model,</span></span>
-<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a> <span class="at">:args</span></span>
-<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a> [{<span class="at">:fn</span> <span class="va">#'pocket-book.recursive-caching-in-pipelines/preprocess,</span></span>
-<span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a>   <span class="at">:args</span></span>
-<span id="cb46-5"><a href="#cb46-5" aria-hidden="true" tabindex="-1"></a>   [{<span class="at">:fn</span> <span class="va">#'pocket-book.recursive-caching-in-pipelines/load-dataset,</span></span>
-<span id="cb46-6"><a href="#cb46-6" aria-hidden="true" tabindex="-1"></a>     <span class="at">:args</span> [{<span class="at">:value</span> <span class="st">"data/deref-demo.csv"</span>}],</span>
-<span id="cb46-7"><a href="#cb46-7" aria-hidden="true" tabindex="-1"></a>     <span class="at">:id</span> <span class="st">"c3"</span>,</span>
-<span id="cb46-8"><a href="#cb46-8" aria-hidden="true" tabindex="-1"></a>     <span class="at">:value</span> {<span class="at">:data</span> [<span class="dv">1</span> <span class="dv">2</span> <span class="dv">3</span> <span class="dv">4</span> <span class="dv">5</span>], <span class="at">:source</span> <span class="st">"data/deref-demo.csv"</span>}}</span>
-<span id="cb46-9"><a href="#cb46-9" aria-hidden="true" tabindex="-1"></a>    {<span class="at">:value</span> {<span class="at">:scale</span> <span class="dv">3</span>}}],</span>
-<span id="cb46-10"><a href="#cb46-10" aria-hidden="true" tabindex="-1"></a>   <span class="at">:id</span> <span class="st">"c2"</span>,</span>
-<span id="cb46-11"><a href="#cb46-11" aria-hidden="true" tabindex="-1"></a>   <span class="at">:value</span> {<span class="at">:data</span> (<span class="dv">3</span> <span class="dv">6</span> <span class="dv">9</span> <span class="dv">12</span> <span class="dv">15</span>), <span class="at">:source</span> <span class="st">"data/deref-demo.csv"</span>}}</span>
-<span id="cb46-12"><a href="#cb46-12" aria-hidden="true" tabindex="-1"></a>  {<span class="at">:value</span> {<span class="at">:epochs</span> <span class="dv">50</span>}}],</span>
-<span id="cb46-13"><a href="#cb46-13" aria-hidden="true" tabindex="-1"></a> <span class="at">:id</span> <span class="st">"c1"</span>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb44"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>{<span class="at">:fn</span> <span class="va">#'pocket-book.recursive-caching-in-pipelines/train-model,</span></span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a> <span class="at">:args</span></span>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a> [{<span class="at">:fn</span> <span class="va">#'pocket-book.recursive-caching-in-pipelines/preprocess,</span></span>
+<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a>   <span class="at">:args</span></span>
+<span id="cb44-5"><a href="#cb44-5" aria-hidden="true" tabindex="-1"></a>   [{<span class="at">:fn</span> <span class="va">#'pocket-book.recursive-caching-in-pipelines/load-dataset,</span></span>
+<span id="cb44-6"><a href="#cb44-6" aria-hidden="true" tabindex="-1"></a>     <span class="at">:args</span> [{<span class="at">:value</span> <span class="st">"data/deref-demo.csv"</span>}],</span>
+<span id="cb44-7"><a href="#cb44-7" aria-hidden="true" tabindex="-1"></a>     <span class="at">:id</span> <span class="st">"c3"</span>,</span>
+<span id="cb44-8"><a href="#cb44-8" aria-hidden="true" tabindex="-1"></a>     <span class="at">:value</span> {<span class="at">:data</span> [<span class="dv">1</span> <span class="dv">2</span> <span class="dv">3</span> <span class="dv">4</span> <span class="dv">5</span>], <span class="at">:source</span> <span class="st">"data/deref-demo.csv"</span>}}</span>
+<span id="cb44-9"><a href="#cb44-9" aria-hidden="true" tabindex="-1"></a>    {<span class="at">:value</span> {<span class="at">:scale</span> <span class="dv">3</span>}}],</span>
+<span id="cb44-10"><a href="#cb44-10" aria-hidden="true" tabindex="-1"></a>   <span class="at">:id</span> <span class="st">"c2"</span>,</span>
+<span id="cb44-11"><a href="#cb44-11" aria-hidden="true" tabindex="-1"></a>   <span class="at">:value</span> {<span class="at">:data</span> (<span class="dv">3</span> <span class="dv">6</span> <span class="dv">9</span> <span class="dv">12</span> <span class="dv">15</span>), <span class="at">:source</span> <span class="st">"data/deref-demo.csv"</span>}}</span>
+<span id="cb44-12"><a href="#cb44-12" aria-hidden="true" tabindex="-1"></a>  {<span class="at">:value</span> {<span class="at">:epochs</span> <span class="dv">50</span>}}],</span>
+<span id="cb44-13"><a href="#cb44-13" aria-hidden="true" tabindex="-1"></a> <span class="at">:id</span> <span class="st">"c1"</span>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p><code>origin-story-graph</code> shows three cached nodes (one per pipeline step). Without the origin registry, the derefed values would appear as opaque leaves and we would see only one cached node:</p>
 <div class="sourceClojure">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb47"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a>(<span class="kw">let</span> [g (pocket/origin-story-graph model-c2)]</span>
-<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">count</span> (<span class="kw">filter</span> (<span class="kw">fn</span> [[_ v]] (<span class="at">:fn</span> v)) (<span class="at">:nodes</span> g))))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb45"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>(<span class="kw">let</span> [g (pocket/origin-story-graph model-c2)]</span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">count</span> (<span class="kw">filter</span> (<span class="kw">fn</span> [[_ v]] (<span class="at">:fn</span> v)) (<span class="at">:nodes</span> g))))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="printedClojure">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb48"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="dv">3</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb46"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="dv">3</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>The full chain as a Mermaid flowchart:</p>
 <div class="sourceClojure">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb49"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>(pocket/origin-story-mermaid model-c2)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb47"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a>(pocket/origin-story-mermaid model-c2)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="mermaid">flowchart TD
   n0["train-model"]
@@ -753,27 +703,10 @@ Preprocessing with options: {:scale 3}
 <section id="cleanup" class="level2">
 <h2 class="anchored" data-anchor-id="cleanup">Cleanup</h2>
 <div class="sourceClojure">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb50"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a>(pocket/cleanup!)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-8-contents" aria-controls="callout-8" aria-expanded="false" aria-label="Toggle callout">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Note</span>OUT
-</div>
-<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
-</div>
-<div id="callout-8" class="callout-8-contents callout-collapse collapse">
-<div class="callout-body-container callout-body">
-<pre><code>[nREPL-session-82f19dfb-7051-41ff-8d31-fe9c05319135] INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo-pipelines
-</code></pre>
-</div>
-</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb48"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a>(pocket/cleanup!)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="printedClojure">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb52"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a>{<span class="at">:dir</span> <span class="st">"/tmp/pocket-demo-pipelines"</span>, <span class="at">:existed</span> <span class="va">true</span>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb49"><pre class="sourceCode clojure code-with-copy"><code class="sourceCode clojure"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>{<span class="at">:dir</span> <span class="st">"/tmp/pocket-demo-pipelines"</span>, <span class="at">:existed</span> <span class="va">true</span>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div style="background-color:grey;height:2px;width:100%;"></div>
 <div><pre><small><small>source: <a href="https://github.com/scicloj/pocket/blob/master/notebooks/pocket_book/recursive_caching_in_pipelines.clj">notebooks/pocket_book/recursive_caching_in_pipelines.clj</a></small></small></pre></div>

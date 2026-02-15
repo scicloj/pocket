@@ -66,16 +66,6 @@ First, we set up a cache directory and define an expensive computation:
 
 
 
-::: {.callout-note}
-## OUT
-```
-[nREPL-session-82f19dfb-7051-41ff-8d31-fe9c05319135] INFO scicloj.pocket - Cache dir set to: /tmp/pocket-demo
-
-```
-:::
-
-
-
 ::: {.printedClojure}
 ```clojure
 "/tmp/pocket-demo"
@@ -90,16 +80,6 @@ Start fresh so the examples below run from a clean slate:
 ::: {.sourceClojure}
 ```clojure
 (pocket/cleanup!)
-```
-:::
-
-
-
-::: {.callout-note}
-## OUT
-```
-[nREPL-session-82f19dfb-7051-41ff-8d31-fe9c05319135] INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo
-
 ```
 :::
 
@@ -182,9 +162,8 @@ First deref (computes and caches):
 ::: {.callout-note}
 ## OUT
 ```
-[nREPL-session-82f19dfb-7051-41ff-8d31-fe9c05319135] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.getting-started/expensive-calculation
 Computing 10 + 20 (this is expensive!)
-"Elapsed time: 401.919253 msecs"
+"Elapsed time: 408.660394 msecs"
 
 ```
 :::
@@ -213,7 +192,7 @@ Second deref (loaded from cache, instant):
 ::: {.callout-note}
 ## OUT
 ```
-"Elapsed time: 0.168447 msecs"
+"Elapsed time: 0.315869 msecs"
 
 ```
 :::
@@ -257,9 +236,8 @@ First call:
 ::: {.callout-note}
 ## OUT
 ```
-[nREPL-session-82f19dfb-7051-41ff-8d31-fe9c05319135] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.getting-started/expensive-calculation
 Computing 5 + 15 (this is expensive!)
-"Elapsed time: 401.25374 msecs"
+"Elapsed time: 403.321301 msecs"
 
 ```
 :::
@@ -288,7 +266,7 @@ Same args — cache hit:
 ::: {.callout-note}
 ## OUT
 ```
-"Elapsed time: 0.313369 msecs"
+"Elapsed time: 0.382192 msecs"
 
 ```
 :::
@@ -317,9 +295,8 @@ Different args — new computation:
 ::: {.callout-note}
 ## OUT
 ```
-[nREPL-session-82f19dfb-7051-41ff-8d31-fe9c05319135] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.getting-started/expensive-calculation
 Computing 7 + 8 (this is expensive!)
-"Elapsed time: 400.982554 msecs"
+"Elapsed time: 401.527272 msecs"
 
 ```
 :::
@@ -363,16 +340,6 @@ Cached nil value:
 ::: {.sourceClojure}
 ```clojure
 (deref nil-result)
-```
-:::
-
-
-
-::: {.callout-note}
-## OUT
-```
-[nREPL-session-82f19dfb-7051-41ff-8d31-fe9c05319135] INFO scicloj.pocket.impl.cache - Cache miss, computing: pocket-book.getting-started/returns-nil
-
 ```
 :::
 
@@ -442,16 +409,6 @@ for a detailed explanation and more best practices.
 ::: {.sourceClojure}
 ```clojure
 (pocket/cleanup!)
-```
-:::
-
-
-
-::: {.callout-note}
-## OUT
-```
-[nREPL-session-82f19dfb-7051-41ff-8d31-fe9c05319135] INFO scicloj.pocket - Cache cleanup: /tmp/pocket-demo
-
 ```
 :::
 
